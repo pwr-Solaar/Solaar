@@ -215,7 +215,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
 
 
 @pytest.mark.parametrize(
-    "number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate",
+    "number, info, responses, handle, unitId, modelId, task_id, kind, firmware, serial, id, psl, rate",
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
@@ -239,7 +239,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
         ["1ms", "2ms", "4ms", "8ms", "1ms", "9ms"],  # polling rate
     ),
 )
-def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate):
+def test_device_ids(number, info, responses, handle, unitId, modelId, task_id, kind, firmware, serial, id, psl, rate):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
@@ -248,7 +248,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
-    assert test_device.tid_map == tid
+    assert test_device.tid_map == task_id
     assert test_device.kind == kind
     assert test_device.firmware == firmware or len(test_device.firmware) > 0 and firmware is True
     assert test_device.id == id
