@@ -17,13 +17,14 @@
 
 import logging
 
+from enum import IntEnum
+
 import gi
 
 from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10_constants
 from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
-from logitech_receiver.common import NamedInts
 
 from solaar import NAME
 from solaar.i18n import _
@@ -54,12 +55,24 @@ try:
 except (ValueError, AttributeError):
     _CAN_SET_ROW_NONE = ""
 
-# tree model columns
-_COLUMN = NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
+
+class Column(IntEnum):
+    """Columns of tree model."""
+
+    PATH = 0
+    NUMBER = 1
+    ACTIVE = 2
+    NAME = 3
+    ICON = 4
+    STATUS_TEXT = 5
+    STATUS_ICON = 6
+    DEVICE = 7
+
+
 _COLUMN_TYPES = (str, int, bool, str, str, str, str, TYPE_PYOBJECT)
 _TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
 assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
-assert len(_COLUMN_TYPES) == len(_COLUMN)
+assert len(_COLUMN_TYPES) == len(Column)
 
 
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
@@ -238,21 +251,21 @@ def _create_tree(model):
     tree.set_model(model)
 
     def _is_separator(model, item, _ignore=None):
-        return model.get_value(item, _COLUMN.PATH) is None
+        return model.get_value(item, Column.PATH) is None
 
     tree.set_row_separator_func(_is_separator, None)
 
     icon_cell_renderer = Gtk.CellRendererPixbuf()
     icon_cell_renderer.set_property("stock-size", _TREE_ICON_SIZE)
     icon_column = Gtk.TreeViewColumn("Icon", icon_cell_renderer)
-    icon_column.add_attribute(icon_cell_renderer, "sensitive", _COLUMN.ACTIVE)
-    icon_column.add_attribute(icon_cell_renderer, "icon-name", _COLUMN.ICON)
+    icon_column.add_attribute(icon_cell_renderer, "sensitive", Column.ACTIVE)
+    icon_column.add_attribute(icon_cell_renderer, "icon-name", Column.ICON)
     tree.append_column(icon_column)
 
     name_cell_renderer = Gtk.CellRendererText()
     name_column = Gtk.TreeViewColumn("device name", name_cell_renderer)
-    name_column.add_attribute(name_cell_renderer, "sensitive", _COLUMN.ACTIVE)
-    name_column.add_attribute(name_cell_renderer, "text", _COLUMN.NAME)
+    name_column.add_attribute(name_cell_renderer, "sensitive", Column.ACTIVE)
+    name_column.add_attribute(name_cell_renderer, "text", Column.NAME)
     name_column.set_expand(True)
     tree.append_column(name_column)
     tree.set_expander_column(name_column)
@@ -261,16 +274,16 @@ def _create_tree(model):
     status_cell_renderer.set_property("scale", 0.85)
     status_cell_renderer.set_property("xalign", 1)
     status_column = Gtk.TreeViewColumn("status text", status_cell_renderer)
-    status_column.add_attribute(status_cell_renderer, "sensitive", _COLUMN.ACTIVE)
-    status_column.add_attribute(status_cell_renderer, "text", _COLUMN.STATUS_TEXT)
+    status_column.add_attribute(status_cell_renderer, "sensitive", Column.ACTIVE)
+    status_column.add_attribute(status_cell_renderer, "text", Column.STATUS_TEXT)
     status_column.set_expand(True)
     tree.append_column(status_column)
 
     battery_cell_renderer = Gtk.CellRendererPixbuf()
     battery_cell_renderer.set_property("stock-size", _TREE_ICON_SIZE)
     battery_column = Gtk.TreeViewColumn("status icon", battery_cell_renderer)
-    battery_column.add_attribute(battery_cell_renderer, "sensitive", _COLUMN.ACTIVE)
-    battery_column.add_attribute(battery_cell_renderer, "icon-name", _COLUMN.STATUS_ICON)
+    battery_column.add_attribute(battery_cell_renderer, "sensitive", Column.ACTIVE)
+    battery_column.add_attribute(battery_cell_renderer, "icon-name", Column.STATUS_ICON)
     tree.append_column(battery_column)
 
     return tree
@@ -348,20 +361,20 @@ def _create(delete_action):
 def _find_selected_device():
     selection = _tree.get_selection()
     model, item = selection.get_selected()
-    return model.get_value(item, _COLUMN.DEVICE) if item else None
+    return model.get_value(item, Column.DEVICE) if item else None
 
 
 def _find_selected_device_id():
     selection = _tree.get_selection()
     model, item = selection.get_selected()
     if item:
-        return _model.get_value(item, _COLUMN.PATH), _model.get_value(item, _COLUMN.NUMBER)
+        return _model.get_value(item, Column.PATH), _model.get_value(item, Column.NUMBER)
 
 
 # triggered by changing selection in the tree
 def _device_selected(selection):
     model, item = selection.get_selected()
-    device = model.get_value(item, _COLUMN.DEVICE) if item else None
+    device = model.get_value(item, Column.DEVICE) if item else None
     if device:
         _update_info_panel(device, full=True)
     else:
@@ -381,7 +394,7 @@ def _receiver_row(receiver_path, receiver=None):
     item = _model.get_iter_first()
     while item:
         # first row matching the path must be the receiver one
-        if _model.get_value(item, _COLUMN.PATH) == receiver_path:
+        if _model.get_value(item, Column.PATH) == receiver_path:
             return item
         item = _model.iter_next(item)
 
@@ -415,13 +428,13 @@ def _device_row(receiver_path, device_number, device=None):
         item = _model.iter_children(receiver_row)
         new_child_index = 0
         while item:
-            if _model.get_value(item, _COLUMN.PATH) != receiver_path:
+            if _model.get_value(item, Column.PATH) != receiver_path:
                 logger.warning(
                     "path for device row %s different from path for receiver %s",
-                    _model.get_value(item, _COLUMN.PATH),
+                    _model.get_value(item, Column.PATH),
                     receiver_path,
                 )
-            item_number = _model.get_value(item, _COLUMN.NUMBER)
+            item_number = _model.get_value(item, Column.NUMBER)
             if item_number == device_number:
                 return item
             if item_number > device_number:
@@ -833,9 +846,9 @@ def update(device, need_popup=False, refresh=False):
         item = _receiver_row(device.path, device if is_alive else None)
 
         if is_alive and item:
-            was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
+            was_pairing = bool(_model.get_value(item, Column.STATUS_ICON))
             is_pairing = (not device.isDevice) and bool(device.pairing.lock_open)
-            _model.set_value(item, _COLUMN.STATUS_ICON, "network-wireless" if is_pairing else _CAN_SET_ROW_NONE)
+            _model.set_value(item, Column.STATUS_ICON, "network-wireless" if is_pairing else _CAN_SET_ROW_NONE)
 
             if selected_device_id == (device.path, 0):
                 full_update = need_popup or was_pairing != is_pairing
@@ -864,15 +877,15 @@ def update(device, need_popup=False, refresh=False):
 
 
 def update_device(device, item, selected_device_id, need_popup, full=False):
-    was_online = _model.get_value(item, _COLUMN.ACTIVE)
+    was_online = _model.get_value(item, Column.ACTIVE)
     is_online = bool(device.online)
-    _model.set_value(item, _COLUMN.ACTIVE, is_online)
+    _model.set_value(item, Column.ACTIVE, is_online)
 
     battery_level = device.battery_info.level if device.battery_info is not None else None
     battery_voltage = device.battery_info.voltage if device.battery_info is not None else None
     if battery_level is None:
-        _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
-        _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
+        _model.set_value(item, Column.STATUS_TEXT, _CAN_SET_ROW_NONE)
+        _model.set_value(item, Column.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
         if battery_voltage is not None and False:  # Use levels instead of voltage here
             status_text = f"{int(battery_voltage)}mV"
@@ -880,13 +893,13 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
             status_text = _(str(battery_level))
         else:
             status_text = f"{int(battery_level)}%"
-        _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
+        _model.set_value(item, Column.STATUS_TEXT, status_text)
 
         charging = device.battery_info.charging() if device.battery_info is not None else None
         icon_name = icons.battery(battery_level, charging)
-        _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
+        _model.set_value(item, Column.STATUS_ICON, icon_name)
 
-    _model.set_value(item, _COLUMN.NAME, device.codename)
+    _model.set_value(item, Column.NAME, device.codename)
 
     if selected_device_id is None or need_popup:
         select(device.receiver.path if device.receiver else device.path, device.number)
@@ -901,7 +914,7 @@ def find_device(serial):
 
     def check(_store, _treepath, row):
         nonlocal result
-        device = _model.get_value(row, _COLUMN.DEVICE)
+        device = _model.get_value(row, Column.DEVICE)
         if device and device.kind and (device.unitId == serial or device.serial == serial):
             result = device
             return True
