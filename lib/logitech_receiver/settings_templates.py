@@ -33,7 +33,6 @@ from . import common
 from . import descriptors
 from . import desktop_notifications
 from . import diversion
-from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
@@ -46,7 +45,6 @@ from .hidpp20_constants import ParamId
 logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
-_DK = hidpp10_constants.DEVICE_KIND
 _F = hidpp20_constants.SupportedFeature
 
 
@@ -1612,8 +1610,6 @@ class LEDZoneSetting(settings.Setting):
     period_field = {"name": _LEDP.period, "kind": settings.Kind.RANGE, "label": _("Period"), "min": 100, "max": 5000}
     intensity_field = {"name": _LEDP.intensity, "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100}
     ramp_field = {"name": _LEDP.ramp, "kind": settings.Kind.CHOICE, "label": _("Ramp"), "choices": hidpp20.LEDRampChoices}
-    # form_field = {"name": _LEDP.form, "kind": settings.Kind.CHOICE, "label": _("Form"), "choices":
-    # _hidpp20.LEDFormChoices}
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
     @classmethod
@@ -1948,7 +1944,7 @@ def check_feature_settings(device, already_known) -> bool:
     return True
 
 
-def check_feature_setting(device, setting_name) -> settings.Setting | None:
+def check_feature_setting(device, setting_name: str) -> settings.Setting | None:
     for sclass in SETTINGS:
         if sclass.feature and sclass.name == setting_name and device.features:
             setting = check_feature(device, sclass)

@@ -43,11 +43,11 @@ class Kind(IntEnum):
 
 class Validator:
     @classmethod
-    def build(cls, setting_class, device, **kwargs):
+    def build(cls, setting_class, device, **kwargs) -> Validator:
         return cls(**kwargs)
 
     @classmethod
-    def to_string(cls, value):
+    def to_string(cls, value) -> str:
         return str(value)
 
     def compare(self, args, current):
@@ -200,7 +200,7 @@ class BitFieldValidator(Validator):
             assert isinstance(byte_count, int) and byte_count >= self.byte_count
             self.byte_count = byte_count
 
-    def to_string(self, value):
+    def to_string(self, value) -> str:
         def element_to_string(key, val):
             k = next((k for k in self.options if int(key) == k), None)
             return str(k) + ":" + str(val) if k is not None else "?"
@@ -381,7 +381,7 @@ class ChoicesValidator(Validator):
         assert self._byte_count + self._read_skip_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) <= 14
 
-    def to_string(self, value):
+    def to_string(self, value) -> str:
         return str(self.choices[value]) if isinstance(value, int) else str(value)
 
     def validate_read(self, reply_bytes):
@@ -465,7 +465,7 @@ class ChoicesMapValidator(ChoicesValidator):
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
-    def to_string(self, value):
+    def to_string(self, value) -> str:
         def element_to_string(key, val):
             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
             return str(k) + ":" + str(c[val]) if k is not None else "?"
