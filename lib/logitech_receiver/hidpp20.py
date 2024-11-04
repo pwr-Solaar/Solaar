@@ -42,6 +42,7 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
+from .common import NamedInts
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
@@ -77,6 +78,24 @@ class Device(Protocol):
     @property
     def _profiles(self) -> Any:
         ...
+
+
+# Capabilities and desired software handling for a control
+# Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
+# We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
+KEY_FLAG = NamedInts(
+    analytics_key_events=0x400,
+    force_raw_XY=0x200,
+    raw_XY=0x100,
+    virtual=0x80,
+    persistently_divertable=0x40,
+    divertable=0x20,
+    reprogrammable=0x10,
+    FN_sensitive=0x08,
+    nonstandard=0x04,
+    is_FN=0x02,
+    mse=0x01,
+)
 
 
 class FeaturesArray(dict):
@@ -217,7 +236,7 @@ class ReprogrammableKey:
 
     @property
     def flags(self) -> List[str]:
-        return special_keys.KEY_FLAG.flag_names(self._flags)
+        return KEY_FLAG.flag_names(self._flags)
 
 
 class ReprogrammableKeyV4(ReprogrammableKey):
@@ -354,11 +373,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
-            special_keys.MAPPING_FLAG.diverted: special_keys.KEY_FLAG.divertable,
-            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
-            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
-            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
-            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY,
+            special_keys.MAPPING_FLAG.diverted: KEY_FLAG.divertable,
+            special_keys.MAPPING_FLAG.persistently_diverted: KEY_FLAG.persistently_divertable,
+            special_keys.MAPPING_FLAG.analytics_key_events_reporting: KEY_FLAG.analytics_key_events,
+            special_keys.MAPPING_FLAG.force_raw_XY_diverted: KEY_FLAG.force_raw_XY,
+            special_keys.MAPPING_FLAG.raw_XY_diverted: KEY_FLAG.raw_XY,
         }
 
         bfield = 0
