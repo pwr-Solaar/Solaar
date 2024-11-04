@@ -66,7 +66,7 @@ class HIDAPI(typing.Protocol):
     def open(self, vendor_id, product_id, serial=None):
         ...
 
-    def open_path(self, path):
+    def open_path(self, path) -> int:
         ...
 
     def enumerate(self, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]) -> DeviceInfo:
@@ -233,7 +233,7 @@ def notify_on_receivers_glib(glib: GLib, callback: Callable):
     return hidapi.monitor_glib(glib, callback, _filter_products_of_interest)
 
 
-def open_path(path):
+def open_path(path) -> int:
     """Checks if the given Linux device path points to the right UR device.
 
     :param path: the Linux device path.
@@ -356,7 +356,7 @@ def _is_relevant_message(data: bytes) -> bool:
     return False
 
 
-def _read(handle, timeout):
+def _read(handle, timeout) -> tuple[int, int, bytes]:
     """Read an incoming packet from the receiver.
 
     :returns: a tuple of (report_id, devnumber, data), or `None`.

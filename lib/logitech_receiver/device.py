@@ -23,7 +23,6 @@ import threading
 import time
 import typing
 
-from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import Protocol
@@ -51,7 +50,7 @@ _hidpp20 = hidpp20.Hidpp20()
 
 
 class LowLevelInterface(Protocol):
-    def open_path(self, path) -> Any:
+    def open_path(self, path) -> int:
         ...
 
     def find_paired_node(self, receiver_path: str, index: int, timeout: int):
