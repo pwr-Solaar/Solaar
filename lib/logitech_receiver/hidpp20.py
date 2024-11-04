@@ -192,11 +192,11 @@ class ReprogrammableKey:
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
 
-    def __init__(self, device: Device, index, cid, tid, flags):
+    def __init__(self, device: Device, index, cid, task_id, flags):
         self._device = device
         self.index = index
         self._cid = cid
-        self._tid = tid
+        self._tid = task_id
         self._flags = flags
 
     @property
@@ -209,7 +209,10 @@ class ReprogrammableKey:
         while the name is the Control ID's native task. But this makes more sense
         than presenting details of controls vs tasks in the interface. The same
         convention applies to `mapped_to`, `remappable_to`, `remap` in `ReprogrammableKeyV4`."""
-        task = str(special_keys.TASK[self._tid])
+        try:
+            task = str(special_keys.Task(self._tid))
+        except ValueError:
+            task = f"unknown:{self._tid:04X}"
         return NamedInt(self._cid, task)
 
     @property
@@ -234,8 +237,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
 
-    def __init__(self, device: Device, index, cid, tid, flags, pos, group, gmask):
-        ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
+    def __init__(self, device: Device, index, cid, task_id, flags, pos, group, gmask):
+        ReprogrammableKey.__init__(self, device, index, cid, task_id, flags)
         self.pos = pos
         self.group = group
         self._gmask = gmask
@@ -251,7 +254,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self._mapped_to is None:
             self._getCidReporting()
         self._device.keys._ensure_all_keys_queried()
-        task = str(special_keys.TASK[self._device.keys.cid_to_tid[self._mapped_to]])
+        task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
         return NamedInt(self._mapped_to, task)
 
     @property
@@ -263,7 +266,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             for g in self.group_mask:
                 g = special_keys.CidGroup[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
-                    tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
+                    cid = self._device.keys.cid_to_tid[tgt_cid]
+                    try:
+                        tgt_task = str(special_keys.Task(cid))
+                    except ValueError:
+                        tgt_task = f"unknown:{cid:04X}"
                     tgt_task = NamedInt(tgt_cid, tgt_task)
                     if tgt_task != self.default_task:  # don't put itself in twice
                         ret[tgt_task] = tgt_task
@@ -524,9 +531,9 @@ class KeysArrayV2(KeysArray):
             raise IndexError(index)
         keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS, 0x10, index)
         if keydata:
-            cid, tid, flags = struct.unpack("!HHB", keydata[:5])
-            self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
-            self.cid_to_tid[cid] = tid
+            cid, task_id, flags = struct.unpack("!HHB", keydata[:5])
+            self.keys[index] = ReprogrammableKey(self.device, index, cid, task_id, flags)
+            self.cid_to_tid[cid] = task_id
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
@@ -540,10 +547,10 @@ class KeysArrayV4(KeysArrayV2):
             raise IndexError(index)
         keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS_V4, 0x10, index)
         if keydata:
-            cid, tid, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
+            cid, task_id, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
-            self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
-            self.cid_to_tid[cid] = tid
+            self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, task_id, flags, pos, group, gmask)
+            self.cid_to_tid[cid] = task_id
             if group != 0:  # 0 = does not belong to a group
                 self.group_cids[special_keys.CidGroup(group)].append(cid)
         elif logger.isEnabledFor(logging.WARNING):

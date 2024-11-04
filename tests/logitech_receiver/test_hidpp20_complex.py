@@ -154,19 +154,19 @@ def test_FeaturesArray_getitem(device, expected0, expected1, expected2, expected
 
 
 @pytest.mark.parametrize(
-    "device, index, cid, tid, flags, default_task, flag_names",
+    "device, index, cid, task_id, flags, default_task, flag_names",
     [
         (device_standard, 2, 1, 1, 0x30, "Volume Up", ["reprogrammable", "divertable"]),
         (device_standard, 1, 2, 2, 0x20, "Volume Down", ["divertable"]),
     ],
 )
-def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, flag_names):
-    key = hidpp20.ReprogrammableKey(device, index, cid, tid, flags)
+def test_reprogrammable_key_key(device, index, cid, task_id, flags, default_task, flag_names):
+    key = hidpp20.ReprogrammableKey(device, index, cid, task_id, flags)
 
     assert key._device == device
     assert key.index == index
     assert key._cid == cid
-    assert key._tid == tid
+    assert key._tid == task_id
     assert key._flags == flags
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
@@ -174,7 +174,7 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
 
 
 @pytest.mark.parametrize(
-    "device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names",
+    "device, index, cid, task_id, flags, pos, group, gmask, default_task, flag_names, group_names",
     [
         (device_standard, 1, 0x51, 0x39, 0x60, 0, 1, 1, "Right Click", ["divertable", "persistently divertable"], ["g1"]),
         (device_standard, 2, 0x52, 0x3A, 0x11, 1, 2, 3, "Mouse Middle Button", ["mse", "reprogrammable"], ["g1", "g2"]),
@@ -193,13 +193,15 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
         ),
     ],
 )
-def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names):
-    key = hidpp20.ReprogrammableKeyV4(device, index, cid, tid, flags, pos, group, gmask)
+def test_reprogrammable_key_v4_key(
+    device, index, cid, task_id, flags, pos, group, gmask, default_task, flag_names, group_names
+):
+    key = hidpp20.ReprogrammableKeyV4(device, index, cid, task_id, flags, pos, group, gmask)
 
     assert key._device == device
     assert key.index == index
     assert key._cid == cid
-    assert key._tid == tid
+    assert key._tid == task_id
     assert key._flags == flags
     assert key.pos == pos
     assert key.group == group
@@ -220,7 +222,7 @@ def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, g
     ],
 )
 # these fields need access all the key data, so start by setting up a device and its key data
-def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, mapping_flags):
+def test_reprogrammable_key_v4_query(responses, index, mapped_to, remappable_to, mapping_flags):
     device = fake_hidpp.Device(
         "KEY", responses=responses, feature=hidpp20_constants.SupportedFeature.REPROG_CONTROLS_V4, offset=5
     )
@@ -360,14 +362,14 @@ def test_KeysArrayV4_query_key(device, index, top, cid):
 
 
 @pytest.mark.parametrize(
-    "device, count, index, cid, tid, flags, pos, group, gmask",
+    "device, count, index, cid, task_id, flags, pos, group, gmask",
     [
         (device_standard, 4, 0, 0x0011, 0x0012, 0xCDAB, 1, 2, 3),
         (device_standard, 6, 1, 0x0111, 0x0022, 0xCDAB, 1, 2, 3),
         (device_standard, 8, 3, 0x0311, 0x0032, 0xCDAB, 1, 2, 4),
     ],
 )
-def test_KeysArrayV4__getitem(device, count, index, cid, tid, flags, pos, group, gmask):
+def test_KeysArrayV4__getitem(device, count, index, cid, task_id, flags, pos, group, gmask):
     keysarray = hidpp20.KeysArrayV4(device, count)
 
     result = keysarray[index]
@@ -375,7 +377,7 @@ def test_KeysArrayV4__getitem(device, count, index, cid, tid, flags, pos, group,
     assert result._device == device
     assert result.index == index
     assert result._cid == cid
-    assert result._tid == tid
+    assert result._tid == task_id
     assert result._flags == flags
     assert result.pos == pos
     assert result.group == group
@@ -421,7 +423,7 @@ device_key = fake_hidpp.Device(
         (special_keys.CONTROL.Virtual_Gesture_Button, 7, common.NamedInt(0x51, "Right Click"), None),
     ],
 )
-def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
+def test_keys_array_v4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
     device_key._keys = _hidpp20.get_keys(device_key)
     device_key._keys._ensure_all_keys_queried()
 
