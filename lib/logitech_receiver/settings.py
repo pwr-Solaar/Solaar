@@ -20,6 +20,7 @@ import struct
 import time
 
 from enum import IntEnum
+from typing import Any
 
 from solaar.i18n import _
 
@@ -276,7 +277,7 @@ class Settings(Setting):
         self._value[int(key)] = value
         self._pre_write(save)
 
-    def write_key_value(self, key, value, save=True):
+    def write_key_value(self, key, value, save=True) -> Any | None:
         assert hasattr(self, "_value")
         assert hasattr(self, "_device")
         assert key is not None

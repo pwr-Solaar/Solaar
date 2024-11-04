@@ -649,8 +649,7 @@ class Battery:
         elif isinstance(self.level, int):
             status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
-        else:
-            return ""
+        return ""
 
 
 class Alert(IntEnum):
