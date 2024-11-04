@@ -15,10 +15,13 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import errno
 import logging
 import subprocess
 import time
+import typing
 
 from collections import namedtuple
 from functools import partial
@@ -36,8 +39,14 @@ from . import configuration
 from . import dbus
 from . import i18n
 
+if typing.TYPE_CHECKING:
+    from hidapi.common import DeviceInfo
+
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver.device import Device
 
 logger = logging.getLogger(__name__)
 
@@ -235,7 +244,7 @@ class SolaarListener(listener.EventsListener):
         return f"<SolaarListener({self.receiver.path},{self.receiver.handle})>"
 
 
-def _process_bluez_dbus(device, path, dictionary, signature):
+def _process_bluez_dbus(device: Device, path, dictionary: dict, signature):
     """Process bluez dbus property changed signals for device status
     changes to discover disconnections and connections.
     """
@@ -251,7 +260,7 @@ def _process_bluez_dbus(device, path, dictionary, signature):
         _cleanup_bluez_dbus(device)
 
 
-def _cleanup_bluez_dbus(device):
+def _cleanup_bluez_dbus(device: Device):
     """Remove dbus signal receiver for device"""
     if logger.isEnabledFor(logging.INFO):
         logger.info("bluez cleanup for %s", device)
@@ -261,10 +270,10 @@ def _cleanup_bluez_dbus(device):
 _all_listeners = {}  # all known receiver listeners, listeners that stop on their own may remain here
 
 
-def _start(device_info):
+def _start(device_info: DeviceInfo):
     assert _status_callback and _setting_callback
-    isDevice = device_info.isDevice
-    if not isDevice:
+
+    if not device_info.isDevice:
         receiver_ = logitech_receiver.receiver.create_receiver(base, device_info, _setting_callback)
     else:
         receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
@@ -345,7 +354,7 @@ def setup_scanner(status_changed_callback, setting_changed_callback, error_callb
     base.notify_on_receivers_glib(GLib, _process_receiver_event)
 
 
-def _process_add(device_info, retry):
+def _process_add(device_info: DeviceInfo, retry):
     try:
         _start(device_info)
     except OSError as e:

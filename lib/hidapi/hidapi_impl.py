@@ -228,7 +228,7 @@ class _DeviceMonitor(Thread):
 
 def _match(
     action: str,
-    device,
+    device: dict[str, Any],
     filter_func: Callable[[int, int, int, bool, bool], dict[str, Any]],
 ):
     """
@@ -393,7 +393,7 @@ def open(vendor_id, product_id, serial=None):
     return device_handle
 
 
-def open_path(device_path) -> Any:
+def open_path(device_path: str) -> int:
     """Open a HID device by its path name.
 
     :param device_path: the path of a ``DeviceInfo`` tuple returned by enumerate().

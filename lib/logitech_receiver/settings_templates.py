@@ -22,7 +22,6 @@ import struct
 import traceback
 
 from time import time
-from typing import Any
 from typing import Callable
 from typing import Protocol
 
@@ -1890,7 +1889,7 @@ class SettingsProtocol(Protocol):
         ...
 
 
-def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Any:
+def check_feature(device, settings_class: SettingsProtocol) -> None | bool | SettingsProtocol:
     if settings_class.feature not in device.features:
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):

@@ -31,7 +31,7 @@ class LowLevelInterfaceFake:
     def __init__(self, responses=None):
         self.responses = responses
 
-    def open_path(self, path):
+    def open_path(self, path) -> int:
         return fake_hidpp.open_path(path)
 
     def find_paired_node(self, receiver_path: str, index: int, timeout: int):
