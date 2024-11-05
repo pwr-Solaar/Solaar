@@ -108,7 +108,7 @@ def test_get_battery_voltage():
 
     assert feature == SupportedFeature.BATTERY_VOLTAGE
     assert battery.level == 90
-    assert battery.status == common.BatteryStatus.RECHARGING
+    assert common.BatteryStatus.RECHARGING in battery.status
     assert battery.voltage == 0x1000
 
 
@@ -390,7 +390,7 @@ def test_decipher_battery_voltage():
 
     assert feature == SupportedFeature.BATTERY_VOLTAGE
     assert battery.level == 90
-    assert battery.status == common.BatteryStatus.RECHARGING
+    assert common.BatteryStatus.RECHARGING in battery.status
     assert battery.voltage == 0x1000
 
 
@@ -438,3 +438,14 @@ def test_feature_flag_names(code, expected_flags):
     flags = common.flag_names(hidpp20_constants.FeatureFlag, code)
 
     assert list(flags) == expected_flags
+
+
+@pytest.mark.parametrize(
+    "code, expected_name",
+    [
+        (0x00, "Unknown Location"),
+        (0x03, "Left Side"),
+    ],
+)
+def test_led_zone_locations(code, expected_name):
+    assert hidpp20.LEDZoneLocations[code] == expected_name
