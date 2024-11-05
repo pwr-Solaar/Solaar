@@ -1207,11 +1207,11 @@ MOUSE_BUTTONS = NamedInts(
 )
 MOUSE_BUTTONS._fallback = lambda x: f"unknown mouse button:{x:04X}"
 
-HORIZONTAL_SCROLL = NamedInts(
-    Horizontal_Scroll_Left=0x4000,
-    Horizontal_Scroll_Right=0x8000,
-)
-HORIZONTAL_SCROLL._fallback = lambda x: f"unknown horizontal scroll:{x:04X}"
+
+class HorizontalScroll(IntEnum):
+    Left = 0x4000
+    Right = 0x8000
+
 
 # Construct universe for Persistent Remappable Keys setting (only for supported values)
 KEYS = UnsortedNamedInts()
@@ -1246,7 +1246,7 @@ for code in MOUSE_BUTTONS:
     KEYS[(ACTIONID.Mouse << 24) + (int(code) << 8)] = str(code)
 
 # Add Horizontal Scroll
-for code in HORIZONTAL_SCROLL:
+for code in HorizontalScroll:
     KEYS[(ACTIONID.Hscroll << 24) + (int(code) << 8)] = str(code)
 
 
