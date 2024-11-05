@@ -170,7 +170,7 @@ def test_reprogrammable_key_key(device, index, cid, task_id, flags, default_task
     assert key._flags == flags
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
+    assert sorted(list(key.flags)) == sorted(flag_names)
 
 
 @pytest.mark.parametrize(
@@ -188,7 +188,7 @@ def test_reprogrammable_key_key(device, index, cid, task_id, flags, default_task
             2,
             7,
             "Mouse Back Button",
-            ["reprogrammable", "raw XY"],
+            ["reprogrammable", "raw_xy"],
             ["g1", "g2", "g3"],
         ),
     ],
@@ -208,7 +208,7 @@ def test_reprogrammable_key_v4_key(
     assert key._gmask == gmask
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
+    assert sorted(list(key.flags)) == sorted(flag_names)
     assert list(key.group_mask) == group_names
 
 
@@ -256,26 +256,28 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
     key = device.keys[index]
     _mapping_flags = list(key.mapping_flags)
 
-    if "divertable" in key.flags or not diverted:
+    if hidpp20.KeyFlag.DIVERTABLE in key.flags or not diverted:
         key.set_diverted(diverted)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_diverted(diverted)
-    assert ("diverted" in list(key.mapping_flags)) == (diverted and "divertable" in key.flags)
+    assert ("diverted" in list(key.mapping_flags)) == (diverted and hidpp20.KeyFlag.DIVERTABLE in key.flags)
 
-    if "persistently divertable" in key.flags or not persistently_diverted:
+    if hidpp20.KeyFlag.PERSISTENTLY_DIVERTABLE in key.flags or not persistently_diverted:
         key.set_persistently_diverted(persistently_diverted)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_persistently_diverted(persistently_diverted)
-    assert ("persistently diverted" in key.mapping_flags) == (persistently_diverted and "persistently divertable" in key.flags)
+    assert (hidpp20.KeyFlag.PERSISTENTLY_DIVERTABLE in key.mapping_flags) == (
+        persistently_diverted and hidpp20.KeyFlag.PERSISTENTLY_DIVERTABLE in key.flags
+    )
 
-    if "raw XY" in key.flags or not rawXY_reporting:
+    if hidpp20.KeyFlag.RAW_XY in key.flags or not rawXY_reporting:
         key.set_rawXY_reporting(rawXY_reporting)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_rawXY_reporting(rawXY_reporting)
-    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw XY" in key.flags)
+    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and hidpp20.KeyFlag.RAW_XY in key.flags)
 
     if remap in key.remappable_to or remap == 0:
         key.remap(remap)
