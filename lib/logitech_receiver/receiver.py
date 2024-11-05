@@ -401,8 +401,8 @@ class Receiver:
 class BoltReceiver(Receiver):
     """Bolt receivers use a different pairing prototol and have different pairing registers"""
 
-    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def initialize(self, product_info: dict):
         serial_reply = self.read_register(Registers.BOLT_UNIQUE_ID)
@@ -466,8 +466,8 @@ class LightSpeedReceiver(Receiver):
 class Ex100Receiver(Receiver):
     """A very old style receiver, somewhat different from newer receivers"""
 
-    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def initialize(self, product_info: dict):
         self.serial = None
