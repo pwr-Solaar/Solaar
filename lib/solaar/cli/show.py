@@ -55,7 +55,7 @@ def _print_receiver(receiver):
     notification_flags = _hidpp10.get_notification_flags(receiver)
     if notification_flags is not None:
         if notification_flags:
-            notification_names = hidpp10_constants.NOTIFICATION_FLAG.flag_names(notification_flags)
+            notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
             print(f"  Notifications: {', '.join(notification_names)} (0x{notification_flags:06X})")
         else:
             print("  Notifications: (none)")
@@ -151,8 +151,8 @@ def _print_device(dev, num=None):
             if isinstance(feature, str):
                 feature_bytes = bytes.fromhex(feature[-4:])
             else:
-                feature_bytes = feature.to_bytes(2)
-            feature_int = int.from_bytes(feature_bytes)
+                feature_bytes = feature.to_bytes(2, byteorder="big")
+            feature_int = int.from_bytes(feature_bytes, byteorder="big")
             flags = dev.request(0x0000, feature_bytes)
             flags = 0 if flags is None else ord(flags[1:2])
             flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
@@ -278,7 +278,11 @@ def _print_device(dev, num=None):
                 gmask_fmt = ",".join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else "empty"
                 print(f"             {', '.join(k.flags)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}")
-                report_fmt = ", ".join(k.mapping_flags)
+                flag_names = list(common.flag_names(hidpp20.KeyFlag, k.flags.value))
+                print(
+                    f"             {', '.join(flag_names)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}"
+                )
+                report_fmt = list(common.flag_names(hidpp20.MappingFlag, k.mapping_flags.value))
                 report_fmt = report_fmt if report_fmt else "default"
                 print(f"             reporting: {report_fmt}")
     if dev.online and dev.remap_keys:
