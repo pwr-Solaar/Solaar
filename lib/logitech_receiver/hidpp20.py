@@ -44,7 +44,6 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .common import NamedInts
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
@@ -105,15 +104,17 @@ class KeyFlag(Flag):
         return self.name.replace("_", " ")
 
 
-# Flags describing the reporting method of a control
-# We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
-MAPPING_FLAG = NamedInts(
-    analytics_key_events_reporting=0x100,
-    force_raw_XY_diverted=0x40,
-    raw_XY_diverted=0x10,
-    persistently_diverted=0x04,
-    diverted=0x01,
-)
+class MappingFlag(Flag):
+    """Flags describing the reporting method of a control.
+
+    We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
+    """
+
+    ANALYTICS_KEY_EVENTS_REPORTING = 0x100
+    FORCE_RAW_XY_DIVERTED = 0x40
+    RAW_XY_DIVERTED = 0x10
+    PERSISTENTLY_DIVERTED = 0x04
+    DIVERTED = 0x01
 
 
 class FeaturesArray(dict):
@@ -317,21 +318,21 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     def mapping_flags(self) -> List[str]:
         if self._mapping_flags is None:
             self._getCidReporting()
-        return MAPPING_FLAG.flag_names(self._mapping_flags)
+        return list(common.flag_names(MappingFlag, self._mapping_flags))
 
     def set_diverted(self, value: bool):
         """If set, the control is diverted temporarily and reports presses as HID++ events."""
-        flags = {MAPPING_FLAG.diverted: value}
+        flags = {MappingFlag.DIVERTED: value}
         self._setCidReporting(flags=flags)
 
     def set_persistently_diverted(self, value: bool):
         """If set, the control is diverted permanently and reports presses as HID++ events."""
-        flags = {MAPPING_FLAG.persistently_diverted: value}
+        flags = {MappingFlag.PERSISTENTLY_DIVERTED: value}
         self._setCidReporting(flags=flags)
 
     def set_rawXY_reporting(self, value: bool):
         """If set, the mouse temporarily reports all its raw XY events while this control is pressed as HID++ events."""
-        flags = {MAPPING_FLAG.raw_XY_diverted: value}
+        flags = {MappingFlag.RAW_XY_DIVERTED: value}
         self._setCidReporting(flags=flags)
 
     def remap(self, to: NamedInt):
@@ -383,19 +384,19 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         """
         flags = flags if flags else {}  # See flake8 B006
 
-        # if MAPPING_FLAG.raw_XY_diverted in flags and flags[MAPPING_FLAG.raw_XY_diverted]:
+        # if MappingFlag.RAW_XY_DIVERTED in flags and flags[MappingFlag.RAW_XY_DIVERTED]:
         # We need diversion to report raw XY, so divert temporarily (since XY reporting is also temporary)
-        # flags[MAPPING_FLAG.diverted] = True
-        # if MAPPING_FLAG.diverted in flags and not flags[MAPPING_FLAG.diverted]:
-        # flags[MAPPING_FLAG.raw_XY_diverted] = False
+        # flags[MappingFlag.DIVERTED] = True
+        # if MappingFlag.DIVERTED in flags and not flags[MappingFlag.DIVERTED]:
+        # flags[MappingFlag.RAW_XY_DIVERTED] = False
 
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
-            MAPPING_FLAG.diverted: KeyFlag.DIVERTABLE,
-            MAPPING_FLAG.persistently_diverted: KeyFlag.PERSISTENTLY_DIVERTABLE,
-            MAPPING_FLAG.analytics_key_events_reporting: KeyFlag.ANALYTICS_KEY_EVENTS,
-            MAPPING_FLAG.force_raw_XY_diverted: KeyFlag.FORCE_RAW_XY,
-            MAPPING_FLAG.raw_XY_diverted: KeyFlag.RAW_XY,
+            MappingFlag.DIVERTED: KeyFlag.DIVERTABLE,
+            MappingFlag.PERSISTENTLY_DIVERTED: KeyFlag.PERSISTENTLY_DIVERTABLE,
+            MappingFlag.ANALYTICS_KEY_EVENTS_REPORTING: KeyFlag.ANALYTICS_KEY_EVENTS,
+            MappingFlag.FORCE_RAW_XY_DIVERTED: KeyFlag.FORCE_RAW_XY,
+            MappingFlag.RAW_XY_DIVERTED: KeyFlag.RAW_XY,
         }
 
         bfield = 0
