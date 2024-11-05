@@ -23,6 +23,7 @@ from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
 from logitech_receiver.hidpp20 import KeyFlag
+from logitech_receiver.hidpp20 import MappingFlag
 from logitech_receiver.hidpp20_constants import GestureId
 
 from . import fake_hidpp
@@ -789,7 +790,7 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
 
 
 @pytest.mark.parametrize(
-    "hex, behavior, sector, address, typ, val, modifiers, data, byt",
+    "hex, expected_behavior, sector, address, typ, val, modifiers, data, byt",
     [
         ("05010203", 0x0, 0x501, 0x0203, None, None, None, None, None),
         ("15020304", 0x1, 0x502, 0x0304, None, None, None, None, None),
@@ -801,10 +802,10 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
         ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xa0"),
     ],
 )
-def test_button_bytes(hex, behavior, sector, address, typ, val, modifiers, data, byt):
+def test_button_bytes(hex, expected_behavior, sector, address, typ, val, modifiers, data, byt):
     button = hidpp20.Button.from_bytes(bytes.fromhex(hex))
 
-    assert getattr(button, "behavior", None) == behavior
+    assert getattr(button, "behavior", None) == expected_behavior
     assert getattr(button, "sector", None) == sector
     assert getattr(button, "address", None) == address
     assert getattr(button, "type", None) == typ
@@ -881,7 +882,7 @@ hex3 = (
         (hex3, "", 2, 1, 16, 0, [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF], "FFFFFFFF", "FFFFFFFFFFFFFFFFFFFFFF"),
     ],
 )
-def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
+def test_onboard_profile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
     profile = hidpp20.OnboardProfile.from_bytes(sector, enabled, buttons, gbuttons, bytes.fromhex(hex))
 
     assert profile.name == name
@@ -902,7 +903,7 @@ def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, res
         (fake_hidpp.responses_profiles_rom_2, "ONB", 1, 2, 2, 1, 254),
     ],
 )
-def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
+def test_onboard_profiles_device(responses, name, count, buttons, gbuttons, sectors, size):
     device = fake_hidpp.Device(
         name, True, 4.5, responses=responses, feature=hidpp20_constants.SupportedFeature.ONBOARD_PROFILES, offset=0x9
     )
@@ -919,4 +920,5 @@ def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, secto
     assert profiles.size == size
     assert len(profiles.profiles) == count
 
-    assert yaml.safe_load(yaml.dump(profiles)).to_bytes().hex() == profiles.to_bytes().hex()
+    yml_dump = yaml.dump(profiles)
+    assert yaml.safe_load(yml_dump).to_bytes().hex() == profiles.to_bytes().hex()
