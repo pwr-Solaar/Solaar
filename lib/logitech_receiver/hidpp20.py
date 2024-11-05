@@ -22,6 +22,7 @@ import struct
 import threading
 
 from enum import Flag
+from enum import IntEnum
 from typing import Any
 from typing import Dict
 from typing import Generator
@@ -671,20 +672,24 @@ SUB_PARAM = {  # (byte count, minimum, maximum)
     ParamId.SCALE_FACTOR: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
 }
 
-# Spec Ids for feature GESTURE_2
-SPEC = common.NamedInts(
-    DVI_field_width=1,
-    field_widths=2,
-    period_unit=3,
-    resolution=4,
-    multiplier=5,
-    sensor_size=6,
-    finger_width_and_height=7,
-    finger_major_minor_axis=8,
-    finger_force=9,
-    zone=10,
-)
-SPEC._fallback = lambda x: f"unknown:{x:04X}"
+
+class SpecGesture(IntEnum):
+    """Spec IDs for feature GESTURE_2."""
+
+    DVI_FIELD_WIDTH = 1
+    FIELD_WIDTHS = 2
+    PERIOD_UNIT = 3
+    RESOLUTION = 4
+    MULTIPLIER = 5
+    SENSOR_SIZE = 6
+    FINGER_WIDTH_AND_HEIGHT = 7
+    FINGER_MAJOR_MINOR_AXIS = 8
+    FINGER_FORCE = 9
+    ZONE = 10
+
+    def __str__(self):
+        return f"{self.name.replace('_', ' ').lower()}"
+
 
 # Action Ids for feature GESTURE_2
 ACTION_ID = common.NamedInts(
@@ -836,10 +841,13 @@ class Param:
 
 
 class Spec:
-    def __init__(self, device, low, high):
+    def __init__(self, device, low: int, high):
         self._device = device
         self.id = low
-        self.spec = SPEC[low]
+        try:
+            self.spec = SpecGesture(low)
+        except ValueError:
+            self.spec = f"unknown:{low:04X}"
         self.byte_count = high & 0x0F
         self._value = None
 
