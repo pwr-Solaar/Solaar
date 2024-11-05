@@ -277,7 +277,6 @@ def _print_device(dev, num=None):
                 print("        %2d: %-26s, default: %-27s => %-26s" % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ",".join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else "empty"
-                print(f"             {', '.join(k.flags)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}")
                 flag_names = list(common.flag_names(hidpp20.KeyFlag, k.flags.value))
                 print(
                     f"             {', '.join(flag_names)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}"
