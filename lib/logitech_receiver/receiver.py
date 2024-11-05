@@ -229,7 +229,7 @@ class Receiver:
             raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
         pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.extended_pairing_information + n - 1)
         if pair_info:
-            power_switch = hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
+            power_switch = hidpp10_constants.PowerSwitchLocation(pair_info[9] & 0x0F)
             serial = pair_info[1:5].hex().upper()
         else:  # some Nano receivers?
             pair_info = self.read_register(0x2D5)  # undocumented and questionable

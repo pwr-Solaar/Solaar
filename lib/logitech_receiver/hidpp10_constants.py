@@ -41,19 +41,20 @@ DEVICE_KIND = NamedInts(
     receiver=0x0F,  # for compatibility with HID++ 2.0
 )
 
-POWER_SWITCH_LOCATION = NamedInts(
-    base=0x01,
-    top_case=0x02,
-    edge_of_top_right_corner=0x03,
-    top_left_corner=0x05,
-    bottom_left_corner=0x06,
-    top_right_corner=0x07,
-    bottom_right_corner=0x08,
-    top_edge=0x09,
-    right_edge=0x0A,
-    left_edge=0x0B,
-    bottom_edge=0x0C,
-)
+
+class PowerSwitchLocation(IntEnum):
+    BASE = 0x01
+    TOP_CASE = 0x02
+    EDGE_OF_TOP_RIGHT_CORNER = 0x03
+    TOP_LEFT_CORNER = 0x05
+    BOTTOM_LEFT_CORNER = 0x06
+    TOP_RIGHT_CORNER = 0x07
+    BOTTOM_RIGHT_CORNER = 0x08
+    TOP_EDGE = 0x09
+    RIGHT_EDGE = 0x0A
+    LEFT_EDGE = 0x0B
+    BOTTOM_EDGE = 0x0C
+
 
 # Some flags are used both by devices and receivers. The Logitech documentation
 # mentions that the first and last (third) byte are used for devices while the
