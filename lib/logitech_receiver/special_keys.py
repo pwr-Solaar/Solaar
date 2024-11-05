@@ -580,17 +580,6 @@ class Task(IntEnum):
         return self.name.replace("_", " ").title()
 
 
-# Flags describing the reporting method of a control
-# We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
-MAPPING_FLAG = NamedInts(
-    analytics_key_events_reporting=0x100,
-    force_raw_XY_diverted=0x40,
-    raw_XY_diverted=0x10,
-    persistently_diverted=0x04,
-    diverted=0x01,
-)
-
-
 class CIDGroupBit(IntEnum):
     g1 = 0x01
     g2 = 0x02
