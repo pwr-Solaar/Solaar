@@ -179,16 +179,6 @@ class OnboardMode(IntEnum):
     MODE_HOST = 0x02
 
 
-CHARGE_STATUS = NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
-
-
-class ChargeStatus(IntEnum):
-    CHARGING = 0x00
-    FULL = 0x01
-    NOT_CHARGING = 0x02
-    ERROR = 0x07
-
-
 class ChargeLevel(IntEnum):
     AVERAGE = 50
     FULL = 90
