@@ -44,7 +44,6 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
@@ -115,6 +114,13 @@ class MappingFlag(Flag):
     RAW_XY_DIVERTED = 0x10
     PERSISTENTLY_DIVERTED = 0x04
     DIVERTED = 0x01
+
+
+class ChargeStatus(Flag):
+    CHARGING = 0x00
+    FULL = 0x01
+    NOT_CHARGING = 0x02
+    ERROR = 0x07
 
 
 class FeaturesArray(dict):
@@ -1879,10 +1885,10 @@ def decipher_battery_voltage(report: bytes):
     charge_type = ChargeType.STANDARD
     if flags & (1 << 7):
         status = BatteryStatus.RECHARGING
-        charge_sts = CHARGE_STATUS[flags & 0x03]
+        charge_sts = ChargeStatus(flags & 0x03)
     if charge_sts is None:
         charge_sts = ErrorCode.UNKNOWN
-    elif charge_sts == CHARGE_STATUS.full:
+    elif ChargeStatus.FULL in charge_sts:
         charge_lvl = ChargeLevel.FULL
         status = BatteryStatus.FULL
     if flags & (1 << 3):
