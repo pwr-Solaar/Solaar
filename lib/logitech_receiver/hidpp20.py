@@ -260,8 +260,8 @@ class ReprogrammableKey:
         return NamedInt(self._cid, task)
 
     @property
-    def flags(self) -> List[str]:
-        return list(common.flag_names(KeyFlag, self._flags))
+    def flags(self) -> KeyFlag:
+        return KeyFlag(self._flags)
 
 
 class ReprogrammableKeyV4(ReprogrammableKey):
@@ -321,10 +321,10 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         return ret
 
     @property
-    def mapping_flags(self) -> List[str]:
+    def mapping_flags(self) -> MappingFlag:
         if self._mapping_flags is None:
             self._getCidReporting()
-        return list(common.flag_names(MappingFlag, self._mapping_flags))
+        return MappingFlag(self._mapping_flags)
 
     def set_diverted(self, value: bool):
         """If set, the control is diverted temporarily and reports presses as HID++ events."""
@@ -407,7 +407,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
         bfield = 0
         for f, v in flags.items():
-            key_flag = FLAG_TO_CAPABILITY[f].name.lower()
+            key_flag = FLAG_TO_CAPABILITY[f]
             if v and key_flag not in self.flags:
                 raise exceptions.FeatureNotSupported(
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
