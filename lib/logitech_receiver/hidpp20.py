@@ -990,7 +990,12 @@ class LEDParam:
     saturation = "saturation"
 
 
-LEDRampChoices = common.NamedInts(default=0, yes=1, no=2)
+class LedRampChoice(IntEnum):
+    DEFAULT = 0
+    YES = 1
+    NO = 2
+
+
 LEDFormChoices = common.NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
 LEDParamSize = {
     LEDParam.color: 3,
