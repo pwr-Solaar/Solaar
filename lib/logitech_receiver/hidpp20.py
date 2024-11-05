@@ -407,13 +407,13 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
                     + f'which does not support "{key_flag}" on device {self._device}.'
                 )
-            bfield |= int(f) if v else 0
-            bfield |= int(f) << 1  # The 'Xvalid' bit
+            bfield |= int(f.value) if v else 0
+            bfield |= int(f.value) << 1  # The 'Xvalid' bit
             if self._mapping_flags:  # update flags if already read
                 if v:
-                    self._mapping_flags |= int(f)
+                    self._mapping_flags |= int(f.value)
                 else:
-                    self._mapping_flags &= ~int(f)
+                    self._mapping_flags &= ~int(f.value)
 
         if remap != 0 and remap not in self.remappable_to:
             raise exceptions.FeatureNotSupported(
@@ -633,7 +633,10 @@ class KeysArrayPersistent(KeysArray):
             elif actionId == special_keys.ACTIONID.Mouse:
                 remapped = special_keys.MOUSE_BUTTONS[remapped]
             elif actionId == special_keys.ACTIONID.Hscroll:
-                remapped = special_keys.HORIZONTAL_SCROLL[remapped]
+                try:
+                    remapped = special_keys.HorizontalScroll(remapped)
+                except ValueError:
+                    remapped = f"unknown horizontal scroll:{remapped:04X}"
             elif actionId == special_keys.ACTIONID.Consumer:
                 remapped = special_keys.HID_CONSUMERCODES[remapped]
             elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
