@@ -560,14 +560,14 @@ def test_param(responses, prm, id, index, size, value, default_value, write1, wr
 
 
 @pytest.mark.parametrize(
-    "responses, id, s, byte_count, value, string",
+    "responses, id, s, byte_count, expected_value, expected_string",
     [
-        (fake_hidpp.responses_gestures, 1, "DVI field width", 1, 8, "[DVI field width=8]"),
-        (fake_hidpp.responses_gestures, 2, "field widths", 1, 8, "[field widths=8]"),
-        (fake_hidpp.responses_gestures, 3, "period unit", 2, 2048, "[period unit=2048]"),
+        (fake_hidpp.responses_gestures, 1, hidpp20.SpecGesture.DVI_FIELD_WIDTH, 1, 8, "[dvi field width=8]"),
+        (fake_hidpp.responses_gestures, 2, hidpp20.SpecGesture.FIELD_WIDTHS, 1, 8, "[field widths=8]"),
+        (fake_hidpp.responses_gestures, 3, hidpp20.SpecGesture.PERIOD_UNIT, 2, 2048, "[period unit=2048]"),
     ],
 )
-def test_Spec(responses, id, s, byte_count, value, string):
+def test_spec(responses, id, s, byte_count, expected_value, expected_string):
     device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.SupportedFeature.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
@@ -576,8 +576,8 @@ def test_Spec(responses, id, s, byte_count, value, string):
     assert spec.id == id
     assert spec.spec == s
     assert spec.byte_count == byte_count
-    assert spec.value == value
-    assert repr(spec) == string
+    assert spec.value == expected_value
+    assert repr(spec) == expected_string
 
 
 def test_Gestures():
