@@ -38,6 +38,8 @@ from . import settings
 from . import settings_validator
 from . import special_keys
 from .hidpp10_constants import Registers
+from .hidpp20 import KeyFlag
+from .hidpp20 import MappingFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 
@@ -898,7 +900,7 @@ class DivertKeys(settings.Settings):
         def read(self, device, key):
             key_index = device.keys.index(key)
             key_struct = device.keys[key_index]
-            return b"\x00\x00\x01" if "diverted" in key_struct.mapping_flags else b"\x00\x00\x00"
+            return b"\x00\x00\x01" if MappingFlag.DIVERTED in key_struct.mapping_flags else b"\x00\x00\x00"
 
         def write(self, device, key, data_bytes):
             key_index = device.keys.index(key)
@@ -926,20 +928,20 @@ class DivertKeys(settings.Settings):
             sliding = gestures = None
             choices = {}
             if device.keys:
-                for k in device.keys:
-                    if "divertable" in k.flags and "virtual" not in k.flags:
-                        if "raw XY" in k.flags:
-                            choices[k.key] = setting_class.choices_gesture
+                for key in device.keys:
+                    if KeyFlag.DIVERTABLE in key.flags and KeyFlag.VIRTUAL not in key.flags:
+                        if KeyFlag.RAW_XY in key.flags:
+                            choices[key.key] = setting_class.choices_gesture
                             if gestures is None:
                                 gestures = MouseGesturesXY(device, name="MouseGestures")
                             if _F.ADJUSTABLE_DPI in device.features:
-                                choices[k.key] = setting_class.choices_universe
+                                choices[key.key] = setting_class.choices_universe
                                 if sliding is None:
                                     sliding = DpiSlidingXY(
                                         device, name="DpiSliding", show_notification=desktop_notifications.show
                                     )
                         else:
-                            choices[k.key] = setting_class.choices_divert
+                            choices[key.key] = setting_class.choices_divert
             if not choices:
                 return None
             validator = cls(choices, key_byte_count=2, byte_count=1, mask=0x01)
@@ -1111,7 +1113,7 @@ class SpeedChange(settings.Setting):
         def build(cls, setting_class, device):
             key_index = device.keys.index(special_keys.CONTROL.DPI_Change)
             key = device.keys[key_index] if key_index is not None else None
-            if key is not None and "divertable" in key.flags:
+            if key is not None and KeyFlag.DIVERTABLE in key.flags:
                 keys = [setting_class.choices_extra, key.key]
                 return cls(choices=common.NamedInts.list(keys), byte_count=2)
 
