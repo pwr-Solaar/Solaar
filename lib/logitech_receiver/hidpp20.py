@@ -691,22 +691,21 @@ class SpecGesture(IntEnum):
         return f"{self.name.replace('_', ' ').lower()}"
 
 
-# Action Ids for feature GESTURE_2
-ACTION_ID = common.NamedInts(
-    MovePointer=1,
-    ScrollHorizontal=2,
-    WheelScrolling=3,
-    ScrollVertial=4,
-    ScrollOrPageXY=5,
-    ScrollOrPageHorizontal=6,
-    PageScreen=7,
-    Drag=8,
-    SecondaryDrag=9,
-    Zoom=10,
-    ScrollHorizontalOnly=11,
-    ScrollVerticalOnly=12,
-)
-ACTION_ID._fallback = lambda x: f"unknown:{x:04X}"
+class ActionId(IntEnum):
+    """Action IDs for feature GESTURE_2."""
+
+    MOVE_POINTER = 1
+    SCROLL_HORIZONTAL = 2
+    WHEEL_SCROLLING = 3
+    SCROLL_VERTICAL = 4
+    SCROLL_OR_PAGE_XY = 5
+    SCROLL_OR_PAGE_HORIZONTAL = 6
+    PAGE_SCREEN = 7
+    DRAG = 8
+    SECONDARY_DRAG = 9
+    ZOOM = 10
+    SCROLL_HORIZONTAL_ONLY = 11
+    SCROLL_VERTICAL_ONLY = 12
 
 
 class Gesture:
