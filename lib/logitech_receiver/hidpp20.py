@@ -1002,7 +1002,16 @@ class LedRampChoice(IntEnum):
     NO = 2
 
 
-LEDFormChoices = common.NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
+class LedFormChoices(IntEnum):
+    DEFAULT = 0
+    SINE = 1
+    SQUARE = 2
+    TRIANGLE = 3
+    SAWTOOTH = 4
+    SHARKFIN = 5
+    EXPONENTIAL = 6
+
+
 LEDParamSize = {
     LEDParam.color: 3,
     LEDParam.speed: 1,
