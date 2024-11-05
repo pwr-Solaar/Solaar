@@ -21,6 +21,7 @@ import socket
 import struct
 import threading
 
+from enum import Flag
 from typing import Any
 from typing import Dict
 from typing import Generator
@@ -42,7 +43,6 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .common import NamedInts
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
@@ -80,22 +80,27 @@ class Device(Protocol):
         ...
 
 
-# Capabilities and desired software handling for a control
-# Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
-# We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
-KEY_FLAG = NamedInts(
-    analytics_key_events=0x400,
-    force_raw_XY=0x200,
-    raw_XY=0x100,
-    virtual=0x80,
-    persistently_divertable=0x40,
-    divertable=0x20,
-    reprogrammable=0x10,
-    FN_sensitive=0x08,
-    nonstandard=0x04,
-    is_FN=0x02,
-    mse=0x01,
-)
+class KeyFlag(Flag):
+    """Capabilities and desired software handling for a control.
+
+    Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
+    We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
+    """
+
+    ANALYTICS_KEY_EVENTS = 0x400
+    FORCE_RAW_XY = 0x200
+    RAW_XY = 0x100
+    VIRTUAL = 0x80
+    PERSISTENTLY_DIVERTABLE = 0x40
+    DIVERTABLE = 0x20
+    REPROGRAMMABLE = 0x10
+    FN_SENSITIVE = 0x08
+    NONSTANDARD = 0x04
+    IS_FN = 0x02
+    MSE = 0x01
+
+    def __str__(self):
+        return self.name.replace("_", " ")
 
 
 class FeaturesArray(dict):
@@ -211,7 +216,7 @@ class ReprogrammableKey:
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
 
-    def __init__(self, device: Device, index, cid, task_id, flags):
+    def __init__(self, device: Device, index: int, cid: int, task_id: int, flags):
         self._device = device
         self.index = index
         self._cid = cid
@@ -236,7 +241,7 @@ class ReprogrammableKey:
 
     @property
     def flags(self) -> List[str]:
-        return KEY_FLAG.flag_names(self._flags)
+        return list(common.flag_names(KeyFlag, self._flags))
 
 
 class ReprogrammableKeyV4(ReprogrammableKey):
@@ -373,19 +378,20 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
-            special_keys.MAPPING_FLAG.diverted: KEY_FLAG.divertable,
-            special_keys.MAPPING_FLAG.persistently_diverted: KEY_FLAG.persistently_divertable,
-            special_keys.MAPPING_FLAG.analytics_key_events_reporting: KEY_FLAG.analytics_key_events,
-            special_keys.MAPPING_FLAG.force_raw_XY_diverted: KEY_FLAG.force_raw_XY,
-            special_keys.MAPPING_FLAG.raw_XY_diverted: KEY_FLAG.raw_XY,
+            special_keys.MAPPING_FLAG.diverted: KeyFlag.DIVERTABLE,
+            special_keys.MAPPING_FLAG.persistently_diverted: KeyFlag.PERSISTENTLY_DIVERTABLE,
+            special_keys.MAPPING_FLAG.analytics_key_events_reporting: KeyFlag.ANALYTICS_KEY_EVENTS,
+            special_keys.MAPPING_FLAG.force_raw_XY_diverted: KeyFlag.FORCE_RAW_XY,
+            special_keys.MAPPING_FLAG.raw_XY_diverted: KeyFlag.RAW_XY,
         }
 
         bfield = 0
         for f, v in flags.items():
-            if v and FLAG_TO_CAPABILITY[f] not in self.flags:
+            key_flag = FLAG_TO_CAPABILITY[f].name.lower()
+            if v and key_flag not in self.flags:
                 raise exceptions.FeatureNotSupported(
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
-                    + f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
+                    + f'which does not support "{key_flag}" on device {self._device}.'
                 )
             bfield |= int(f) if v else 0
             bfield |= int(f) << 1  # The 'Xvalid' bit
