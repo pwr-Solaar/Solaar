@@ -18,14 +18,10 @@
 
 import logging
 
+from queue import Queue
 from threading import Thread
 
 logger = logging.getLogger(__name__)
-
-try:
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
 
 
 class TaskRunner(Thread):
