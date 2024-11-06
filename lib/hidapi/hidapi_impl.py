@@ -171,7 +171,7 @@ class HIDError(Exception):
     pass
 
 
-def _enumerate_devices():
+def _enumerate_devices() -> list:
     """Returns all HID devices which are potentially useful to us"""
     devices = []
     c_devices = _hidapi.hid_enumerate(0, 0)
@@ -201,7 +201,7 @@ def _enumerate_devices():
 
 
 # Use a separate thread to check if devices have been removed or connected
-class _DeviceMonitor(Thread):
+class DeviceMonitor(Thread):
     def __init__(self, device_callback, polling_delay=5.0):
         self.device_callback = device_callback
         self.polling_delay = polling_delay
@@ -359,11 +359,11 @@ def monitor_glib(
             # Removed devices will be detected by Solaar directly
             pass
 
-    monitor = _DeviceMonitor(device_callback=device_callback)
+    monitor = DeviceMonitor(device_callback=device_callback)
     monitor.start()
 
 
-def enumerate(filter_func) -> DeviceInfo:
+def enumerate(filter_func: Callable) -> DeviceInfo:
     """Enumerate the HID Devices.
 
     List all the HID devices attached to the system, optionally filtering by
