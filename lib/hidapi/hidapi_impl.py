@@ -206,15 +206,18 @@ class DeviceMonitor(Thread):
         self.device_callback = device_callback
         self.polling_delay = polling_delay
         self.prev_devices = None
+        self.alive = False
+        self.abort_triggered = False
         # daemon threads are automatically killed when main thread exits
         super().__init__(daemon=True)
 
     def run(self):
+        self.alive = True
         # Populate initial set of devices so startup doesn't cause any callbacks
         self.prev_devices = {tuple(dev.items()): dev for dev in _enumerate_devices()}
 
         # Continously enumerate devices and raise callback for changes
-        while True:
+        while not self.abort_triggered:
             current_devices = {tuple(dev.items()): dev for dev in _enumerate_devices()}
             for key, device in self.prev_devices.items():
                 if key not in current_devices:
@@ -224,6 +227,11 @@ class DeviceMonitor(Thread):
                     self.device_callback(ACTION_ADD, device)
             self.prev_devices = current_devices
             sleep(self.polling_delay)
+
+        self.alive = False
+
+    def stop(self):
+        self.abort_triggered = True
 
 
 def _match(

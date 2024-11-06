@@ -22,6 +22,9 @@ class MockLowLevelInterface:
     def request(self, handle, devnumber, request_id, *params, **kwargs):
         pass
 
+    def close(self):
+        pass
+
 
 @pytest.mark.parametrize(
     "sub_id, notification_data, expected_error, expected_new_device",

@@ -7,9 +7,10 @@ def run_task():
 
 def test_task_runner(mocker):
     tr = tasks.TaskRunner(name="Testrunner")
-    tr.queue.put((run_task, {}, {}))
-    # tr.run()
-    # tr.stop()
-    # assert tr.alive
-    # tr.stop()
-    # assert not tr.alive
+    tr.start()
+    assert tr.alive
+
+    tr(run_task)
+
+    tr.stop()
+    assert not tr.alive

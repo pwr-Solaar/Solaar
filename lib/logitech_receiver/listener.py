@@ -19,10 +19,26 @@ import logging
 import queue
 import threading
 
-from . import base
+from typing import Any
+from typing import Protocol
+
 from . import exceptions
 
 logger = logging.getLogger(__name__)
+
+
+class LowLevelInterface(Protocol):
+    def open_path(self, path):
+        ...
+
+    def ping(self, handle, number, long_message=False):
+        ...
+
+    def make_notification(self, report_id: int, devnumber: int, data: bytes) -> Any:
+        ...
+
+    def close(self, handle):
+        ...
 
 
 class _ThreadedHandle:
@@ -30,14 +46,15 @@ class _ThreadedHandle:
     Closing a ThreadedHandle will close all handles.
     """
 
-    __slots__ = ("path", "_local", "_handles", "_listener")
+    __slots__ = ("path", "_local", "_handles", "_listener", "_base")
 
-    def __init__(self, listener, path, handle):
+    def __init__(self, listener, path, handle, low_level_api: LowLevelInterface):
         assert listener is not None
         assert path is not None
         assert handle is not None
         assert isinstance(handle, int)
 
+        self._base = low_level_api
         self._listener = listener
         self.path = path
         self._local = threading.local()
@@ -46,7 +63,7 @@ class _ThreadedHandle:
         self._handles = [handle]
 
     def _open(self):
-        handle = base.open_path(self.path)
+        handle = self._base.open_path(self.path)
         if handle is None:
             logger.error("%r failed to open new handle", self)
         else:
@@ -63,7 +80,7 @@ class _ThreadedHandle:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%r closing %s", self, handles)
             for h in handles:
-                base.close(h)
+                self._base.close(h)
 
     @property
     def notifications_hook(self):
@@ -112,12 +129,13 @@ class EventsListener(threading.Thread):
     Incoming packets will be passed to the callback function in sequence.
     """
 
-    def __init__(self, receiver, notifications_callback):
+    def __init__(self, receiver, notifications_callback, low_level: LowLevelInterface):
         try:
             path_name = receiver.path.split("/")[2]
         except IndexError:
             path_name = receiver.path
         super().__init__(name=self.__class__.__name__ + ":" + path_name)
+        self._base = low_level
         self.daemon = True
         self._active = False
         self.receiver = receiver
@@ -127,7 +145,7 @@ class EventsListener(threading.Thread):
     def run(self):
         self._active = True
         # replace the handle with a threaded one
-        self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
+        self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle, self._base)
         if logger.isEnabledFor(logging.INFO):
             logger.info("started with %s (%d)", self.receiver, int(self.receiver.handle))
         self.has_started()
@@ -139,13 +157,13 @@ class EventsListener(threading.Thread):
         while self._active:
             if self._queued_notifications.empty():
                 try:
-                    n = base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
+                    n = self._base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except exceptions.NoReceiver:
                     logger.warning("%s disconnected", self.receiver.name)
                     self.receiver.close()
                     break
                 if n:
-                    n = base.make_notification(*n)
+                    n = self._base.make_notification(*n)
             else:
                 n = self._queued_notifications.get()  # deliver any queued notifications
             if n:

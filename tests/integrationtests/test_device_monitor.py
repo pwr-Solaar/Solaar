@@ -9,17 +9,17 @@ def test_device_monitor(mocker):
     from hidapi.hidapi_impl import DeviceMonitor
 
     mock_callback = mocker.Mock()
-    monitor = DeviceMonitor(device_callback=mock_callback, polling_delay=1)
+    monitor = DeviceMonitor(device_callback=mock_callback, polling_delay=0.1)
     monitor.start()
 
-    while not monitor.is_alive():
-        time.sleep(0.1)
+    while not monitor.alive:
+        time.sleep(0.01)
 
     assert monitor.alive
 
     monitor.stop()
 
-    while monitor.is_alive():
-        time.sleep(0.1)
+    while monitor.alive:
+        time.sleep(0.01)
 
     assert not monitor.alive
