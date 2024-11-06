@@ -36,7 +36,9 @@ from solaar import configuration
 from solaar import dbus
 from solaar import listener
 from solaar import ui
+from solaar.custom_logger import CustomLogger
 
+logging.setLoggerClass(CustomLogger)
 logger = logging.getLogger(__name__)
 
 
