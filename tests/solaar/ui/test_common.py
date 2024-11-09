@@ -10,12 +10,12 @@ from solaar.ui import common
     "reason, expected_in_title, expected_in_text",
     [
         (
-            "permissions",
+            common.ErrorReason.PERMISSIONS,
             "Permissions error",
             "not have permission to open",
         ),
-        ("nodevice", "connect to device error", "error connecting"),
-        ("unpair", "Unpairing failed", "receiver returned an error"),
+        (common.ErrorReason.NO_DEVICE, "connect to device error", "error connecting"),
+        (common.ErrorReason.UNPAIR, "Unpairing failed", "receiver returned an error"),
     ],
 )
 def test_create_error_text(reason, expected_in_title, expected_in_text):

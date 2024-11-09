@@ -19,9 +19,9 @@ from gi.repository import Gdk
 from gi.repository import Gtk
 
 from solaar.i18n import _
+from solaar.ui import common
 
 from . import pair_window
-from .common import error_dialog
 
 
 def make_image_menu_item(label, icon_name, function, *args):
@@ -95,4 +95,4 @@ def unpair(window, device):
         try:
             del receiver[device_number]
         except Exception:
-            error_dialog("unpair", device)
+            common.error_dialog(common.ErrorReason.UNPAIR, device)
