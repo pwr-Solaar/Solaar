@@ -484,7 +484,7 @@ msgstr "Kan också få M keys och MR key att skicka HID++-aviseringar"
 
 #: lib/logitech_receiver/settings_templates.py:402
 msgid "Scroll Wheel Ratcheted"
-msgstr "Scrollhjulet spärrat"
+msgstr "Rullningshjulet spärrat"
 
 #: lib/logitech_receiver/settings_templates.py:403
 msgid ""
@@ -2085,7 +2085,7 @@ msgstr "%(light_level)d lux"
 #~ msgstr "parkopplade enheter"
 
 #~ msgid "pairing lock is "
-#~ msgstr "parkopplingsläget är "
+#~ msgstr "parkoppling är "
 
 #~ msgid "unknown"
 #~ msgstr "okänd"
