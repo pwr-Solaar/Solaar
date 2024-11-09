@@ -484,7 +484,7 @@ msgstr "Kan också få M keys och MR key att skicka HID++-aviseringar"
 
 #: lib/logitech_receiver/settings_templates.py:402
 msgid "Scroll Wheel Ratcheted"
-msgstr "Rullningshjulet spärrat"
+msgstr "Rullningshjul spärrat"
 
 #: lib/logitech_receiver/settings_templates.py:403
 msgid ""
