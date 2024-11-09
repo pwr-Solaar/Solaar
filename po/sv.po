@@ -2085,7 +2085,7 @@ msgstr "%(light_level)d lux"
 #~ msgstr "parkopplade enheter"
 
 #~ msgid "pairing lock is "
-#~ msgstr "parkoppling är "
+#~ msgstr "parkopplingslåset är "
 
 #~ msgid "unknown"
 #~ msgstr "okänd"
