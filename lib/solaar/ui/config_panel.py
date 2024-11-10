@@ -18,6 +18,7 @@
 import logging
 import traceback
 
+from enum import Enum
 from threading import Timer
 
 import gi
@@ -36,6 +37,16 @@ from gi.repository import GLib  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    MATCH_SELECTED = "match_selected"
+    NOTIFY_ACTIVE = "notify::active"
+    TOGGLED = "toggled"
+    VALUE_CHANGED = "value-changed"
 
 
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
@@ -116,7 +127,7 @@ class ToggleControl(Gtk.Switch, Control):
     def __init__(self, sbox, delegate=None):
         super().__init__(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
         self.init(sbox, delegate)
-        self.connect("notify::active", self.changed)
+        self.connect(GtkSignal.NOTIFY_ACTIVE.value, self.changed)
 
     def set_value(self, value):
         if value is not None:
@@ -135,7 +146,7 @@ class SliderControl(Gtk.Scale, Control):
         self.set_round_digits(0)
         self.set_digits(0)
         self.set_increments(1, 5)
-        self.connect("value-changed", self.changed)
+        self.connect(GtkSignal.VALUE_CHANGED.value, self.changed)
 
     def get_value(self):
         return int(super().get_value())
@@ -167,7 +178,7 @@ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
         self.choices = choices if choices is not None else sbox.setting.choices
         for entry in self.choices:
             self.append(str(int(entry)), str(entry))
-        self.connect("changed", self.changed)
+        self.connect(GtkSignal.CHANGED.value, self.changed)
 
     def get_value(self):
         return int(self.get_active_id()) if self.get_active_id() is not None else None
@@ -205,9 +216,9 @@ class ChoiceControlBig(Gtk.Entry, Control):
         completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][1]))
         completion.set_text_column(1)
         self.set_completion(completion)
-        self.connect("changed", self.changed)
-        self.connect("activate", self.activate)
-        completion.connect("match_selected", self.select)
+        self.connect(GtkSignal.CHANGED.value, self.changed)
+        self.connect(GtkSignal.ACTIVATE.value, self.activate)
+        completion.connect(GtkSignal.MATCH_SELECTED.value, self.select)
 
     def get_value(self):
         choice = self.get_choice()
@@ -253,7 +264,7 @@ class MapChoiceControl(Gtk.HBox, Control):
         self.valueBox = _create_choice_control(sbox.setting, choices=self.value_choices, delegate=self)
         self.pack_start(self.keyBox, False, False, 0)
         self.pack_end(self.valueBox, False, False, 0)
-        self.keyBox.connect("changed", self.map_value_notify_key)
+        self.keyBox.connect(GtkSignal.CHANGED.value, self.map_value_notify_key)
 
     def get_value(self):
         key_choice = int(self.keyBox.get_active_id())
@@ -301,7 +312,7 @@ class MultipleControl(Gtk.ListBox, Control):
         self._showing = True
         self.setup(sbox.setting)  # set up the data and boxes for the sub-controls
         btn = Gtk.Button(label=button_label)
-        btn.connect("clicked", self.toggle_display)
+        btn.connect(GtkSignal.CLICKED.value, self.toggle_display)
         self._button = btn
         hbox = Gtk.HBox(homogeneous=False, spacing=6)
         hbox.pack_end(change, False, False, 0)
@@ -349,7 +360,7 @@ class MultipleToggleControl(MultipleControl):
             h.set_tooltip_text(lbl_tooltip or " ")
             control = Gtk.Switch()
             control._setting_key = int(k)
-            control.connect("notify::active", self.toggle_notify)
+            control.connect(GtkSignal.NOTIFY_ACTIVE.value, self.toggle_notify)
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, False, False, 0)
             lbl.set_margin_start(30)
@@ -426,7 +437,7 @@ class MultipleRangeControl(MultipleControl):
                     h.pack_end(control, False, False, 0)
                 else:
                     raise NotImplementedError
-                control.connect("value-changed", self.changed, item, sub_item)
+                control.connect(GtkSignal.VALUE_CHANGED.value, self.changed, item, sub_item)
                 item_lb.add(h)
                 h._setting_sub_item = sub_item
                 h._label, h._control = sub_item_lbl, control
@@ -487,7 +498,7 @@ class PackedRangeControl(MultipleRangeControl):
             control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, validator.min_value, validator.max_value, 1)
             control.set_round_digits(0)
             control.set_digits(0)
-            control.connect("value-changed", self.changed, validator.keys[item])
+            control.connect(GtkSignal.VALUE_CHANGED.value, self.changed, validator.keys[item])
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, True, True, 0)
             h._setting_item = validator.keys[item]
@@ -548,7 +559,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 for entry in item["choices"]:
                     item_box.append(str(int(entry)), str(entry))
                 item_box.set_active(0)
-                item_box.connect("changed", self.changed)
+                item_box.connect(GtkSignal.CHANGED.value, self.changed)
                 self.pack_start(item_box, False, False, 0)
             elif item["kind"] == settings.Kind.RANGE:
                 item_box = Scale()
@@ -556,7 +567,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_box.set_round_digits(0)
                 item_box.set_digits(0)
                 item_box.set_increments(1, 5)
-                item_box.connect("value-changed", self.changed)
+                item_box.connect(GtkSignal.VALUE_CHANGED.value, self.changed)
                 self.pack_start(item_box, True, True, 0)
             item_box.set_visible(False)
             self._items[str(item["name"])] = (item_lblbox, item_box)
@@ -664,7 +675,7 @@ def _create_sbox(s, _device):
     change.set_relief(Gtk.ReliefStyle.NONE)
     change.add(change_icon)
     change.set_sensitive(True)
-    change.connect("clicked", _change_click, sbox)
+    change.connect(GtkSignal.CLICKED.value, _change_click, sbox)
 
     if s.kind == settings.Kind.TOGGLE:
         control = ToggleControl(sbox)

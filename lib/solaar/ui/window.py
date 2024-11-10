@@ -17,6 +17,7 @@
 
 import logging
 
+from enum import Enum
 from enum import IntEnum
 
 import gi
@@ -75,6 +76,12 @@ assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
 assert len(_COLUMN_TYPES) == len(Column)
 
 
+class GtkSignal(Enum):
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    DELETE_EVENT = "delete-event"
+
+
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
     b = Gtk.ToggleButton() if toggle else Gtk.Button()
     c = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
@@ -84,7 +91,7 @@ def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, toolt
         c.pack_start(Gtk.Label(label=label), True, True, 0)
     b.add(c)
     if clicked is not None:
-        b.connect("clicked", clicked)
+        b.connect(GtkSignal.CLICKED.value, clicked)
     if tooltip:
         b.set_tooltip_text(tooltip)
     if not label and icon_size < _NORMAL_BUTTON_ICON_SIZE:
@@ -296,7 +303,7 @@ def _create_window_layout():
     assert _empty is not None
 
     assert _tree.get_selection().get_mode() == Gtk.SelectionMode.SINGLE
-    _tree.get_selection().connect("changed", _device_selected)
+    _tree.get_selection().connect(GtkSignal.CHANGED.value, _device_selected)
 
     tree_scroll = Gtk.ScrolledWindow()
     tree_scroll.add(_tree)
@@ -341,7 +348,7 @@ def _create(delete_action):
     window = Gtk.Window()
     window.set_title(NAME)
     window.set_role("status-window")
-    window.connect("delete-event", delete_action)
+    window.connect(GtkSignal.DELETE_EVENT.value, delete_action)
 
     vbox = _create_window_layout()
     window.add(vbox)
