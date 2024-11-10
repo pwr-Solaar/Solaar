@@ -14,6 +14,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from dataclasses import dataclass
+from enum import Enum
 
 from gi.repository import Gtk
 from logitech_receiver import diversion
@@ -24,6 +25,14 @@ from logitech_receiver.special_keys import CONTROL
 from solaar.i18n import _
 from solaar.ui.rule_base import CompletionEntry
 from solaar.ui.rule_base import RuleComponentUI
+
+
+class GtkSignal(Enum):
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    NOTIFY_ACTIVE = "notify::active"
+    TOGGLED = "toggled"
+    VALUE_CHANGED = "value-changed"
 
 
 class ConditionUI(RuleComponentUI):
@@ -44,7 +53,7 @@ class ProcessUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect("changed", self._on_update)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -74,7 +83,7 @@ class MouseProcessUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect("changed", self._on_update)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -119,7 +128,7 @@ class FeatureUI(ConditionUI):
             self.field.append(feature, feature)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_size_request(600, 0)
-        self.field.connect("changed", self._on_update)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
         all_features = [str(f) for f in SupportedFeature]
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 1, 1, 1)
@@ -163,7 +172,7 @@ class ReportUI(ConditionUI):
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
-        self.field.connect("changed", self._on_update)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -200,7 +209,7 @@ class ModifiersUI(ConditionUI):
             self.widgets[switch] = (i, 2, 1, 1)
             self.labels[m] = label
             self.switches[m] = switch
-            switch.connect("notify::active", self._on_update)
+            switch.connect(GtkSignal.NOTIFY_ACTIVE.value, self._on_update)
 
     def show(self, component, editable=True):
         super().show(component, editable)
@@ -236,13 +245,13 @@ class KeyUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 5, 1)
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
-        self.key_field.connect("changed", self._on_update)
+        self.key_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.key_field] = (0, 1, 2, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Key down"))
-        self.action_pressed_radio.connect("toggled", self._on_update, Key.DOWN)
+        self.action_pressed_radio.connect(GtkSignal.TOGGLED.value, self._on_update, Key.DOWN)
         self.widgets[self.action_pressed_radio] = (2, 1, 1, 1)
         self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Key up"))
-        self.action_released_radio.connect("toggled", self._on_update, Key.UP)
+        self.action_released_radio.connect(GtkSignal.TOGGLED.value, self._on_update, Key.UP)
         self.widgets[self.action_released_radio] = (3, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -288,7 +297,7 @@ class KeyIsDownUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 5, 1)
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
-        self.key_field.connect("changed", self._on_update)
+        self.key_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.key_field] = (0, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -335,12 +344,12 @@ class TestUI(ConditionUI):
         self.test.set_hexpand(False)
         self.test.set_size_request(300, 0)
         CompletionEntry.add_completion_to_entry(self.test.get_child(), diversion.TESTS)
-        self.test.connect("changed", self._on_update)
+        self.test.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.test] = (1, 1, 1, 1)
 
         self.parameter = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.parameter.set_size_request(150, 0)
-        self.parameter.connect("changed", self._on_update)
+        self.parameter.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.parameter] = (3, 1, 1, 1)
 
     def show(self, component, editable=True):
@@ -444,14 +453,14 @@ class TestBytesUI(ConditionUI):
                     field = Gtk.SpinButton.new_with_range(element.min, element.max, 1)
                     field.set_value(0)
                     field.set_size_request(150, 0)
-                    field.connect("value-changed", self._on_update)
+                    field.connect(GtkSignal.VALUE_CHANGED.value, self._on_update)
                     label = Gtk.Label(label=element.label, margin_top=20)
                     self.fields[element.id] = field
                     self.field_labels[element.id] = label
                     self.widgets[label] = (col, 1, 1, 1)
                     self.widgets[field] = (col, 2, 1, 1)
                     col += 1 if col != mode_col - 1 else 2
-        self.mode_field.connect("changed", lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
+        self.mode_field.connect(GtkSignal.CHANGED.value, lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
         self.mode_field.set_active_id("range")
 
     def show(self, component, editable=True):
@@ -529,7 +538,7 @@ class MouseGestureUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
         self.add_btn = Gtk.Button(label=_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        self.add_btn.connect("clicked", self._clicked_add)
+        self.add_btn.connect(GtkSignal.CLICKED.value, self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
 
     def _create_field(self):
@@ -537,7 +546,7 @@ class MouseGestureUI(ConditionUI):
         for g in self.MOUSE_GESTURE_NAMES:
             field.append(g, g)
         CompletionEntry.add_completion_to_entry(field.get_child(), self.MOVE_NAMES)
-        field.connect("changed", self._on_update)
+        field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 1, 1, 1)
         return field
@@ -546,7 +555,7 @@ class MouseGestureUI(ConditionUI):
         btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
+        btn.connect(GtkSignal.CLICKED.value, self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, _btn):
