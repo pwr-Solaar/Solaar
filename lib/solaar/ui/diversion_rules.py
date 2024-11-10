@@ -325,7 +325,7 @@ class ActionMenu:
         else:
             idx = parent_c.components.index(c)
         if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
+            new_c.source = str(_DIV.RULES_CONFIG)  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
         self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=idx)
@@ -604,16 +604,19 @@ class DiversionDialog:
         self.dirty = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        _DIV.load_config_rule_file()
+        _DIV.load_rule_config()
         self.model = self._create_model()
         self.view.set_model(self.model)
         self.view.expand_all()
 
     def _save_yaml_file(self):
-        if _DIV._save_config_rule_file():
+        try:
+            _DIV.save_config_rule_file()
             self.dirty = False
             self.save_btn.set_sensitive(False)
             self.discard_btn.set_sensitive(False)
+        except Exception:
+            pass
 
     def _create_top_panel(self):
         sw = Gtk.ScrolledWindow()
