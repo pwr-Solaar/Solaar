@@ -29,15 +29,17 @@ import sys
 import time
 import typing
 
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Tuple
 
 import gi
 import psutil
-import yaml
 
 from keysyms import keysymdef
+
+from . import rule_storage
 
 # There is no evdev on macOS or Windows. Diversion will not work without
 # it but other Solaar functionality is available.
@@ -57,6 +59,14 @@ if typing.TYPE_CHECKING:
     from .base import HIDPPNotification
 
 logger = logging.getLogger(__name__)
+
+if os.environ.get("XDG_CONFIG_HOME"):
+    xdg_config_home = Path(os.environ.get("XDG_CONFIG_HOME"))
+else:
+    xdg_config_home = Path("~/.config").expanduser()
+
+RULES_CONFIG = xdg_config_home / "solaar" / "rules.yaml"
+
 
 #
 # See docs/rules.md for documentation
@@ -144,6 +154,17 @@ mr_key_down = False
 thumb_wheel_displacement = 0
 
 _dbus_interface = None
+
+
+class AbstractRepository(typing.Protocol):
+    def save(self, rules: Dict[str, str]) -> None:
+        ...
+
+    def load(self) -> list:
+        ...
+
+
+storage: AbstractRepository = rule_storage.YmlRuleStorage(RULES_CONFIG)
 
 
 class XkbDisplay(ctypes.Structure):
@@ -1548,21 +1569,12 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
 
-_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
-_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
+def save_config_rule_file() -> None:
+    """Saves user configured rules."""
 
-rules = built_in_rules
-
-
-def _save_config_rule_file(file_name: str = _file_path):
     # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
     class inline_list(list):
         pass
-
-    def blockseq_rep(dumper, data):
-        return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
-
-    yaml.add_representer(inline_list, blockseq_rep)
 
     def convert(elem):
         if isinstance(elem, list):
@@ -1578,53 +1590,41 @@ def _save_config_rule_file(file_name: str = _file_path):
             return int(elem)
         return elem
 
-    # YAML format settings
-    dump_settings = {
-        "encoding": "utf-8",
-        "explicit_start": True,
-        "explicit_end": True,
-        "default_flow_style": False,
-        # 'version': (1, 3),  # it would be printed for every rule
-    }
+    global rules
+
     # Save only user-defined rules
-    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == file_name), [])
+    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == str(RULES_CONFIG)), [])
     if logger.isEnabledFor(logging.INFO):
-        logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
+        logger.info(f"saving {len(rules_to_save)} rule(s) to {str(RULES_CONFIG)}")
+    dump_data = [r["Rule"] for r in rules_to_save]
     try:
-        with open(file_name, "w") as f:
-            if rules_to_save:
-                f.write("%YAML 1.3\n")  # Write version manually
-            dump_data = [r["Rule"] for r in rules_to_save]
-            yaml.dump_all(convert(dump_data), f, **dump_settings)
-    except Exception as e:
-        logger.error("failed to save to %s\n%s", file_name, e)
-        return False
-    return True
+        data = convert(dump_data)
+        storage.save(data)
+    except Exception:
+        logger.error("failed to save to rules config")
 
 
-def load_config_rule_file():
+def load_rule_config() -> Rule:
     """Loads user configured rules."""
     global rules
 
-    if os.path.isfile(_file_path):
-        rules = _load_rule_config(_file_path)
-
-
-def _load_rule_config(file_path: str) -> Rule:
     loaded_rules = []
     try:
-        with open(file_path) as config_file:
-            loaded_rules = []
-            for loaded_rule in yaml.safe_load_all(config_file):
-                rule = Rule(loaded_rule, source=file_path)
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug("load rule: %s", rule)
-                loaded_rules.append(rule)
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
+        plain_rules = storage.load()
+        for loaded_rule in plain_rules:
+            rule = Rule(loaded_rule, source=str(RULES_CONFIG))
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(f"load rule: {rule}")
+            loaded_rules.append(rule)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info(
+                f"loaded {len(loaded_rules)} rules from config file",
+            )
     except Exception as e:
-        logger.error("failed to load from %s\n%s", file_path, e)
-    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
+        logger.error(f"failed to load from {RULES_CONFIG}\n{e}")
+    user_rules = Rule(loaded_rules, source=str(RULES_CONFIG))
+    rules = Rule([user_rules, built_in_rules])
+    return rules
 
 
-load_config_rule_file()
+load_rule_config()
