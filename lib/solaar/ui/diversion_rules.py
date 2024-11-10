@@ -56,6 +56,18 @@ _diversion_dialog = None
 _rule_component_clipboard = None
 
 
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    BUTTON_RELEASE_EVENT = "button-release-event"
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    DELETE_EVENT = "delete-event"
+    KEY_PRESS_EVENT = "key-press-event"
+    NOTIFY_ACTIVE = "notify::active"
+    TOGGLED = "toggled"
+    VALUE_CHANGED = "value_changed"
+
+
 def create_all_settings(all_settings: list[Setting]) -> dict[str, list[Setting]]:
     settings = {}
     for s in sorted(all_settings, key=lambda setting: setting.label):
@@ -333,7 +345,7 @@ class ActionMenu:
 
     def _menu_flatten(self, m, it):
         menu_flatten = Gtk.MenuItem(_("Flatten"))
-        menu_flatten.connect("activate", self.menu_do_flatten, m, it)
+        menu_flatten.connect(GtkSignal.ACTIVATE.value, self.menu_do_flatten, m, it)
         menu_flatten.show()
         return menu_flatten
 
@@ -416,7 +428,7 @@ class ActionMenu:
                 label, feature, *args = spec
                 item = Gtk.MenuItem(label)
                 args = [a.copy() if isinstance(a, list) else a for a in args]
-                item.connect("activate", self._menu_do_insert_new, m, it, feature, *args, below)
+                item.connect(GtkSignal.ACTIVATE.value, self._menu_do_insert_new, m, it, feature, *args, below)
                 return item
             else:
                 return None
@@ -427,7 +439,7 @@ class ActionMenu:
 
     def _menu_create_rule(self, m, it, below=False) -> Gtk.MenuItem:
         menu_create_rule = Gtk.MenuItem(_("Insert new rule"))
-        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, diversion.Rule, [], below)
+        menu_create_rule.connect(GtkSignal.ACTIVATE.value, self._menu_do_insert_new, m, it, diversion.Rule, [], below)
         menu_create_rule.show()
         return menu_create_rule
 
@@ -447,7 +459,7 @@ class ActionMenu:
 
     def _menu_delete(self, m, it) -> Gtk.MenuItem:
         menu_delete = Gtk.MenuItem(_("Delete"))
-        menu_delete.connect("activate", self.menu_do_delete, m, it)
+        menu_delete.connect(GtkSignal.ACTIVATE.value, self.menu_do_delete, m, it)
         menu_delete.show()
         return menu_delete
 
@@ -469,7 +481,7 @@ class ActionMenu:
 
     def _menu_negate(self, m, it) -> Gtk.MenuItem:
         menu_negate = Gtk.MenuItem(_("Negate"))
-        menu_negate.connect("activate", self.menu_do_negate, m, it)
+        menu_negate.connect(GtkSignal.ACTIVATE.value, self.menu_do_negate, m, it)
         menu_negate.show()
         return menu_negate
 
@@ -497,9 +509,9 @@ class ActionMenu:
         menu_sub_rule = Gtk.MenuItem(_("Sub-rule"))
         menu_and = Gtk.MenuItem(_("And"))
         menu_or = Gtk.MenuItem(_("Or"))
-        menu_sub_rule.connect("activate", self.menu_do_wrap, m, it, diversion.Rule)
-        menu_and.connect("activate", self.menu_do_wrap, m, it, diversion.And)
-        menu_or.connect("activate", self.menu_do_wrap, m, it, diversion.Or)
+        menu_sub_rule.connect(GtkSignal.ACTIVATE.value, self.menu_do_wrap, m, it, diversion.Rule)
+        menu_and.connect(GtkSignal.ACTIVATE.value, self.menu_do_wrap, m, it, diversion.And)
+        menu_or.connect(GtkSignal.ACTIVATE.value, self.menu_do_wrap, m, it, diversion.Or)
         submenu_wrap.append(menu_sub_rule)
         submenu_wrap.append(menu_and)
         submenu_wrap.append(menu_or)
@@ -523,7 +535,7 @@ class ActionMenu:
 
     def _menu_cut(self, m, it):
         menu_cut = Gtk.MenuItem(_("Cut"))
-        menu_cut.connect("activate", self.menu_do_cut, m, it)
+        menu_cut.connect(GtkSignal.ACTIVATE.value, self.menu_do_cut, m, it)
         menu_cut.show()
         return menu_cut
 
@@ -539,13 +551,13 @@ class ActionMenu:
 
     def _menu_paste(self, m, it, below=False):
         menu_paste = Gtk.MenuItem(_("Paste"))
-        menu_paste.connect("activate", self.menu_do_paste, m, it, below)
+        menu_paste.connect(GtkSignal.ACTIVATE.value, self.menu_do_paste, m, it, below)
         menu_paste.show()
         return menu_paste
 
     def _menu_copy(self, m, it):
         menu_copy = Gtk.MenuItem(_("Copy"))
-        menu_copy.connect("activate", self.menu_do_copy, m, it)
+        menu_copy.connect(GtkSignal.ACTIVATE.value, self.menu_do_copy, m, it)
         menu_copy.show()
         return menu_copy
 
@@ -554,7 +566,7 @@ class DiversionDialog:
     def __init__(self, action_menu):
         window = Gtk.Window()
         window.set_title(_("Solaar Rule Editor"))
-        window.connect("delete-event", self._closing)
+        window.connect(GtkSignal.DELETE_EVENT.value, self._closing)
         vbox = Gtk.VBox()
 
         self.top_panel, self.view = self._create_top_panel()
@@ -597,7 +609,7 @@ class DiversionDialog:
 
         window.show_all()
 
-        window.connect("delete-event", lambda w, e: w.hide_on_delete() or True)
+        window.connect(GtkSignal.DELETE_EVENT.value, lambda w, e: w.hide_on_delete() or True)
 
         style = window.get_style_context()
         style.add_class("solaar")
@@ -645,9 +657,9 @@ class DiversionDialog:
         view.set_enable_tree_lines(True)
         view.set_reorderable(False)
 
-        view.connect("key-press-event", self._event_key_pressed)
-        view.connect("button-release-event", self._event_button_released)
-        view.get_selection().connect("changed", self._selection_changed)
+        view.connect(GtkSignal.KEY_PRESS_EVENT.value, self._event_key_pressed)
+        view.connect(GtkSignal.BUTTON_RELEASE_EVENT.value, self._event_button_released)
+        view.get_selection().connect(GtkSignal.CHANGED.value, self._selection_changed)
         sw.add(view)
         sw.set_size_request(0, 300)  # don't ask for so much height
 
@@ -662,8 +674,8 @@ class DiversionDialog:
         self.discard_btn.set_always_show_image(True)
         self.discard_btn.set_sensitive(False)
         self.discard_btn.set_valign(Gtk.Align.CENTER)
-        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
-        self.discard_btn.connect("clicked", lambda *_args: self._reload_yaml_file())
+        self.save_btn.connect(GtkSignal.CLICKED.value, lambda *_args: self._save_yaml_file())
+        self.discard_btn.connect(GtkSignal.CLICKED.value, lambda *_args: self._reload_yaml_file())
         button_box.pack_start(self.save_btn, False, False, 0)
         button_box.pack_start(self.discard_btn, False, False, 0)
         button_box.set_halign(Gtk.Align.CENTER)
@@ -869,7 +881,7 @@ class SmartComboBox(Gtk.ComboBox):
                 if name != self.get_child().get_text():
                     self.get_child().set_text(name)
 
-        self.connect("changed", lambda *a: replace_with(self.get_value(invalid_as_str=False)))
+        self.connect(GtkSignal.CHANGED.value, lambda *a: replace_with(self.get_value(invalid_as_str=False)))
 
         self.set_id_column(0)
         if self.get_has_entry():
@@ -1158,7 +1170,7 @@ class LaterUI(RuleComponentUI):
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
-        self.field.connect("value-changed", self._on_update)
+        self.field.connect(GtkSignal.VALUE_CHANGED.value, self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1226,15 +1238,15 @@ class SetValueControl(Gtk.HBox):
             ],
             case_insensitive=True,
         )
-        self.toggle_widget.connect("changed", self._changed)
+        self.toggle_widget.connect(GtkSignal.CHANGED.value, self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
-        self.range_widget.connect("value-changed", self._changed)
+        self.range_widget.connect(GtkSignal.VALUE_CHANGED.value, self._changed)
         self.choice_widget = SmartComboBox(
             [], completion=True, has_entry=True, case_insensitive=True, replace_with_default_name=True
         )
-        self.choice_widget.connect("changed", self._changed)
+        self.choice_widget.connect(GtkSignal.CHANGED.value, self._changed)
         self.sub_key_widget = SmartComboBox([])
-        self.sub_key_widget.connect("changed", self._changed)
+        self.sub_key_widget.connect(GtkSignal.CHANGED.value, self._changed)
         self.unsupported_label = Gtk.Label(label=_("Unsupported setting"))
         self.pack_start(self.sub_key_widget, False, False, 0)
         self.sub_key_widget.set_hexpand(False)
@@ -1385,7 +1397,7 @@ class _DeviceUI:
         self.device_field.set_value("")
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
-        self.device_field.connect("changed", self._on_update)
+        self.device_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
     def update_devices(self):
@@ -1436,7 +1448,7 @@ class HostUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect("changed", self._on_update)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1483,8 +1495,8 @@ class _SettingWithValueUI:
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
         self.device_field.set_margin_top(m)
-        self.device_field.connect("changed", self._changed_device)
-        self.device_field.connect("changed", self._on_update)
+        self.device_field.connect(GtkSignal.CHANGED.value, self._changed_device)
+        self.device_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
         lbl = Gtk.Label(
@@ -1497,8 +1509,8 @@ class _SettingWithValueUI:
         self.widgets[lbl] = (0, 2, 1, 1)
         self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
-        self.setting_field.connect("changed", self._changed_setting)
-        self.setting_field.connect("changed", self._on_update)
+        self.setting_field.connect(GtkSignal.CHANGED.value, self._changed_setting)
+        self.setting_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.setting_field] = (1, 2, 1, 1)
 
         self.value_lbl = Gtk.Label(
@@ -1521,8 +1533,8 @@ class _SettingWithValueUI:
         self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
-        self.key_field.connect("changed", self._changed_key)
-        self.key_field.connect("changed", self._on_update)
+        self.key_field.connect(GtkSignal.CHANGED.value, self._changed_key)
+        self.key_field.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.key_field] = (3, 1, 1, 1)
 
     @classmethod

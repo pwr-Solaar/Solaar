@@ -13,8 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-
+from enum import Enum
 from typing import List
 from typing import Tuple
 from typing import Union
@@ -22,6 +21,10 @@ from typing import Union
 from gi.repository import Gtk
 
 from solaar import NAME
+
+
+class GtkSignal(Enum):
+    RESPONSE = "response"
 
 
 class AboutView:
@@ -34,7 +37,7 @@ class AboutView:
         self.view.set_icon_name(NAME.lower())
         self.view.set_license_type(Gtk.License.GPL_2_0)
 
-        self.view.connect("response", lambda x, y: self.handle_close(x))
+        self.view.connect(GtkSignal.RESPONSE.value, lambda x, y: self.handle_close(x))
 
     def update_version_info(self, version: str) -> None:
         self.view.set_version(version)

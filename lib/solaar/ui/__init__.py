@@ -17,6 +17,7 @@
 
 import logging
 
+from enum import Enum
 from typing import Callable
 
 import gi
@@ -46,6 +47,12 @@ assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
 
 APP_ID = "io.github.pwr_solaar.solaar"
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    COMMAND_LINE = "command-line"
+    SHUTDOWN = "shutdown"
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -108,9 +115,9 @@ def run_loop(
         lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window),
         startup_hook,
     )
-    application.connect("command-line", _command_line)
-    application.connect("activate", _activate)
-    application.connect("shutdown", _shutdown, shutdown_hook)
+    application.connect(GtkSignal.COMMAND_LINE.value, _command_line)
+    application.connect(GtkSignal.ACTIVATE.value, _activate)
+    application.connect(GtkSignal.SHUTDOWN.value, _shutdown, shutdown_hook)
 
     application.register()
     if application.get_is_remote():
