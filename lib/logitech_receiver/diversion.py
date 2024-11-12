@@ -1569,62 +1569,64 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
 
-def save_config_rule_file() -> None:
-    """Saves user configured rules."""
+class Persister:
+    @staticmethod
+    def save_config_rule_file() -> None:
+        """Saves user configured rules."""
 
-    # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
-    class inline_list(list):
-        pass
+        # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
+        class inline_list(list):
+            pass
 
-    def convert(elem):
-        if isinstance(elem, list):
-            if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
-                # All diversion classes that expect a list of scalars also support a single scalar without a list
-                return elem[0]
-            if all(isinstance(c, (int, str, float)) for c in elem):
-                return inline_list([convert(c) for c in elem])
-            return [convert(c) for c in elem]
-        if isinstance(elem, dict):
-            return {k: convert(v) for k, v in elem.items()}
-        if isinstance(elem, NamedInt):
-            return int(elem)
-        return elem
+        def convert(elem):
+            if isinstance(elem, list):
+                if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
+                    # All diversion classes that expect a list of scalars also support a single scalar without a list
+                    return elem[0]
+                if all(isinstance(c, (int, str, float)) for c in elem):
+                    return inline_list([convert(c) for c in elem])
+                return [convert(c) for c in elem]
+            if isinstance(elem, dict):
+                return {k: convert(v) for k, v in elem.items()}
+            if isinstance(elem, NamedInt):
+                return int(elem)
+            return elem
 
-    global rules
+        global rules
 
-    # Save only user-defined rules
-    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == str(RULES_CONFIG)), [])
-    if logger.isEnabledFor(logging.INFO):
-        logger.info(f"saving {len(rules_to_save)} rule(s) to {str(RULES_CONFIG)}")
-    dump_data = [r["Rule"] for r in rules_to_save]
-    try:
-        data = convert(dump_data)
-        storage.save(data)
-    except Exception:
-        logger.error("failed to save to rules config")
-
-
-def load_rule_config() -> Rule:
-    """Loads user configured rules."""
-    global rules
-
-    loaded_rules = []
-    try:
-        plain_rules = storage.load()
-        for loaded_rule in plain_rules:
-            rule = Rule(loaded_rule, source=str(RULES_CONFIG))
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(f"load rule: {rule}")
-            loaded_rules.append(rule)
+        # Save only user-defined rules
+        rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == str(RULES_CONFIG)), [])
         if logger.isEnabledFor(logging.INFO):
-            logger.info(
-                f"loaded {len(loaded_rules)} rules from config file",
-            )
-    except Exception as e:
-        logger.error(f"failed to load from {RULES_CONFIG}\n{e}")
-    user_rules = Rule(loaded_rules, source=str(RULES_CONFIG))
-    rules = Rule([user_rules, built_in_rules])
-    return rules
+            logger.info(f"saving {len(rules_to_save)} rule(s) to {str(RULES_CONFIG)}")
+        dump_data = [r["Rule"] for r in rules_to_save]
+        try:
+            data = convert(dump_data)
+            storage.save(data)
+        except Exception:
+            logger.error("failed to save to rules config")
+
+    @staticmethod
+    def load_rule_config() -> Rule:
+        """Loads user configured rules."""
+        global rules
+
+        loaded_rules = []
+        try:
+            plain_rules = storage.load()
+            for loaded_rule in plain_rules:
+                rule = Rule(loaded_rule, source=str(RULES_CONFIG))
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(f"load rule: {rule}")
+                loaded_rules.append(rule)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info(
+                    f"loaded {len(loaded_rules)} rules from config file",
+                )
+        except Exception as e:
+            logger.error(f"failed to load from {RULES_CONFIG}\n{e}")
+        user_rules = Rule(loaded_rules, source=str(RULES_CONFIG))
+        rules = Rule([user_rules, built_in_rules])
+        return rules
 
 
-load_rule_config()
+Persister.load_rule_config()
