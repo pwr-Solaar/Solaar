@@ -551,7 +551,7 @@ def _update_details(button):
 
             flag_bits = device.notification_flags
             if flag_bits is not None:
-                flag_names = hidpp10_constants.flags_to_names(flag_bits, fallback=f"({_('none')})")
+                flag_names = hidpp10_constants.flags_to_str(flag_bits, fallback=f"({_('none')})")
                 yield _("Notifications"), flag_names
 
         def _set_details(text):

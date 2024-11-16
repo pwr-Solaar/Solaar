@@ -16,7 +16,9 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from __future__ import annotations
 
+from enum import Flag
 from enum import IntEnum
+from typing import List
 
 from .common import NamedInts
 
@@ -58,37 +60,61 @@ class PowerSwitchLocation(IntEnum):
     BOTTOM_EDGE = 0x0C
 
 
-# Some flags are used both by devices and receivers. The Logitech documentation
-# mentions that the first and last (third) byte are used for devices while the
-# second is used for the receiver. In practise, the second byte is also used for
-# some device-specific notifications (keyboard illumination level). Do not
-# simply set all notification bits if the software does not support it. For
-# example, enabling keyboard_sleep_raw makes the Sleep key a no-operation unless
-# the software is updated to handle that event.
-# Observations:
-# - wireless and software present were seen on receivers, reserved_r1b4 as well
-# - the rest work only on devices as far as we can tell right now
-# In the future would be useful to have separate enums for receiver and device notification flags,
-# but right now we don't know enough.
-# additional flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
-NOTIFICATION_FLAG = NamedInts(
-    numpad_numerical_keys=0x800000,
-    f_lock_status=0x400000,
-    roller_H=0x200000,
-    battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
-    mouse_extra_buttons=0x080000,
-    roller_V=0x040000,
-    power_keys=0x020000,  # system control keys such as Sleep
-    keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
-    multi_touch=0x001000,  # notify on multi-touch changes
-    software_present=0x000800,  # software is controlling part of device behaviour
-    link_quality=0x000400,  # notify on link quality changes
-    ui=0x000200,  # notify on UI changes
-    wireless=0x000100,  # notify when the device wireless goes on/off-line
-    configuration_complete=0x000004,
-    voip_telephony=0x000002,
-    threed_gesture=0x000001,
-)
+class NotificationFlag(Flag):
+    """Some flags are used both by devices and receivers.
+
+    The Logitech documentation mentions that the first and last (third)
+    byte are used for devices while the second is used for the receiver.
+    In practise, the second byte is also used for some device-specific
+    notifications (keyboard illumination level). Do not simply set all
+    notification bits if the software does not support it. For example,
+    enabling keyboard_sleep_raw makes the Sleep key a no-operation
+    unless the software is updated to handle that event.
+
+    Observations:
+    - wireless and software present seen on receivers,
+    reserved_r1b4 as well
+    - the rest work only on devices as far as we can tell right now
+    In the future would be useful to have separate enums for receiver
+    and device notification flags, but right now we don't know enough.
+    Additional flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
+    """
+
+    @classmethod
+    def flag_names(cls, flag_bits: int) -> List[str]:
+        """Extract the names of the flags from the integer."""
+        indexed = {item.value: item.name for item in cls}
+
+        flag_names = []
+        unknown_bits = flag_bits
+        for k in indexed:
+            # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+            assert bin(k).count("1") == 1
+            if k & flag_bits == k:
+                unknown_bits &= ~k
+                flag_names.append(indexed[k].replace("_", " ").lower())
+
+        # Yield any remaining unknown bits
+        if unknown_bits != 0:
+            flag_names.append(f"unknown:{unknown_bits:06X}")
+        return flag_names
+
+    NUMPAD_NUMERICAL_KEYS = 0x800000
+    F_LOCK_STATUS = 0x400000
+    ROLLER_H = 0x200000
+    BATTERY_STATUS = 0x100000  # send battery charge notifications (0x07 or 0x0D)
+    MOUSE_EXTRA_BUTTONS = 0x080000
+    ROLLER_V = 0x040000
+    POWER_KEYS = 0x020000  # system control keys such as Sleep
+    KEYBOARD_MULTIMEDIA_RAW = 0x010000  # consumer controls such as Mute and Calculator
+    MULTI_TOUCH = 0x001000  # notify on multi-touch changes
+    SOFTWARE_PRESENT = 0x000800  # software is controlling part of device behaviour
+    LINK_QUALITY = 0x000400  # notify on link quality changes
+    UI = 0x000200  # notify on UI changes
+    WIRELESS = 0x000100  # notify when the device wireless goes on/off-line
+    CONFIGURATION_COMPLETE = 0x000004
+    VOIP_TELEPHONY = 0x000002
+    THREED_GESTURE = 0x000001
 
 
 def flags_to_str(flag_bits: int | None, fallback: str) -> str:
@@ -97,8 +123,8 @@ def flags_to_str(flag_bits: int | None, fallback: str) -> str:
         if flag_bits == 0:
             flag_names = (fallback,)
         else:
-            flag_names = list(NOTIFICATION_FLAG.flag_names(flag_bits))
-    return f"\n{' ':15}".join(flag_names)
+            flag_names = NotificationFlag.flag_names(flag_bits)
+    return f"\n{' ':15}".join(sorted(flag_names))
 
 
 class ErrorCode(IntEnum):

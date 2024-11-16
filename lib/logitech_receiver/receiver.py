@@ -36,6 +36,7 @@ from . import hidpp10_constants
 from .common import Alert
 from .common import Notification
 from .device import Device
+from .hidpp10_constants import NotificationFlag
 from .hidpp10_constants import Registers
 
 if typing.TYPE_CHECKING:
@@ -172,7 +173,7 @@ class Receiver:
             return False
 
         if enable:
-            set_flag_bits = hidpp10_constants.NOTIFICATION_FLAG.wireless | hidpp10_constants.NOTIFICATION_FLAG.software_present
+            set_flag_bits = NotificationFlag.WIRELESS | NotificationFlag.SOFTWARE_PRESENT
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
@@ -181,7 +182,10 @@ class Receiver:
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
+        if flag_bits is None:
+            flag_names = None
+        else:
+            flag_names = hidpp10_constants.NotificationFlag.flag_names(flag_bits)
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: receiver notifications %s => %s", self, "enabled" if enable else "disabled", flag_names)
         return flag_bits
