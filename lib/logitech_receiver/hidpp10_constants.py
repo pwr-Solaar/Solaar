@@ -205,22 +205,27 @@ INFO_SUBREGISTERS = NamedInts(
     bolt_device_name=0x60,  # 0x6N01, by connected device,
 )
 
-# Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
-DEVICE_FEATURES = NamedInts(
-    reserved1=0x010000,
-    special_buttons=0x020000,
-    enhanced_key_usage=0x040000,
-    fast_fw_rev=0x080000,
-    reserved2=0x100000,
-    reserved3=0x200000,
-    scroll_accel=0x400000,
-    buttons_control_resolution=0x800000,
-    inhibit_lock_key_sound=0x000001,
-    reserved4=0x000002,
-    mx_air_3d_engine=0x000004,
-    host_control_leds=0x000008,
-    reserved5=0x000010,
-    reserved6=0x000020,
-    reserved7=0x000040,
-    reserved8=0x000080,
-)
+
+class DeviceFeature(Flag):
+    """Features for devices.
+
+    Flags taken from
+    https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
+    """
+
+    RESERVED1 = 0x010000
+    SPECIAL_BUTTONS = 0x020000
+    ENHANCED_KEY_USAGE = 0x040000
+    FAST_FW_REV = 0x080000
+    RESERVED2 = 0x100000
+    RESERVED3 = 0x200000
+    SCROLL_ACCEL = 0x400000
+    BUTTONS_CONTROL_RESOLUTION = 0x800000
+    INHIBIT_LOCK_KEY_SOUND = 0x000001
+    RESERVED4 = 0x000002
+    MX_AIR_3D_ENGINE = 0x000004
+    HOST_CONTROL_LEDS = 0x000008
+    RESERVED5 = 0x000010
+    RESERVED6 = 0x000020
+    RESERVED7 = 0x000040
+    RESERVED8 = 0x000080
