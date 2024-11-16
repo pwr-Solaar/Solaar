@@ -644,6 +644,11 @@ class ScrollRatchet(settings.Setting):
     validator_options = {"choices": choices_universe}
 
 
+class ScrollRatchetEnhanced(ScrollRatchet):
+    feature = _F.SMART_SHIFT_ENHANCED
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+
 class SmartShift(settings.Setting):
     name = "smart-shift"
     label = _("Scroll Wheel Ratchet Speed")
