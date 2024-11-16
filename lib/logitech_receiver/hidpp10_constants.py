@@ -14,6 +14,8 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
+
 from enum import IntEnum
 
 from .common import NamedInts
@@ -87,6 +89,16 @@ NOTIFICATION_FLAG = NamedInts(
     voip_telephony=0x000002,
     threed_gesture=0x000001,
 )
+
+
+def flags_to_str(flag_bits: int | None, fallback: str) -> str:
+    flag_names = []
+    if flag_bits is not None:
+        if flag_bits == 0:
+            flag_names = (fallback,)
+        else:
+            flag_names = list(NOTIFICATION_FLAG.flag_names(flag_bits))
+    return f"\n{' ':15}".join(flag_names)
 
 
 class ErrorCode(IntEnum):

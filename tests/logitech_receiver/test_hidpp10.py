@@ -274,6 +274,25 @@ def test_set_notification_flags_bad(mocker):
     assert result is None
 
 
+@pytest.mark.parametrize(
+    "flag_bits, expected_names",
+    [
+        (None, ""),
+        (0x0, "none"),
+        (0x009020, "multi touch\n               unknown:008020"),
+        (0x080000, "mouse extra buttons"),
+        (
+            0x080000 + 0x000400,
+            ("link quality\n               mouse extra buttons"),
+        ),
+    ],
+)
+def test_notification_flag_str(flag_bits, expected_names):
+    flag_names = hidpp10_constants.flags_to_str(flag_bits, fallback="none")
+
+    assert flag_names == expected_names
+
+
 def test_get_device_features():
     result = _hidpp10.get_device_features(device_standard)
 
