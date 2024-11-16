@@ -26,6 +26,7 @@ from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
+from .hidpp10_constants import NotificationFlag
 from .hidpp10_constants import Registers
 
 logger = logging.getLogger(__name__)
@@ -190,7 +191,7 @@ class Hidpp10:
     def get_notification_flags(self, device: Device):
         return self._get_register(device, Registers.NOTIFICATIONS)
 
-    def set_notification_flags(self, device: Device, *flag_bits):
+    def set_notification_flags(self, device: Device, *flag_bits: NotificationFlag):
         assert device is not None
 
         # Avoid a call if the device is not online,
@@ -200,7 +201,7 @@ class Hidpp10:
             if device.protocol and device.protocol >= 2.0:
                 return
 
-        flag_bits = sum(int(b) for b in flag_bits)
+        flag_bits = sum(int(b.value) for b in flag_bits)
         assert flag_bits & 0x00FFFFFF == flag_bits
         result = write_register(device, Registers.NOTIFICATIONS, common.int2bytes(flag_bits, 3))
         return result is not None

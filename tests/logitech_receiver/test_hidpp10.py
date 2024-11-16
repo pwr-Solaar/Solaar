@@ -255,7 +255,7 @@ def test_set_notification_flags(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
     spy_request.assert_called_once_with(0x8000 | Registers.NOTIFICATIONS, b"\x10\x01\x00")
@@ -267,7 +267,7 @@ def test_set_notification_flags_bad(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
     assert spy_request.call_count == 0
