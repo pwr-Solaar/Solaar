@@ -196,7 +196,7 @@ class SolaarListener(listener.EventsListener):
                     if (
                         self.receiver.read_register(
                             hidpp10_constants.Registers.RECEIVER_INFO,
-                            hidpp10_constants.INFO_SUBREGISTERS.pairing_information + n.devnumber - 1,
+                            hidpp10_constants.InfoSubRegisters.PAIRING_INFORMATION + n.devnumber - 1,
                         )
                         is None
                     ):
