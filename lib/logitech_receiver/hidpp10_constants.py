@@ -194,16 +194,15 @@ class Registers(IntEnum):
 
 
 # Subregisters for receiver_info register
-INFO_SUBREGISTERS = NamedInts(
-    serial_number=0x01,  # not found on many receivers
-    fw_version=0x02,
-    receiver_information=0x03,
-    pairing_information=0x20,  # 0x2N, by connected device
-    extended_pairing_information=0x30,  # 0x3N, by connected device
-    device_name=0x40,  # 0x4N, by connected device
-    bolt_pairing_information=0x50,  # 0x5N, by connected device
-    bolt_device_name=0x60,  # 0x6N01, by connected device,
-)
+class InfoSubRegisters(IntEnum):
+    SERIAL_NUMBER = 0x01  # not found on many receivers
+    FW_VERSION = 0x02
+    RECEIVER_INFORMATION = 0x03
+    PAIRING_INFORMATION = 0x20  # 0x2N, by connected device
+    EXTENDED_PAIRING_INFORMATION = 0x30  # 0x3N, by connected device
+    DEVICE_NAME = 0x40  # 0x4N, by connected device
+    BOLT_PAIRING_INFORMATION = 0x50  # 0x5N, by connected device
+    BOLT_DEVICE_NAME = 0x60  # 0x6N01, by connected device
 
 
 class DeviceFeature(Flag):
