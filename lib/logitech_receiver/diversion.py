@@ -239,6 +239,8 @@ if evdev:
         "scroll_right": (7, evdev.ecodes.ecodes["BTN_7"]),
         "button8": (8, evdev.ecodes.ecodes["BTN_8"]),
         "button9": (9, evdev.ecodes.ecodes["BTN_9"]),
+        "back": (10, evdev.ecodes.ecodes["BTN_SIDE"]),
+        "forward": (11, evdev.ecodes.ecodes["BTN_EXTRA"]),
     }
 
     # uinput capability for keyboard keys, mouse buttons, and scrolling
