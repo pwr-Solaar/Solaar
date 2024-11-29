@@ -691,6 +691,11 @@ class SmartShiftEnhanced(SmartShift):
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
+class ScrollRatchetEnhanced(ScrollRatchet):
+    feature = _F.SMART_SHIFT_ENHANCED
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+
 # the keys for the choice map are Logitech controls (from special_keys)
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
 # and the integer being the control number for that task (to be written to the device)
@@ -1750,6 +1755,7 @@ SETTINGS = [
     HiresMode,  # simple
     ScrollRatchet,  # simple
     SmartShift,  # working
+    ScrollRatchetEnhanced,
     SmartShiftEnhanced,  # simple
     ThumbInvert,  # working
     ThumbMode,  # working
