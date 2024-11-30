@@ -18,6 +18,7 @@
 import logging
 import os
 
+from enum import Enum
 from time import time
 
 import gi
@@ -40,6 +41,11 @@ logger = logging.getLogger(__name__)
 
 _TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    SCROLL_EVENT = "scroll-event"
 
 
 def _create_menu(quit_handler):
@@ -172,7 +178,7 @@ try:
         # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
-        ind.connect("scroll-event", _scroll)
+        ind.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
 
         return ind
 
@@ -214,8 +220,8 @@ except ImportError:
         icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
-        icon.connect("activate", window.toggle)
-        icon.connect("scroll-event", _scroll)
+        icon.connect(GtkSignal.ACTIVATE.value, window.toggle)
+        icon.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
         icon.connect(
             "popup-menu",
             lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time),
