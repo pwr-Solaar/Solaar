@@ -14,7 +14,11 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
+
+from enum import Flag
 from enum import IntEnum
+from typing import List
 
 from .common import NamedInts
 
@@ -41,51 +45,86 @@ DEVICE_KIND = NamedInts(
     receiver=0x0F,  # for compatibility with HID++ 2.0
 )
 
-POWER_SWITCH_LOCATION = NamedInts(
-    base=0x01,
-    top_case=0x02,
-    edge_of_top_right_corner=0x03,
-    top_left_corner=0x05,
-    bottom_left_corner=0x06,
-    top_right_corner=0x07,
-    bottom_right_corner=0x08,
-    top_edge=0x09,
-    right_edge=0x0A,
-    left_edge=0x0B,
-    bottom_edge=0x0C,
-)
 
-# Some flags are used both by devices and receivers. The Logitech documentation
-# mentions that the first and last (third) byte are used for devices while the
-# second is used for the receiver. In practise, the second byte is also used for
-# some device-specific notifications (keyboard illumination level). Do not
-# simply set all notification bits if the software does not support it. For
-# example, enabling keyboard_sleep_raw makes the Sleep key a no-operation unless
-# the software is updated to handle that event.
-# Observations:
-# - wireless and software present were seen on receivers, reserved_r1b4 as well
-# - the rest work only on devices as far as we can tell right now
-# In the future would be useful to have separate enums for receiver and device notification flags,
-# but right now we don't know enough.
-# additional flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
-NOTIFICATION_FLAG = NamedInts(
-    numpad_numerical_keys=0x800000,
-    f_lock_status=0x400000,
-    roller_H=0x200000,
-    battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
-    mouse_extra_buttons=0x080000,
-    roller_V=0x040000,
-    power_keys=0x020000,  # system control keys such as Sleep
-    keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
-    multi_touch=0x001000,  # notify on multi-touch changes
-    software_present=0x000800,  # software is controlling part of device behaviour
-    link_quality=0x000400,  # notify on link quality changes
-    ui=0x000200,  # notify on UI changes
-    wireless=0x000100,  # notify when the device wireless goes on/off-line
-    configuration_complete=0x000004,
-    voip_telephony=0x000002,
-    threed_gesture=0x000001,
-)
+class PowerSwitchLocation(IntEnum):
+    BASE = 0x01
+    TOP_CASE = 0x02
+    EDGE_OF_TOP_RIGHT_CORNER = 0x03
+    TOP_LEFT_CORNER = 0x05
+    BOTTOM_LEFT_CORNER = 0x06
+    TOP_RIGHT_CORNER = 0x07
+    BOTTOM_RIGHT_CORNER = 0x08
+    TOP_EDGE = 0x09
+    RIGHT_EDGE = 0x0A
+    LEFT_EDGE = 0x0B
+    BOTTOM_EDGE = 0x0C
+
+
+class NotificationFlag(Flag):
+    """Some flags are used both by devices and receivers.
+
+    The Logitech documentation mentions that the first and last (third)
+    byte are used for devices while the second is used for the receiver.
+    In practise, the second byte is also used for some device-specific
+    notifications (keyboard illumination level). Do not simply set all
+    notification bits if the software does not support it. For example,
+    enabling keyboard_sleep_raw makes the Sleep key a no-operation
+    unless the software is updated to handle that event.
+
+    Observations:
+    - wireless and software present seen on receivers,
+    reserved_r1b4 as well
+    - the rest work only on devices as far as we can tell right now
+    In the future would be useful to have separate enums for receiver
+    and device notification flags, but right now we don't know enough.
+    Additional flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
+    """
+
+    @classmethod
+    def flag_names(cls, flag_bits: int) -> List[str]:
+        """Extract the names of the flags from the integer."""
+        indexed = {item.value: item.name for item in cls}
+
+        flag_names = []
+        unknown_bits = flag_bits
+        for k in indexed:
+            # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+            assert bin(k).count("1") == 1
+            if k & flag_bits == k:
+                unknown_bits &= ~k
+                flag_names.append(indexed[k].replace("_", " ").lower())
+
+        # Yield any remaining unknown bits
+        if unknown_bits != 0:
+            flag_names.append(f"unknown:{unknown_bits:06X}")
+        return flag_names
+
+    NUMPAD_NUMERICAL_KEYS = 0x800000
+    F_LOCK_STATUS = 0x400000
+    ROLLER_H = 0x200000
+    BATTERY_STATUS = 0x100000  # send battery charge notifications (0x07 or 0x0D)
+    MOUSE_EXTRA_BUTTONS = 0x080000
+    ROLLER_V = 0x040000
+    POWER_KEYS = 0x020000  # system control keys such as Sleep
+    KEYBOARD_MULTIMEDIA_RAW = 0x010000  # consumer controls such as Mute and Calculator
+    MULTI_TOUCH = 0x001000  # notify on multi-touch changes
+    SOFTWARE_PRESENT = 0x000800  # software is controlling part of device behaviour
+    LINK_QUALITY = 0x000400  # notify on link quality changes
+    UI = 0x000200  # notify on UI changes
+    WIRELESS = 0x000100  # notify when the device wireless goes on/off-line
+    CONFIGURATION_COMPLETE = 0x000004
+    VOIP_TELEPHONY = 0x000002
+    THREED_GESTURE = 0x000001
+
+
+def flags_to_str(flag_bits: int | None, fallback: str) -> str:
+    flag_names = []
+    if flag_bits is not None:
+        if flag_bits == 0:
+            flag_names = (fallback,)
+        else:
+            flag_names = NotificationFlag.flag_names(flag_bits)
+    return f"\n{' ':15}".join(sorted(flag_names))
 
 
 class ErrorCode(IntEnum):
@@ -166,22 +205,27 @@ INFO_SUBREGISTERS = NamedInts(
     bolt_device_name=0x60,  # 0x6N01, by connected device,
 )
 
-# Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
-DEVICE_FEATURES = NamedInts(
-    reserved1=0x010000,
-    special_buttons=0x020000,
-    enhanced_key_usage=0x040000,
-    fast_fw_rev=0x080000,
-    reserved2=0x100000,
-    reserved3=0x200000,
-    scroll_accel=0x400000,
-    buttons_control_resolution=0x800000,
-    inhibit_lock_key_sound=0x000001,
-    reserved4=0x000002,
-    mx_air_3d_engine=0x000004,
-    host_control_leds=0x000008,
-    reserved5=0x000010,
-    reserved6=0x000020,
-    reserved7=0x000040,
-    reserved8=0x000080,
-)
+
+class DeviceFeature(Flag):
+    """Features for devices.
+
+    Flags taken from
+    https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
+    """
+
+    RESERVED1 = 0x010000
+    SPECIAL_BUTTONS = 0x020000
+    ENHANCED_KEY_USAGE = 0x040000
+    FAST_FW_REV = 0x080000
+    RESERVED2 = 0x100000
+    RESERVED3 = 0x200000
+    SCROLL_ACCEL = 0x400000
+    BUTTONS_CONTROL_RESOLUTION = 0x800000
+    INHIBIT_LOCK_KEY_SOUND = 0x000001
+    RESERVED4 = 0x000002
+    MX_AIR_3D_ENGINE = 0x000004
+    HOST_CONTROL_LEDS = 0x000008
+    RESERVED5 = 0x000010
+    RESERVED6 = 0x000020
+    RESERVED7 = 0x000040
+    RESERVED8 = 0x000080
