@@ -1053,7 +1053,7 @@ msgstr "Grafisk design av användargränssnitt"
 
 #: lib/solaar/ui/about.py:47
 msgid "Testing"
-msgstr "Prövar"
+msgstr "Testning"
 
 #: lib/solaar/ui/about.py:54
 msgid "Logitech documentation"
