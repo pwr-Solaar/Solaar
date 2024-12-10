@@ -23,6 +23,8 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import device
 from logitech_receiver import hidpp20
+from logitech_receiver.common import BatteryLevelApproximation
+from logitech_receiver.common import BatteryStatus
 
 from . import fake_hidpp
 
@@ -215,7 +217,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
 
 
 @pytest.mark.parametrize(
-    "number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate",
+    "number, info, responses, handle, unitId, modelId, task_id, kind, firmware, serial, id, psl, rate",
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
@@ -239,7 +241,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
         ["1ms", "2ms", "4ms", "8ms", "1ms", "9ms"],  # polling rate
     ),
 )
-def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate):
+def test_device_ids(number, info, responses, handle, unitId, modelId, task_id, kind, firmware, serial, id, psl, rate):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
@@ -248,7 +250,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
-    assert test_device.tid_map == tid
+    assert test_device.tid_map == task_id
     assert test_device.kind == kind
     assert test_device.firmware == firmware or len(test_device.firmware) > 0 and firmware is True
     assert test_device.id == id
@@ -325,14 +327,14 @@ def test_device_settings(device_info, responses, protocol, p, persister, setting
 
 
 @pytest.mark.parametrize(
-    "device_info, responses, protocol, battery, changed",
+    "device_info, responses, protocol, expected_battery, changed",
     [
         (di_C318, fake_hidpp.r_empty, 1.0, None, {"active": True, "alert": 0, "reason": None}),
         (
             di_C318,
             fake_hidpp.r_keyboard_1,
             1.0,
-            common.Battery(50, None, 0, None),
+            common.Battery(BatteryLevelApproximation.GOOD.value, None, BatteryStatus.DISCHARGING, None),
             {"active": True, "alert": 0, "reason": None},
         ),
         (
@@ -344,12 +346,12 @@ def test_device_settings(device_info, responses, protocol, p, persister, setting
         ),
     ],
 )
-def test_device_battery(device_info, responses, protocol, battery, changed, mocker):
+def test_device_battery(device_info, responses, protocol, expected_battery, changed, mocker):
     test_device = FakeDevice(responses, None, None, online=True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
     spy_changed = mocker.spy(test_device, "changed")
 
-    assert test_device.battery() == battery
+    assert test_device.battery() == expected_battery
     test_device.read_battery()
     spy_changed.assert_called_with(**changed)

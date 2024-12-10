@@ -22,6 +22,8 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
+from logitech_receiver.hidpp20 import KeyFlag
+from logitech_receiver.hidpp20 import MappingFlag
 from logitech_receiver.hidpp20_constants import GestureId
 
 from . import fake_hidpp
@@ -154,30 +156,54 @@ def test_FeaturesArray_getitem(device, expected0, expected1, expected2, expected
 
 
 @pytest.mark.parametrize(
-    "device, index, cid, tid, flags, default_task, flag_names",
+    "device, index, cid, task_id, flags, default_task, expected_flags",
     [
-        (device_standard, 2, 1, 1, 0x30, "Volume Up", ["reprogrammable", "divertable"]),
-        (device_standard, 1, 2, 2, 0x20, "Volume Down", ["divertable"]),
+        (device_standard, 2, 1, 1, 0x30, "Volume Up", KeyFlag.REPROGRAMMABLE | KeyFlag.DIVERTABLE),
+        (device_standard, 1, 2, 2, 0x20, "Volume Down", KeyFlag.DIVERTABLE),
     ],
 )
-def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, flag_names):
-    key = hidpp20.ReprogrammableKey(device, index, cid, tid, flags)
+def test_reprogrammable_key_key(device, index, cid, task_id, flags, default_task, expected_flags):
+    key = hidpp20.ReprogrammableKey(device, index, cid, task_id, flags)
 
     assert key._device == device
     assert key.index == index
     assert key._cid == cid
-    assert key._tid == tid
+    assert key._tid == task_id
     assert key._flags == flags
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
+    assert key.flags == expected_flags
 
 
 @pytest.mark.parametrize(
-    "device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names",
+    "device, index, cid, task_id, flags, pos, group, gmask, default_task, expected_flags, group_names",
     [
-        (device_standard, 1, 0x51, 0x39, 0x60, 0, 1, 1, "Right Click", ["divertable", "persistently divertable"], ["g1"]),
-        (device_standard, 2, 0x52, 0x3A, 0x11, 1, 2, 3, "Mouse Middle Button", ["mse", "reprogrammable"], ["g1", "g2"]),
+        (
+            device_standard,
+            1,
+            0x51,
+            0x39,
+            0x60,
+            0,
+            1,
+            1,
+            "Right Click",
+            KeyFlag.DIVERTABLE | KeyFlag.PERSISTENTLY_DIVERTABLE,
+            ["g1"],
+        ),
+        (
+            device_standard,
+            2,
+            0x52,
+            0x3A,
+            0x11,
+            1,
+            2,
+            3,
+            "Mouse Middle Button",
+            KeyFlag.MSE | KeyFlag.REPROGRAMMABLE,
+            ["g1", "g2"],
+        ),
         (
             device_standard,
             3,
@@ -188,39 +214,41 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
             2,
             7,
             "Mouse Back Button",
-            ["reprogrammable", "raw XY"],
+            KeyFlag.REPROGRAMMABLE | KeyFlag.RAW_XY,
             ["g1", "g2", "g3"],
         ),
     ],
 )
-def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names):
-    key = hidpp20.ReprogrammableKeyV4(device, index, cid, tid, flags, pos, group, gmask)
+def test_reprogrammable_key_v4_key(
+    device, index, cid, task_id, flags, pos, group, gmask, default_task, expected_flags, group_names
+):
+    key = hidpp20.ReprogrammableKeyV4(device, index, cid, task_id, flags, pos, group, gmask)
 
     assert key._device == device
     assert key.index == index
     assert key._cid == cid
-    assert key._tid == tid
+    assert key._tid == task_id
     assert key._flags == flags
     assert key.pos == pos
     assert key.group == group
     assert key._gmask == gmask
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
+    assert key.flags == expected_flags
     assert list(key.group_mask) == group_names
 
 
 @pytest.mark.parametrize(
-    "responses, index, mapped_to, remappable_to, mapping_flags",
+    "responses, index, mapped_to, remappable_to, expected_mapping_flags",
     [
-        (fake_hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), []),
-        (fake_hidpp.responses_key, 2, "Left Click", None, ["diverted"]),
-        (fake_hidpp.responses_key, 3, "Mouse Back Button", None, ["diverted", "persistently diverted"]),
-        (fake_hidpp.responses_key, 4, "Mouse Forward Button", None, ["diverted", "raw XY diverted"]),
+        (fake_hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), MappingFlag(0)),
+        (fake_hidpp.responses_key, 2, "Left Click", None, MappingFlag.DIVERTED),
+        (fake_hidpp.responses_key, 3, "Mouse Back Button", None, MappingFlag.DIVERTED | MappingFlag.PERSISTENTLY_DIVERTED),
+        (fake_hidpp.responses_key, 4, "Mouse Forward Button", None, MappingFlag.DIVERTED | MappingFlag.RAW_XY_DIVERTED),
     ],
 )
 # these fields need access all the key data, so start by setting up a device and its key data
-def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, mapping_flags):
+def test_reprogrammable_key_v4_query(responses, index, mapped_to, remappable_to, expected_mapping_flags):
     device = fake_hidpp.Device(
         "KEY", responses=responses, feature=hidpp20_constants.SupportedFeature.REPROG_CONTROLS_V4, offset=5
     )
@@ -230,7 +258,7 @@ def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, m
 
     assert key.mapped_to == mapped_to
     assert (key.remappable_to == remappable_to) or remappable_to is None
-    assert list(key.mapping_flags) == mapping_flags
+    assert key.mapping_flags == expected_mapping_flags
 
 
 @pytest.mark.parametrize(
@@ -242,7 +270,7 @@ def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, m
         (fake_hidpp.responses_key, 4, False, False, False, 0x50, ["0056020000", "0056080000", "0056200000", "0056000050"]),
     ],
 )
-def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets, mocker):
+def test_reprogrammable_key_v4_set(responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets, mocker):
     responses += [fake_hidpp.Response(r, 0x530, r) for r in sets]
     device = fake_hidpp.Device(
         "KEY", responses=responses, feature=hidpp20_constants.SupportedFeature.REPROG_CONTROLS_V4, offset=5
@@ -252,28 +280,30 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
     spy_request = mocker.spy(device, "request")
 
     key = device.keys[index]
-    _mapping_flags = list(key.mapping_flags)
+    _mapping_flags = key.mapping_flags
 
-    if "divertable" in key.flags or not diverted:
+    if hidpp20.KeyFlag.DIVERTABLE in key.flags or not diverted:
         key.set_diverted(diverted)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_diverted(diverted)
-    assert ("diverted" in list(key.mapping_flags)) == (diverted and "divertable" in key.flags)
+    assert (MappingFlag.DIVERTED in key.mapping_flags) == (diverted and hidpp20.KeyFlag.DIVERTABLE in key.flags)
 
-    if "persistently divertable" in key.flags or not persistently_diverted:
+    if hidpp20.KeyFlag.PERSISTENTLY_DIVERTABLE in key.flags or not persistently_diverted:
         key.set_persistently_diverted(persistently_diverted)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_persistently_diverted(persistently_diverted)
-    assert ("persistently diverted" in key.mapping_flags) == (persistently_diverted and "persistently divertable" in key.flags)
+    assert (hidpp20.MappingFlag.PERSISTENTLY_DIVERTED in key.mapping_flags) == (
+        persistently_diverted and hidpp20.KeyFlag.PERSISTENTLY_DIVERTABLE in key.flags
+    )
 
-    if "raw XY" in key.flags or not rawXY_reporting:
+    if hidpp20.KeyFlag.RAW_XY in key.flags or not rawXY_reporting:
         key.set_rawXY_reporting(rawXY_reporting)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_rawXY_reporting(rawXY_reporting)
-    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw XY" in key.flags)
+    assert (MappingFlag.RAW_XY_DIVERTED in key.mapping_flags) == (rawXY_reporting and hidpp20.KeyFlag.RAW_XY in key.flags)
 
     if remap in key.remappable_to or remap == 0:
         key.remap(remap)
@@ -360,14 +390,14 @@ def test_KeysArrayV4_query_key(device, index, top, cid):
 
 
 @pytest.mark.parametrize(
-    "device, count, index, cid, tid, flags, pos, group, gmask",
+    "device, count, index, cid, task_id, flags, pos, group, gmask",
     [
         (device_standard, 4, 0, 0x0011, 0x0012, 0xCDAB, 1, 2, 3),
         (device_standard, 6, 1, 0x0111, 0x0022, 0xCDAB, 1, 2, 3),
         (device_standard, 8, 3, 0x0311, 0x0032, 0xCDAB, 1, 2, 4),
     ],
 )
-def test_KeysArrayV4__getitem(device, count, index, cid, tid, flags, pos, group, gmask):
+def test_KeysArrayV4__getitem(device, count, index, cid, task_id, flags, pos, group, gmask):
     keysarray = hidpp20.KeysArrayV4(device, count)
 
     result = keysarray[index]
@@ -375,7 +405,7 @@ def test_KeysArrayV4__getitem(device, count, index, cid, tid, flags, pos, group,
     assert result._device == device
     assert result.index == index
     assert result._cid == cid
-    assert result._tid == tid
+    assert result._tid == task_id
     assert result._flags == flags
     assert result.pos == pos
     assert result.group == group
@@ -421,7 +451,7 @@ device_key = fake_hidpp.Device(
         (special_keys.CONTROL.Virtual_Gesture_Button, 7, common.NamedInt(0x51, "Right Click"), None),
     ],
 )
-def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
+def test_keys_array_v4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
     device_key._keys = _hidpp20.get_keys(device_key)
     device_key._keys._ensure_all_keys_queried()
 
@@ -556,14 +586,14 @@ def test_param(responses, prm, id, index, size, value, default_value, write1, wr
 
 
 @pytest.mark.parametrize(
-    "responses, id, s, byte_count, value, string",
+    "responses, id, s, byte_count, expected_value, expected_string",
     [
-        (fake_hidpp.responses_gestures, 1, "DVI field width", 1, 8, "[DVI field width=8]"),
-        (fake_hidpp.responses_gestures, 2, "field widths", 1, 8, "[field widths=8]"),
-        (fake_hidpp.responses_gestures, 3, "period unit", 2, 2048, "[period unit=2048]"),
+        (fake_hidpp.responses_gestures, 1, hidpp20.SpecGesture.DVI_FIELD_WIDTH, 1, 8, "[dvi field width=8]"),
+        (fake_hidpp.responses_gestures, 2, hidpp20.SpecGesture.FIELD_WIDTHS, 1, 8, "[field widths=8]"),
+        (fake_hidpp.responses_gestures, 3, hidpp20.SpecGesture.PERIOD_UNIT, 2, 2048, "[period unit=2048]"),
     ],
 )
-def test_Spec(responses, id, s, byte_count, value, string):
+def test_spec(responses, id, s, byte_count, expected_value, expected_string):
     device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.SupportedFeature.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
@@ -572,8 +602,8 @@ def test_Spec(responses, id, s, byte_count, value, string):
     assert spec.id == id
     assert spec.spec == s
     assert spec.byte_count == byte_count
-    assert spec.value == value
-    assert repr(spec) == string
+    assert spec.value == expected_value
+    assert repr(spec) == expected_string
 
 
 def test_Gestures():
@@ -760,7 +790,7 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
 
 
 @pytest.mark.parametrize(
-    "hex, behavior, sector, address, typ, val, modifiers, data, byt",
+    "hex, expected_behavior, sector, address, typ, val, modifiers, data, byt",
     [
         ("05010203", 0x0, 0x501, 0x0203, None, None, None, None, None),
         ("15020304", 0x1, 0x502, 0x0304, None, None, None, None, None),
@@ -772,10 +802,10 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
         ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xa0"),
     ],
 )
-def test_button_bytes(hex, behavior, sector, address, typ, val, modifiers, data, byt):
+def test_button_bytes(hex, expected_behavior, sector, address, typ, val, modifiers, data, byt):
     button = hidpp20.Button.from_bytes(bytes.fromhex(hex))
 
-    assert getattr(button, "behavior", None) == behavior
+    assert getattr(button, "behavior", None) == expected_behavior
     assert getattr(button, "sector", None) == sector
     assert getattr(button, "address", None) == address
     assert getattr(button, "type", None) == typ
@@ -852,7 +882,7 @@ hex3 = (
         (hex3, "", 2, 1, 16, 0, [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF], "FFFFFFFF", "FFFFFFFFFFFFFFFFFFFFFF"),
     ],
 )
-def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
+def test_onboard_profile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
     profile = hidpp20.OnboardProfile.from_bytes(sector, enabled, buttons, gbuttons, bytes.fromhex(hex))
 
     assert profile.name == name
@@ -873,7 +903,7 @@ def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, res
         (fake_hidpp.responses_profiles_rom_2, "ONB", 1, 2, 2, 1, 254),
     ],
 )
-def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
+def test_onboard_profiles_device(responses, name, count, buttons, gbuttons, sectors, size):
     device = fake_hidpp.Device(
         name, True, 4.5, responses=responses, feature=hidpp20_constants.SupportedFeature.ONBOARD_PROFILES, offset=0x9
     )
@@ -890,4 +920,5 @@ def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, secto
     assert profiles.size == size
     assert len(profiles.profiles) == count
 
-    assert yaml.safe_load(yaml.dump(profiles)).to_bytes().hex() == profiles.to_bytes().hex()
+    yml_dump = yaml.dump(profiles)
+    assert yaml.safe_load(yml_dump).to_bytes().hex() == profiles.to_bytes().hex()

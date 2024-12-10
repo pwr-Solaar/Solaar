@@ -255,7 +255,7 @@ def test_set_notification_flags(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
     spy_request.assert_called_once_with(0x8000 | Registers.NOTIFICATIONS, b"\x10\x01\x00")
@@ -267,11 +267,30 @@ def test_set_notification_flags_bad(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
     assert spy_request.call_count == 0
     assert result is None
+
+
+@pytest.mark.parametrize(
+    "flag_bits, expected_names",
+    [
+        (None, ""),
+        (0x0, "none"),
+        (0x009020, "multi touch\n               unknown:008020"),
+        (0x080000, "mouse extra buttons"),
+        (
+            0x080000 + 0x000400,
+            ("link quality\n               mouse extra buttons"),
+        ),
+    ],
+)
+def test_notification_flag_str(flag_bits, expected_names):
+    flag_names = hidpp10_constants.flags_to_str(flag_bits, fallback="none")
+
+    assert flag_names == expected_names
 
 
 def test_get_device_features():
