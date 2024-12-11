@@ -31,6 +31,7 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Optional
+from typing import Protocol
 
 from gi.repository import Gdk
 from gi.repository import GObject
@@ -325,7 +326,7 @@ class ActionMenu:
         else:
             idx = parent_c.components.index(c)
         if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
+            new_c.source = str(_DIV.RULES_CONFIG)  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
         self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=idx)
@@ -528,8 +529,16 @@ class ActionMenu:
         return menu_copy
 
 
+class RulePersister(Protocol):
+    def load_rule_config(self) -> _DIV.Rule:
+        ...
+
+    def save_config_rule_file(self) -> None:
+        ...
+
+
 class DiversionDialog:
-    def __init__(self, action_menu):
+    def __init__(self, action_menu, rule_persister: RulePersister):
         window = Gtk.Window()
         window.set_title(_("Solaar Rule Editor"))
         window.connect("delete-event", self._closing)
@@ -546,6 +555,7 @@ class DiversionDialog:
             populate_model_func=_populate_model,
             on_update=self.on_update,
         )
+        self._ruler_persister = rule_persister
 
         self.dirty = False  # if dirty, there are pending changes to be saved
 
@@ -604,16 +614,19 @@ class DiversionDialog:
         self.dirty = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        _DIV.load_config_rule_file()
+        self._ruler_persister.load_rule_config()
         self.model = self._create_model()
         self.view.set_model(self.model)
         self.view.expand_all()
 
     def _save_yaml_file(self):
-        if _DIV._save_config_rule_file():
+        try:
+            self._ruler_persister.save_config_rule_file()
             self.dirty = False
             self.save_btn.set_sensitive(False)
             self.discard_btn.set_sensitive(False)
+        except Exception:
+            pass
 
     def _create_top_panel(self):
         sw = Gtk.ScrolledWindow()
@@ -1862,6 +1875,6 @@ def show_window(model: Gtk.TreeStore):
     global _dev_model
     _dev_model = model
     if _diversion_dialog is None:
-        _diversion_dialog = DiversionDialog(ActionMenu)
+        _diversion_dialog = DiversionDialog(action_menu=ActionMenu, rule_persister=_DIV.Persister())
     update_devices()
     _diversion_dialog.window.present()
