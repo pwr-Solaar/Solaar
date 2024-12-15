@@ -55,7 +55,7 @@ def test_process_receiver_notification(sub_id, notification_data, expected_error
     receiver: Receiver = Receiver(MockLowLevelInterface(), None, {}, True, None, None)
     notification = HIDPPNotification(0, 0, sub_id, 0x02, notification_data)
 
-    result = notifications._process_receiver_notification(receiver, notification)
+    result = notifications.process_receiver_notification(receiver, notification)
 
     assert result
     assert receiver.pairing.error == expected_error
@@ -73,7 +73,7 @@ def test_process_receiver_notification(sub_id, notification_data, expected_error
 def test_process_device_notification(hidpp_notification, expected):
     device = fake_hidpp.Device()
 
-    result = notifications._process_device_notification(device, hidpp_notification)
+    result = notifications.process_device_notification(device, hidpp_notification)
 
     assert result == expected
 
