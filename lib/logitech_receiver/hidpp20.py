@@ -1902,7 +1902,7 @@ def decipher_battery_voltage(report: bytes):
         charge_sts = ChargeStatus(flags & 0x03)
     if charge_sts is None:
         charge_sts = ErrorCode.UNKNOWN
-    elif ChargeStatus.FULL in charge_sts:
+    elif isinstance(charge_sts, ChargeStatus) and ChargeStatus.FULL in charge_sts:
         charge_lvl = ChargeLevel.FULL
         status = BatteryStatus.FULL
     if flags & (1 << 3):
