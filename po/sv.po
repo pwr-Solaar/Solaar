@@ -132,11 +132,11 @@ msgstr "för många enheter"
 
 #: lib/logitech_receiver/i18n.py:56
 msgid "sequence timeout"
-msgstr "sekvens timout"
+msgstr "tidsgräns för sekvens överskreds"
 
 #: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:572
 msgid "Firmware"
-msgstr "Programvara"
+msgstr "Fast programvara"
 
 #: lib/logitech_receiver/i18n.py:60
 msgid "Bootloader"
@@ -468,19 +468,19 @@ msgstr "Ställ in kronans mjuka rullning"
 
 #: lib/logitech_receiver/settings_templates.py:383
 msgid "Divert G Keys"
-msgstr "Avleda G Keys"
+msgstr "Avleda G-tangenter"
 
 #: lib/logitech_receiver/settings_templates.py:385
 msgid ""
 "Make G keys send GKEY HID++ notifications (which trigger Solaar rules but "
 "are otherwise ignored)."
 msgstr ""
-"Få G keys att skicka GKEY HID++-aviseringar (som utlöser Solaar-regler men "
+"Få G-tangenter att skicka GKEY HID++-aviseringar (som utlöser Solaar-regler men "
 "som annars ignoreras)."
 
 #: lib/logitech_receiver/settings_templates.py:386
 msgid "May also make M keys and MR key send HID++ notifications"
-msgstr "Kan också få M keys och MR key att skicka HID++-aviseringar"
+msgstr "Kan också få M-tangenter och MR-tangenten att skicka HID++-aviseringar"
 
 #: lib/logitech_receiver/settings_templates.py:402
 msgid "Scroll Wheel Ratcheted"
@@ -634,11 +634,11 @@ msgstr "Utför ett högerklick."
 
 #: lib/logitech_receiver/settings_templates.py:901
 msgid "Single tap with two fingers"
-msgstr "Enkel tryck med två fingrar"
+msgstr "Enkelt tryck med två fingrar"
 
 #: lib/logitech_receiver/settings_templates.py:902
 msgid "Single tap with three fingers"
-msgstr "Enkel tryck med tre fingrar"
+msgstr "Enkelt tryck med tre fingrar"
 
 #: lib/logitech_receiver/settings_templates.py:906
 msgid "Double tap"
@@ -768,7 +768,7 @@ msgstr "Svep två fingrar från den övre kanten"
 #: lib/logitech_receiver/settings_templates.py:944
 #: lib/logitech_receiver/settings_templates.py:948
 msgid "Pinch to zoom out; spread to zoom in."
-msgstr "Nyp för att zooma ut; sprida för att zooma in."
+msgstr "Nyp för att zooma ut; sprid för att zooma in."
 
 #: lib/logitech_receiver/settings_templates.py:944
 msgid "Zoom with two fingers."
@@ -881,7 +881,7 @@ msgstr "Styr M-Key LED:ar."
 #: lib/logitech_receiver/settings_templates.py:1047
 #: lib/logitech_receiver/settings_templates.py:1077
 msgid "May need G Keys diverted to be effective."
-msgstr "Kan behöva omdirigera G Keys för att vara effektiva."
+msgstr "Kan behöva omdirigera G-tangenter för att vara effektiva."
 
 #: lib/logitech_receiver/settings_templates.py:1053
 #, python-format
@@ -1224,7 +1224,7 @@ msgstr "Och"
 
 #: lib/solaar/ui/diversion_rules.py:513
 msgid "Condition"
-msgstr "Tillstånd"
+msgstr "Villkor"
 
 #: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1292
 msgid "Feature"
@@ -1278,7 +1278,7 @@ msgstr "Testa"
 
 #: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1643
 msgid "Test bytes"
-msgstr "Testa bytes"
+msgstr "Testa byte"
 
 #: lib/solaar/ui/diversion_rules.py:528 lib/solaar/ui/diversion_rules.py:1736
 msgid "Mouse Gesture"
@@ -1385,7 +1385,7 @@ msgid ""
 msgstr ""
 "Omdirigerad knapp eller knapp nedtryckt eller släppt.\n"
 "Använd inställningarna för vidarekoppling av tangent/knapp och "
-"vidarekoppling av G-knappar för att vidarekoppla nycklar och knappar."
+"vidarekoppling av G-tangenter för att vidarekoppla tangenter och knappar."
 
 #: lib/solaar/ui/diversion_rules.py:1392
 msgid "Key down"
@@ -1403,7 +1403,7 @@ msgid ""
 msgstr ""
 "Vidarekopplad nyckel eller knapp är för närvarande nere.\n"
 "Använd inställningarna för vidarekoppling av tangent/knapp och "
-"vidarekoppling av G-knappar för att vidarekoppla nycklar och knappar."
+"vidarekoppling av G-tangenter för att vidarekoppla tangenter och knappar."
 
 #: lib/solaar/ui/diversion_rules.py:1475
 msgid "Test condition on notification triggering rule processing."
@@ -1452,7 +1452,7 @@ msgid ""
 "Bit or range test on bytes in notification message triggering rule "
 "processing."
 msgstr ""
-"Bit- eller omfångstest på bytes i aviseringsmeddelande som utlöser "
+"Bit- eller omfångstest på byte i aviseringsmeddelande som utlöser "
 "regelbearbetning."
 
 #: lib/solaar/ui/diversion_rules.py:1583
