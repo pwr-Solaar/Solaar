@@ -388,6 +388,7 @@ class Device:
     setting_callback: Any = None
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
+    number = "d1"
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register
@@ -405,6 +406,7 @@ class Device:
         self.persister = configuration._DeviceEntry()
         self.features = hidpp20.FeaturesArray(self)
         self.settings = []
+        self.receiver = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
             self.responses = [
@@ -434,6 +436,18 @@ class Device:
     def ping(self, handle=None, devnumber=None, long_message=False):
         print("PING", self._protocol)
         return self._protocol
+
+    def handle_notification(self, handle):
+        pass
+
+    def changed(self, *args, **kwargs):
+        pass
+
+    def set_battery_info(self, *args, **kwargs):
+        pass
+
+    def status_string(self):
+        pass
 
 
 def match_requests(number, responses, call_args_list):
