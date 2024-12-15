@@ -393,7 +393,7 @@ class Device:
                 try:
                     feature, battery = result
                     if self.persister and battery_feature is None:
-                        self.persister["_battery"] = feature
+                        self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
                     if self.persister and battery_feature is None:
