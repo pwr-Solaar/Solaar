@@ -22,6 +22,8 @@ import time
 
 from collections import namedtuple
 from functools import partial
+from typing import Any
+from typing import Protocol
 
 import gi
 import logitech_receiver
@@ -58,12 +60,26 @@ def _ghost(device):
     )
 
 
+class LowLevelInterface(Protocol):
+    def open_path(self, path):
+        ...
+
+    def ping(self, handle, number, long_message=False):
+        ...
+
+    def make_notification(self, report_id: int, devnumber: int, data: bytes) -> Any:
+        ...
+
+    def close(self, handle):
+        ...
+
+
 class SolaarListener(listener.EventsListener):
     """Keeps the status of a Receiver or Device (member name is receiver but it can also be a device)."""
 
-    def __init__(self, receiver, status_changed_callback):
+    def __init__(self, receiver, status_changed_callback, low_level):
         assert status_changed_callback
-        super().__init__(receiver, self._notifications_handler)
+        super().__init__(receiver, self._notifications_handler, low_level)
         self.status_changed_callback = status_changed_callback
         receiver.status_callback = self._status_changed
 
@@ -275,7 +291,7 @@ def _start(device_info):
                 receiver_.cleanups.append(_cleanup_bluez_dbus)
 
     if receiver_:
-        rl = SolaarListener(receiver_, _status_callback)
+        rl = SolaarListener(receiver_, _status_callback, base)
         rl.start()
         _all_listeners[device_info.path] = rl
         return rl
