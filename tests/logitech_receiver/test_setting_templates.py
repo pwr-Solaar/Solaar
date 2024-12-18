@@ -530,9 +530,9 @@ key_tests = [
     Setup(
         FeatureTest(settings_templates.ReprogrammableKeys, {0x50: 0x50, 0x51: 0x50, 0xC4: 0xC4}, {0x51: 0x51}, 4, offset=0x05),
         {
-            common.NamedInt(0x50, "Left Button"): common.UnsortedNamedInts(Left_Click=0x50, Right_Click=0x51),
-            common.NamedInt(0x51, "Right Button"): common.UnsortedNamedInts(Right_Click=0x51, Left_Click=0x50),
-            common.NamedInt(0xC4, "Smart Shift"): common.UnsortedNamedInts(Smart_Shift=0xC4, Left_Click=80, Right_Click=81),
+            common.NamedInt(0x50, "Left Button"): common.NamedInts(Left_Click=0x50, Right_Click=0x51),
+            common.NamedInt(0x51, "Right Button"): common.NamedInts(Right_Click=0x51, Left_Click=0x50),
+            common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Smart_Shift=0xC4, Left_Click=80, Right_Click=81),
         },
         *responses_reprog_controls,
         fake_hidpp.Response("0051000051", 0x0530, "0051000051"),  # right button set write

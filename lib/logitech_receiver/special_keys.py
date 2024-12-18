@@ -24,7 +24,6 @@ from enum import IntEnum
 import yaml
 
 from .common import NamedInts
-from .common import UnsortedNamedInts
 
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
 _keys_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
@@ -1233,7 +1232,7 @@ HORIZONTAL_SCROLL = NamedInts(
 HORIZONTAL_SCROLL._fallback = lambda x: f"unknown horizontal scroll:{x:04X}"
 
 # Construct universe for Persistent Remappable Keys setting (only for supported values)
-KEYS = UnsortedNamedInts()
+KEYS = NamedInts()
 KEYS_Default = 0x7FFFFFFF  # Special value to reset key to default - has to be different from all others
 KEYS[KEYS_Default] = "Default"  # Value to reset to default
 KEYS[0] = "None"  # Value for no output
@@ -1271,7 +1270,7 @@ for code in HORIZONTAL_SCROLL:
 
 # Construct subsets for known devices
 def persistent_keys(action_ids):
-    keys = UnsortedNamedInts()
+    keys = NamedInts()
     keys[KEYS_Default] = "Default"  # Value to reset to default
     keys[0] = "No Output (only as default)"
     for key in KEYS:
@@ -1283,7 +1282,7 @@ def persistent_keys(action_ids):
 KEYS_KEYS_CONSUMER = persistent_keys([ACTIONID.Key, ACTIONID.Consumer])
 KEYS_KEYS_MOUSE_HSCROLL = persistent_keys([ACTIONID.Key, ACTIONID.Mouse, ACTIONID.Hscroll])
 
-COLORS = UnsortedNamedInts(
+COLORS = NamedInts(
     {
         # from Xorg rgb.txt,v 1.3 2000/08/17
         "red": 0xFF0000,
@@ -1424,7 +1423,7 @@ COLORS = UnsortedNamedInts(
     }
 )
 
-COLORSPLUS = UnsortedNamedInts({"No change": -1})
+COLORSPLUS = NamedInts({"No change": -1})
 for i in COLORS:
     COLORSPLUS[int(i)] = str(i)
 

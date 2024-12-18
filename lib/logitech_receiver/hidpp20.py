@@ -257,7 +257,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     @property
     def remappable_to(self) -> common.NamedInts:
         self._device.keys._ensure_all_keys_queried()
-        ret = common.UnsortedNamedInts()
+        ret = common.NamedInts()
         if self.group_mask:  # only keys with a non-zero gmask are remappable
             ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
