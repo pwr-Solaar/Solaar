@@ -22,6 +22,7 @@ import time
 
 from collections import namedtuple
 from functools import partial
+from typing import Callable
 
 import gi
 import logitech_receiver
@@ -35,6 +36,7 @@ from logitech_receiver import notifications
 from . import configuration
 from . import dbus
 from . import i18n
+from .ui import common
 
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
@@ -336,7 +338,7 @@ _setting_callback = None  # GUI callback to change UI in response to changes to 
 _error_callback = None  # GUI callback to report errors
 
 
-def setup_scanner(status_changed_callback, setting_changed_callback, error_callback):
+def setup_scanner(status_changed_callback: Callable, setting_changed_callback: Callable, error_callback: Callable):
     global _status_callback, _error_callback, _setting_callback
     assert _status_callback is None, "scanner was already set-up"
     _status_callback = status_changed_callback
@@ -359,11 +361,11 @@ def _process_add(device_info, retry):
             if retry:
                 GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
             else:
-                _error_callback("permissions", device_info.path)
+                _error_callback(common.ErrorReason.PERMISSIONS, device_info.path)
         else:
-            _error_callback("nodevice", device_info.path)
+            _error_callback(common.ErrorReason.NO_DEVICE, device_info.path)
     except exceptions.NoReceiver:
-        _error_callback("nodevice", device_info.path)
+        _error_callback(common.ErrorReason.NO_DEVICE, device_info.path)
 
 
 # receiver add/remove events will start/stop listener threads

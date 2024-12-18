@@ -16,6 +16,7 @@
 
 import logging
 
+from enum import Enum
 from typing import Tuple
 
 import gi
@@ -30,22 +31,28 @@ from gi.repository import Gtk  # NOQA: E402
 logger = logging.getLogger(__name__)
 
 
-def _create_error_text(reason: str, object_) -> Tuple[str, str]:
-    if reason == "permissions":
+class ErrorReason(Enum):
+    PERMISSIONS = "Permissions"
+    NO_DEVICE = "No device"
+    UNPAIR = "Unpair"
+
+
+def _create_error_text(reason: ErrorReason, object_) -> Tuple[str, str]:
+    if reason == ErrorReason.PERMISSIONS:
         title = _("Permissions error")
         text = (
             _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object_
             + "\n\n"
             + _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
         )
-    elif reason == "nodevice":
+    elif reason == ErrorReason.NO_DEVICE:
         title = _("Cannot connect to device error")
         text = (
             _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object_
             + "\n\n"
             + _("Try disconnecting the device and then reconnecting it or turning it off and then on.")
         )
-    elif reason == "unpair":
+    elif reason == ErrorReason.UNPAIR:
         title = _("Unpairing failed")
         text = (
             _("Failed to unpair %{device} from %{receiver}.").format(
@@ -56,11 +63,11 @@ def _create_error_text(reason: str, object_) -> Tuple[str, str]:
             + _("The receiver returned an error, with no further details.")
         )
     else:
-        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object_)
+        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason.name, object_)
     return title, text
 
 
-def _error_dialog(reason: str, object_):
+def _error_dialog(reason: ErrorReason, object_):
     logger.error("error: %s %s", reason, object_)
     title, text = _create_error_text(reason, object_)
 
@@ -70,8 +77,7 @@ def _error_dialog(reason: str, object_):
     m.destroy()
 
 
-def error_dialog(reason, object_):
-    assert reason is not None
+def error_dialog(reason: ErrorReason, object_):
     GLib.idle_add(_error_dialog, reason, object_)
 
 
@@ -91,5 +97,6 @@ def stop_async():
 
 
 def ui_async(function, *args, **kwargs):
+    """Runs a function asynchronously."""
     if _task_runner:
         _task_runner(function, *args, **kwargs)

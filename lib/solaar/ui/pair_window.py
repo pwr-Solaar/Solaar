@@ -17,6 +17,8 @@
 
 import logging
 
+from enum import Enum
+
 from gi.repository import GLib
 from gi.repository import Gtk
 from logitech_receiver import hidpp10_constants
@@ -30,6 +32,11 @@ logger = logging.getLogger(__name__)
 
 _PAIRING_TIMEOUT = 30  # seconds
 _STATUS_CHECK = 500  # milliseconds
+
+
+class GtkSignal(Enum):
+    CANCEL = "cancel"
+    CLOSE = "close"
 
 
 def create(receiver):
@@ -207,8 +214,8 @@ def _create_assistant(receiver, ok, finish, title, text):
         assistant.set_page_complete(page_intro, True)
     else:
         page_intro = _create_failure_page(assistant, receiver.pairing.error)
-    assistant.connect("cancel", finish, receiver)
-    assistant.connect("close", finish, receiver)
+    assistant.connect(GtkSignal.CANCEL.value, finish, receiver)
+    assistant.connect(GtkSignal.CLOSE.value, finish, receiver)
     return assistant
 
 
