@@ -25,7 +25,7 @@ POT_FILE="$POT_DIR/$DOMAIN.pot"
 	--package-name "$DOMAIN" \
 	--package-version "$VERSION" \
 	--default-domain="$L_NAME" \
-	--language=Python --from-code=UTF-8 --files-from="$SOURCE_FILES" \
+	--from-code=UTF-8 --files-from="$SOURCE_FILES" \
 	--no-escape --indent --add-location --sort-by-file \
 	--add-comments=I18N \
 	--output="$POT_FILE"
