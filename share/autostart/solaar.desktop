@@ -2,16 +2,17 @@
 [Desktop Entry]
 # I18N: Please leave the name of the program untranslated
 Name=Solaar
-Comment=Logitech Unifying Receiver peripherals manager
-Comment[fr]=Gestionnaire de périphériques pour les récepteurs Logitech Unifying
-Comment[hr]=Upravitelj Logitechovih uređaja povezanih putem Unifying i Nano prijemnika
-Comment[ru]=Управление приёмником Logitech Unifying Receiver
 Comment[de]=Logitech Unifying Empfänger Geräteverwaltung
 Comment[es]=Administrador de periféricos de Logitech Receptor Unifying
+Comment[fr]=Gestionnaire de périphériques pour les récepteurs Logitech Unifying
+Comment[hr]=Upravitelj Logitechovih uređaja povezanih putem Unifying i Nano prijem
 Comment[pl]=Menedżer urządzeń peryferyjnych odbiornika Logitech Unifying
+Comment[ru]=Управление приёмником Logitech Unifying Receiver
 Comment[sv]=Kringutrustningshanteraring för Logitech Unifying-mottagare
 Comment[zh_CN]=罗技优联设备管理器
 Comment[zh_TW]=羅技Unifying 裝置管理器
+Comment=Logitech Unifying Receiver peripherals manager
+# TODO: Move this to a gettext translation
 Comment[zh_HK]=羅技Unifying 裝置管理器
 Exec=solaar --window=hide
 Icon=solaar
