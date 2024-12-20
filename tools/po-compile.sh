@@ -15,3 +15,12 @@ while read po_file; do
 		--output-file="$target" \
 		"$po_file"
 done
+
+find "$PWD/share" -type f -name '*.template.desktop' | \
+while read desktop_file; do
+	output_file="$(echo "$desktop_file" | sed 's/\.template\.desktop/.desktop/g')"
+	/usr/bin/msgfmt \
+		--desktop \
+		--template="$desktop_file" \
+		-d "$PWD/po" -o "$output_file"
+done

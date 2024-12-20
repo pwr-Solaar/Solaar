@@ -3,2148 +3,2181 @@
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2014.
 #
-msgid ""
-msgstr ""
-"Project-Id-Version: solaar 0.9.2\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-14 13:23+0700\n"
-"PO-Revision-Date: 2024-04-23 18:20+0800\n"
-"Last-Translator: Peter Dave Hello <hsu@peterdavehello.org>\n"
-"Language-Team: Peter Dave Hello <hsu@peterdavehello.org>\n"
-"Language: zh_TW\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Language: zh_TW\n"
-"X-Source-Language: C\n"
-"X-Generator: Poedit 3.0\n"
+msgid   ""
+msgstr  "Project-Id-Version: solaar 0.9.2\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2024-12-20 07:40+0000\n"
+        "PO-Revision-Date: 2024-04-23 18:20+0800\n"
+        "Last-Translator: Peter Dave Hello <hsu@peterdavehello.org>\n"
+        "Language-Team: Peter Dave Hello <hsu@peterdavehello.org>\n"
+        "Language: zh_TW\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=1; plural=0;\n"
+        "X-Language: zh_TW\n"
+        "X-Source-Language: C\n"
+        "X-Generator: Poedit 3.0\n"
 
-#: lib/logitech_receiver/base_usb.py:45
-msgid "Bolt Receiver"
-msgstr "Bolt 接收器"
+#: lib/logitech_receiver/base_usb.py:48
+msgid   "Bolt Receiver"
+msgstr  "Bolt 接收器"
 
-#: lib/logitech_receiver/base_usb.py:58
-msgid "Unifying Receiver"
-msgstr "Unifying 接收器"
+#: lib/logitech_receiver/base_usb.py:60
+msgid   "Unifying Receiver"
+msgstr  "Unifying 接收器"
 
-#: lib/logitech_receiver/base_usb.py:70 lib/logitech_receiver/base_usb.py:83
-#: lib/logitech_receiver/base_usb.py:97 lib/logitech_receiver/base_usb.py:111
-#: lib/logitech_receiver/base_usb.py:125
-msgid "Nano Receiver"
-msgstr "Nano 接收器"
+#: lib/logitech_receiver/base_usb.py:71 lib/logitech_receiver/base_usb.py:83
+#: lib/logitech_receiver/base_usb.py:96 lib/logitech_receiver/base_usb.py:109
+msgid   "Nano Receiver"
+msgstr  "Nano 接收器"
 
-#: lib/logitech_receiver/base_usb.py:138
-msgid "Lightspeed Receiver"
-msgstr "Lightspeed 接收器"
+#: lib/logitech_receiver/base_usb.py:121
+msgid   "Lightspeed Receiver"
+msgstr  "Lightspeed 接收器"
 
-#: lib/logitech_receiver/base_usb.py:149
-msgid "EX100 Receiver 27 Mhz"
-msgstr "EX100 27 Mhz 接收器"
+#: lib/logitech_receiver/base_usb.py:131
+msgid   "EX100 Receiver 27 Mhz"
+msgstr  "EX100 27 Mhz 接收器"
 
-#: lib/logitech_receiver/common.py:604
+#: lib/logitech_receiver/common.py:648
 #, python-format
-msgid "Battery: %(level)s (%(status)s)"
-msgstr "電量：%(level)s (%(status)s)"
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  "電量：%(level)s (%(status)s)"
 
-#: lib/logitech_receiver/common.py:606
+#: lib/logitech_receiver/common.py:651
 #, python-format
-msgid "Battery: %(percent)d%% (%(status)s)"
-msgstr "電量：%(percent)d%% (%(status)s)"
+msgid   "Battery: %(percent)d%% (%(status)s)"
+msgstr  "電量：%(percent)d%% (%(status)s)"
 
-#: lib/logitech_receiver/hidpp20.py:926
-#: lib/logitech_receiver/settings_templates.py:291
+#: lib/logitech_receiver/hidpp20.py:953
+#: lib/logitech_receiver/settings_templates.py:293
 #, fuzzy
-msgid "Disabled"
-msgstr "已停用"
+msgid   "Disabled"
+msgstr  "已停用"
 
-#: lib/logitech_receiver/hidpp20.py:927
-msgid "Static"
-msgstr "靜態"
+#: lib/logitech_receiver/hidpp20.py:954
+msgid   "Static"
+msgstr  "靜態"
 
-#: lib/logitech_receiver/hidpp20.py:928
-msgid "Pulse"
-msgstr "脈衝"
+#: lib/logitech_receiver/hidpp20.py:955
+msgid   "Pulse"
+msgstr  "脈衝"
 
-#: lib/logitech_receiver/hidpp20.py:929
-msgid "Cycle"
-msgstr "循環"
+#: lib/logitech_receiver/hidpp20.py:956
+msgid   "Cycle"
+msgstr  "循環"
 
-#: lib/logitech_receiver/hidpp20.py:930
-msgid "Boot"
-msgstr "開機"
+#: lib/logitech_receiver/hidpp20.py:957
+msgid   "Boot"
+msgstr  "開機"
 
-#: lib/logitech_receiver/hidpp20.py:931
-msgid "Demo"
-msgstr "示範"
+#: lib/logitech_receiver/hidpp20.py:958
+msgid   "Demo"
+msgstr  "示範"
 
-#: lib/logitech_receiver/hidpp20.py:932
-msgid "Breathe"
-msgstr "呼吸"
+#: lib/logitech_receiver/hidpp20.py:960
+msgid   "Breathe"
+msgstr  "呼吸"
 
-#: lib/logitech_receiver/hidpp20.py:933
-msgid "Ripple"
-msgstr "漣漪"
+#: lib/logitech_receiver/hidpp20.py:963
+msgid   "Ripple"
+msgstr  "漣漪"
 
-#: lib/logitech_receiver/hidpp20.py:994
+#: lib/logitech_receiver/hidpp20.py:964
+msgid   "Decomposition"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:965
+msgid   "Signature1"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:966
+msgid   "Signature2"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:967
+msgid   "CycleS"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1031
 #, fuzzy
-msgid "Unknown Location"
-msgstr "未知位置"
+msgid   "Unknown Location"
+msgstr  "未知位置"
 
-#: lib/logitech_receiver/hidpp20.py:995
-msgid "Primary"
-msgstr "主要"
+#: lib/logitech_receiver/hidpp20.py:1032
+msgid   "Primary"
+msgstr  "主要"
 
-#: lib/logitech_receiver/hidpp20.py:996
-msgid "Logo"
-msgstr "標誌"
+#: lib/logitech_receiver/hidpp20.py:1033
+msgid   "Logo"
+msgstr  "標誌"
 
-#: lib/logitech_receiver/hidpp20.py:997
+#: lib/logitech_receiver/hidpp20.py:1034
 #, fuzzy
-msgid "Left Side"
-msgstr "左側"
+msgid   "Left Side"
+msgstr  "左側"
 
-#: lib/logitech_receiver/hidpp20.py:998
+#: lib/logitech_receiver/hidpp20.py:1035
 #, fuzzy
-msgid "Right Side"
-msgstr "右側"
+msgid   "Right Side"
+msgstr  "右側"
 
-#: lib/logitech_receiver/hidpp20.py:999
-msgid "Combined"
-msgstr "結合"
+#: lib/logitech_receiver/hidpp20.py:1036
+msgid   "Combined"
+msgstr  "結合"
 
-#: lib/logitech_receiver/hidpp20.py:1000
-msgid "Primary 1"
-msgstr "主要 1"
+#: lib/logitech_receiver/hidpp20.py:1037
+msgid   "Primary 1"
+msgstr  "主要 1"
 
-#: lib/logitech_receiver/hidpp20.py:1001
-msgid "Primary 2"
-msgstr "主要 2"
+#: lib/logitech_receiver/hidpp20.py:1038
+msgid   "Primary 2"
+msgstr  "主要 2"
 
-#: lib/logitech_receiver/hidpp20.py:1002
-msgid "Primary 3"
-msgstr "主要 3"
+#: lib/logitech_receiver/hidpp20.py:1039
+msgid   "Primary 3"
+msgstr  "主要 3"
 
-#: lib/logitech_receiver/hidpp20.py:1003
-msgid "Primary 4"
-msgstr "主要 4"
+#: lib/logitech_receiver/hidpp20.py:1040
+msgid   "Primary 4"
+msgstr  "主要 4"
 
-#: lib/logitech_receiver/hidpp20.py:1004
-msgid "Primary 5"
-msgstr "主要 5"
+#: lib/logitech_receiver/hidpp20.py:1041
+msgid   "Primary 5"
+msgstr  "主要 5"
 
-#: lib/logitech_receiver/hidpp20.py:1005
-msgid "Primary 6"
-msgstr "主要 6"
+#: lib/logitech_receiver/hidpp20.py:1042
+msgid   "Primary 6"
+msgstr  "主要 6"
 
 #: lib/logitech_receiver/i18n.py:28
-msgid "empty"
-msgstr "電池已耗盡"
+msgid   "empty"
+msgstr  "電池已耗盡"
 
 #: lib/logitech_receiver/i18n.py:29
-msgid "critical"
-msgstr "極低"
+msgid   "critical"
+msgstr  "極低"
 
 #: lib/logitech_receiver/i18n.py:30
-msgid "low"
-msgstr "低"
+msgid   "low"
+msgstr  "低"
 
 #: lib/logitech_receiver/i18n.py:31
-msgid "average"
-msgstr "平均"
+msgid   "average"
+msgstr  "平均"
 
 #: lib/logitech_receiver/i18n.py:32
-msgid "good"
-msgstr "良好"
+msgid   "good"
+msgstr  "良好"
 
 #: lib/logitech_receiver/i18n.py:33
-msgid "full"
-msgstr "滿格"
+msgid   "full"
+msgstr  "滿格"
 
 #: lib/logitech_receiver/i18n.py:35
-msgid "discharging"
-msgstr "放電中"
+msgid   "discharging"
+msgstr  "放電中"
 
 #: lib/logitech_receiver/i18n.py:36
-msgid "recharging"
-msgstr "充電中"
+msgid   "recharging"
+msgstr  "充電中"
 
 #: lib/logitech_receiver/i18n.py:37
-msgid "charging"
-msgstr "充電中"
+msgid   "charging"
+msgstr  "充電中"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid "not charging"
-msgstr "未充電"
+msgid   "not charging"
+msgstr  "未充電"
 
 #: lib/logitech_receiver/i18n.py:39
-msgid "almost full"
-msgstr "即將充滿"
+msgid   "almost full"
+msgstr  "即將充滿"
 
 #: lib/logitech_receiver/i18n.py:40
-msgid "charged"
-msgstr "已充滿"
+msgid   "charged"
+msgstr  "已充滿"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid "slow recharge"
-msgstr "慢速充電"
+msgid   "slow recharge"
+msgstr  "慢速充電"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid "invalid battery"
-msgstr "電池無效"
+msgid   "invalid battery"
+msgstr  "電池無效"
 
 #: lib/logitech_receiver/i18n.py:43
-msgid "thermal error"
-msgstr "溫度異常"
+msgid   "thermal error"
+msgstr  "溫度異常"
 
 #: lib/logitech_receiver/i18n.py:44
-msgid "error"
-msgstr "錯誤"
+msgid   "error"
+msgstr  "錯誤"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid "standard"
-msgstr "標準"
+msgid   "standard"
+msgstr  "標準"
 
 #: lib/logitech_receiver/i18n.py:46
-msgid "fast"
-msgstr "快速"
+msgid   "fast"
+msgstr  "快速"
 
 #: lib/logitech_receiver/i18n.py:47
-msgid "slow"
-msgstr "慢"
+msgid   "slow"
+msgstr  "慢"
 
 #: lib/logitech_receiver/i18n.py:49
-msgid "device timeout"
-msgstr "裝置逾時"
+msgid   "device timeout"
+msgstr  "裝置逾時"
 
 #: lib/logitech_receiver/i18n.py:50
-msgid "device not supported"
-msgstr "不支援的裝置"
+msgid   "device not supported"
+msgstr  "不支援的裝置"
 
 #: lib/logitech_receiver/i18n.py:51
-msgid "too many devices"
-msgstr "裝置數量太多"
+msgid   "too many devices"
+msgstr  "裝置數量太多"
 
 #: lib/logitech_receiver/i18n.py:52
-msgid "sequence timeout"
-msgstr "序列超時"
+msgid   "sequence timeout"
+msgstr  "序列超時"
 
 #: lib/logitech_receiver/i18n.py:54
-msgid "Firmware"
-msgstr "韌體"
+msgid   "Firmware"
+msgstr  "韌體"
 
 #: lib/logitech_receiver/i18n.py:55
-msgid "Bootloader"
-msgstr "啟動器"
+msgid   "Bootloader"
+msgstr  "啟動器"
 
 #: lib/logitech_receiver/i18n.py:56
-msgid "Hardware"
-msgstr "硬體"
+msgid   "Hardware"
+msgstr  "硬體"
 
 #: lib/logitech_receiver/i18n.py:57
-msgid "Other"
-msgstr "其他"
+msgid   "Other"
+msgstr  "其他"
 
 #: lib/logitech_receiver/i18n.py:59
-msgid "Left Button"
-msgstr "左鍵"
+msgid   "Left Button"
+msgstr  "左鍵"
 
 #: lib/logitech_receiver/i18n.py:60
-msgid "Right Button"
-msgstr "右鍵"
+msgid   "Right Button"
+msgstr  "右鍵"
 
 #: lib/logitech_receiver/i18n.py:61
-msgid "Middle Button"
-msgstr "中鍵"
+msgid   "Middle Button"
+msgstr  "中鍵"
 
 #: lib/logitech_receiver/i18n.py:62
-msgid "Back Button"
-msgstr "返回鍵"
+msgid   "Back Button"
+msgstr  "返回鍵"
 
 #: lib/logitech_receiver/i18n.py:63
-msgid "Forward Button"
-msgstr "前進鍵"
+msgid   "Forward Button"
+msgstr  "前進鍵"
 
 #: lib/logitech_receiver/i18n.py:64
-msgid "Mouse Gesture Button"
-msgstr "滑鼠手勢鍵"
+msgid   "Mouse Gesture Button"
+msgstr  "滑鼠手勢鍵"
 
 #: lib/logitech_receiver/i18n.py:65
-msgid "Smart Shift"
-msgstr "智慧切換"
+msgid   "Smart Shift"
+msgstr  "智慧切換"
 
 #: lib/logitech_receiver/i18n.py:66
-msgid "DPI Switch"
-msgstr "DPI 切換"
+msgid   "DPI Switch"
+msgstr  "DPI 切換"
 
 #: lib/logitech_receiver/i18n.py:67
-msgid "Left Tilt"
-msgstr "向左傾斜"
+msgid   "Left Tilt"
+msgstr  "向左傾斜"
 
 #: lib/logitech_receiver/i18n.py:68
-msgid "Right Tilt"
-msgstr "向右傾斜"
+msgid   "Right Tilt"
+msgstr  "向右傾斜"
 
 #: lib/logitech_receiver/i18n.py:69
-msgid "Left Click"
-msgstr "左鍵"
+msgid   "Left Click"
+msgstr  "左鍵"
 
 #: lib/logitech_receiver/i18n.py:70
-msgid "Right Click"
-msgstr "右鍵"
+msgid   "Right Click"
+msgstr  "右鍵"
 
 #: lib/logitech_receiver/i18n.py:71
-msgid "Mouse Middle Button"
-msgstr "滑鼠中鍵"
+msgid   "Mouse Middle Button"
+msgstr  "滑鼠中鍵"
 
 #: lib/logitech_receiver/i18n.py:72
-msgid "Mouse Back Button"
-msgstr "滑鼠返回鍵"
+msgid   "Mouse Back Button"
+msgstr  "滑鼠返回鍵"
 
 #: lib/logitech_receiver/i18n.py:73
-msgid "Mouse Forward Button"
-msgstr "滑鼠前進鍵"
+msgid   "Mouse Forward Button"
+msgstr  "滑鼠前進鍵"
 
 #: lib/logitech_receiver/i18n.py:74
-msgid "Gesture Button Navigation"
-msgstr "手勢按鈕導航"
+msgid   "Gesture Button Navigation"
+msgstr  "手勢按鈕導航"
 
 #: lib/logitech_receiver/i18n.py:75
-msgid "Mouse Scroll Left Button"
-msgstr "滑鼠滾輪向左按鈕"
+msgid   "Mouse Scroll Left Button"
+msgstr  "滑鼠滾輪向左按鈕"
 
 #: lib/logitech_receiver/i18n.py:76
-msgid "Mouse Scroll Right Button"
-msgstr "滑鼠滾輪向右按鈕"
+msgid   "Mouse Scroll Right Button"
+msgstr  "滑鼠滾輪向右按鈕"
 
 #: lib/logitech_receiver/i18n.py:78
-msgid "pressed"
-msgstr "按下"
+msgid   "pressed"
+msgstr  "按下"
 
 #: lib/logitech_receiver/i18n.py:79
-msgid "released"
-msgstr "放開"
+msgid   "released"
+msgstr  "放開"
 
-#: lib/logitech_receiver/notifications.py:63
-#: lib/logitech_receiver/notifications.py:115
-msgid "pairing lock is closed"
-msgstr "配對鎖已關閉"
+#: lib/logitech_receiver/notifications.py:86
+#: lib/logitech_receiver/notifications.py:138
+msgid   "pairing lock is closed"
+msgstr  "配對鎖已關閉"
 
-#: lib/logitech_receiver/notifications.py:63
-#: lib/logitech_receiver/notifications.py:115
-msgid "pairing lock is open"
-msgstr "配對鎖已開啟"
+#: lib/logitech_receiver/notifications.py:86
+#: lib/logitech_receiver/notifications.py:138
+msgid   "pairing lock is open"
+msgstr  "配對鎖已開啟"
 
-#: lib/logitech_receiver/notifications.py:80
-msgid "discovery lock is closed"
-msgstr "發現鎖已關閉"
+#: lib/logitech_receiver/notifications.py:103
+msgid   "discovery lock is closed"
+msgstr  "發現鎖已關閉"
 
-#: lib/logitech_receiver/notifications.py:80
-msgid "discovery lock is open"
-msgstr "發現鎖已開啟"
+#: lib/logitech_receiver/notifications.py:103
+msgid   "discovery lock is open"
+msgstr  "發現鎖已開啟"
 
-#: lib/logitech_receiver/notifications.py:207
-msgid "connected"
-msgstr "已連線"
+#: lib/logitech_receiver/notifications.py:232 lib/solaar/listener.py:247
+msgid   "connected"
+msgstr  "已連線"
 
-#: lib/logitech_receiver/notifications.py:207
-msgid "disconnected"
-msgstr "已斷線"
+#: lib/logitech_receiver/notifications.py:232 lib/solaar/listener.py:247
+msgid   "disconnected"
+msgstr  "已斷線"
 
-#: lib/logitech_receiver/notifications.py:233
-msgid "unpaired"
-msgstr "未配對"
+#: lib/logitech_receiver/notifications.py:258
+msgid   "unpaired"
+msgstr  "未配對"
 
-#: lib/logitech_receiver/notifications.py:280
-msgid "powered on"
-msgstr "已啟動"
+#: lib/logitech_receiver/notifications.py:305
+msgid   "powered on"
+msgstr  "已啟動"
 
-#: lib/logitech_receiver/receiver.py:345
-msgid "No paired devices."
-msgstr "沒有已配對的裝置。"
+#: lib/logitech_receiver/receiver.py:383
+msgid   "No paired devices."
+msgstr  "沒有已配對的裝置。"
 
-#: lib/logitech_receiver/receiver.py:347 lib/solaar/ui/window.py:630
+#: lib/logitech_receiver/receiver.py:385 lib/solaar/ui/window.py:590
 #, fuzzy, python-format
-msgid "%(count)s paired device."
-msgid_plural "%(count)s paired devices."
-msgstr[0] "%(count)s 個已配對裝置"
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       "%(count)s 個已配對裝置"
 
-#: lib/logitech_receiver/settings.py:617
-msgid "register"
-msgstr "註冊"
+#: lib/logitech_receiver/settings.py:614
+msgid   "register"
+msgstr  "註冊"
 
-#: lib/logitech_receiver/settings.py:631 lib/logitech_receiver/settings.py:658
-msgid "feature"
-msgstr "功能"
+#: lib/logitech_receiver/settings.py:628 lib/logitech_receiver/settings.py:663
+msgid   "feature"
+msgstr  "功能"
 
-#: lib/logitech_receiver/settings_templates.py:144
-msgid "Swap Fx function"
-msgstr "互換 Fx 鍵功能"
+#: lib/logitech_receiver/settings_templates.py:132
+msgid   "Swap Fx function"
+msgstr  "互換 Fx 鍵功能"
 
-#: lib/logitech_receiver/settings_templates.py:147
-msgid ""
-"When set, the F1..F12 keys will activate their special function,\n"
-"and you must hold the FN key to activate their standard function."
-msgstr ""
-"若開啟，F1 到 F12 鍵將啟用特殊功能，\n"
-"使用標準功能請同時按住 FN 鍵。"
+#: lib/logitech_receiver/settings_templates.py:135
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  "若開啟，F1 到 F12 鍵將啟用特殊功能，\n"
+        "使用標準功能請同時按住 FN 鍵。"
 
-#: lib/logitech_receiver/settings_templates.py:152
-msgid ""
-"When unset, the F1..F12 keys will activate their standard function,\n"
-"and you must hold the FN key to activate their special function."
-msgstr ""
-"若關閉，F1 到 F12 鍵將啟用標準功能，\n"
-"使用特殊功能請同時按住 FN 鍵。"
+#: lib/logitech_receiver/settings_templates.py:140
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  "若關閉，F1 到 F12 鍵將啟用標準功能，\n"
+        "使用特殊功能請同時按住 FN 鍵。"
 
-#: lib/logitech_receiver/settings_templates.py:160
-msgid "Hand Detection"
-msgstr "手掌識別"
+#: lib/logitech_receiver/settings_templates.py:148
+msgid   "Hand Detection"
+msgstr  "手掌識別"
 
-#: lib/logitech_receiver/settings_templates.py:161
-msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "手掌置於鍵盤上方時開啟亮度。"
+#: lib/logitech_receiver/settings_templates.py:149
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  "手掌置於鍵盤上方時開啟亮度。"
 
-#: lib/logitech_receiver/settings_templates.py:168
-msgid "Scroll Wheel Smooth Scrolling"
-msgstr "滾輪平滑捲動"
+#: lib/logitech_receiver/settings_templates.py:156
+msgid   "Scroll Wheel Smooth Scrolling"
+msgstr  "滾輪平滑捲動"
 
-#: lib/logitech_receiver/settings_templates.py:169
-#: lib/logitech_receiver/settings_templates.py:402
-#: lib/logitech_receiver/settings_templates.py:431
-msgid "High-sensitivity mode for vertical scroll with the wheel."
-msgstr "滾輪高解析度滾動模式。"
-
-#: lib/logitech_receiver/settings_templates.py:176
-msgid "Side Scrolling"
-msgstr "側邊滾動"
-
-#: lib/logitech_receiver/settings_templates.py:178
-msgid ""
-"When disabled, pushing the wheel sideways sends custom button events\n"
-"instead of the standard side-scrolling events."
-msgstr ""
-"若停用，按下滾輪側邊將傳送自定義按鈕事件\n"
-"而不是標準側邊滾動事件。"
-
-#: lib/logitech_receiver/settings_templates.py:188
-msgid "Sensitivity (DPI - older mice)"
-msgstr "靈敏度（DPI - 較舊的滑鼠）"
-
-#: lib/logitech_receiver/settings_templates.py:189
-#: lib/logitech_receiver/settings_templates.py:958
-msgid "Mouse movement sensitivity"
-msgstr "滑鼠移動靈敏度"
-
-#: lib/logitech_receiver/settings_templates.py:249
-#: lib/logitech_receiver/settings_templates.py:261
-#: lib/logitech_receiver/settings_templates.py:388
-msgid "Backlight"
-msgstr "背光"
-
-#: lib/logitech_receiver/settings_templates.py:250
-#: lib/logitech_receiver/settings_templates.py:389
-msgid "Set illumination time for keyboard."
-msgstr "設定鍵盤的照明時間。"
-
-#: lib/logitech_receiver/settings_templates.py:262
-msgid ""
-"Illumination level on keyboard.  Changes made are only applied in Manual "
-"mode."
-msgstr "鍵盤上的亮度等級。僅在手動模式下適用。"
-
-#: lib/logitech_receiver/settings_templates.py:293
-msgid "Automatic"
-msgstr "自動"
-
-#: lib/logitech_receiver/settings_templates.py:295
-msgid "Manual"
-msgstr "手動"
-
-#: lib/logitech_receiver/settings_templates.py:297
-msgid "Enabled"
-msgstr "已啟用"
-
-#: lib/logitech_receiver/settings_templates.py:303
-#, fuzzy
-msgid "Backlight Level"
-msgstr "背光"
-
-#: lib/logitech_receiver/settings_templates.py:304
-msgid "Illumination level on keyboard when in Manual mode."
-msgstr "在手動模式下鍵盤的亮度等級。"
-
-#: lib/logitech_receiver/settings_templates.py:361
-msgid "Backlight Delay Hands Out"
-msgstr "手離開後背光延遲"
-
-#: lib/logitech_receiver/settings_templates.py:362
-msgid ""
-"Delay in seconds until backlight fades out with hands away from keyboard."
-msgstr "手離開鍵盤後，背光消失的延遲時間（以秒為單位）。"
-
-#: lib/logitech_receiver/settings_templates.py:370
-msgid "Backlight Delay Hands In"
-msgstr "手靠近後背光延遲"
-
-#: lib/logitech_receiver/settings_templates.py:371
-msgid "Delay in seconds until backlight fades out with hands near keyboard."
-msgstr "手靠近鍵盤後，背光消失的延遲時間（以秒為單位）。"
-
-#: lib/logitech_receiver/settings_templates.py:379
-msgid "Backlight Delay Powered"
-msgstr "供電後背光延遲"
-
-#: lib/logitech_receiver/settings_templates.py:380
-msgid "Delay in seconds until backlight fades out with external power."
-msgstr "外部供電後，背光消失的延遲時間（以秒為單位）。"
-
-#: lib/logitech_receiver/settings_templates.py:400
-msgid "Scroll Wheel High Resolution"
-msgstr "滾輪高解析度"
-
+#: lib/logitech_receiver/settings_templates.py:157
 #: lib/logitech_receiver/settings_templates.py:404
 #: lib/logitech_receiver/settings_templates.py:433
-msgid "Set to ignore if scrolling is abnormally fast or slow"
-msgstr "如果滾動速度異常快或慢，設定為忽略"
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  "滾輪高解析度滾動模式。"
 
-#: lib/logitech_receiver/settings_templates.py:411
-#: lib/logitech_receiver/settings_templates.py:442
-msgid "Scroll Wheel Diversion"
-msgstr "滾輪轉向"
+#: lib/logitech_receiver/settings_templates.py:164
+msgid   "Side Scrolling"
+msgstr  "側邊滾動"
+
+#: lib/logitech_receiver/settings_templates.py:166
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  "若停用，按下滾輪側邊將傳送自定義按鈕事件\n"
+        "而不是標準側邊滾動事件。"
+
+#: lib/logitech_receiver/settings_templates.py:176
+msgid   "Sensitivity (DPI - older mice)"
+msgstr  "靈敏度（DPI - 較舊的滑鼠）"
+
+#: lib/logitech_receiver/settings_templates.py:177
+#: lib/logitech_receiver/settings_templates.py:981
+#: lib/logitech_receiver/settings_templates.py:1009
+msgid   "Mouse movement sensitivity"
+msgstr  "滑鼠移動靈敏度"
+
+#: lib/logitech_receiver/settings_templates.py:250
+msgid   "Backlight Timed"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:251
+#: lib/logitech_receiver/settings_templates.py:391
+msgid   "Set illumination time for keyboard."
+msgstr  "設定鍵盤的照明時間。"
+
+#: lib/logitech_receiver/settings_templates.py:262
+msgid   "Backlight"
+msgstr  "背光"
+
+#: lib/logitech_receiver/settings_templates.py:263
+msgid   "Illumination level on keyboard.  Changes made are only applied in "
+        "Manual mode."
+msgstr  "鍵盤上的亮度等級。僅在手動模式下適用。"
+
+#: lib/logitech_receiver/settings_templates.py:295
+msgid   "Automatic"
+msgstr  "自動"
+
+#: lib/logitech_receiver/settings_templates.py:297
+msgid   "Manual"
+msgstr  "手動"
+
+#: lib/logitech_receiver/settings_templates.py:299
+msgid   "Enabled"
+msgstr  "已啟用"
+
+#: lib/logitech_receiver/settings_templates.py:305
+#, fuzzy
+msgid   "Backlight Level"
+msgstr  "背光"
+
+#: lib/logitech_receiver/settings_templates.py:306
+msgid   "Illumination level on keyboard when in Manual mode."
+msgstr  "在手動模式下鍵盤的亮度等級。"
+
+#: lib/logitech_receiver/settings_templates.py:363
+msgid   "Backlight Delay Hands Out"
+msgstr  "手離開後背光延遲"
+
+#: lib/logitech_receiver/settings_templates.py:364
+msgid   "Delay in seconds until backlight fades out with hands away from "
+        "keyboard."
+msgstr  "手離開鍵盤後，背光消失的延遲時間（以秒為單位）。"
+
+#: lib/logitech_receiver/settings_templates.py:372
+msgid   "Backlight Delay Hands In"
+msgstr  "手靠近後背光延遲"
+
+#: lib/logitech_receiver/settings_templates.py:373
+msgid   "Delay in seconds until backlight fades out with hands near keyboard."
+msgstr  "手靠近鍵盤後，背光消失的延遲時間（以秒為單位）。"
+
+#: lib/logitech_receiver/settings_templates.py:381
+msgid   "Backlight Delay Powered"
+msgstr  "供電後背光延遲"
+
+#: lib/logitech_receiver/settings_templates.py:382
+msgid   "Delay in seconds until backlight fades out with external power."
+msgstr  "外部供電後，背光消失的延遲時間（以秒為單位）。"
+
+#: lib/logitech_receiver/settings_templates.py:390
+msgid   "Backlight (Seconds)"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:402
+msgid   "Scroll Wheel High Resolution"
+msgstr  "滾輪高解析度"
+
+#: lib/logitech_receiver/settings_templates.py:406
+#: lib/logitech_receiver/settings_templates.py:435
+msgid   "Set to ignore if scrolling is abnormally fast or slow"
+msgstr  "如果滾動速度異常快或慢，設定為忽略"
 
 #: lib/logitech_receiver/settings_templates.py:413
-msgid ""
-"Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger "
-"Solaar rules but are otherwise ignored)."
-msgstr ""
-"使滾輪發送 LOWRES_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下將被忽"
-"略）。"
-
-#: lib/logitech_receiver/settings_templates.py:420
-msgid "Scroll Wheel Direction"
-msgstr "滾輪方向"
-
-#: lib/logitech_receiver/settings_templates.py:421
-msgid "Invert direction for vertical scroll with wheel."
-msgstr "反轉滾輪的垂直滾動方向。"
-
-#: lib/logitech_receiver/settings_templates.py:429
-msgid "Scroll Wheel Resolution"
-msgstr "滾輪解析度"
-
 #: lib/logitech_receiver/settings_templates.py:444
-msgid ""
-"Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar "
-"rules but are otherwise ignored)."
-msgstr ""
-"使滾輪發送 HIRES_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下將被忽略）。"
+msgid   "Scroll Wheel Diversion"
+msgstr  "滾輪轉向"
 
-#: lib/logitech_receiver/settings_templates.py:453
-msgid "Sensitivity (Pointer Speed)"
-msgstr "靈敏度（指標速度）"
+#: lib/logitech_receiver/settings_templates.py:415
+msgid   "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  "使滾輪發送 LOWRES_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下將"
+        "被忽略）。"
 
-#: lib/logitech_receiver/settings_templates.py:454
-msgid "Speed multiplier for mouse (256 is normal multiplier)."
-msgstr "滑鼠速度乘數（256 為正常乘數）。"
+#: lib/logitech_receiver/settings_templates.py:422
+msgid   "Scroll Wheel Direction"
+msgstr  "滾輪方向"
 
-#: lib/logitech_receiver/settings_templates.py:464
-msgid "Thumb Wheel Diversion"
-msgstr "拇指滾輪轉向"
+#: lib/logitech_receiver/settings_templates.py:423
+msgid   "Invert direction for vertical scroll with wheel."
+msgstr  "反轉滾輪的垂直滾動方向。"
+
+#: lib/logitech_receiver/settings_templates.py:431
+msgid   "Scroll Wheel Resolution"
+msgstr  "滾輪解析度"
+
+#: lib/logitech_receiver/settings_templates.py:446
+msgid   "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  "使滾輪發送 HIRES_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下將被"
+        "忽略）。"
+
+#: lib/logitech_receiver/settings_templates.py:455
+msgid   "Sensitivity (Pointer Speed)"
+msgstr  "靈敏度（指標速度）"
+
+#: lib/logitech_receiver/settings_templates.py:456
+msgid   "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr  "滑鼠速度乘數（256 為正常乘數）。"
 
 #: lib/logitech_receiver/settings_templates.py:466
-msgid ""
-"Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar "
-"rules but are otherwise ignored)."
-msgstr ""
-"使拇指滾輪發送 THUMB_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下將被忽"
-"略）。"
+msgid   "Thumb Wheel Diversion"
+msgstr  "拇指滾輪轉向"
 
-#: lib/logitech_receiver/settings_templates.py:475
-msgid "Thumb Wheel Direction"
-msgstr "拇指滾輪方向"
+#: lib/logitech_receiver/settings_templates.py:468
+msgid   "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
+        "Solaar rules but are otherwise ignored)."
+msgstr  "使拇指滾輪發送 THUMB_WHEEL HID++ 通知（觸發 Solaar 規則，但其他情況下"
+        "將被忽略）。"
 
-#: lib/logitech_receiver/settings_templates.py:476
-msgid "Invert thumb wheel scroll direction."
-msgstr "反轉拇指滾輪滾動方向。"
+#: lib/logitech_receiver/settings_templates.py:477
+msgid   "Thumb Wheel Direction"
+msgstr  "拇指滾輪方向"
 
-#: lib/logitech_receiver/settings_templates.py:496
-msgid "Onboard Profiles"
-msgstr "內建設定檔"
+#: lib/logitech_receiver/settings_templates.py:478
+msgid   "Invert thumb wheel scroll direction."
+msgstr  "反轉拇指滾輪滾動方向。"
 
-#: lib/logitech_receiver/settings_templates.py:497
+#: lib/logitech_receiver/settings_templates.py:498
+msgid   "Onboard Profiles"
+msgstr  "內建設定檔"
+
+#: lib/logitech_receiver/settings_templates.py:499
 #, fuzzy
-msgid ""
-"Enable an onboard profile, which controls report rate, sensitivity, and "
-"button actions"
-msgstr "啟用內建設定檔，通常用於控制回報速率和鍵盤亮度"
-
-#: lib/logitech_receiver/settings_templates.py:541
-#: lib/logitech_receiver/settings_templates.py:581
-#, fuzzy
-msgid "Report Rate"
-msgstr "回報速率"
+msgid   "Enable an onboard profile, which controls report rate, sensitivity, "
+        "and button actions"
+msgstr  "啟用內建設定檔，通常用於控制回報速率和鍵盤亮度"
 
 #: lib/logitech_receiver/settings_templates.py:543
-#: lib/logitech_receiver/settings_templates.py:583
+#: lib/logitech_receiver/settings_templates.py:576
 #, fuzzy
-msgid "Frequency of device movement reports"
-msgstr "裝置輪詢的頻率，以毫秒為單位"
+msgid   "Report Rate"
+msgstr  "回報速率"
 
-#: lib/logitech_receiver/settings_templates.py:543
-#: lib/logitech_receiver/settings_templates.py:583
-#: lib/logitech_receiver/settings_templates.py:1295
-#: lib/logitech_receiver/settings_templates.py:1326
-msgid "May need Onboard Profiles set to Disable to be effective."
-msgstr "可能需要將內建設定檔設定為停用才能生效。"
+#: lib/logitech_receiver/settings_templates.py:545
+#: lib/logitech_receiver/settings_templates.py:578
+#, fuzzy
+msgid   "Frequency of device movement reports"
+msgstr  "裝置輪詢的頻率，以毫秒為單位"
 
-#: lib/logitech_receiver/settings_templates.py:623
-msgid "Divert crown events"
-msgstr "轉移多功能轉鈕事件"
+#: lib/logitech_receiver/settings_templates.py:545
+#: lib/logitech_receiver/settings_templates.py:578
+#: lib/logitech_receiver/settings_templates.py:1009
+#: lib/logitech_receiver/settings_templates.py:1383
+#: lib/logitech_receiver/settings_templates.py:1414
+msgid   "May need Onboard Profiles set to Disable to be effective."
+msgstr  "可能需要將內建設定檔設定為停用才能生效。"
+
+#: lib/logitech_receiver/settings_templates.py:606
+msgid   "Divert crown events"
+msgstr  "轉移多功能轉鈕事件"
+
+#: lib/logitech_receiver/settings_templates.py:607
+msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "使多功能轉鈕發送 CROWN HID++ 通知（觸發 Solaar 規則，但其他情況下將被"
+        "忽略）。"
+
+#: lib/logitech_receiver/settings_templates.py:615
+msgid   "Crown smooth scroll"
+msgstr  "Crown 平滑滾動"
+
+#: lib/logitech_receiver/settings_templates.py:616
+msgid   "Set crown smooth scroll"
+msgstr  "設定 Crown 平滑滾動"
 
 #: lib/logitech_receiver/settings_templates.py:624
-msgid ""
-"Make crown send CROWN HID++ notifications (which trigger Solaar rules but "
-"are otherwise ignored)."
-msgstr ""
-"使多功能轉鈕發送 CROWN HID++ 通知（觸發 Solaar 規則，但其他情況下將被忽略）。"
-
-#: lib/logitech_receiver/settings_templates.py:632
-msgid "Crown smooth scroll"
-msgstr "Crown 平滑滾動"
-
-#: lib/logitech_receiver/settings_templates.py:633
-msgid "Set crown smooth scroll"
-msgstr "設定 Crown 平滑滾動"
-
-#: lib/logitech_receiver/settings_templates.py:641
 #, fuzzy
-msgid "Divert G and M Keys"
-msgstr "轉換 G 鍵"
+msgid   "Divert G and M Keys"
+msgstr  "轉換 G 鍵"
+
+#: lib/logitech_receiver/settings_templates.py:625
+#, fuzzy
+msgid   "Make G and M keys send HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "讓 G 鍵發送 GKEY HID++ 通知（將觸發 Solaar 規則，但其他情況下會被忽"
+        "略）。"
+
+#: lib/logitech_receiver/settings_templates.py:639
+msgid   "Scroll Wheel Ratcheted"
+msgstr  "滾輪棘輪"
+
+#: lib/logitech_receiver/settings_templates.py:640
+msgid   "Switch the mouse wheel between speed-controlled ratcheting and "
+        "always freespin."
+msgstr  "在速度控制的滾輪棘輪和始終自由滾動之間切換滑鼠滾輪。"
 
 #: lib/logitech_receiver/settings_templates.py:642
-#, fuzzy
-msgid ""
-"Make G and M keys send HID++ notifications (which trigger Solaar rules but "
-"are otherwise ignored)."
-msgstr ""
-"讓 G 鍵發送 GKEY HID++ 通知（將觸發 Solaar 規則，但其他情況下會被忽略）。"
+msgid   "Freespinning"
+msgstr  "自由滾動"
 
-#: lib/logitech_receiver/settings_templates.py:656
-msgid "Scroll Wheel Ratcheted"
-msgstr "滾輪棘輪"
+#: lib/logitech_receiver/settings_templates.py:642
+msgid   "Ratcheted"
+msgstr  "棘輪式"
 
-#: lib/logitech_receiver/settings_templates.py:657
-msgid ""
-"Switch the mouse wheel between speed-controlled ratcheting and always "
-"freespin."
-msgstr "在速度控制的滾輪棘輪和始終自由滾動之間切換滑鼠滾輪。"
+#: lib/logitech_receiver/settings_templates.py:649
+msgid   "Scroll Wheel Ratchet Speed"
+msgstr  "滾輪棘輪速度"
 
-#: lib/logitech_receiver/settings_templates.py:659
-msgid "Freespinning"
-msgstr "自由滾動"
+#: lib/logitech_receiver/settings_templates.py:651
+msgid   "Use the mouse wheel speed to switch between ratcheted and "
+        "freespinning.\n"
+        "The mouse wheel is always ratcheted at 50."
+msgstr  "使用滑鼠滾輪速度在滾輪棘輪和自由滾動之間切換。\n"
+        "滾輪在 50 時始終處於棘輪狀態。"
 
-#: lib/logitech_receiver/settings_templates.py:659
-msgid "Ratcheted"
-msgstr "棘輪式"
+#: lib/logitech_receiver/settings_templates.py:705
+msgid   "Key/Button Actions"
+msgstr  "鍵/按鈕動作"
 
-#: lib/logitech_receiver/settings_templates.py:666
-msgid "Scroll Wheel Ratchet Speed"
-msgstr "滾輪棘輪速度"
+#: lib/logitech_receiver/settings_templates.py:707
+msgid   "Change the action for the key or button."
+msgstr  "更改鍵或按鈕的動作。"
 
-#: lib/logitech_receiver/settings_templates.py:668
-msgid ""
-"Use the mouse wheel speed to switch between ratcheted and freespinning.\n"
-"The mouse wheel is always ratcheted at 50."
-msgstr ""
-"使用滑鼠滾輪速度在滾輪棘輪和自由滾動之間切換。\n"
-"滾輪在 50 時始終處於棘輪狀態。"
+#: lib/logitech_receiver/settings_templates.py:709
+msgid   "Overridden by diversion."
+msgstr  "由轉換覆蓋。"
 
-#: lib/logitech_receiver/settings_templates.py:717
-msgid "Key/Button Actions"
-msgstr "鍵/按鈕動作"
-
-#: lib/logitech_receiver/settings_templates.py:719
-msgid "Change the action for the key or button."
-msgstr "更改鍵或按鈕的動作。"
-
-#: lib/logitech_receiver/settings_templates.py:721
-msgid "Overridden by diversion."
-msgstr "由轉換覆蓋。"
-
-#: lib/logitech_receiver/settings_templates.py:723
-msgid ""
-"Changing important actions (such as for the left mouse button) can result in "
-"an unusable system."
-msgstr "更改重要動作（例如左鍵）可能導致系統無法使用。"
+#: lib/logitech_receiver/settings_templates.py:711
+msgid   "Changing important actions (such as for the left mouse button) can "
+        "result in an unusable system."
+msgstr  "更改重要動作（例如左鍵）可能導致系統無法使用。"
 
 #: lib/logitech_receiver/settings_templates.py:886
-msgid "Key/Button Diversion"
-msgstr "鍵/按鈕轉換"
+msgid   "Key/Button Diversion"
+msgstr  "鍵/按鈕轉換"
 
 #: lib/logitech_receiver/settings_templates.py:887
-msgid ""
-"Make the key or button send HID++ notifications (Diverted) or initiate Mouse "
-"Gestures or Sliding DPI"
-msgstr "讓鍵或按鈕發送 HID++ 通知（已轉換）或啟動滑鼠手勢或滑動 DPI"
+msgid   "Make the key or button send HID++ notifications (Diverted) or "
+        "initiate Mouse Gestures or Sliding DPI"
+msgstr  "讓鍵或按鈕發送 HID++ 通知（已轉換）或啟動滑鼠手勢或滑動 DPI"
 
 #: lib/logitech_receiver/settings_templates.py:890
 #: lib/logitech_receiver/settings_templates.py:891
 #: lib/logitech_receiver/settings_templates.py:892
-msgid "Diverted"
-msgstr "已轉換"
+msgid   "Diverted"
+msgstr  "已轉換"
 
 #: lib/logitech_receiver/settings_templates.py:890
 #: lib/logitech_receiver/settings_templates.py:891
-msgid "Mouse Gestures"
-msgstr "滑鼠手勢"
+msgid   "Mouse Gestures"
+msgstr  "滑鼠手勢"
 
 #: lib/logitech_receiver/settings_templates.py:890
 #: lib/logitech_receiver/settings_templates.py:891
 #: lib/logitech_receiver/settings_templates.py:892
-msgid "Regular"
-msgstr "常規"
+msgid   "Regular"
+msgstr  "常規"
 
 #: lib/logitech_receiver/settings_templates.py:890
-msgid "Sliding DPI"
-msgstr "滑動 DPI"
+msgid   "Sliding DPI"
+msgstr  "滑動 DPI"
 
-#: lib/logitech_receiver/settings_templates.py:957
-msgid "Sensitivity (DPI)"
-msgstr "靈敏度 (DPI)"
+#: lib/logitech_receiver/settings_templates.py:980
+#: lib/logitech_receiver/settings_templates.py:1008
+msgid   "Sensitivity (DPI)"
+msgstr  "靈敏度 (DPI)"
 
-#: lib/logitech_receiver/settings_templates.py:997
-msgid "Sensitivity Switching"
-msgstr "靈敏度切換"
+#: lib/logitech_receiver/settings_templates.py:1085
+msgid   "Sensitivity Switching"
+msgstr  "靈敏度切換"
 
-#: lib/logitech_receiver/settings_templates.py:999
-msgid ""
-"Switch the current sensitivity and the remembered sensitivity when the key "
-"or button is pressed.\n"
-"If there is no remembered sensitivity, just remember the current sensitivity"
-msgstr ""
-"在按下鍵或按鈕時切換目前靈敏度和已記憶的靈敏度。\n"
-"如果沒有已記憶的靈敏度，只需記住目前的靈敏度"
+#: lib/logitech_receiver/settings_templates.py:1087
+msgid   "Switch the current sensitivity and the remembered sensitivity when "
+        "the key or button is pressed.\n"
+        "If there is no remembered sensitivity, just remember the current "
+        "sensitivity"
+msgstr  "在按下鍵或按鈕時切換目前靈敏度和已記憶的靈敏度。\n"
+        "如果沒有已記憶的靈敏度，只需記住目前的靈敏度"
 
-#: lib/logitech_receiver/settings_templates.py:1003
-msgid "Off"
-msgstr "關"
-
-#: lib/logitech_receiver/settings_templates.py:1034
-msgid "Disable keys"
-msgstr "停用鍵"
-
-#: lib/logitech_receiver/settings_templates.py:1035
-msgid "Disable specific keyboard keys."
-msgstr "停用特定鍵盤按鍵。"
-
-#: lib/logitech_receiver/settings_templates.py:1038
-#, python-format
-msgid "Disables the %s key."
-msgstr "停用 %s 鍵。"
-
-#: lib/logitech_receiver/settings_templates.py:1051
-#: lib/logitech_receiver/settings_templates.py:1108
-msgid "Set OS"
-msgstr "設定作業系統"
-
-#: lib/logitech_receiver/settings_templates.py:1052
-#: lib/logitech_receiver/settings_templates.py:1109
-msgid "Change keys to match OS."
-msgstr "更改按鍵以符合作業系統。"
-
-#: lib/logitech_receiver/settings_templates.py:1121
-msgid "Change Host"
-msgstr "更改主機號碼"
+#: lib/logitech_receiver/settings_templates.py:1091
+msgid   "Off"
+msgstr  "關"
 
 #: lib/logitech_receiver/settings_templates.py:1122
-msgid "Switch connection to a different host"
-msgstr "切換到其他主機"
+msgid   "Disable keys"
+msgstr  "停用鍵"
 
-#: lib/logitech_receiver/settings_templates.py:1146
-msgid "Performs a left click."
-msgstr "執行左鍵點選。"
+#: lib/logitech_receiver/settings_templates.py:1123
+msgid   "Disable specific keyboard keys."
+msgstr  "停用特定鍵盤按鍵。"
 
-#: lib/logitech_receiver/settings_templates.py:1146
-msgid "Single tap"
-msgstr "點選"
+#: lib/logitech_receiver/settings_templates.py:1126
+#, python-format
+msgid   "Disables the %s key."
+msgstr  "停用 %s 鍵。"
 
-#: lib/logitech_receiver/settings_templates.py:1147
-msgid "Performs a right click."
-msgstr "執行右鍵點選。"
-
-#: lib/logitech_receiver/settings_templates.py:1147
-msgid "Single tap with two fingers"
-msgstr "用兩根手指點選"
-
-#: lib/logitech_receiver/settings_templates.py:1148
-msgid "Single tap with three fingers"
-msgstr "用三根手指點選"
-
-#: lib/logitech_receiver/settings_templates.py:1152
-msgid "Double tap"
-msgstr "點兩下"
-
-#: lib/logitech_receiver/settings_templates.py:1152
-msgid "Performs a double click."
-msgstr "執行點兩下。"
-
-#: lib/logitech_receiver/settings_templates.py:1153
-msgid "Double tap with two fingers"
-msgstr "用兩根手指點兩下"
-
-#: lib/logitech_receiver/settings_templates.py:1154
-msgid "Double tap with three fingers"
-msgstr "用三根手指點兩下"
-
-#: lib/logitech_receiver/settings_templates.py:1157
-msgid "Drags items by dragging the finger after double tapping."
-msgstr "點兩下後拖動手指來拖動物件。"
-
-#: lib/logitech_receiver/settings_templates.py:1157
-msgid "Tap and drag"
-msgstr "點選並拖曳"
-
-#: lib/logitech_receiver/settings_templates.py:1159
-msgid "Tap and drag with two fingers"
-msgstr "用兩根手指點兩下並拖曳"
-
-#: lib/logitech_receiver/settings_templates.py:1160
-msgid "Drags items by dragging the fingers after double tapping."
-msgstr "點兩下後拖動手指來拖動物件。"
-
-#: lib/logitech_receiver/settings_templates.py:1162
-msgid "Tap and drag with three fingers"
-msgstr "用三根手指點選並拖曳"
-
-#: lib/logitech_receiver/settings_templates.py:1165
-msgid "Suppress tap and edge gestures"
-msgstr "停用輕觸和邊緣手勢"
-
-#: lib/logitech_receiver/settings_templates.py:1166
-msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
-msgstr "停用輕觸和邊緣手勢（相當於按 Fn+左鍵點選）。"
-
-#: lib/logitech_receiver/settings_templates.py:1168
-msgid "Scroll with one finger"
-msgstr "用一根手指滾動"
-
-#: lib/logitech_receiver/settings_templates.py:1168
-#: lib/logitech_receiver/settings_templates.py:1169
-#: lib/logitech_receiver/settings_templates.py:1172
-msgid "Scrolls."
-msgstr "滾動。"
-
-#: lib/logitech_receiver/settings_templates.py:1169
-#: lib/logitech_receiver/settings_templates.py:1172
-msgid "Scroll with two fingers"
-msgstr "用兩根手指滾動"
-
-#: lib/logitech_receiver/settings_templates.py:1170
-msgid "Scroll horizontally with two fingers"
-msgstr "用兩根手指水平滾動"
-
-#: lib/logitech_receiver/settings_templates.py:1170
-msgid "Scrolls horizontally."
-msgstr "水平滾動。"
-
-#: lib/logitech_receiver/settings_templates.py:1171
-msgid "Scroll vertically with two fingers"
-msgstr "用兩根手指垂直滾動"
-
-#: lib/logitech_receiver/settings_templates.py:1171
-msgid "Scrolls vertically."
-msgstr "垂直滾動。"
-
-#: lib/logitech_receiver/settings_templates.py:1173
-msgid "Inverts the scrolling direction."
-msgstr "反轉滾動方向。"
-
-#: lib/logitech_receiver/settings_templates.py:1173
-msgid "Natural scrolling"
-msgstr "自然滾動"
-
-#: lib/logitech_receiver/settings_templates.py:1174
-msgid "Enables the thumbwheel."
-msgstr "啟用拇指滾輪。"
-
-#: lib/logitech_receiver/settings_templates.py:1174
-msgid "Thumbwheel"
-msgstr "拇指滾輪"
-
-#: lib/logitech_receiver/settings_templates.py:1185
-#: lib/logitech_receiver/settings_templates.py:1189
-msgid "Swipe from the top edge"
-msgstr "從上緣滑動"
-
-#: lib/logitech_receiver/settings_templates.py:1186
-msgid "Swipe from the left edge"
-msgstr "從左緣滑動"
-
-#: lib/logitech_receiver/settings_templates.py:1187
-msgid "Swipe from the right edge"
-msgstr "從右緣滑動"
-
-#: lib/logitech_receiver/settings_templates.py:1188
-msgid "Swipe from the bottom edge"
-msgstr "從下緣滑動"
-
-#: lib/logitech_receiver/settings_templates.py:1190
-msgid "Swipe two fingers from the left edge"
-msgstr "從左緣滑動兩根手指"
-
-#: lib/logitech_receiver/settings_templates.py:1191
-msgid "Swipe two fingers from the right edge"
-msgstr "從右緣滑動兩根手指"
-
-#: lib/logitech_receiver/settings_templates.py:1192
-msgid "Swipe two fingers from the bottom edge"
-msgstr "從下緣滑動兩根手指"
-
-#: lib/logitech_receiver/settings_templates.py:1193
-msgid "Swipe two fingers from the top edge"
-msgstr "從上緣滑動兩根手指"
-
-#: lib/logitech_receiver/settings_templates.py:1194
-#: lib/logitech_receiver/settings_templates.py:1198
-msgid "Pinch to zoom out; spread to zoom in."
-msgstr "捏合以縮小；張開以放大。"
-
-#: lib/logitech_receiver/settings_templates.py:1194
-msgid "Zoom with two fingers."
-msgstr "用兩根手指縮放。"
-
-#: lib/logitech_receiver/settings_templates.py:1195
-msgid "Pinch to zoom out."
-msgstr "捏合以縮小。"
-
+#: lib/logitech_receiver/settings_templates.py:1139
 #: lib/logitech_receiver/settings_templates.py:1196
-msgid "Spread to zoom in."
-msgstr "張開以放大。"
+msgid   "Set OS"
+msgstr  "設定作業系統"
 
+#: lib/logitech_receiver/settings_templates.py:1140
 #: lib/logitech_receiver/settings_templates.py:1197
-msgid "Zoom with three fingers."
-msgstr "用三根手指縮放。"
+msgid   "Change keys to match OS."
+msgstr  "更改按鍵以符合作業系統。"
 
-#: lib/logitech_receiver/settings_templates.py:1198
-msgid "Zoom with two fingers"
-msgstr "用兩根手指縮放"
+#: lib/logitech_receiver/settings_templates.py:1209
+msgid   "Change Host"
+msgstr  "更改主機號碼"
 
-#: lib/logitech_receiver/settings_templates.py:1216
-msgid "Pixel zone"
-msgstr "像素區域"
+#: lib/logitech_receiver/settings_templates.py:1210
+msgid   "Switch connection to a different host"
+msgstr  "切換到其他主機"
 
-#: lib/logitech_receiver/settings_templates.py:1217
-msgid "Ratio zone"
-msgstr "比例區域"
+#: lib/logitech_receiver/settings_templates.py:1234
+msgid   "Performs a left click."
+msgstr  "執行左鍵點選。"
 
-#: lib/logitech_receiver/settings_templates.py:1218
-msgid "Scale factor"
-msgstr "縮放係數"
+#: lib/logitech_receiver/settings_templates.py:1234
+msgid   "Single tap"
+msgstr  "點選"
 
-#: lib/logitech_receiver/settings_templates.py:1218
-msgid "Sets the cursor speed."
-msgstr "設定游標速度。"
+#: lib/logitech_receiver/settings_templates.py:1235
+msgid   "Performs a right click."
+msgstr  "執行右鍵點選。"
 
-#: lib/logitech_receiver/settings_templates.py:1222
-msgid "Left"
-msgstr "左"
+#: lib/logitech_receiver/settings_templates.py:1235
+msgid   "Single tap with two fingers"
+msgstr  "用兩根手指點選"
 
-#: lib/logitech_receiver/settings_templates.py:1222
-msgid "Left-most coordinate."
-msgstr "最左邊的座標。"
+#: lib/logitech_receiver/settings_templates.py:1236
+msgid   "Single tap with three fingers"
+msgstr  "用三根手指點選"
 
-#: lib/logitech_receiver/settings_templates.py:1223
-msgid "Bottom"
-msgstr "底部"
+#: lib/logitech_receiver/settings_templates.py:1240
+msgid   "Double tap"
+msgstr  "點兩下"
 
-#: lib/logitech_receiver/settings_templates.py:1223
-msgid "Bottom coordinate."
-msgstr "底部座標。"
+#: lib/logitech_receiver/settings_templates.py:1240
+msgid   "Performs a double click."
+msgstr  "執行點兩下。"
 
-#: lib/logitech_receiver/settings_templates.py:1224
-msgid "Width"
-msgstr "寬度"
+#: lib/logitech_receiver/settings_templates.py:1241
+msgid   "Double tap with two fingers"
+msgstr  "用兩根手指點兩下"
 
-#: lib/logitech_receiver/settings_templates.py:1224
-msgid "Width."
-msgstr "寬度。"
+#: lib/logitech_receiver/settings_templates.py:1242
+msgid   "Double tap with three fingers"
+msgstr  "用三根手指點兩下"
 
-#: lib/logitech_receiver/settings_templates.py:1225
-msgid "Height"
-msgstr "高度"
+#: lib/logitech_receiver/settings_templates.py:1245
+msgid   "Drags items by dragging the finger after double tapping."
+msgstr  "點兩下後拖動手指來拖動物件。"
 
-#: lib/logitech_receiver/settings_templates.py:1225
-msgid "Height."
-msgstr "高度。"
+#: lib/logitech_receiver/settings_templates.py:1245
+msgid   "Tap and drag"
+msgstr  "點選並拖曳"
 
-#: lib/logitech_receiver/settings_templates.py:1226
-msgid "Cursor speed."
-msgstr "游標速度。"
+#: lib/logitech_receiver/settings_templates.py:1247
+msgid   "Tap and drag with two fingers"
+msgstr  "用兩根手指點兩下並拖曳"
 
-#: lib/logitech_receiver/settings_templates.py:1226
-msgid "Scale"
-msgstr "縮放"
-
-#: lib/logitech_receiver/settings_templates.py:1232
-msgid "Gestures"
-msgstr "手勢"
-
-#: lib/logitech_receiver/settings_templates.py:1233
-msgid "Tweak the mouse/touchpad behaviour."
-msgstr "調整滑鼠/觸控板行為。"
-
-#: lib/logitech_receiver/settings_templates.py:1249
-msgid "Gestures Diversion"
-msgstr "手勢轉換"
+#: lib/logitech_receiver/settings_templates.py:1248
+msgid   "Drags items by dragging the fingers after double tapping."
+msgstr  "點兩下後拖動手指來拖動物件。"
 
 #: lib/logitech_receiver/settings_templates.py:1250
-msgid "Divert mouse/touchpad gestures."
-msgstr "轉換滑鼠/觸控板手勢。"
+msgid   "Tap and drag with three fingers"
+msgstr  "用三根手指點選並拖曳"
 
-#: lib/logitech_receiver/settings_templates.py:1266
-msgid "Gesture params"
-msgstr "手勢參數"
+#: lib/logitech_receiver/settings_templates.py:1253
+msgid   "Suppress tap and edge gestures"
+msgstr  "停用輕觸和邊緣手勢"
 
-#: lib/logitech_receiver/settings_templates.py:1267
-msgid "Change numerical parameters of a mouse/touchpad."
-msgstr "更改滑鼠/觸控板的數值參數。"
+#: lib/logitech_receiver/settings_templates.py:1254
+msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr  "停用輕觸和邊緣手勢（相當於按 Fn+左鍵點選）。"
 
-#: lib/logitech_receiver/settings_templates.py:1291
-msgid "M-Key LEDs"
-msgstr "M 鍵 LED"
+#: lib/logitech_receiver/settings_templates.py:1256
+msgid   "Scroll with one finger"
+msgstr  "用一根手指滾動"
 
-#: lib/logitech_receiver/settings_templates.py:1293
-msgid "Control the M-Key LEDs."
-msgstr "控制 M 鍵 LED。"
+#: lib/logitech_receiver/settings_templates.py:1256
+#: lib/logitech_receiver/settings_templates.py:1257
+#: lib/logitech_receiver/settings_templates.py:1260
+msgid   "Scrolls."
+msgstr  "滾動。"
 
-#: lib/logitech_receiver/settings_templates.py:1297
-#: lib/logitech_receiver/settings_templates.py:1328
-msgid "May need G Keys diverted to be effective."
-msgstr "可能需要轉換 G 鍵才能生效。"
+#: lib/logitech_receiver/settings_templates.py:1257
+#: lib/logitech_receiver/settings_templates.py:1260
+msgid   "Scroll with two fingers"
+msgstr  "用兩根手指滾動"
 
-#: lib/logitech_receiver/settings_templates.py:1303
-#, python-format
-msgid "Lights up the %s key."
-msgstr "點亮 %s 鍵。"
+#: lib/logitech_receiver/settings_templates.py:1258
+msgid   "Scroll horizontally with two fingers"
+msgstr  "用兩根手指水平滾動"
 
-#: lib/logitech_receiver/settings_templates.py:1322
-msgid "MR-Key LED"
-msgstr "MR 鍵 LED"
+#: lib/logitech_receiver/settings_templates.py:1258
+msgid   "Scrolls horizontally."
+msgstr  "水平滾動。"
 
-#: lib/logitech_receiver/settings_templates.py:1324
-msgid "Control the MR-Key LED."
-msgstr "控制 MR 鍵 LED。"
+#: lib/logitech_receiver/settings_templates.py:1259
+msgid   "Scroll vertically with two fingers"
+msgstr  "用兩根手指垂直滾動"
 
-#: lib/logitech_receiver/settings_templates.py:1345
-msgid "Persistent Key/Button Mapping"
-msgstr "持久按鍵/按鈕對應"
+#: lib/logitech_receiver/settings_templates.py:1259
+msgid   "Scrolls vertically."
+msgstr  "垂直滾動。"
 
-#: lib/logitech_receiver/settings_templates.py:1347
-msgid "Permanently change the mapping for the key or button."
-msgstr "永久更改按鍵或按鈕的對應。"
+#: lib/logitech_receiver/settings_templates.py:1261
+msgid   "Inverts the scrolling direction."
+msgstr  "反轉滾動方向。"
 
-#: lib/logitech_receiver/settings_templates.py:1349
-msgid ""
-"Changing important keys or buttons (such as for the left mouse button) can "
-"result in an unusable system."
-msgstr "更改重要的按鍵或按鈕（例如左鍵）可能導致系統無法使用。"
+#: lib/logitech_receiver/settings_templates.py:1261
+msgid   "Natural scrolling"
+msgstr  "自然滾動"
 
-#: lib/logitech_receiver/settings_templates.py:1406
-msgid "Sidetone"
-msgstr "側音"
+#: lib/logitech_receiver/settings_templates.py:1262
+msgid   "Enables the thumbwheel."
+msgstr  "啟用拇指滾輪。"
 
-#: lib/logitech_receiver/settings_templates.py:1407
-msgid "Set sidetone level."
-msgstr "設定側音等級。"
+#: lib/logitech_receiver/settings_templates.py:1262
+msgid   "Thumbwheel"
+msgstr  "拇指滾輪"
 
+#: lib/logitech_receiver/settings_templates.py:1273
+#: lib/logitech_receiver/settings_templates.py:1277
+msgid   "Swipe from the top edge"
+msgstr  "從上緣滑動"
+
+#: lib/logitech_receiver/settings_templates.py:1274
+msgid   "Swipe from the left edge"
+msgstr  "從左緣滑動"
+
+#: lib/logitech_receiver/settings_templates.py:1275
+msgid   "Swipe from the right edge"
+msgstr  "從右緣滑動"
+
+#: lib/logitech_receiver/settings_templates.py:1276
+msgid   "Swipe from the bottom edge"
+msgstr  "從下緣滑動"
+
+#: lib/logitech_receiver/settings_templates.py:1278
+msgid   "Swipe two fingers from the left edge"
+msgstr  "從左緣滑動兩根手指"
+
+#: lib/logitech_receiver/settings_templates.py:1279
+msgid   "Swipe two fingers from the right edge"
+msgstr  "從右緣滑動兩根手指"
+
+#: lib/logitech_receiver/settings_templates.py:1280
+msgid   "Swipe two fingers from the bottom edge"
+msgstr  "從下緣滑動兩根手指"
+
+#: lib/logitech_receiver/settings_templates.py:1281
+msgid   "Swipe two fingers from the top edge"
+msgstr  "從上緣滑動兩根手指"
+
+#: lib/logitech_receiver/settings_templates.py:1282
+#: lib/logitech_receiver/settings_templates.py:1286
+msgid   "Pinch to zoom out; spread to zoom in."
+msgstr  "捏合以縮小；張開以放大。"
+
+#: lib/logitech_receiver/settings_templates.py:1282
+msgid   "Zoom with two fingers."
+msgstr  "用兩根手指縮放。"
+
+#: lib/logitech_receiver/settings_templates.py:1283
+msgid   "Pinch to zoom out."
+msgstr  "捏合以縮小。"
+
+#: lib/logitech_receiver/settings_templates.py:1284
+msgid   "Spread to zoom in."
+msgstr  "張開以放大。"
+
+#: lib/logitech_receiver/settings_templates.py:1285
+msgid   "Zoom with three fingers."
+msgstr  "用三根手指縮放。"
+
+#: lib/logitech_receiver/settings_templates.py:1286
+msgid   "Zoom with two fingers"
+msgstr  "用兩根手指縮放"
+
+#: lib/logitech_receiver/settings_templates.py:1304
+msgid   "Pixel zone"
+msgstr  "像素區域"
+
+#: lib/logitech_receiver/settings_templates.py:1305
+msgid   "Ratio zone"
+msgstr  "比例區域"
+
+#: lib/logitech_receiver/settings_templates.py:1306
+msgid   "Scale factor"
+msgstr  "縮放係數"
+
+#: lib/logitech_receiver/settings_templates.py:1306
+msgid   "Sets the cursor speed."
+msgstr  "設定游標速度。"
+
+#: lib/logitech_receiver/settings_templates.py:1310
+msgid   "Left"
+msgstr  "左"
+
+#: lib/logitech_receiver/settings_templates.py:1310
+msgid   "Left-most coordinate."
+msgstr  "最左邊的座標。"
+
+#: lib/logitech_receiver/settings_templates.py:1311
+msgid   "Bottom"
+msgstr  "底部"
+
+#: lib/logitech_receiver/settings_templates.py:1311
+msgid   "Bottom coordinate."
+msgstr  "底部座標。"
+
+#: lib/logitech_receiver/settings_templates.py:1312
+msgid   "Width"
+msgstr  "寬度"
+
+#: lib/logitech_receiver/settings_templates.py:1312
+msgid   "Width."
+msgstr  "寬度。"
+
+#: lib/logitech_receiver/settings_templates.py:1313
+msgid   "Height"
+msgstr  "高度"
+
+#: lib/logitech_receiver/settings_templates.py:1313
+msgid   "Height."
+msgstr  "高度。"
+
+#: lib/logitech_receiver/settings_templates.py:1314
+msgid   "Cursor speed."
+msgstr  "游標速度。"
+
+#: lib/logitech_receiver/settings_templates.py:1314
+msgid   "Scale"
+msgstr  "縮放"
+
+#: lib/logitech_receiver/settings_templates.py:1320
+msgid   "Gestures"
+msgstr  "手勢"
+
+#: lib/logitech_receiver/settings_templates.py:1321
+msgid   "Tweak the mouse/touchpad behaviour."
+msgstr  "調整滑鼠/觸控板行為。"
+
+#: lib/logitech_receiver/settings_templates.py:1337
+msgid   "Gestures Diversion"
+msgstr  "手勢轉換"
+
+#: lib/logitech_receiver/settings_templates.py:1338
+msgid   "Divert mouse/touchpad gestures."
+msgstr  "轉換滑鼠/觸控板手勢。"
+
+#: lib/logitech_receiver/settings_templates.py:1354
+msgid   "Gesture params"
+msgstr  "手勢參數"
+
+#: lib/logitech_receiver/settings_templates.py:1355
+msgid   "Change numerical parameters of a mouse/touchpad."
+msgstr  "更改滑鼠/觸控板的數值參數。"
+
+#: lib/logitech_receiver/settings_templates.py:1379
+msgid   "M-Key LEDs"
+msgstr  "M 鍵 LED"
+
+#: lib/logitech_receiver/settings_templates.py:1381
+msgid   "Control the M-Key LEDs."
+msgstr  "控制 M 鍵 LED。"
+
+#: lib/logitech_receiver/settings_templates.py:1385
 #: lib/logitech_receiver/settings_templates.py:1416
-msgid "Equalizer"
-msgstr "均衡器"
+msgid   "May need G Keys diverted to be effective."
+msgstr  "可能需要轉換 G 鍵才能生效。"
 
-#: lib/logitech_receiver/settings_templates.py:1417
-msgid "Set equalizer levels."
-msgstr "設定均衡器等級。"
+#: lib/logitech_receiver/settings_templates.py:1391
+#, python-format
+msgid   "Lights up the %s key."
+msgstr  "點亮 %s 鍵。"
 
-#: lib/logitech_receiver/settings_templates.py:1439
-msgid "Hz"
-msgstr "赫茲"
+#: lib/logitech_receiver/settings_templates.py:1410
+msgid   "MR-Key LED"
+msgstr  "MR 鍵 LED"
 
-#: lib/logitech_receiver/settings_templates.py:1445
-msgid "Power Management"
-msgstr "電源管理"
+#: lib/logitech_receiver/settings_templates.py:1412
+msgid   "Control the MR-Key LED."
+msgstr  "控制 MR 鍵 LED。"
 
-#: lib/logitech_receiver/settings_templates.py:1446
-msgid "Power off in minutes (0 for never)."
-msgstr "幾分鐘後關機（0 表示永不）。"
+#: lib/logitech_receiver/settings_templates.py:1433
+msgid   "Persistent Key/Button Mapping"
+msgstr  "持久按鍵/按鈕對應"
 
-#: lib/logitech_receiver/settings_templates.py:1457
-msgid "LED Control"
-msgstr "LED 控制"
+#: lib/logitech_receiver/settings_templates.py:1435
+msgid   "Permanently change the mapping for the key or button."
+msgstr  "永久更改按鍵或按鈕的對應。"
 
-#: lib/logitech_receiver/settings_templates.py:1458
-msgid "Switch control of LEDs between device and Solaar"
-msgstr "在裝置與 Solaar 之間切換 LED 控制"
-
-#: lib/logitech_receiver/settings_templates.py:1473
-msgid "LED Zone Effects"
-msgstr "LED 區域效果"
-
-#: lib/logitech_receiver/settings_templates.py:1474
-msgid "Set effect for LED Zone"
-msgstr "設定 LED 區域的效果"
-
-#: lib/logitech_receiver/settings_templates.py:1477
-msgid "Speed"
-msgstr "速度"
-
-#: lib/logitech_receiver/settings_templates.py:1478
-msgid "Period"
-msgstr "週期"
-
-#: lib/logitech_receiver/settings_templates.py:1479
-msgid "Intensity"
-msgstr "強度"
-
-#: lib/logitech_receiver/settings_templates.py:1480
-msgid "Ramp"
-msgstr "漸變"
+#: lib/logitech_receiver/settings_templates.py:1437
+msgid   "Changing important keys or buttons (such as for the left mouse "
+        "button) can result in an unusable system."
+msgstr  "更改重要的按鍵或按鈕（例如左鍵）可能導致系統無法使用。"
 
 #: lib/logitech_receiver/settings_templates.py:1494
-msgid "LEDs"
-msgstr "LED 燈"
+msgid   "Sidetone"
+msgstr  "側音"
 
-#: lib/solaar/ui/__init__.py:112
-msgid "Another Solaar process is already running so just expose its window"
-msgstr "已經有其他的 Solaar 處理程序在執行了，所以將會顯示它的視窗。"
+#: lib/logitech_receiver/settings_templates.py:1495
+msgid   "Set sidetone level."
+msgstr  "設定側音等級。"
 
-#: lib/solaar/ui/about.py:38
-msgid ""
-"Manages Logitech receivers,\n"
-"keyboards, mice, and tablets."
-msgstr "管理羅技接收器、鍵盤、滑鼠和平板。"
+#: lib/logitech_receiver/settings_templates.py:1504
+msgid   "Equalizer"
+msgstr  "均衡器"
 
-#: lib/solaar/ui/about.py:46
-msgid "Additional Programming"
-msgstr "額外程式化"
+#: lib/logitech_receiver/settings_templates.py:1505
+msgid   "Set equalizer levels."
+msgstr  "設定均衡器等級。"
 
-#: lib/solaar/ui/about.py:47
-msgid "GUI design"
-msgstr "圖形介面設計"
+#: lib/logitech_receiver/settings_templates.py:1527
+msgid   "Hz"
+msgstr  "赫茲"
 
-#: lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "軟體測試"
+#: lib/logitech_receiver/settings_templates.py:1533
+msgid   "Power Management"
+msgstr  "電源管理"
 
-#: lib/solaar/ui/about.py:57
-msgid "Logitech documentation"
-msgstr "羅技文件"
+#: lib/logitech_receiver/settings_templates.py:1534
+msgid   "Power off in minutes (0 for never)."
+msgstr  "幾分鐘後關機（0 表示永不）。"
+
+#: lib/logitech_receiver/settings_templates.py:1545
+msgid   "Brightness Control"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1546
+msgid   "Control overall brightness"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1589
+#: lib/logitech_receiver/settings_templates.py:1643
+msgid   "LED Control"
+msgstr  "LED 控制"
+
+#: lib/logitech_receiver/settings_templates.py:1590
+#: lib/logitech_receiver/settings_templates.py:1644
+msgid   "Switch control of LED zones between device and Solaar"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1605
+#: lib/logitech_receiver/settings_templates.py:1654
+msgid   "LED Zone Effects"
+msgstr  "LED 區域效果"
+
+#: lib/logitech_receiver/settings_templates.py:1606
+#: lib/logitech_receiver/settings_templates.py:1655
+msgid   "LED Control needs to be set to Solaar to be effective."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1606
+#: lib/logitech_receiver/settings_templates.py:1655
+msgid   "Set effect for LED Zone"
+msgstr  "設定 LED 區域的效果"
+
+#: lib/logitech_receiver/settings_templates.py:1609
+msgid   "Speed"
+msgstr  "速度"
+
+#: lib/logitech_receiver/settings_templates.py:1610
+msgid   "Period"
+msgstr  "週期"
+
+#: lib/logitech_receiver/settings_templates.py:1611
+msgid   "Intensity"
+msgstr  "強度"
+
+#: lib/logitech_receiver/settings_templates.py:1612
+msgid   "Ramp"
+msgstr  "漸變"
+
+#: lib/logitech_receiver/settings_templates.py:1628
+msgid   "LEDs"
+msgstr  "LED 燈"
+
+#: lib/logitech_receiver/settings_templates.py:1665
+msgid   "Per-key Lighting"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1666
+msgid   "Control per-key lighting."
+msgstr  ""
+
+#: lib/solaar/ui/__init__.py:117
+msgid   "Another Solaar process is already running so just expose its window"
+msgstr  "已經有其他的 Solaar 處理程序在執行了，所以將會顯示它的視窗。"
+
+#: lib/solaar/ui/about/model.py:36
+msgid   "Manages Logitech receivers,\n"
+        "keyboards, mice, and tablets."
+msgstr  "管理羅技接收器、鍵盤、滑鼠和平板。"
+
+#: lib/solaar/ui/about/model.py:63
+msgid   "Additional Programming"
+msgstr  "額外程式化"
+
+#: lib/solaar/ui/about/model.py:64
+msgid   "GUI design"
+msgstr  "圖形介面設計"
+
+#: lib/solaar/ui/about/model.py:66
+msgid   "Testing"
+msgstr  "軟體測試"
+
+#: lib/solaar/ui/about/model.py:74
+msgid   "Logitech documentation"
+msgstr  "羅技文件"
 
 #: lib/solaar/ui/action.py:83 lib/solaar/ui/action.py:87
-#: lib/solaar/ui/window.py:199
-msgid "Unpair"
-msgstr "取消配對"
+#: lib/solaar/ui/window.py:188
+msgid   "Unpair"
+msgstr  "取消配對"
 
-#: lib/solaar/ui/action.py:86 lib/solaar/ui/diversion_rules.py:104
-msgid "Cancel"
-msgstr "取消"
+#: lib/solaar/ui/action.py:86 lib/solaar/ui/diversion_rules.py:107
+msgid   "Cancel"
+msgstr  "取消"
 
 #: lib/solaar/ui/common.py:35
-msgid "Permissions error"
-msgstr "權限錯誤"
+msgid   "Permissions error"
+msgstr  "權限錯誤"
 
 #: lib/solaar/ui/common.py:37
 #, python-format
-msgid ""
-"Found a Logitech receiver or device (%s), but did not have permission to "
-"open it."
-msgstr "找到了羅技接收器或裝置（%s），但沒有權限開啟。"
+msgid   "Found a Logitech receiver or device (%s), but did not have "
+        "permission to open it."
+msgstr  "找到了羅技接收器或裝置（%s），但沒有權限開啟。"
 
 #: lib/solaar/ui/common.py:39
-msgid ""
-"If you've just installed Solaar, try disconnecting the receiver or device "
-"and then reconnecting it."
-msgstr "如果您剛剛安裝了 Solaar，請嘗試斷開接收器或裝置，然後重新連接。"
+msgid   "If you've just installed Solaar, try disconnecting the receiver or "
+        "device and then reconnecting it."
+msgstr  "如果您剛剛安裝了 Solaar，請嘗試斷開接收器或裝置，然後重新連接。"
 
 #: lib/solaar/ui/common.py:42
-msgid "Cannot connect to device error"
-msgstr "無法連接到裝置錯誤"
+msgid   "Cannot connect to device error"
+msgstr  "無法連接到裝置錯誤"
 
 #: lib/solaar/ui/common.py:44
 #, python-format
-msgid ""
-"Found a Logitech receiver or device at %s, but encountered an error "
-"connecting to it."
-msgstr "在 %s 找到了一個羅技接收器或裝置，但連接時遇到錯誤。"
+msgid   "Found a Logitech receiver or device at %s, but encountered an error "
+        "connecting to it."
+msgstr  "在 %s 找到了一個羅技接收器或裝置，但連接時遇到錯誤。"
 
 #: lib/solaar/ui/common.py:46
-msgid ""
-"Try disconnecting the device and then reconnecting it or turning it off and "
-"then on."
-msgstr "嘗試斷開裝置然後重新連接，或者關閉裝置然後再開啟。"
+msgid   "Try disconnecting the device and then reconnecting it or turning it "
+        "off and then on."
+msgstr  "嘗試斷開裝置然後重新連接，或者關閉裝置然後再開啟。"
 
 #: lib/solaar/ui/common.py:49
-msgid "Unpairing failed"
-msgstr "取消配對失敗"
+msgid   "Unpairing failed"
+msgstr  "取消配對失敗"
 
 #: lib/solaar/ui/common.py:51
 #, python-brace-format
-msgid "Failed to unpair %{device} from %{receiver}."
-msgstr "取消 %{device} 到 %{receiver} 的配對失敗。"
+msgid   "Failed to unpair %{device} from %{receiver}."
+msgstr  "取消 %{device} 到 %{receiver} 的配對失敗。"
 
-#: lib/solaar/ui/common.py:53
-msgid "The receiver returned an error, with no further details."
-msgstr "接收器出現錯誤，未提供詳細資訊。"
+#: lib/solaar/ui/common.py:56
+msgid   "The receiver returned an error, with no further details."
+msgstr  "接收器出現錯誤，未提供詳細資訊。"
 
-#: lib/solaar/ui/config_panel.py:231
-msgid "Complete - ENTER to change"
-msgstr "完成 - 按 ENTER 來修改"
+#: lib/solaar/ui/config_panel.py:228
+msgid   "Complete - ENTER to change"
+msgstr  "完成 - 按 ENTER 來修改"
 
-#: lib/solaar/ui/config_panel.py:231
-msgid "Incomplete"
-msgstr "未完成"
+#: lib/solaar/ui/config_panel.py:228
+msgid   "Incomplete"
+msgstr  "未完成"
 
-#: lib/solaar/ui/config_panel.py:476 lib/solaar/ui/config_panel.py:529
+#: lib/solaar/ui/config_panel.py:475 lib/solaar/ui/config_panel.py:527
 #, python-format
-msgid "%d value"
-msgid_plural "%d values"
-msgstr[0] "%d 值"
+msgid   "%d value"
+msgid_plural    "%d values"
+msgstr[0]       "%d 值"
 
-#: lib/solaar/ui/config_panel.py:612
-msgid "Changes allowed"
-msgstr "允許更改"
+#: lib/solaar/ui/config_panel.py:609
+msgid   "Changes allowed"
+msgstr  "允許更改"
 
-#: lib/solaar/ui/config_panel.py:613
-msgid "No changes allowed"
-msgstr "不允許更改"
+#: lib/solaar/ui/config_panel.py:610
+msgid   "No changes allowed"
+msgstr  "不允許更改"
 
-#: lib/solaar/ui/config_panel.py:614
-msgid "Ignore this setting"
-msgstr "忽略此設定"
+#: lib/solaar/ui/config_panel.py:611
+msgid   "Ignore this setting"
+msgstr  "忽略此設定"
 
-#: lib/solaar/ui/config_panel.py:659
-msgid "Working"
-msgstr "工作中"
+#: lib/solaar/ui/config_panel.py:655
+msgid   "Working"
+msgstr  "工作中"
 
-#: lib/solaar/ui/config_panel.py:662
-msgid "Read/write operation failed."
-msgstr "讀/寫操作失敗。"
+#: lib/solaar/ui/config_panel.py:658
+msgid   "Read/write operation failed."
+msgstr  "讀/寫操作失敗。"
 
-#: lib/solaar/ui/diversion_rules.py:66
-msgid "Built-in rules"
-msgstr "內建規則"
+#: lib/solaar/ui/desktop_notifications.py:114
+msgid   "unspecified reason"
+msgstr  "不明的原因"
 
-#: lib/solaar/ui/diversion_rules.py:66
-msgid "User-defined rules"
-msgstr "使用者自定義規則"
+#: lib/solaar/ui/diversion_rules.py:69
+msgid   "Built-in rules"
+msgstr  "內建規則"
 
-#: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:1089
-msgid "Rule"
-msgstr "規則"
+#: lib/solaar/ui/diversion_rules.py:69
+msgid   "User-defined rules"
+msgstr  "使用者自定義規則"
 
-#: lib/solaar/ui/diversion_rules.py:69 lib/solaar/ui/diversion_rules.py:538
-#: lib/solaar/ui/diversion_rules.py:665
-msgid "Sub-rule"
-msgstr "子規則"
+#: lib/solaar/ui/diversion_rules.py:71 lib/solaar/ui/diversion_rules.py:1089
+msgid   "Rule"
+msgstr  "規則"
 
-#: lib/solaar/ui/diversion_rules.py:71
-msgid "[empty]"
-msgstr "[空]"
+#: lib/solaar/ui/diversion_rules.py:72 lib/solaar/ui/diversion_rules.py:348
+#: lib/solaar/ui/diversion_rules.py:475
+msgid   "Sub-rule"
+msgstr  "子規則"
 
-#: lib/solaar/ui/diversion_rules.py:95
-msgid "Make changes permanent?"
-msgstr "使更改永久生效？"
+#: lib/solaar/ui/diversion_rules.py:74
+msgid   "[empty]"
+msgstr  "[空]"
 
-#: lib/solaar/ui/diversion_rules.py:100
-msgid "Yes"
-msgstr "是"
+#: lib/solaar/ui/diversion_rules.py:98
+msgid   "Make changes permanent?"
+msgstr  "使更改永久生效？"
 
-#: lib/solaar/ui/diversion_rules.py:102
-msgid "No"
-msgstr "否"
+#: lib/solaar/ui/diversion_rules.py:103
+msgid   "Yes"
+msgstr  "是"
 
-#: lib/solaar/ui/diversion_rules.py:107
-msgid "If you choose No, changes will be lost when Solaar is closed."
-msgstr "如果您選擇否，當 Solaar 關閉時，更改將會遺失。"
+#: lib/solaar/ui/diversion_rules.py:105
+msgid   "No"
+msgstr  "否"
 
-#: lib/solaar/ui/diversion_rules.py:138
-msgid "Solaar Rule Editor"
-msgstr "Solaar 規則編輯器"
+#: lib/solaar/ui/diversion_rules.py:110
+msgid   "If you choose No, changes will be lost when Solaar is closed."
+msgstr  "如果您選擇否，當 Solaar 關閉時，更改將會遺失。"
 
-#: lib/solaar/ui/diversion_rules.py:231
-msgid "Save changes"
-msgstr "儲存修改"
+#: lib/solaar/ui/diversion_rules.py:239
+msgid   "Paste here"
+msgstr  "在此貼上"
 
-#: lib/solaar/ui/diversion_rules.py:236
-msgid "Discard changes"
-msgstr "不儲存修改"
+#: lib/solaar/ui/diversion_rules.py:241
+msgid   "Paste above"
+msgstr  "在上方貼上"
 
-#: lib/solaar/ui/diversion_rules.py:397
-msgid "Insert here"
-msgstr "在此插入"
+#: lib/solaar/ui/diversion_rules.py:243
+msgid   "Paste below"
+msgstr  "在下方貼上"
 
-#: lib/solaar/ui/diversion_rules.py:399
-msgid "Insert above"
-msgstr "在上方插入"
+#: lib/solaar/ui/diversion_rules.py:249
+msgid   "Paste rule here"
+msgstr  "在此貼上規則"
 
-#: lib/solaar/ui/diversion_rules.py:401
-msgid "Insert below"
-msgstr "在下方插入"
+#: lib/solaar/ui/diversion_rules.py:251
+msgid   "Paste rule above"
+msgstr  "在上方貼上規則"
+
+#: lib/solaar/ui/diversion_rules.py:253
+msgid   "Paste rule below"
+msgstr  "在下方貼上規則"
+
+#: lib/solaar/ui/diversion_rules.py:257
+msgid   "Paste rule"
+msgstr  "貼上規則"
+
+#: lib/solaar/ui/diversion_rules.py:272
+msgid   "Insert here"
+msgstr  "在此插入"
+
+#: lib/solaar/ui/diversion_rules.py:274
+msgid   "Insert above"
+msgstr  "在上方插入"
+
+#: lib/solaar/ui/diversion_rules.py:276
+msgid   "Insert below"
+msgstr  "在下方插入"
+
+#: lib/solaar/ui/diversion_rules.py:282
+msgid   "Insert new rule here"
+msgstr  "在此插入新規則"
+
+#: lib/solaar/ui/diversion_rules.py:284
+msgid   "Insert new rule above"
+msgstr  "在上方插入新規則"
+
+#: lib/solaar/ui/diversion_rules.py:286
+msgid   "Insert new rule below"
+msgstr  "在下方插入新規則"
+
+#: lib/solaar/ui/diversion_rules.py:313
+msgid   "Flatten"
+msgstr  "平坦化"
+
+#: lib/solaar/ui/diversion_rules.py:346
+msgid   "Insert"
+msgstr  "插入"
+
+#: lib/solaar/ui/diversion_rules.py:349 lib/solaar/ui/diversion_rules.py:477
+#: lib/solaar/ui/diversion_rules.py:1121
+msgid   "Or"
+msgstr  "或"
+
+#: lib/solaar/ui/diversion_rules.py:350 lib/solaar/ui/diversion_rules.py:476
+#: lib/solaar/ui/diversion_rules.py:1107
+msgid   "And"
+msgstr  "和"
+
+#: lib/solaar/ui/diversion_rules.py:352
+msgid   "Condition"
+msgstr  "條件"
+
+#: lib/solaar/ui/diversion_rules.py:354 lib/solaar/ui/rule_conditions.py:145
+msgid   "Feature"
+msgstr  "功能"
+
+#: lib/solaar/ui/diversion_rules.py:355 lib/solaar/ui/rule_conditions.py:179
+msgid   "Report"
+msgstr  "回報"
+
+#: lib/solaar/ui/diversion_rules.py:356 lib/solaar/ui/rule_conditions.py:60
+msgid   "Process"
+msgstr  "處理"
+
+#: lib/solaar/ui/diversion_rules.py:357
+msgid   "Mouse process"
+msgstr  "滑鼠處理"
+
+#: lib/solaar/ui/diversion_rules.py:358 lib/solaar/ui/rule_conditions.py:216
+msgid   "Modifiers"
+msgstr  "修飾鍵"
+
+#: lib/solaar/ui/diversion_rules.py:359 lib/solaar/ui/rule_conditions.py:268
+msgid   "Key"
+msgstr  "鍵"
+
+#: lib/solaar/ui/diversion_rules.py:360 lib/solaar/ui/rule_conditions.py:309
+msgid   "KeyIsDown"
+msgstr  "按鍵處於按下狀態"
+
+#: lib/solaar/ui/diversion_rules.py:361 lib/solaar/ui/diversion_rules.py:1414
+msgid   "Active"
+msgstr  "使用中"
+
+#: lib/solaar/ui/diversion_rules.py:362 lib/solaar/ui/diversion_rules.py:1372
+#: lib/solaar/ui/diversion_rules.py:1423 lib/solaar/ui/diversion_rules.py:1470
+msgid   "Device"
+msgstr  "裝置"
+
+#: lib/solaar/ui/diversion_rules.py:363 lib/solaar/ui/diversion_rules.py:1449
+msgid   "Host"
+msgstr  "主機"
+
+#: lib/solaar/ui/diversion_rules.py:364 lib/solaar/ui/diversion_rules.py:1489
+msgid   "Setting"
+msgstr  "設定"
+
+#: lib/solaar/ui/diversion_rules.py:365 lib/solaar/ui/rule_conditions.py:324
+#: lib/solaar/ui/rule_conditions.py:373
+msgid   "Test"
+msgstr  "測試"
+
+#: lib/solaar/ui/diversion_rules.py:366 lib/solaar/ui/rule_conditions.py:498
+msgid   "Test bytes"
+msgstr  "測試位元組"
+
+#: lib/solaar/ui/diversion_rules.py:367 lib/solaar/ui/rule_conditions.py:599
+msgid   "Mouse Gesture"
+msgstr  "滑鼠手勢"
+
+#: lib/solaar/ui/diversion_rules.py:371
+msgid   "Action"
+msgstr  "動作"
+
+#: lib/solaar/ui/diversion_rules.py:373 lib/solaar/ui/rule_actions.py:131
+msgid   "Key press"
+msgstr  "按鍵按下"
+
+#: lib/solaar/ui/diversion_rules.py:374 lib/solaar/ui/rule_actions.py:182
+msgid   "Mouse scroll"
+msgstr  "滑鼠滾動"
+
+#: lib/solaar/ui/diversion_rules.py:375 lib/solaar/ui/rule_actions.py:243
+msgid   "Mouse click"
+msgstr  "滑鼠點選"
+
+#: lib/solaar/ui/diversion_rules.py:376
+msgid   "Set"
+msgstr  "設定"
+
+#: lib/solaar/ui/diversion_rules.py:377 lib/solaar/ui/rule_actions.py:313
+msgid   "Execute"
+msgstr  "執行"
+
+#: lib/solaar/ui/diversion_rules.py:378 lib/solaar/ui/diversion_rules.py:1152
+msgid   "Later"
+msgstr  "稍後"
 
 #: lib/solaar/ui/diversion_rules.py:407
-msgid "Insert new rule here"
-msgstr "在此插入新規則"
+msgid   "Insert new rule"
+msgstr  "插入新規則"
 
-#: lib/solaar/ui/diversion_rules.py:409
-msgid "Insert new rule above"
-msgstr "在上方插入新規則"
+#: lib/solaar/ui/diversion_rules.py:427 lib/solaar/ui/rule_actions.py:74
+#: lib/solaar/ui/rule_actions.py:272 lib/solaar/ui/rule_conditions.py:546
+msgid   "Delete"
+msgstr  "刪除"
 
-#: lib/solaar/ui/diversion_rules.py:411
-msgid "Insert new rule below"
-msgstr "在下方插入新規則"
+#: lib/solaar/ui/diversion_rules.py:449
+msgid   "Negate"
+msgstr  "否"
 
-#: lib/solaar/ui/diversion_rules.py:456
-msgid "Paste here"
-msgstr "在此貼上"
-
-#: lib/solaar/ui/diversion_rules.py:458
-msgid "Paste above"
-msgstr "在上方貼上"
-
-#: lib/solaar/ui/diversion_rules.py:460
-msgid "Paste below"
-msgstr "在下方貼上"
-
-#: lib/solaar/ui/diversion_rules.py:466
-msgid "Paste rule here"
-msgstr "在此貼上規則"
-
-#: lib/solaar/ui/diversion_rules.py:468
-msgid "Paste rule above"
-msgstr "在上方貼上規則"
-
-#: lib/solaar/ui/diversion_rules.py:470
-msgid "Paste rule below"
-msgstr "在下方貼上規則"
-
-#: lib/solaar/ui/diversion_rules.py:474
-msgid "Paste rule"
-msgstr "貼上規則"
+#: lib/solaar/ui/diversion_rules.py:473
+msgid   "Wrap with"
+msgstr  "包在一起"
 
 #: lib/solaar/ui/diversion_rules.py:503
-msgid "Flatten"
-msgstr "平坦化"
+msgid   "Cut"
+msgstr  "剪下"
 
-#: lib/solaar/ui/diversion_rules.py:536
-msgid "Insert"
-msgstr "插入"
+#: lib/solaar/ui/diversion_rules.py:519
+msgid   "Paste"
+msgstr  "貼上"
 
-#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:667
-#: lib/solaar/ui/diversion_rules.py:1129
-msgid "Or"
-msgstr "或"
+#: lib/solaar/ui/diversion_rules.py:525
+msgid   "Copy"
+msgstr  "複製"
 
-#: lib/solaar/ui/diversion_rules.py:540 lib/solaar/ui/diversion_rules.py:666
-#: lib/solaar/ui/diversion_rules.py:1115
-msgid "And"
-msgstr "和"
+#: lib/solaar/ui/diversion_rules.py:534
+msgid   "Solaar Rule Editor"
+msgstr  "Solaar 規則編輯器"
 
-#: lib/solaar/ui/diversion_rules.py:542
-msgid "Condition"
-msgstr "條件"
-
-#: lib/solaar/ui/diversion_rules.py:544 lib/solaar/ui/diversion_rules.py:1290
-msgid "Feature"
-msgstr "功能"
-
-#: lib/solaar/ui/diversion_rules.py:545 lib/solaar/ui/diversion_rules.py:1325
-msgid "Report"
-msgstr "回報"
-
-#: lib/solaar/ui/diversion_rules.py:546 lib/solaar/ui/diversion_rules.py:1204
-msgid "Process"
-msgstr "處理"
-
-#: lib/solaar/ui/diversion_rules.py:547
-msgid "Mouse process"
-msgstr "滑鼠處理"
-
-#: lib/solaar/ui/diversion_rules.py:548 lib/solaar/ui/diversion_rules.py:1362
-msgid "Modifiers"
-msgstr "修飾鍵"
-
-#: lib/solaar/ui/diversion_rules.py:549 lib/solaar/ui/diversion_rules.py:1414
-msgid "Key"
-msgstr "鍵"
-
-#: lib/solaar/ui/diversion_rules.py:550 lib/solaar/ui/diversion_rules.py:1455
-msgid "KeyIsDown"
-msgstr "按鍵處於按下狀態"
-
-#: lib/solaar/ui/diversion_rules.py:551 lib/solaar/ui/diversion_rules.py:2260
-msgid "Active"
-msgstr "使用中"
-
-#: lib/solaar/ui/diversion_rules.py:552 lib/solaar/ui/diversion_rules.py:2217
-#: lib/solaar/ui/diversion_rules.py:2269 lib/solaar/ui/diversion_rules.py:2319
-msgid "Device"
-msgstr "裝置"
-
-#: lib/solaar/ui/diversion_rules.py:553 lib/solaar/ui/diversion_rules.py:2295
-msgid "Host"
-msgstr "主機"
-
-#: lib/solaar/ui/diversion_rules.py:554 lib/solaar/ui/diversion_rules.py:2337
-msgid "Setting"
-msgstr "設定"
-
-#: lib/solaar/ui/diversion_rules.py:555 lib/solaar/ui/diversion_rules.py:1470
-#: lib/solaar/ui/diversion_rules.py:1519
-msgid "Test"
-msgstr "測試"
-
-#: lib/solaar/ui/diversion_rules.py:556 lib/solaar/ui/diversion_rules.py:1633
-msgid "Test bytes"
-msgstr "測試位元組"
-
-#: lib/solaar/ui/diversion_rules.py:557 lib/solaar/ui/diversion_rules.py:1734
-msgid "Mouse Gesture"
-msgstr "滑鼠手勢"
-
-#: lib/solaar/ui/diversion_rules.py:561
-msgid "Action"
-msgstr "動作"
-
-#: lib/solaar/ui/diversion_rules.py:563 lib/solaar/ui/diversion_rules.py:1844
-msgid "Key press"
-msgstr "按鍵按下"
-
-#: lib/solaar/ui/diversion_rules.py:564 lib/solaar/ui/diversion_rules.py:1895
-msgid "Mouse scroll"
-msgstr "滑鼠滾動"
-
-#: lib/solaar/ui/diversion_rules.py:565 lib/solaar/ui/diversion_rules.py:1956
-msgid "Mouse click"
-msgstr "滑鼠點選"
-
-#: lib/solaar/ui/diversion_rules.py:566
-msgid "Set"
-msgstr "設定"
-
-#: lib/solaar/ui/diversion_rules.py:567 lib/solaar/ui/diversion_rules.py:2026
-msgid "Execute"
-msgstr "執行"
-
-#: lib/solaar/ui/diversion_rules.py:568 lib/solaar/ui/diversion_rules.py:1160
-msgid "Later"
-msgstr "稍後"
-
-#: lib/solaar/ui/diversion_rules.py:597
-msgid "Insert new rule"
-msgstr "插入新規則"
-
-#: lib/solaar/ui/diversion_rules.py:617 lib/solaar/ui/diversion_rules.py:1681
-#: lib/solaar/ui/diversion_rules.py:1786 lib/solaar/ui/diversion_rules.py:1985
-msgid "Delete"
-msgstr "刪除"
+#: lib/solaar/ui/diversion_rules.py:634
+msgid   "Save changes"
+msgstr  "儲存修改"
 
 #: lib/solaar/ui/diversion_rules.py:639
-msgid "Negate"
-msgstr "否"
-
-#: lib/solaar/ui/diversion_rules.py:663
-msgid "Wrap with"
-msgstr "包在一起"
-
-#: lib/solaar/ui/diversion_rules.py:685
-msgid "Cut"
-msgstr "剪下"
-
-#: lib/solaar/ui/diversion_rules.py:700
-msgid "Paste"
-msgstr "貼上"
-
-#: lib/solaar/ui/diversion_rules.py:706
-msgid "Copy"
-msgstr "複製"
+msgid   "Discard changes"
+msgstr  "不儲存修改"
 
 #: lib/solaar/ui/diversion_rules.py:1070
-msgid "This editor does not support the selected rule component yet."
-msgstr "此編輯器尚不支援所選規則元件。"
+msgid   "This editor does not support the selected rule component yet."
+msgstr  "此編輯器尚不支援所選規則元件。"
 
-#: lib/solaar/ui/diversion_rules.py:1140
-msgid "Number of seconds to delay."
-msgstr "延遲的秒數。"
+#: lib/solaar/ui/diversion_rules.py:1132
+msgid   "Number of seconds to delay.  Delay between 0 and 1 is done with "
+        "higher precision."
+msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1178
-msgid "Not"
-msgstr "非"
+#: lib/solaar/ui/diversion_rules.py:1170
+msgid   "Not"
+msgstr  "非"
 
-#: lib/solaar/ui/diversion_rules.py:1187
-msgid "X11 active process. For use in X11 only."
-msgstr "X11 活躍程序。僅適用於 X11。"
+#: lib/solaar/ui/diversion_rules.py:1201
+msgid   "Toggle"
+msgstr  "切換"
 
-#: lib/solaar/ui/diversion_rules.py:1217
-msgid "X11 mouse process. For use in X11 only."
-msgstr "X11 滑鼠程序。僅適用於 X11。"
+#: lib/solaar/ui/diversion_rules.py:1202
+msgid   "True"
+msgstr  "真"
 
-#: lib/solaar/ui/diversion_rules.py:1234
-msgid "MouseProcess"
-msgstr "滑鼠程序"
+#: lib/solaar/ui/diversion_rules.py:1203
+msgid   "False"
+msgstr  "假"
 
-#: lib/solaar/ui/diversion_rules.py:1258
-msgid "Feature name of notification triggering rule processing."
-msgstr "觸發規則處理的通知功能名稱。"
+#: lib/solaar/ui/diversion_rules.py:1216
+msgid   "Unsupported setting"
+msgstr  "不支援的設定"
 
-#: lib/solaar/ui/diversion_rules.py:1305
-msgid "Report number of notification triggering rule processing."
-msgstr "回報觸發規則處理的通知數量。"
+#: lib/solaar/ui/diversion_rules.py:1378 lib/solaar/ui/diversion_rules.py:1397
+#: lib/solaar/ui/diversion_rules.py:1476 lib/solaar/ui/diversion_rules.py:1731
+#: lib/solaar/ui/diversion_rules.py:1749
+msgid   "Originating device"
+msgstr  "發起裝置"
 
-#: lib/solaar/ui/diversion_rules.py:1338
-msgid "Active keyboard modifiers. Not always available in Wayland."
-msgstr "活躍的鍵盤修飾鍵。在 Wayland 中並非總是可用。"
+#: lib/solaar/ui/diversion_rules.py:1410
+msgid   "Device is active and its settings can be changed."
+msgstr  "裝置處於啟用狀態，其設定可以被調整。"
 
-#: lib/solaar/ui/diversion_rules.py:1378
-msgid ""
-"Diverted key or button depressed or released.\n"
-"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
-"buttons."
-msgstr ""
-"轉向鍵或按鈕被按下或放開。\n"
-"使用按鍵 / 按鈕轉向和轉向 G 鍵設定來轉向鍵和按鈕。"
-
-#: lib/solaar/ui/diversion_rules.py:1387
-msgid "Key down"
-msgstr "按鍵按下"
-
-#: lib/solaar/ui/diversion_rules.py:1390
-msgid "Key up"
-msgstr "按鍵鬆開"
-
-#: lib/solaar/ui/diversion_rules.py:1430
-msgid ""
-"Diverted key or button is currently down.\n"
-"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
-"buttons."
-msgstr ""
-"轉向鍵或按鈕目前處於按下狀態。\n"
-"使用鍵 / 按鈕轉向和轉向 G 鍵設定來轉向鍵和按鈕。"
-
-#: lib/solaar/ui/diversion_rules.py:1468
-msgid "Test condition on notification triggering rule processing."
-msgstr "在通知觸發規則處理上測試條件。"
-
-#: lib/solaar/ui/diversion_rules.py:1472
-msgid "Parameter"
-msgstr "參數"
-
-#: lib/solaar/ui/diversion_rules.py:1534
-msgid "begin (inclusive)"
-msgstr "開始（包含）"
-
-#: lib/solaar/ui/diversion_rules.py:1535
-msgid "end (exclusive)"
-msgstr "結束（不包含）"
-
-#: lib/solaar/ui/diversion_rules.py:1543
-msgid "range"
-msgstr "範圍"
-
-#: lib/solaar/ui/diversion_rules.py:1546
-msgid "minimum"
-msgstr "最小值"
-
-#: lib/solaar/ui/diversion_rules.py:1547
-msgid "maximum"
-msgstr "最大值"
-
-#: lib/solaar/ui/diversion_rules.py:1549
-#, python-format
-msgid "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
-msgstr "位元組 %(0)d 到 %(1)d，範圍從 %(2)d 到 %(3)d"
-
-#: lib/solaar/ui/diversion_rules.py:1552 lib/solaar/ui/diversion_rules.py:1553
-msgid "mask"
-msgstr "遮罩"
-
-#: lib/solaar/ui/diversion_rules.py:1554
-#, python-format
-msgid "bytes %(0)d to %(1)d, mask %(2)d"
-msgstr "位元組 %(0)d 到 %(1)d，遮罩 %(2)d"
-
-#: lib/solaar/ui/diversion_rules.py:1563
-msgid ""
-"Bit or range test on bytes in notification message triggering rule "
-"processing."
-msgstr "在通知訊息觸發規則處理中對位元組進行位元或範圍測試。"
-
-#: lib/solaar/ui/diversion_rules.py:1573
-msgid "type"
-msgstr "類型"
-
-#: lib/solaar/ui/diversion_rules.py:1661
-msgid ""
-"Mouse gesture with optional initiating button followed by zero or more mouse "
-"movements."
-msgstr "滑鼠手勢，可選擇帶有初始按鈕，後跟零個或多個滑鼠移動。"
-
-#: lib/solaar/ui/diversion_rules.py:1666
-msgid "Add movement"
-msgstr "新增移動"
-
-#: lib/solaar/ui/diversion_rules.py:1760
-msgid ""
-"Simulate a chorded key click or depress or release.\n"
-"On Wayland requires write access to /dev/uinput."
-msgstr ""
-"模擬成組按鍵點選或按下或放開。\n"
-"在 Wayland 上需要對 /dev/uinput 進行寫入。"
-
-#: lib/solaar/ui/diversion_rules.py:1765
-msgid "Add key"
-msgstr "新增按鍵"
-
-#: lib/solaar/ui/diversion_rules.py:1768
-msgid "Click"
-msgstr "點選"
-
-#: lib/solaar/ui/diversion_rules.py:1771
-msgid "Depress"
-msgstr "按下"
-
-#: lib/solaar/ui/diversion_rules.py:1774
-msgid "Release"
-msgstr "放開"
-
-#: lib/solaar/ui/diversion_rules.py:1859
-msgid ""
-"Simulate a mouse scroll.\n"
-"On Wayland requires write access to /dev/uinput."
-msgstr ""
-"模擬滑鼠滾動。\n"
-"在 Wayland 上需要對 /dev/uinput 進行寫入。"
-
-#: lib/solaar/ui/diversion_rules.py:1915
-msgid ""
-"Simulate a mouse click.\n"
-"On Wayland requires write access to /dev/uinput."
-msgstr ""
-"模擬滑鼠點選。\n"
-"在 Wayland 上需要對 /dev/uinput 進行寫入。"
-
-#: lib/solaar/ui/diversion_rules.py:1918
-msgid "Button"
-msgstr "按鈕"
-
-#: lib/solaar/ui/diversion_rules.py:1919
+#: lib/solaar/ui/diversion_rules.py:1419
 #, fuzzy
-msgid "Count and Action"
-msgstr "條件"
+msgid   "Device that originated the current notification."
+msgstr  "裝置發起了當前通知。"
 
-#: lib/solaar/ui/diversion_rules.py:1968
-msgid "Execute a command with arguments."
-msgstr "執行帶有參數的命令。"
+#: lib/solaar/ui/diversion_rules.py:1432
+msgid   "Name of host computer."
+msgstr  "主機名稱"
 
-#: lib/solaar/ui/diversion_rules.py:1971
-msgid "Add argument"
-msgstr "新增參數"
+#: lib/solaar/ui/diversion_rules.py:1503
+msgid   "Value"
+msgstr  "數值"
 
-#: lib/solaar/ui/diversion_rules.py:2046
-msgid "Toggle"
-msgstr "切換"
+#: lib/solaar/ui/diversion_rules.py:1512
+msgid   "Item"
+msgstr  "項目"
 
-#: lib/solaar/ui/diversion_rules.py:2047
-msgid "True"
-msgstr "真"
+#: lib/solaar/ui/diversion_rules.py:1791
+msgid   "Change setting on device"
+msgstr  "變更裝置上的設定"
 
-#: lib/solaar/ui/diversion_rules.py:2048
-msgid "False"
-msgstr "假"
+#: lib/solaar/ui/diversion_rules.py:1807
+msgid   "Setting on device"
+msgstr  "裝置上的設定"
 
-#: lib/solaar/ui/diversion_rules.py:2061
-msgid "Unsupported setting"
-msgstr "不支援的設定"
+#: lib/solaar/ui/pair_window.py:37 lib/solaar/ui/pair_window.py:165
+#, python-format
+msgid   "%(receiver_name)s: pair new device"
+msgstr  "%(receiver_name)s：配對新的裝置"
 
-#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2243
-#: lib/solaar/ui/diversion_rules.py:2325 lib/solaar/ui/diversion_rules.py:2568
-#: lib/solaar/ui/diversion_rules.py:2586
-msgid "Originating device"
-msgstr "發起裝置"
+#: lib/solaar/ui/pair_window.py:39
+msgid   "Bolt receivers are only compatible with Bolt devices."
+msgstr  "Bolt 接收器只支援 Bolt 裝置。"
 
-#: lib/solaar/ui/diversion_rules.py:2256
-msgid "Device is active and its settings can be changed."
-msgstr "裝置處於啟用狀態，其設定可以被調整。"
+#: lib/solaar/ui/pair_window.py:41
+msgid   "Press a pairing button or key until the pairing light flashes "
+        "quickly."
+msgstr  "按下配對按鈕或按鍵，直到配對燈快速閃爍。"
 
-#: lib/solaar/ui/diversion_rules.py:2265
+#: lib/solaar/ui/pair_window.py:44
+msgid   "Unifying receivers are only compatible with Unifying devices."
+msgstr  "Unifying 接收器只支援 Unifying 裝置。"
+
+#: lib/solaar/ui/pair_window.py:46
+msgid   "Other receivers are only compatible with a few devices."
+msgstr  "其他接收器僅支援少數裝置。"
+
+#: lib/solaar/ui/pair_window.py:48
+msgid   "For most devices, turn on the device you want to pair."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:49
+msgid   "If the device is already turned on, turn it off and on again."
+msgstr  "如果裝置已開啟，請將其關閉並重新開啟。"
+
+#: lib/solaar/ui/pair_window.py:51
+msgid   "The device must not be paired with a nearby powered-on receiver."
+msgstr  "裝置不應與附近已開啟的接收器配對。"
+
+#: lib/solaar/ui/pair_window.py:54
+msgid   "For devices with multiple channels, press, hold, and release the "
+        "button for the channel you wish to pair\n"
+        "or use the channel switch button to select a channel and then press, "
+        "hold, and release the channel switch button."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:61
+msgid   "The channel indicator light should be blinking rapidly."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:65
+#, python-format
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       "\n"
+        "\n"
+        "此接收器剩餘 %d 次配對。"
+
+#: lib/solaar/ui/pair_window.py:71
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  "\n"
+        "在此階段取消不會消耗配對次數。"
+
+#: lib/solaar/ui/pair_window.py:166
+#, python-format
+msgid   "Enter passcode on %(name)s."
+msgstr  "在 %(name)s 上輸入密碼。"
+
+#: lib/solaar/ui/pair_window.py:169
+#, python-format
+msgid   "Type %(passcode)s and then press the enter key."
+msgstr  "輸入 %(passcode)s，然後按 Enter 鍵。"
+
+#: lib/solaar/ui/pair_window.py:174
+msgid   "left"
+msgstr  "左"
+
+#: lib/solaar/ui/pair_window.py:174
+msgid   "right"
+msgstr  "右"
+
+#: lib/solaar/ui/pair_window.py:176
+#, python-format
+msgid   "Press %(code)s\n"
+        "and then press left and right buttons simultaneously."
+msgstr  "按下 %(code)s\n"
+        "然後同時按下左鍵和右鍵。"
+
+#: lib/solaar/ui/pair_window.py:219
+msgid   "The wireless link is not encrypted"
+msgstr  "無線連線未加密"
+
+#: lib/solaar/ui/pair_window.py:224
+msgid   "Found a new device:"
+msgstr  "發現一個新裝置："
+
+#: lib/solaar/ui/pair_window.py:245
+msgid   "Pairing failed"
+msgstr  "配對失敗"
+
+#: lib/solaar/ui/pair_window.py:247
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "請確認您的裝置已在範圍內，並保證其電量充足。"
+
+#: lib/solaar/ui/pair_window.py:249
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "偵測到 1 個新裝置，但與此接收器不相容。"
+
+#: lib/solaar/ui/pair_window.py:251
+msgid   "More paired devices than receiver can support."
+msgstr  "配對的裝置數量超過接收器的支援範圍。"
+
+#: lib/solaar/ui/pair_window.py:253
+msgid   "No further details are available about the error."
+msgstr  "無此錯誤的詳細資訊。"
+
+#: lib/solaar/ui/rule_actions.py:48
+msgid   "Simulate a chorded key click or depress or release.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "模擬成組按鍵點選或按下或放開。\n"
+        "在 Wayland 上需要對 /dev/uinput 進行寫入。"
+
+#: lib/solaar/ui/rule_actions.py:53
+msgid   "Add key"
+msgstr  "新增按鍵"
+
+#: lib/solaar/ui/rule_actions.py:56
+msgid   "Click"
+msgstr  "點選"
+
+#: lib/solaar/ui/rule_actions.py:59
+msgid   "Depress"
+msgstr  "按下"
+
+#: lib/solaar/ui/rule_actions.py:62
+msgid   "Release"
+msgstr  "放開"
+
+#: lib/solaar/ui/rule_actions.py:146
+msgid   "Simulate a mouse scroll.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "模擬滑鼠滾動。\n"
+        "在 Wayland 上需要對 /dev/uinput 進行寫入。"
+
+#: lib/solaar/ui/rule_actions.py:202
+msgid   "Simulate a mouse click.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "模擬滑鼠點選。\n"
+        "在 Wayland 上需要對 /dev/uinput 進行寫入。"
+
+#: lib/solaar/ui/rule_actions.py:205
+msgid   "Button"
+msgstr  "按鈕"
+
+#: lib/solaar/ui/rule_actions.py:206
 #, fuzzy
-msgid "Device that originated the current notification."
-msgstr "裝置發起了當前通知。"
+msgid   "Count and Action"
+msgstr  "條件"
 
-#: lib/solaar/ui/diversion_rules.py:2278
-msgid "Name of host computer."
-msgstr "主機名稱"
+#: lib/solaar/ui/rule_actions.py:255
+msgid   "Execute a command with arguments."
+msgstr  "執行帶有參數的命令。"
 
-#: lib/solaar/ui/diversion_rules.py:2345
-msgid "Value"
-msgstr "數值"
+#: lib/solaar/ui/rule_actions.py:258
+msgid   "Add argument"
+msgstr  "新增參數"
 
-#: lib/solaar/ui/diversion_rules.py:2353
-msgid "Item"
-msgstr "項目"
+#: lib/solaar/ui/rule_conditions.py:43
+msgid   "X11 active process. For use in X11 only."
+msgstr  "X11 活躍程序。僅適用於 X11。"
 
-#: lib/solaar/ui/diversion_rules.py:2627
-msgid "Change setting on device"
-msgstr "變更裝置上的設定"
+#: lib/solaar/ui/rule_conditions.py:73
+msgid   "X11 mouse process. For use in X11 only."
+msgstr  "X11 滑鼠程序。僅適用於 X11。"
 
-#: lib/solaar/ui/diversion_rules.py:2643
-msgid "Setting on device"
-msgstr "裝置上的設定"
+#: lib/solaar/ui/rule_conditions.py:90
+msgid   "MouseProcess"
+msgstr  "滑鼠程序"
 
-#: lib/solaar/ui/notify.py:118
-msgid "unspecified reason"
-msgstr "不明的原因"
+#: lib/solaar/ui/rule_conditions.py:114
+msgid   "Feature name of notification triggering rule processing."
+msgstr  "觸發規則處理的通知功能名稱。"
 
-#: lib/solaar/ui/pair_window.py:126 lib/solaar/ui/pair_window.py:260
-#: lib/solaar/ui/pair_window.py:296
+#: lib/solaar/ui/rule_conditions.py:160
+msgid   "Report number of notification triggering rule processing."
+msgstr  "回報觸發規則處理的通知數量。"
+
+#: lib/solaar/ui/rule_conditions.py:192
+msgid   "Active keyboard modifiers. Not always available in Wayland."
+msgstr  "活躍的鍵盤修飾鍵。在 Wayland 中並非總是可用。"
+
+#: lib/solaar/ui/rule_conditions.py:232
+msgid   "Diverted key or button depressed or released.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  "轉向鍵或按鈕被按下或放開。\n"
+        "使用按鍵 / 按鈕轉向和轉向 G 鍵設定來轉向鍵和按鈕。"
+
+#: lib/solaar/ui/rule_conditions.py:241
+msgid   "Key down"
+msgstr  "按鍵按下"
+
+#: lib/solaar/ui/rule_conditions.py:244
+msgid   "Key up"
+msgstr  "按鍵鬆開"
+
+#: lib/solaar/ui/rule_conditions.py:284
+msgid   "Diverted key or button is currently down.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  "轉向鍵或按鈕目前處於按下狀態。\n"
+        "使用鍵 / 按鈕轉向和轉向 G 鍵設定來轉向鍵和按鈕。"
+
+#: lib/solaar/ui/rule_conditions.py:322
+msgid   "Test condition on notification triggering rule processing."
+msgstr  "在通知觸發規則處理上測試條件。"
+
+#: lib/solaar/ui/rule_conditions.py:326
+msgid   "Parameter"
+msgstr  "參數"
+
+#: lib/solaar/ui/rule_conditions.py:399
+msgid   "begin (inclusive)"
+msgstr  "開始（包含）"
+
+#: lib/solaar/ui/rule_conditions.py:400
+msgid   "end (exclusive)"
+msgstr  "結束（不包含）"
+
+#: lib/solaar/ui/rule_conditions.py:408
+msgid   "range"
+msgstr  "範圍"
+
+#: lib/solaar/ui/rule_conditions.py:411
+msgid   "minimum"
+msgstr  "最小值"
+
+#: lib/solaar/ui/rule_conditions.py:412
+msgid   "maximum"
+msgstr  "最大值"
+
+#: lib/solaar/ui/rule_conditions.py:414
 #, python-format
-msgid "%(receiver_name)s: pair new device"
-msgstr "%(receiver_name)s：配對新的裝置"
+msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
+msgstr  "位元組 %(0)d 到 %(1)d，範圍從 %(2)d 到 %(3)d"
 
-#: lib/solaar/ui/pair_window.py:127
+#: lib/solaar/ui/rule_conditions.py:417 lib/solaar/ui/rule_conditions.py:418
+msgid   "mask"
+msgstr  "遮罩"
+
+#: lib/solaar/ui/rule_conditions.py:419
 #, python-format
-msgid "Enter passcode on %(name)s."
-msgstr "在 %(name)s 上輸入密碼。"
+msgid   "bytes %(0)d to %(1)d, mask %(2)d"
+msgstr  "位元組 %(0)d 到 %(1)d，遮罩 %(2)d"
 
-#: lib/solaar/ui/pair_window.py:130
-#, python-format
-msgid "Type %(passcode)s and then press the enter key."
-msgstr "輸入 %(passcode)s，然後按 Enter 鍵。"
+#: lib/solaar/ui/rule_conditions.py:428
+msgid   "Bit or range test on bytes in notification message triggering rule "
+        "processing."
+msgstr  "在通知訊息觸發規則處理中對位元組進行位元或範圍測試。"
 
-#: lib/solaar/ui/pair_window.py:133
-msgid "left"
-msgstr "左"
+#: lib/solaar/ui/rule_conditions.py:438
+msgid   "type"
+msgstr  "類型"
 
-#: lib/solaar/ui/pair_window.py:133
-msgid "right"
-msgstr "右"
+#: lib/solaar/ui/rule_conditions.py:526
+msgid   "Mouse gesture with optional initiating button followed by zero or "
+        "more mouse movements."
+msgstr  "滑鼠手勢，可選擇帶有初始按鈕，後跟零個或多個滑鼠移動。"
 
-#: lib/solaar/ui/pair_window.py:135
-#, python-format
-msgid ""
-"Press %(code)s\n"
-"and then press left and right buttons simultaneously."
-msgstr ""
-"按下 %(code)s\n"
-"然後同時按下左鍵和右鍵。"
+#: lib/solaar/ui/rule_conditions.py:531
+msgid   "Add movement"
+msgstr  "新增移動"
 
-#: lib/solaar/ui/pair_window.py:192
-msgid "Pairing failed"
-msgstr "配對失敗"
-
-#: lib/solaar/ui/pair_window.py:194
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr "請確認您的裝置已在範圍內，並保證其電量充足。"
-
-#: lib/solaar/ui/pair_window.py:196
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "偵測到 1 個新裝置，但與此接收器不相容。"
-
-#: lib/solaar/ui/pair_window.py:198
-msgid "More paired devices than receiver can support."
-msgstr "配對的裝置數量超過接收器的支援範圍。"
-
-#: lib/solaar/ui/pair_window.py:200
-msgid "No further details are available about the error."
-msgstr "無此錯誤的詳細資訊。"
-
-#: lib/solaar/ui/pair_window.py:214
-msgid "Found a new device:"
-msgstr "發現一個新裝置："
-
-#: lib/solaar/ui/pair_window.py:239
-msgid "The wireless link is not encrypted"
-msgstr "無線連線未加密"
-
-#: lib/solaar/ui/pair_window.py:268
-msgid "Unifying receivers are only compatible with Unifying devices."
-msgstr "Unifying 接收器只支援 Unifying 裝置。"
-
-#: lib/solaar/ui/pair_window.py:270
-msgid "Bolt receivers are only compatible with Bolt devices."
-msgstr "Bolt 接收器只支援 Bolt 裝置。"
-
-#: lib/solaar/ui/pair_window.py:272
-msgid "Other receivers are only compatible with a few devices."
-msgstr "其他接收器僅支援少數裝置。"
-
-#: lib/solaar/ui/pair_window.py:274
-msgid "The device must not be paired with a nearby powered-on receiver."
-msgstr "裝置不應與附近已開啟的接收器配對。"
-
-#: lib/solaar/ui/pair_window.py:278
-msgid "Press a pairing button or key until the pairing light flashes quickly."
-msgstr "按下配對按鈕或按鍵，直到配對燈快速閃爍。"
-
-#: lib/solaar/ui/pair_window.py:280
-msgid "You may have to first turn the device off and on again."
-msgstr "您可能需要先關閉裝置，然後再開啟。"
-
-#: lib/solaar/ui/pair_window.py:282
-msgid "Turn on the device you want to pair."
-msgstr "開啟您要配對的裝置。"
-
-#: lib/solaar/ui/pair_window.py:284
-msgid "If the device is already turned on, turn it off and on again."
-msgstr "如果裝置已開啟，請將其關閉並重新開啟。"
-
-#: lib/solaar/ui/pair_window.py:288
-#, python-format
-msgid ""
-"\n"
-"\n"
-"This receiver has %d pairing remaining."
-msgid_plural ""
-"\n"
-"\n"
-"This receiver has %d pairings remaining."
-msgstr[0] ""
-"\n"
-"\n"
-"此接收器剩餘 %d 次配對。"
-
-#: lib/solaar/ui/pair_window.py:294
-msgid ""
-"\n"
-"Cancelling at this point will not use up a pairing."
-msgstr ""
-"\n"
-"在此階段取消不會消耗配對次數。"
-
-#: lib/solaar/ui/tray.py:58
+#: lib/solaar/ui/tray.py:49
 #, fuzzy
-msgid "No supported device found"
-msgstr "沒有找到羅技的裝置"
+msgid   "No supported device found"
+msgstr  "沒有找到羅技的裝置"
 
-#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:321
+#: lib/solaar/ui/tray.py:54 lib/solaar/ui/window.py:308
 #, python-format
-msgid "About %s"
-msgstr "關於 %s"
+msgid   "About %s"
+msgstr  "關於 %s"
 
-#: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
+#: lib/solaar/ui/tray.py:55 lib/solaar/ui/window.py:306
 #, python-format
-msgid "Quit %s"
-msgstr "結束 %s"
+msgid   "Quit %s"
+msgstr  "結束 %s"
 
-#: lib/solaar/ui/tray.py:294 lib/solaar/ui/tray.py:302
-msgid "no receiver"
-msgstr "無接收器"
+#: lib/solaar/ui/tray.py:270 lib/solaar/ui/tray.py:278
+msgid   "no receiver"
+msgstr  "無接收器"
 
-#: lib/solaar/ui/tray.py:315 lib/solaar/ui/tray.py:320
-msgid "offline"
-msgstr "離線"
+#: lib/solaar/ui/tray.py:291 lib/solaar/ui/tray.py:296
+msgid   "offline"
+msgstr  "離線"
 
-#: lib/solaar/ui/tray.py:318
-msgid "no status"
-msgstr "無狀態"
+#: lib/solaar/ui/tray.py:294
+msgid   "no status"
+msgstr  "無狀態"
 
-#: lib/solaar/ui/window.py:99
-msgid "Scanning"
-msgstr "掃描中"
+#: lib/solaar/ui/window.py:90
+msgid   "Scanning"
+msgstr  "掃描中"
 
-#: lib/solaar/ui/window.py:132
-msgid "Battery"
-msgstr "電池"
+#: lib/solaar/ui/window.py:121
+msgid   "Battery"
+msgstr  "電池"
 
-#: lib/solaar/ui/window.py:135
-msgid "Wireless Link"
-msgstr "無線連線"
+#: lib/solaar/ui/window.py:124
+msgid   "Wireless Link"
+msgstr  "無線連線"
 
-#: lib/solaar/ui/window.py:139
-msgid "Lighting"
-msgstr "亮度"
+#: lib/solaar/ui/window.py:128
+msgid   "Lighting"
+msgstr  "亮度"
 
-#: lib/solaar/ui/window.py:173
-msgid "Show Technical Details"
-msgstr "顯示細節"
+#: lib/solaar/ui/window.py:162
+msgid   "Show Technical Details"
+msgstr  "顯示細節"
 
-#: lib/solaar/ui/window.py:189
-msgid "Pair new device"
-msgstr "配對新裝置"
+#: lib/solaar/ui/window.py:178
+msgid   "Pair new device"
+msgstr  "配對新裝置"
 
-#: lib/solaar/ui/window.py:207
-msgid "Select a device"
-msgstr "選擇 1 個裝置"
+#: lib/solaar/ui/window.py:196
+msgid   "Select a device"
+msgstr  "選擇 1 個裝置"
 
-#: lib/solaar/ui/window.py:324
-msgid "Rule Editor"
-msgstr "規則編輯器"
+#: lib/solaar/ui/window.py:311
+msgid   "Rule Editor"
+msgstr  "規則編輯器"
 
-#: lib/solaar/ui/window.py:543
-msgid "Path"
-msgstr "路徑"
+#: lib/solaar/ui/window.py:504
+msgid   "Path"
+msgstr  "路徑"
 
-#: lib/solaar/ui/window.py:546
-msgid "USB ID"
-msgstr "USB ID"
+#: lib/solaar/ui/window.py:506
+msgid   "USB ID"
+msgstr  "USB ID"
 
-#: lib/solaar/ui/window.py:549 lib/solaar/ui/window.py:551
-#: lib/solaar/ui/window.py:566 lib/solaar/ui/window.py:568
-msgid "Serial"
-msgstr "序號"
+#: lib/solaar/ui/window.py:509 lib/solaar/ui/window.py:511
+#: lib/solaar/ui/window.py:526 lib/solaar/ui/window.py:528
+msgid   "Serial"
+msgstr  "序號"
 
-#: lib/solaar/ui/window.py:555
-msgid "Index"
-msgstr "索引"
+#: lib/solaar/ui/window.py:515
+msgid   "Index"
+msgstr  "索引"
 
-#: lib/solaar/ui/window.py:557
-msgid "Wireless PID"
-msgstr "無線 PID"
+#: lib/solaar/ui/window.py:517
+msgid   "Wireless PID"
+msgstr  "無線 PID"
 
-#: lib/solaar/ui/window.py:559
-msgid "Product ID"
-msgstr "產品 ID"
+#: lib/solaar/ui/window.py:519
+msgid   "Product ID"
+msgstr  "產品 ID"
 
-#: lib/solaar/ui/window.py:561
-msgid "Protocol"
-msgstr "通訊協定"
+#: lib/solaar/ui/window.py:521
+msgid   "Protocol"
+msgstr  "通訊協定"
 
-#: lib/solaar/ui/window.py:561
-msgid "Unknown"
-msgstr "不明"
+#: lib/solaar/ui/window.py:521
+msgid   "Unknown"
+msgstr  "不明"
 
-#: lib/solaar/ui/window.py:563
-msgid "Polling rate"
-msgstr "查詢速率"
+#: lib/solaar/ui/window.py:523
+msgid   "Polling rate"
+msgstr  "查詢速率"
 
-#: lib/solaar/ui/window.py:570
-msgid "Unit ID"
-msgstr "單位 ID"
+#: lib/solaar/ui/window.py:530
+msgid   "Unit ID"
+msgstr  "單位 ID"
 
-#: lib/solaar/ui/window.py:584
-msgid "Notifications"
-msgstr "通知"
+#: lib/solaar/ui/window.py:544
+msgid   "Notifications"
+msgstr  "通知"
 
-#: lib/solaar/ui/window.py:628
-msgid "No device paired."
-msgstr "沒有已經配對的裝置"
+#: lib/solaar/ui/window.py:588
+msgid   "No device paired."
+msgstr  "沒有已經配對的裝置"
 
-#: lib/solaar/ui/window.py:637
+#: lib/solaar/ui/window.py:597
 #, fuzzy, python-format
-msgid "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0] "此接收器最多可以配對到 %(max_count)s 個裝置"
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       "此接收器最多可以配對到 %(max_count)s 個裝置"
 
-#: lib/solaar/ui/window.py:648
+#: lib/solaar/ui/window.py:608
 #, python-format
-msgid "This receiver has %d pairing remaining."
-msgid_plural "This receiver has %d pairings remaining."
-msgstr[0] "此接收器剩餘 %d 次配對。"
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       "此接收器剩餘 %d 次配對。"
+
+#: lib/solaar/ui/window.py:665
+msgid   "Battery Voltage"
+msgstr  "電池電壓"
+
+#: lib/solaar/ui/window.py:667
+msgid   "Voltage reported by battery"
+msgstr  "電池回報的電壓"
+
+#: lib/solaar/ui/window.py:669
+msgid   "Battery Level"
+msgstr  "電池電量"
+
+#: lib/solaar/ui/window.py:671
+msgid   "Approximate level reported by battery"
+msgstr  "電池回報的大約電量"
+
+#: lib/solaar/ui/window.py:678 lib/solaar/ui/window.py:680
+msgid   "next reported "
+msgstr  "下一次回報的 "
+
+#: lib/solaar/ui/window.py:681
+msgid   " and next level to be reported."
+msgstr  " 以及下一個將被回報的等級。"
+
+#: lib/solaar/ui/window.py:697
+msgid   "encrypted"
+msgstr  "已加密"
+
+#: lib/solaar/ui/window.py:699
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  "裝置與接收器間的無線連線已加密。"
+
+#: lib/solaar/ui/window.py:701
+msgid   "not encrypted"
+msgstr  "未加密"
 
 #: lib/solaar/ui/window.py:705
-msgid "Battery Voltage"
-msgstr "電池電壓"
-
-#: lib/solaar/ui/window.py:707
-msgid "Voltage reported by battery"
-msgstr "電池回報的電壓"
-
-#: lib/solaar/ui/window.py:709
-msgid "Battery Level"
-msgstr "電池電量"
-
-#: lib/solaar/ui/window.py:711
-msgid "Approximate level reported by battery"
-msgstr "電池回報的大約電量"
-
-#: lib/solaar/ui/window.py:718 lib/solaar/ui/window.py:720
-msgid "next reported "
-msgstr "下一次回報的 "
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "This is a security issue for pointing devices, and a major security "
+        "issue for text-input devices."
+msgstr  "此裝置與其接收器之間的無線連接未加密。\n"
+        "這對指向性裝置是一個安全問題，對文字輸入裝置則是一個重大的安全問題。"
 
 #: lib/solaar/ui/window.py:721
-msgid " and next level to be reported."
-msgstr " 以及下一個將被回報的等級。"
-
-#: lib/solaar/ui/window.py:737
-msgid "encrypted"
-msgstr "已加密"
-
-#: lib/solaar/ui/window.py:739
-msgid "The wireless link between this device and its receiver is encrypted."
-msgstr "裝置與接收器間的無線連線已加密。"
-
-#: lib/solaar/ui/window.py:741
-msgid "not encrypted"
-msgstr "未加密"
-
-#: lib/solaar/ui/window.py:745
-msgid ""
-"The wireless link between this device and its receiver is not encrypted.\n"
-"This is a security issue for pointing devices, and a major security issue "
-"for text-input devices."
-msgstr ""
-"此裝置與其接收器之間的無線連接未加密。\n"
-"這對指向性裝置是一個安全問題，對文字輸入裝置則是一個重大的安全問題。"
-
-#: lib/solaar/ui/window.py:761
 #, python-format
-msgid "%(light_level)d lux"
-msgstr "%(light_level)d lux"
+msgid   "%(light_level)d lux"
+msgstr  "%(light_level)d lux"
 
-#~ msgid "Turn illumination on or off on keyboard."
-#~ msgstr "開啟或關閉鍵盤照明。"
+#. I18N: Please leave the name of the program untranslated
+#: share/applications/solaar.template.desktop:4
+#: share/autostart/solaar.template.desktop:4
+msgid   "Solaar"
+msgstr  ""
 
-#~ msgid "Polling Rate (ms)"
-#~ msgstr "輪詢速率（毫秒）"
+#: share/applications/solaar.template.desktop:5
+#: share/autostart/solaar.template.desktop:5
+msgid   "Logitech Unifying Receiver peripherals manager"
+msgstr  "羅技Unifying 裝置管理器"
 
-#~ msgid "May also make M keys and MR key send HID++ notifications"
-#~ msgstr "也可能讓 M 鍵和 MR 鍵發送 HID++ 通知"
+#: share/applications/solaar.template.desktop:14
+#: share/autostart/solaar.template.desktop:21
+msgid   "logitech;unifying;receiver;mouse;keyboard;"
+msgstr  ""
 
-#~ msgid "Battery: %(level)s"
-#~ msgstr "電量：%(level)s "
+#~ msgid        "%(battery_level)s"
+#~ msgstr       "%(battery_level)s"
 
-#~ msgid "Battery: %(percent)d%%"
-#~ msgstr "電量：%(percent)d%%"
+#~ msgid        "%(battery_percent)d%%"
+#~ msgstr       "%(battery_percent)d%%"
 
-#~ msgid "Lighting: %(level)s lux"
-#~ msgstr "亮度： %(level)s lux"
+#~ msgid        "%(rate)d ms (%(rate_hz)dHz)"
+#~ msgstr       "%(rate)d ms (%(rate_hz)dHz)"
 
-#~ msgid "Count"
-#~ msgstr "計數"
+#~ msgid        "About"
+#~ msgstr       "關於"
 
-#~ msgid "%(rate)d ms (%(rate_hz)dHz)"
-#~ msgstr "%(rate)d ms (%(rate_hz)dHz)"
+#~ msgid        "Add action"
+#~ msgstr       "增加動作"
 
-#~ msgid "none"
-#~ msgstr "無"
+#~ msgid        "Adjust the DPI by sliding the mouse horizontally while "
+#~      "holding the button down."
+#~ msgstr       "按住按鈕時，透過水平滑動滑鼠來調整 DPI。"
 
-#~ msgid "Only one device can be paired to this receiver."
-#~ msgstr "此接收器只能配對一個裝置"
+#~ msgid        "Automatically switch the mouse wheel between ratchet and "
+#~      "freespin mode.\n"
+#~      "The mouse wheel is always free at 0, and always locked at 50"
+#~ msgstr       "自動切換滑鼠滾輪的段落模式"
 
-#~ msgid "last known"
-#~ msgstr "最後已知"
+#~ msgid        "Automatically switch the mouse wheel between ratchet and "
+#~      "freespin mode.\n"
+#~      "The mouse wheel is always free at 0, and always ratcheted at 50"
+#~ msgstr       "自動在滾輪棘輪模式和自由滾動模式之間切換滑鼠滾輪。\n"
+#~      "滾輪在 0 時始終處於自由狀態，而在 50 時始終處於棘輪狀態"
 
-#~ msgid "top"
-#~ msgstr "上"
+#~ msgid        "Battery information unknown."
+#~ msgstr       "電池狀態是未知的"
 
-#~ msgid "width"
-#~ msgstr "寬度"
+#~ msgid        "Battery: %(level)s"
+#~ msgstr       "電量：%(level)s "
 
-#~ msgid "height"
-#~ msgstr "高度"
+#~ msgid        "Battery: %(percent)d%%"
+#~ msgstr       "電量：%(percent)d%%"
 
-#~ msgid "About"
-#~ msgstr "關於"
+#~ msgid        "Count"
+#~ msgstr       "計數"
 
-#~ msgid "No Logitech receiver found"
-#~ msgstr "未發現羅技接收器"
+#~ msgid        "DPI Sliding Adjustment"
+#~ msgstr       "DPI 滑動調整"
 
-#~ msgid "Quit"
-#~ msgstr "退出"
+#~ msgid        "Found a Logitech Receiver (%s), but did not have permission "
+#~      "to open it."
+#~ msgstr       "已發現 1 個羅技接收器 (%s)，但您沒有權限存取。"
 
-#~ msgid "Smooth Scrolling"
-#~ msgstr "平滑滾動"
+#~ msgid        "High Resolution Wheel Invert"
+#~ msgstr       "高解析度滾輪反轉"
 
-#~ msgid "High Resolution Wheel Invert"
-#~ msgstr "高解析度滾輪反轉"
+#~ msgid        "High-sensitivity wheel invert mode for vertical scroll."
+#~ msgstr       "垂直捲動的高解析度反轉模式"
 
-#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
-#~ msgstr "垂直捲動的高解析度反轉模式"
+#~ msgid        "If the device is already turned on,\n"
+#~      "turn if off and on again."
+#~ msgstr       "若裝置的電源已經開啟，\n"
+#~      "請先關閉再開啟。"
 
-#~ msgid "Wheel Resolution"
-#~ msgstr "滾輪解析度"
+#~ msgid        "If you've just installed Solaar, try removing the receiver "
+#~      "and plugging it back in."
+#~ msgstr       "若您剛剛安裝 Solaar，請嘗試將接收器拔下再重新插上。"
 
-#~ msgid ""
-#~ "Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-#~ "The mouse wheel is always free at 0, and always locked at 50"
-#~ msgstr "自動切換滑鼠滾輪的段落模式"
+#~ msgid        "Lighting: %(level)s lux"
+#~ msgstr       "亮度： %(level)s lux"
 
-#~ msgid "The receiver was unplugged."
-#~ msgstr "接收器已移除。"
+#~ msgid        "May also make M keys and MR key send HID++ notifications"
+#~ msgstr       "也可能讓 M 鍵和 MR 鍵發送 HID++ 通知"
 
-#~ msgid ""
-#~ "Shows status of devices connected\n"
-#~ "through wireless Logitech receivers."
-#~ msgstr ""
-#~ "顯示羅技接收器\n"
-#~ "已連線的裝置狀態。"
+#~ msgid        "No Logitech receiver found"
+#~ msgstr       "未發現羅技接收器"
 
-#~ msgid "The receiver only supports %d paired device(s)."
-#~ msgstr "此接收器僅支援 %d 個配對裝置。"
+#~ msgid        "Number of seconds to delay."
+#~ msgstr       "延遲的秒數。"
 
-#~ msgid ""
-#~ "If the device is already turned on,\n"
-#~ "turn if off and on again."
-#~ msgstr ""
-#~ "若裝置的電源已經開啟，\n"
-#~ "請先關閉再開啟。"
+#~ msgid        "Only one device can be paired to this receiver."
+#~ msgstr       "此接收器只能配對一個裝置"
 
-#~ msgid "USB id"
-#~ msgstr "USB ID"
+#~ msgid        "Polling Rate (ms)"
+#~ msgstr       "輪詢速率（毫秒）"
 
-#~ msgid "%(battery_percent)d%%"
-#~ msgstr "%(battery_percent)d%%"
+#~ msgid        "Quit"
+#~ msgstr       "退出"
 
-#~ msgid "%(battery_level)s"
-#~ msgstr "%(battery_level)s"
+#~ msgid        "Scroll Wheel Rachet"
+#~ msgstr       "滾輪棘輪"
 
-#~ msgid ""
-#~ "The wireless link between this device and its receiver is not encrypted.\n"
-#~ "\n"
-#~ "For pointing devices (mice, trackballs, trackpads), this is a minor "
-#~ "security issue.\n"
-#~ "\n"
-#~ "It is, however, a major security issue for text-input devices (keyboards, "
-#~ "numpads),\n"
-#~ "because typed text can be sniffed inconspicuously by 3rd parties within "
-#~ "range."
-#~ msgstr ""
-#~ "裝置與接收器間的無線連線未加密。\n"
-#~ "\n"
-#~ "對定位裝置（如滑鼠、軌跡球、觸控板）來說這不是什麼問題。\n"
-#~ "\n"
-#~ "然而這對於內容輸入裝置（如鍵盤、數字鍵盤）卻是一個重大的安全問題，\n"
-#~ "您輸入的內容有可能被第三方偷偷監聽到。"
+#~ msgid        "Send a gesture by sliding the mouse while holding the button "
+#~      "down."
+#~ msgstr       "按住按鈕時，透過滑動滑鼠來發送手勢。"
 
-#~ msgid "Battery information unknown."
-#~ msgstr "電池狀態是未知的"
+#~ msgid        "Shows status of devices connected\n"
+#~      "through wireless Logitech receivers."
+#~ msgstr       "顯示羅技接收器\n"
+#~      "已連線的裝置狀態。"
 
-#~ msgid "unknown"
-#~ msgstr "未知的"
+#~ msgid        "Smooth Scrolling"
+#~ msgstr       "平滑滾動"
 
-#~ msgid "Add action"
-#~ msgstr "增加動作"
+#~ msgid        "Switch control of LEDs between device and Solaar"
+#~ msgstr       "在裝置與 Solaar 之間切換 LED 控制"
 
-#~ msgid ""
-#~ "Try removing the device and plugging it back in or turning it off and "
-#~ "then on."
-#~ msgstr "嘗試移除裝置並將其插回，或是關閉然後開啟。"
+#~ msgid        "The receiver only supports %d paired device(s)."
+#~ msgstr       "此接收器僅支援 %d 個配對裝置。"
 
-#~ msgid ""
-#~ "If you've just installed Solaar, try removing the receiver and plugging "
-#~ "it back in."
-#~ msgstr "若您剛剛安裝 Solaar，請嘗試將接收器拔下再重新插上。"
+#~ msgid        "The receiver was unplugged."
+#~ msgstr       "接收器已移除。"
 
-#~ msgid ""
-#~ "Found a Logitech Receiver (%s), but did not have permission to open it."
-#~ msgstr "已發現 1 個羅技接收器 (%s)，但您沒有權限存取。"
+#~ msgid        "The wireless link between this device and its receiver is "
+#~      "not encrypted.\n"
+#~      "\n"
+#~      "For pointing devices (mice, trackballs, trackpads), this is a minor "
+#~      "security issue.\n"
+#~      "\n"
+#~      "It is, however, a major security issue for text-input devices "
+#~      "(keyboards, numpads),\n"
+#~      "because typed text can be sniffed inconspicuously by 3rd parties "
+#~      "within range."
+#~ msgstr       "裝置與接收器間的無線連線未加密。\n"
+#~      "\n"
+#~      "對定位裝置（如滑鼠、軌跡球、觸控板）來說這不是什麼問題。\n"
+#~      "\n"
+#~      "然而這對於內容輸入裝置（如鍵盤、數字鍵盤）卻是一個重大的安全問題，\n"
+#~      "您輸入的內容有可能被第三方偷偷監聽到。"
 
-#~ msgid "Send a gesture by sliding the mouse while holding the button down."
-#~ msgstr "按住按鈕時，透過滑動滑鼠來發送手勢。"
+#~ msgid        "Try removing the device and plugging it back in or turning "
+#~      "it off and then on."
+#~ msgstr       "嘗試移除裝置並將其插回，或是關閉然後開啟。"
 
-#~ msgid ""
-#~ "Adjust the DPI by sliding the mouse horizontally while holding the button "
-#~ "down."
-#~ msgstr "按住按鈕時，透過水平滑動滑鼠來調整 DPI。"
+#~ msgid        "Turn illumination on or off on keyboard."
+#~ msgstr       "開啟或關閉鍵盤照明。"
 
-#~ msgid "DPI Sliding Adjustment"
-#~ msgstr "DPI 滑動調整"
+#~ msgid        "Turn on the device you want to pair."
+#~ msgstr       "開啟您要配對的裝置。"
 
-#~ msgid ""
-#~ "Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-#~ "The mouse wheel is always free at 0, and always ratcheted at 50"
-#~ msgstr ""
-#~ "自動在滾輪棘輪模式和自由滾動模式之間切換滑鼠滾輪。\n"
-#~ "滾輪在 0 時始終處於自由狀態，而在 50 時始終處於棘輪狀態"
+#~ msgid        "USB id"
+#~ msgstr       "USB ID"
 
-#~ msgid "Scroll Wheel Rachet"
-#~ msgstr "滾輪棘輪"
+#~ msgid        "Wheel Resolution"
+#~ msgstr       "滾輪解析度"
+
+#~ msgid        "You may have to first turn the device off and on again."
+#~ msgstr       "您可能需要先關閉裝置，然後再開啟。"
+
+#~ msgid        "height"
+#~ msgstr       "高度"
+
+#~ msgid        "last known"
+#~ msgstr       "最後已知"
+
+#~ msgid        "none"
+#~ msgstr       "無"
+
+#~ msgid        "top"
+#~ msgstr       "上"
+
+#~ msgid        "unknown"
+#~ msgstr       "未知的"
+
+#~ msgid        "width"
+#~ msgstr       "寬度"

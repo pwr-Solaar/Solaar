@@ -14,7 +14,9 @@ VERSION=$(python setup.py --version)
 DOMAIN=$(python setup.py --name)
 
 SOURCE_FILES=$(/bin/mktemp --tmpdir $DOMAIN-po-update-XXXXXX)
+
 find "lib" -name '*.py' >"$SOURCE_FILES"
+find "share" -name "*.template.desktop" >>"$SOURCE_FILES"
 
 POT_DIR="$PWD/po"
 test -d "$POT_DIR"
@@ -25,7 +27,7 @@ POT_FILE="$POT_DIR/$DOMAIN.pot"
 	--package-name "$DOMAIN" \
 	--package-version "$VERSION" \
 	--default-domain="$L_NAME" \
-	--language=Python --from-code=UTF-8 --files-from="$SOURCE_FILES" \
+	--from-code=UTF-8 --files-from="$SOURCE_FILES" \
 	--no-escape --indent --add-location --sort-by-file \
 	--add-comments=I18N \
 	--output="$POT_FILE"

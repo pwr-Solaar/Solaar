@@ -1,0 +1,15 @@
+# NOTE: This file is generated from share/autostart/solaar.template.desktop.
+[Desktop Entry]
+# I18N: Please leave the name of the program untranslated
+Name=Solaar
+Comment=Logitech Unifying Receiver peripherals manager
+# TODO: Move this to a gettext translation
+Comment[zh_HK]=羅技Unifying 裝置管理器
+Exec=solaar --window=hide
+Icon=solaar
+StartupNotify=true
+Terminal=false
+Type=Application
+Keywords=logitech;unifying;receiver;mouse;keyboard;
+Categories=Utility;GTK;
+#Categories=Utility;GTK;Settings;HardwareSettings;
