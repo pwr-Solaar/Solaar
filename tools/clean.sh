@@ -7,3 +7,4 @@ find . -type d -name '__pycache__' -delete
 
 /bin/rm --force po/*~
 /bin/rm --force --recursive share/locale/
+/bin/rm --force share/*/solaar.desktop
