@@ -21,10 +21,11 @@ import socket
 import struct
 import threading
 
+from enum import Flag
+from enum import IntEnum
 from typing import Any
 from typing import Dict
 from typing import Generator
-from typing import List
 from typing import Optional
 from typing import Tuple
 
@@ -42,7 +43,6 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
@@ -77,6 +77,46 @@ class Device(Protocol):
     @property
     def _profiles(self) -> Any:
         ...
+
+
+class KeyFlag(Flag):
+    """Capabilities and desired software handling for a control.
+
+    Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
+    We treat bytes 4 and 8 of `getCidInfo` as a single bitfield.
+    """
+
+    ANALYTICS_KEY_EVENTS = 0x400
+    FORCE_RAW_XY = 0x200
+    RAW_XY = 0x100
+    VIRTUAL = 0x80
+    PERSISTENTLY_DIVERTABLE = 0x40
+    DIVERTABLE = 0x20
+    REPROGRAMMABLE = 0x10
+    FN_SENSITIVE = 0x08
+    NONSTANDARD = 0x04
+    IS_FN = 0x02
+    MSE = 0x01
+
+
+class MappingFlag(Flag):
+    """Flags describing the reporting method of a control.
+
+    We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
+    """
+
+    ANALYTICS_KEY_EVENTS_REPORTING = 0x100
+    FORCE_RAW_XY_DIVERTED = 0x40
+    RAW_XY_DIVERTED = 0x10
+    PERSISTENTLY_DIVERTED = 0x04
+    DIVERTED = 0x01
+
+
+class ChargeStatus(Flag):
+    CHARGING = 0x00
+    FULL = 0x01
+    NOT_CHARGING = 0x02
+    ERROR = 0x07
 
 
 class FeaturesArray(dict):
@@ -184,19 +224,21 @@ class FeaturesArray(dict):
 
 class ReprogrammableKey:
     """Information about a control present on a device with the `REPROG_CONTROLS` feature.
-    Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
+
     Read-only properties:
-    - index {int} -- index in the control ID table
-    - key {NamedInt} -- the name of this control
-    - default_task {NamedInt} -- the native function of this control
-    - flags {List[str]} -- capabilities and desired software handling of the control
+    - index -- index in the control ID table
+    - key -- the name of this control
+    - default_task -- the native function of this control
+    - flags -- capabilities and desired software handling of the control
+
+    Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
     """
 
-    def __init__(self, device: Device, index, cid, tid, flags):
+    def __init__(self, device: Device, index: int, cid: int, task_id: int, flags: int):
         self._device = device
         self.index = index
         self._cid = cid
-        self._tid = tid
+        self._tid = task_id
         self._flags = flags
 
     @property
@@ -209,12 +251,15 @@ class ReprogrammableKey:
         while the name is the Control ID's native task. But this makes more sense
         than presenting details of controls vs tasks in the interface. The same
         convention applies to `mapped_to`, `remappable_to`, `remap` in `ReprogrammableKeyV4`."""
-        task = str(special_keys.TASK[self._tid])
+        try:
+            task = str(special_keys.Task(self._tid))
+        except ValueError:
+            task = f"unknown:{self._tid:04X}"
         return NamedInt(self._cid, task)
 
     @property
-    def flags(self) -> List[str]:
-        return special_keys.KEY_FLAG.flag_names(self._flags)
+    def flags(self) -> KeyFlag:
+        return KeyFlag(self._flags)
 
 
 class ReprogrammableKeyV4(ReprogrammableKey):
@@ -234,8 +279,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
 
-    def __init__(self, device: Device, index, cid, tid, flags, pos, group, gmask):
-        ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
+    def __init__(self, device: Device, index, cid, task_id, flags, pos, group, gmask):
+        ReprogrammableKey.__init__(self, device, index, cid, task_id, flags)
         self.pos = pos
         self.group = group
         self._gmask = gmask
@@ -251,11 +296,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self._mapped_to is None:
             self._getCidReporting()
         self._device.keys._ensure_all_keys_queried()
-        task = str(special_keys.TASK[self._device.keys.cid_to_tid[self._mapped_to]])
+        task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
         return NamedInt(self._mapped_to, task)
 
     @property
-    def remappable_to(self) -> common.NamedInts:
+    def remappable_to(self):
         self._device.keys._ensure_all_keys_queried()
         ret = common.UnsortedNamedInts()
         if self.group_mask:  # only keys with a non-zero gmask are remappable
@@ -263,31 +308,35 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             for g in self.group_mask:
                 g = special_keys.CidGroup[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
-                    tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
+                    cid = self._device.keys.cid_to_tid[tgt_cid]
+                    try:
+                        tgt_task = str(special_keys.Task(cid))
+                    except ValueError:
+                        tgt_task = f"unknown:{cid:04X}"
                     tgt_task = NamedInt(tgt_cid, tgt_task)
                     if tgt_task != self.default_task:  # don't put itself in twice
                         ret[tgt_task] = tgt_task
         return ret
 
     @property
-    def mapping_flags(self) -> List[str]:
+    def mapping_flags(self) -> MappingFlag:
         if self._mapping_flags is None:
             self._getCidReporting()
-        return special_keys.MAPPING_FLAG.flag_names(self._mapping_flags)
+        return MappingFlag(self._mapping_flags)
 
-    def set_diverted(self, value: bool):
+    def set_diverted(self, value: bool) -> None:
         """If set, the control is diverted temporarily and reports presses as HID++ events."""
-        flags = {special_keys.MAPPING_FLAG.diverted: value}
+        flags = {MappingFlag.DIVERTED: value}
         self._setCidReporting(flags=flags)
 
-    def set_persistently_diverted(self, value: bool):
+    def set_persistently_diverted(self, value: bool) -> None:
         """If set, the control is diverted permanently and reports presses as HID++ events."""
-        flags = {special_keys.MAPPING_FLAG.persistently_diverted: value}
+        flags = {MappingFlag.PERSISTENTLY_DIVERTED: value}
         self._setCidReporting(flags=flags)
 
-    def set_rawXY_reporting(self, value: bool):
+    def set_rawXY_reporting(self, value: bool) -> None:
         """If set, the mouse temporarily reports all its raw XY events while this control is pressed as HID++ events."""
-        flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
+        flags = {MappingFlag.RAW_XY_DIVERTED: value}
         self._setCidReporting(flags=flags)
 
     def remap(self, to: NamedInt):
@@ -339,35 +388,30 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         """
         flags = flags if flags else {}  # See flake8 B006
 
-        # if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
-        # We need diversion to report raw XY, so divert temporarily (since XY reporting is also temporary)
-        # flags[special_keys.MAPPING_FLAG.diverted] = True
-        # if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
-        # flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
-
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
-            special_keys.MAPPING_FLAG.diverted: special_keys.KEY_FLAG.divertable,
-            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
-            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
-            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
-            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY,
+            MappingFlag.DIVERTED: KeyFlag.DIVERTABLE,
+            MappingFlag.PERSISTENTLY_DIVERTED: KeyFlag.PERSISTENTLY_DIVERTABLE,
+            MappingFlag.ANALYTICS_KEY_EVENTS_REPORTING: KeyFlag.ANALYTICS_KEY_EVENTS,
+            MappingFlag.FORCE_RAW_XY_DIVERTED: KeyFlag.FORCE_RAW_XY,
+            MappingFlag.RAW_XY_DIVERTED: KeyFlag.RAW_XY,
         }
 
         bfield = 0
-        for f, v in flags.items():
-            if v and FLAG_TO_CAPABILITY[f] not in self.flags:
+        for mapping_flag, activated in flags.items():
+            key_flag = FLAG_TO_CAPABILITY[mapping_flag]
+            if activated and key_flag not in self.flags:
                 raise exceptions.FeatureNotSupported(
-                    msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
-                    + f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
+                    msg=f'Tried to set mapping flag "{mapping_flag}" on control "{self.key}" '
+                    + f'which does not support "{key_flag}" on device {self._device}.'
                 )
-            bfield |= int(f) if v else 0
-            bfield |= int(f) << 1  # The 'Xvalid' bit
+            bfield |= mapping_flag.value if activated else 0
+            bfield |= mapping_flag.value << 1  # The 'Xvalid' bit
             if self._mapping_flags:  # update flags if already read
-                if v:
-                    self._mapping_flags |= int(f)
+                if activated:
+                    self._mapping_flags |= mapping_flag.value
                 else:
-                    self._mapping_flags &= ~int(f)
+                    self._mapping_flags &= ~mapping_flag.value
 
         if remap != 0 and remap not in self.remappable_to:
             raise exceptions.FeatureNotSupported(
@@ -524,9 +568,9 @@ class KeysArrayV2(KeysArray):
             raise IndexError(index)
         keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS, 0x10, index)
         if keydata:
-            cid, tid, flags = struct.unpack("!HHB", keydata[:5])
-            self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
-            self.cid_to_tid[cid] = tid
+            cid, task_id, flags = struct.unpack("!HHB", keydata[:5])
+            self.keys[index] = ReprogrammableKey(self.device, index, cid, task_id, flags)
+            self.cid_to_tid[cid] = task_id
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
@@ -540,10 +584,10 @@ class KeysArrayV4(KeysArrayV2):
             raise IndexError(index)
         keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS_V4, 0x10, index)
         if keydata:
-            cid, tid, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
+            cid, task_id, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
-            self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
-            self.cid_to_tid[cid] = tid
+            self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, task_id, flags, pos, group, gmask)
+            self.cid_to_tid[cid] = task_id
             if group != 0:  # 0 = does not belong to a group
                 self.group_cids[special_keys.CidGroup(group)].append(cid)
         elif logger.isEnabledFor(logging.WARNING):
@@ -587,7 +631,10 @@ class KeysArrayPersistent(KeysArray):
             elif actionId == special_keys.ACTIONID.Mouse:
                 remapped = special_keys.MOUSE_BUTTONS[remapped]
             elif actionId == special_keys.ACTIONID.Hscroll:
-                remapped = special_keys.HORIZONTAL_SCROLL[remapped]
+                try:
+                    remapped = special_keys.HorizontalScroll(remapped)
+                except ValueError:
+                    remapped = f"unknown horizontal scroll:{remapped:04X}"
             elif actionId == special_keys.ACTIONID.Consumer:
                 remapped = special_keys.HID_CONSUMERCODES[remapped]
             elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
@@ -639,37 +686,40 @@ SUB_PARAM = {  # (byte count, minimum, maximum)
     ParamId.SCALE_FACTOR: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
 }
 
-# Spec Ids for feature GESTURE_2
-SPEC = common.NamedInts(
-    DVI_field_width=1,
-    field_widths=2,
-    period_unit=3,
-    resolution=4,
-    multiplier=5,
-    sensor_size=6,
-    finger_width_and_height=7,
-    finger_major_minor_axis=8,
-    finger_force=9,
-    zone=10,
-)
-SPEC._fallback = lambda x: f"unknown:{x:04X}"
 
-# Action Ids for feature GESTURE_2
-ACTION_ID = common.NamedInts(
-    MovePointer=1,
-    ScrollHorizontal=2,
-    WheelScrolling=3,
-    ScrollVertial=4,
-    ScrollOrPageXY=5,
-    ScrollOrPageHorizontal=6,
-    PageScreen=7,
-    Drag=8,
-    SecondaryDrag=9,
-    Zoom=10,
-    ScrollHorizontalOnly=11,
-    ScrollVerticalOnly=12,
-)
-ACTION_ID._fallback = lambda x: f"unknown:{x:04X}"
+class SpecGesture(IntEnum):
+    """Spec IDs for feature GESTURE_2."""
+
+    DVI_FIELD_WIDTH = 1
+    FIELD_WIDTHS = 2
+    PERIOD_UNIT = 3
+    RESOLUTION = 4
+    MULTIPLIER = 5
+    SENSOR_SIZE = 6
+    FINGER_WIDTH_AND_HEIGHT = 7
+    FINGER_MAJOR_MINOR_AXIS = 8
+    FINGER_FORCE = 9
+    ZONE = 10
+
+    def __str__(self):
+        return f"{self.name.replace('_', ' ').lower()}"
+
+
+class ActionId(IntEnum):
+    """Action IDs for feature GESTURE_2."""
+
+    MOVE_POINTER = 1
+    SCROLL_HORIZONTAL = 2
+    WHEEL_SCROLLING = 3
+    SCROLL_VERTICAL = 4
+    SCROLL_OR_PAGE_XY = 5
+    SCROLL_OR_PAGE_HORIZONTAL = 6
+    PAGE_SCREEN = 7
+    DRAG = 8
+    SECONDARY_DRAG = 9
+    ZOOM = 10
+    SCROLL_HORIZONTAL_ONLY = 11
+    SCROLL_VERTICAL_ONLY = 12
 
 
 class Gesture:
@@ -804,10 +854,13 @@ class Param:
 
 
 class Spec:
-    def __init__(self, device, low, high):
+    def __init__(self, device, low: int, high):
         self._device = device
         self.id = low
-        self.spec = SPEC[low]
+        try:
+            self.spec = SpecGesture(low)
+        except ValueError:
+            self.spec = f"unknown:{low:04X}"
         self.byte_count = high & 0x0F
         self._value = None
 
@@ -935,8 +988,22 @@ class LEDParam:
     saturation = "saturation"
 
 
-LEDRampChoices = common.NamedInts(default=0, yes=1, no=2)
-LEDFormChoices = common.NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
+class LedRampChoice(IntEnum):
+    DEFAULT = 0
+    YES = 1
+    NO = 2
+
+
+class LedFormChoices(IntEnum):
+    DEFAULT = 0
+    SINE = 1
+    SQUARE = 2
+    TRIANGLE = 3
+    SAWTOOTH = 4
+    SHARKFIN = 5
+    EXPONENTIAL = 6
+
+
 LEDParamSize = {
     LEDParam.color: 3,
     LEDParam.speed: 1,
@@ -1094,26 +1161,29 @@ class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_
 
 ButtonBehaviors = common.NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
 ButtonMappingTypes = common.NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
-ButtonFunctions = common.NamedInts(
-    No_Action=0x0,
-    Tilt_Left=0x1,
-    Tilt_Right=0x2,
-    Next_DPI=0x3,
-    Previous_DPI=0x4,
-    Cycle_DPI=0x5,
-    Default_DPI=0x6,
-    Shift_DPI=0x7,
-    Next_Profile=0x8,
-    Previous_Profile=0x9,
-    Cycle_Profile=0xA,
-    G_Shift=0xB,
-    Battery_Status=0xC,
-    Profile_Select=0xD,
-    Mode_Switch=0xE,
-    Host_Button=0xF,
-    Scroll_Down=0x10,
-    Scroll_Up=0x11,
-)
+
+
+class ButtonFunctions(IntEnum):
+    NO_ACTION = 0x0
+    TILT_LEFT = 0x1
+    TILT_RIGHT = 0x2
+    NEXT_DPI = 0x3
+    PREVIOUS_DPI = 0x4
+    CYCLE_DPI = 0x5
+    DEFAULT_DPI = 0x6
+    SHIFT_DPI = 0x7
+    NEXT_PROFILE = 0x8
+    PREVIOUS_PROFILE = 0x9
+    CYCLE_PROFILE = 0xA
+    G_SHIFT = 0xB
+    BATTERY_STATUS = 0xC
+    PROFILE_SELECT = 0xD
+    MODE_SWITCH = 0xE
+    HOST_BUTTON = 0xF
+    SCROLL_DOWN = 0x10
+    SCROLL_UP = 0x11
+
+
 ButtonButtons = special_keys.MOUSE_BUTTONS
 ButtonModifiers = special_keys.modifiers
 ButtonKeys = special_keys.USB_HID_KEYCODES
@@ -1138,32 +1208,37 @@ class Button:
         return dumper.represent_mapping("!Button", data.__dict__, flow_style=True)
 
     @classmethod
-    def from_bytes(cls, bytes):
-        behavior = ButtonBehaviors[bytes[0] >> 4]
+    def from_bytes(cls, bytes_) -> Button:
+        behavior_id = bytes_[0] >> 4
+        behavior = ButtonBehaviors[behavior_id]
         if behavior == ButtonBehaviors.MacroExecute or behavior == ButtonBehaviors.MacroStop:
-            sector = ((bytes[0] & 0x0F) << 8) + bytes[1]
-            address = (bytes[2] << 8) + bytes[3]
+            sector = ((bytes_[0] & 0x0F) << 8) + bytes_[1]
+            address = (bytes_[2] << 8) + bytes_[3]
             result = cls(behavior=behavior, sector=sector, address=address)
         elif behavior == ButtonBehaviors.Send:
-            mapping_type = ButtonMappingTypes[bytes[1]]
+            mapping_type = ButtonMappingTypes[bytes_[1]]
             if mapping_type == ButtonMappingTypes.Button:
-                value = ButtonButtons[(bytes[2] << 8) + bytes[3]]
+                value = ButtonButtons[(bytes_[2] << 8) + bytes_[3]]
                 result = cls(behavior=behavior, type=mapping_type, value=value)
             elif mapping_type == ButtonMappingTypes.Modifier_And_Key:
-                modifiers = bytes[2]
-                value = ButtonKeys[bytes[3]]
+                modifiers = bytes_[2]
+                value = ButtonKeys[bytes_[3]]
                 result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
             elif mapping_type == ButtonMappingTypes.Consumer_Key:
-                value = ButtonConsumerKeys[(bytes[2] << 8) + bytes[3]]
+                value = ButtonConsumerKeys[(bytes_[2] << 8) + bytes_[3]]
                 result = cls(behavior=behavior, type=mapping_type, value=value)
             elif mapping_type == ButtonMappingTypes.No_Action:
                 result = cls(behavior=behavior, type=mapping_type)
         elif behavior == ButtonBehaviors.Function:
-            value = ButtonFunctions[bytes[1]] if ButtonFunctions[bytes[1]] is not None else bytes[1]
-            data = bytes[3]
-            result = cls(behavior=behavior, value=value, data=data)
+            second_byte = bytes_[1]
+            try:
+                btn_func = ButtonFunctions(second_byte).value
+            except ValueError:
+                btn_func = second_byte
+            data = bytes_[3]
+            result = cls(behavior=behavior, value=btn_func, data=data)
         else:
-            result = cls(behavior=bytes[0] >> 4, bytes=bytes)
+            result = cls(behavior=bytes_[0] >> 4, bytes=bytes_)
         return result
 
     def to_bytes(self):
@@ -1306,7 +1381,14 @@ class OnboardProfiles:
         return dumper.represent_mapping("!OnboardProfiles", data.__dict__)
 
     @classmethod
-    def get_profile_headers(cls, device):
+    def get_profile_headers(cls, device) -> list[tuple[int, int]]:
+        """Returns profile headers.
+
+        Returns
+        -------
+        list[tuple[int, int]]
+            Tuples contain (sector, enabled).
+        """
         i = 0
         headers = []
         chunk = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
@@ -1333,10 +1415,8 @@ class OnboardProfiles:
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
         headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
-        i = 0
-        for sector, enabled in headers:
-            profiles[i + 1] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
-            i += 1
+        for i, (sector, enabled) in enumerate(headers, start=1):
+            profiles[i] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
         return cls(
             version=OnboardProfilesVersion,
             name=device.name,
@@ -1819,10 +1899,10 @@ def decipher_battery_voltage(report: bytes):
     charge_type = ChargeType.STANDARD
     if flags & (1 << 7):
         status = BatteryStatus.RECHARGING
-        charge_sts = CHARGE_STATUS[flags & 0x03]
+        charge_sts = ChargeStatus(flags & 0x03)
     if charge_sts is None:
         charge_sts = ErrorCode.UNKNOWN
-    elif charge_sts == CHARGE_STATUS.full:
+    elif ChargeStatus.FULL in charge_sts:
         charge_lvl = ChargeLevel.FULL
         status = BatteryStatus.FULL
     if flags & (1 << 3):
