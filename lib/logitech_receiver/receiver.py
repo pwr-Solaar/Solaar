@@ -41,6 +41,8 @@ from .hidpp10_constants import Registers
 if typing.TYPE_CHECKING:
     from logitech_receiver import common
 
+    from .base import HIDPPNotification
+
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
@@ -198,7 +200,7 @@ class Receiver:
             if not self.write_register(Registers.RECEIVER_CONNECTION, 0x02):
                 logger.warning("%s: failed to trigger device link notifications", self)
 
-    def notification_information(self, number, notification):
+    def notification_information(self, number, notification: HIDPPNotification) -> tuple[bool, bool, typing.Any, str]:
         """Extract information from unifying-style notification"""
         assert notification.address != 0x02
         online = not bool(notification.data[0] & 0x40)
