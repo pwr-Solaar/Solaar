@@ -1,5 +1,15 @@
-# 1.1.14rc1
+# 1.1.14rc2
 
+* Add ratchet setting for smart shift enhanced devices
+* Refactor Gesture into enum
+* Replace ERROR NamedInts by IntEnum (#2645)
+* Refactor hidpp20 to use enum
+* Update Swedish, Norwegian Nynorsk (nn), and Norwegian Bokmål (nb) translations
+* Use IntEnum for firmware and cidgroup constances
+* Change pairing error values to intenums
+* Fix initialization bug for PackedRangeControl
+* Add tests for feature class, process_notification, and key_is_down
+* Check all bits for extended report rate
 * Add type hints
 * Improve about dialog
 * Reduce dependencies
