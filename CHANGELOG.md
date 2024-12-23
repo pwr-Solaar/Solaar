@@ -1,5 +1,6 @@
-# 1.1.14rc2
+# 1.1.14rc3
 
+* Fix battery entries in config.yaml
 * Add ratchet setting for smart shift enhanced devices
 * Refactor Gesture into enum
 * Replace ERROR NamedInts by IntEnum (#2645)
