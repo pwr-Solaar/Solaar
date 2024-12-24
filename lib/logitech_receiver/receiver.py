@@ -36,6 +36,8 @@ from . import hidpp10_constants
 from .common import Alert
 from .common import Notification
 from .device import Device
+from .hidpp10_constants import InfoSubRegisters
+from .hidpp10_constants import NotificationFlag
 from .hidpp10_constants import Registers
 
 if typing.TYPE_CHECKING:
@@ -44,7 +46,6 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
-_IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
 class LowLevelInterface(Protocol):
@@ -124,7 +125,7 @@ class Receiver:
 
     def initialize(self, product_info: dict):
         # read the receiver information subregister, so we can find out max_devices
-        serial_reply = self.read_register(Registers.RECEIVER_INFO, _IR.receiver_information)
+        serial_reply = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.RECEIVER_INFORMATION)
         if serial_reply:
             self.serial = serial_reply[1:5].hex().upper()
             self.max_devices = serial_reply[6]
@@ -172,7 +173,7 @@ class Receiver:
             return False
 
         if enable:
-            set_flag_bits = hidpp10_constants.NOTIFICATION_FLAG.wireless | hidpp10_constants.NOTIFICATION_FLAG.software_present
+            set_flag_bits = NotificationFlag.WIRELESS | NotificationFlag.SOFTWARE_PRESENT
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
@@ -181,13 +182,16 @@ class Receiver:
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
+        if flag_bits is None:
+            flag_names = None
+        else:
+            flag_names = hidpp10_constants.NotificationFlag.flag_names(flag_bits)
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: receiver notifications %s => %s", self, "enabled" if enable else "disabled", flag_names)
         return flag_bits
 
     def device_codename(self, n):
-        codename = self.read_register(Registers.RECEIVER_INFO, _IR.device_name + n - 1)
+        codename = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.DEVICE_NAME + n - 1)
         if codename:
             codename = codename[2 : 2 + ord(codename[1:2])]
             return codename.decode("ascii")
@@ -212,7 +216,7 @@ class Receiver:
         polling_rate = ""
         serial = None
         power_switch = "(unknown)"
-        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.pairing_information + n - 1)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.PAIRING_INFORMATION + n - 1)
         if pair_info:  # a receiver that uses Unifying-style pairing registers
             wpid = pair_info[3:5].hex().upper()
             kind = hidpp10_constants.DEVICE_KIND[pair_info[7] & 0x0F]
@@ -227,9 +231,9 @@ class Receiver:
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
         else:
             raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
-        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.extended_pairing_information + n - 1)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.EXTENDED_PAIRING_INFORMATION + n - 1)
         if pair_info:
-            power_switch = hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
+            power_switch = hidpp10_constants.PowerSwitchLocation(pair_info[9] & 0x0F)
             serial = pair_info[1:5].hex().upper()
         else:  # some Nano receivers?
             pair_info = self.read_register(0x2D5)  # undocumented and questionable
@@ -410,13 +414,13 @@ class BoltReceiver(Receiver):
         self.max_devices = product_info.get("max_devices", 1)
 
     def device_codename(self, n):
-        codename = self.read_register(Registers.RECEIVER_INFO, _IR.bolt_device_name + n, 0x01)
+        codename = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.BOLT_DEVICE_NAME + n, 0x01)
         if codename:
             codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
             return codename.decode("ascii")
 
     def device_pairing_information(self, n: int) -> dict:
-        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.bolt_pairing_information + n)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.BOLT_PAIRING_INFORMATION + n)
         if pair_info:
             wpid = (pair_info[3:4] + pair_info[2:3]).hex().upper()
             kind = hidpp10_constants.DEVICE_KIND[pair_info[1] & 0x0F]

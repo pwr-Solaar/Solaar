@@ -20,6 +20,7 @@ import binascii
 import dataclasses
 import typing
 
+from enum import Flag
 from enum import IntEnum
 from typing import Generator
 from typing import Iterable
@@ -589,7 +590,7 @@ class FirmwareInfo:
     extras: str | None
 
 
-class BatteryStatus(IntEnum):
+class BatteryStatus(Flag):
     DISCHARGING = 0x00
     RECHARGING = 0x01
     ALMOST_FULL = 0x02
@@ -649,8 +650,7 @@ class Battery:
         elif isinstance(self.level, int):
             status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
-        else:
-            return ""
+        return ""
 
 
 class Alert(IntEnum):
