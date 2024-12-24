@@ -54,7 +54,7 @@ tray_icon_size = None
 temp = tempfile.NamedTemporaryFile(prefix="Solaar_", mode="w", delete=True)
 
 
-def _parse_arguments():
+def create_parser():
     arg_parser = argparse.ArgumentParser(
         prog=NAME.lower(), epilog="For more information see https://pwr-solaar.github.io/Solaar"
     )
@@ -99,7 +99,11 @@ def _parse_arguments():
         choices=cli.actions,
         help="command-line action to perform (optional); append ' --help' to show args",
     )
+    return arg_parser
 
+
+def _parse_arguments():
+    arg_parser = create_parser()
     args = arg_parser.parse_args()
 
     if args.help_actions:

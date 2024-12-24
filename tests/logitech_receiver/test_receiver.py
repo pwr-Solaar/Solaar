@@ -12,6 +12,13 @@ from logitech_receiver import receiver
 from . import fake_hidpp
 
 
+@pytest.fixture
+def nano_recv():
+    device_info = DeviceInfo("12", product_id=0xC534)
+    mock_low_level = LowLevelInterfaceFake(responses_lacking)
+    yield receiver.create_receiver(mock_low_level, device_info, lambda x: x)
+
+
 class LowLevelInterfaceFake:
     def __init__(self, responses=None):
         self.responses = responses
@@ -189,3 +196,27 @@ def test_receiver_factory_no_device(device_info, responses):
 
     with pytest.raises(exceptions.NoSuchDevice):
         r.device_pairing_information(1)
+
+
+@pytest.mark.parametrize(
+    "address, data, expected_online, expected_encrypted",
+    [
+        (0x03, b"\x01\x02\x03", True, False),
+        (0x10, b"\x61\x02\x03", False, True),
+    ],
+)
+def test_notification_information_nano_receiver(nano_recv, address, data, expected_online, expected_encrypted):
+    _number = 0
+    notification = base.HIDPPNotification(
+        report_id=0x01,
+        devnumber=0x52C,
+        sub_id=0,
+        address=address,
+        data=data,
+    )
+    online, encrypted, wpid, kind = nano_recv.notification_information(_number, notification)
+
+    assert online == expected_online
+    assert encrypted == expected_encrypted
+    assert wpid == "0302"
+    assert kind == "keyboard"
