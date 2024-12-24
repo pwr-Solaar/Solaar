@@ -148,12 +148,17 @@ def _print_device(dev, num=None):
         dev_settings = []
         settings_templates.check_feature_settings(dev, dev_settings)
         for feature, index in dev.features.enumerate():
-            flags = dev.request(0x0000, feature.bytes(2))
+            if isinstance(feature, str):
+                feature_bytes = bytes.fromhex(feature[-4:])
+            else:
+                feature_bytes = feature.to_bytes(2)
+            feature_int = int.from_bytes(feature_bytes)
+            flags = dev.request(0x0000, feature_bytes)
             flags = 0 if flags is None else ord(flags[1:2])
             flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
-            version = dev.features.get_feature_version(int(feature))
+            version = dev.features.get_feature_version(feature_int)
             version = version if version else 0
-            print("        %2d: %-22s {%04X} V%s    %s " % (index, feature, feature, version, ", ".join(flags)))
+            print("        %2d: %-22s {%04X} V%s    %s " % (index, feature, feature_int, version, ", ".join(flags)))
             if feature == SupportedFeature.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
