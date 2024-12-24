@@ -1,11 +1,12 @@
-# 1.1.14rc3
+# 1.1.14rc4
 
+* Handle fake feature enums in show
 * Fix battery entries in config.yaml
 * Add ratchet setting for smart shift enhanced devices
 * Refactor Gesture into enum
 * Replace ERROR NamedInts by IntEnum (#2645)
 * Refactor hidpp20 to use enum
-* Update Swedish, Norwegian Nynorsk (nn), and Norwegian Bokmål (nb) translations
+* Update Polish, Swedish, Norwegian Nynorsk (nn), and Norwegian Bokmål (nb) translations
 * Use IntEnum for firmware and cidgroup constances
 * Change pairing error values to intenums
 * Fix initialization bug for PackedRangeControl
