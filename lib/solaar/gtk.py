@@ -178,7 +178,8 @@ def main():
 
     udev_file = "42-logitech-unify-permissions.rules"
     if (
-        logger.isEnabledFor(logging.WARNING)
+        platform.system() == "Linux"
+        and logger.isEnabledFor(logging.WARNING)
         and not os.path.isfile("/etc/udev/rules.d/" + udev_file)
         and not os.path.isfile("/usr/lib/udev/rules.d/" + udev_file)
         and not os.path.isfile("/usr/local/lib/udev/rules.d/" + udev_file)
