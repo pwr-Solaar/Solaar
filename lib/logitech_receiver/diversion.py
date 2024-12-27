@@ -366,7 +366,7 @@ def simulate_uinput(what, code, arg):
 def simulate_key(code, event):  # X11 keycode but Solaar event code
     if not wayland and simulate_xtest(code, event):
         return True
-    if simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
+    if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
     logger.warning("no way to simulate key input")
 

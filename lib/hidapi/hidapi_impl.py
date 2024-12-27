@@ -181,15 +181,8 @@ def _enumerate_devices():
         p = p.contents.next
     _hidapi.hid_free_enumeration(c_devices)
 
-    keyboard_or_mouse = {d["path"] for d in devices if d["usage_page"] == 1 and d["usage"] in (6, 2)}
     unique_devices = {}
     for device in devices:
-        # On macOS we cannot access keyboard or mouse devices without special permissions. Since
-        # we don't need them anyway we remove them so opening them doesn't cause errors later.
-        if device["path"] in keyboard_or_mouse:
-            # print(f"Ignoring keyboard or mouse device: {device}")
-            continue
-
         # hidapi returns separate entries for each usage page of a device.
         # Deduplicate by path to only keep one device entry.
         if device["path"] not in unique_devices:
@@ -255,15 +248,20 @@ def _match(
     device_handle = None
     try:
         device_handle = open_path(device["path"])
-        report = _get_input_report(device_handle, 0x10, 32)
-        if len(report) == 1 + 6 and report[0] == 0x10:
-            device["hidpp_short"] = True
-        report = _get_input_report(device_handle, 0x11, 32)
-        if len(report) == 1 + 19 and report[0] == 0x11:
-            device["hidpp_long"] = True
-    except HIDError as e:  # noqa: F841
-        if logger.isEnabledFor(logging.INFO):
-            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")  # noqa
+        try:
+            report = _get_input_report(device_handle, 0x10, 32)
+            if len(report) == 1 + 6 and report[0] == 0x10:
+                device["hidpp_short"] = True
+        except HIDError as e:
+            if logger.isEnabledFor(logging.INFO):
+                logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+        try:
+            report = _get_input_report(device_handle, 0x11, 32)
+            if len(report) == 1 + 19 and report[0] == 0x11:
+                device["hidpp_long"] = True
+        except HIDError as e:
+            if logger.isEnabledFor(logging.INFO):
+                logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
     finally:
         if device_handle:
             close(device_handle)
