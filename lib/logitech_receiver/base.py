@@ -34,9 +34,11 @@ from typing import Callable
 from . import base_usb
 from . import common
 from . import descriptors
-from . import exceptions
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
+from .exceptions import FeatureCallError
+from .exceptions import NoSuchDeviceError
+from .exceptions import ReceiverNotAvailableError
 from .hidpp10_constants import ErrorCode as Hidpp10ErrorCode
 from .hidpp20_constants import ErrorCode as Hidpp20ErrorCode
 
@@ -284,7 +286,7 @@ def write(handle, devnumber, data, long_message=False):
 
     The first two (required) bytes of data must be the SubId and address.
 
-    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    :raises NoReceiverAvailableError: if the receiver is no longer available, i.e. has
     been physically removed from the machine, or the kernel driver has been
     unloaded. The handle will be closed automatically.
     """
@@ -308,10 +310,10 @@ def write(handle, devnumber, data, long_message=False):
 
     try:
         hidapi.write(int(handle), wdata)
-    except Exception as reason:
+    except Exception as exc:
         logger.error("write failed, assuming handle %r no longer available", handle)
         close(handle)
-        raise exceptions.NoReceiver(reason=reason) from reason
+        raise ReceiverNotAvailableError(str(exc)) from exc
 
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
@@ -323,7 +325,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 
     :returns: a tuple of (devnumber, message data), or `None`
 
-    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    :raises NoReceiverAvailableError: if the receiver is no longer available, i.e. has
     been physically removed from the machine, or the kernel driver has been
     unloaded. The handle will be closed automatically.
     """
@@ -361,7 +363,7 @@ def _read(handle, timeout):
 
     :returns: a tuple of (report_id, devnumber, data), or `None`.
 
-    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    :raises NoReceiverAvailableError: if the receiver is no longer available, i.e. has
     been physically removed from the machine, or the kernel driver has been
     unloaded. The handle will be closed automatically.
     """
@@ -369,10 +371,10 @@ def _read(handle, timeout):
         # convert timeout to milliseconds, the hidapi expects it
         timeout = int(timeout * 1000)
         data = hidapi.read(int(handle), _MAX_READ_SIZE, timeout)
-    except Exception as reason:
+    except Exception as exc:
         logger.warning("read failed, assuming handle %r no longer available", handle)
         close(handle)
-        raise exceptions.NoReceiver(reason=reason) from reason
+        raise ReceiverNotAvailableError(str(exc)) from exc
 
     if data and _is_relevant_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
@@ -403,10 +405,10 @@ def _skip_incoming(handle, ihandle, notifications_hook):
         try:
             # read whatever is already in the buffer, if any
             data = hidapi.read(ihandle, _MAX_READ_SIZE, 0)
-        except Exception as reason:
+        except Exception as exc:
             logger.error("read failed, assuming receiver %s no longer available", handle)
             close(handle)
-            raise exceptions.NoReceiver(reason=reason) from reason
+            raise ReceiverNotAvailableError(str(exc)) from exc
 
         if data:
             if _is_relevant_message(data):  # only process messages that pass check
@@ -552,7 +554,7 @@ def request(
         notifications_hook = getattr(handle, "notifications_hook", None)
         try:
             _skip_incoming(handle, ihandle, notifications_hook)
-        except exceptions.NoReceiver:
+        except ReceiverNotAvailableError:
             logger.warning("device or receiver disconnected")
             return None
         write(ihandle, devnumber, request_data, long_message)
@@ -597,11 +599,8 @@ def request(
                             error,
                             Hidpp20ErrorCode(error),
                         )
-                        raise exceptions.FeatureCallError(
-                            number=devnumber,
-                            request=request_id,
-                            error=error,
-                            params=params,
+                        raise FeatureCallError(
+                            msg=f"number={devnumber}, " f"request={request_id}, " f"error={error}, " f"params={params}",
                         )
 
                     if reply_data[:2] == request_data[:2]:
@@ -649,7 +648,7 @@ def ping(handle, devnumber, long_message: bool = False):
         notifications_hook = getattr(handle, "notifications_hook", None)
         try:
             _skip_incoming(handle, int(handle), notifications_hook)
-        except exceptions.NoReceiver:
+        except ReceiverNotAvailableError:
             logger.warning("device or receiver disconnected")
             return
 
@@ -683,7 +682,7 @@ def ping(handle, devnumber, long_message: bool = False):
                             return  # device unreachable
                         if error == Hidpp10ErrorCode.UNKNOWN_DEVICE:  # no paired device with that number
                             logger.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
-                            raise exceptions.NoSuchDevice(number=devnumber, request=request_id)
+                            raise NoSuchDeviceError(number=devnumber, receiver=None, msg=f"{request_id}")
 
                 if notifications_hook:
                     n = make_notification(report_id, reply_devnumber, reply_data)

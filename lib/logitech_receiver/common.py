@@ -559,21 +559,6 @@ def int2bytes(x, count=None, signed=False):
         return x.to_bytes(length=8, byteorder="big", signed=signed).lstrip(b"\x00")
 
 
-class KwException(Exception):
-    """An exception that remembers all arguments passed to the constructor.
-    They can be later accessed by simple member access.
-    """
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-
-    def __getattr__(self, k):
-        try:
-            return super().__getattr__(k)
-        except AttributeError:
-            return self.args[0].get(k)  # was self.args[0][k]
-
-
 class FirmwareKind(IntEnum):
     Firmware = 0x00
     Bootloader = 0x01

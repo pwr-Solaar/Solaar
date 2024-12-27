@@ -31,7 +31,6 @@ from typing import Protocol
 from solaar import configuration
 
 from . import descriptors
-from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
@@ -39,6 +38,7 @@ from . import settings
 from . import settings_templates
 from .common import Alert
 from .common import Battery
+from .exceptions import NoSuchDeviceError
 from .hidpp20_constants import SupportedFeature
 
 if typing.TYPE_CHECKING:
@@ -169,9 +169,7 @@ class Device:
 
         if receiver:
             if not self.wpid:
-                raise exceptions.NoSuchDevice(
-                    number=number, receiver=receiver, error="no wpid for device connected to receiver"
-                )
+                raise NoSuchDeviceError(number=number, receiver=receiver, msg="no wpid for device connected to " "receiver")
             self.descriptor = descriptors.get_wpid(self.wpid)
             if self.descriptor is None:
                 codename = self.receiver.device_codename(self.number)  # Last chance to get a descriptor, may fail
@@ -581,7 +579,7 @@ class Device:
     def __str__(self):
         try:
             name = self._name or self._codename or "?"
-        except exceptions.NoSuchDevice:
+        except NoSuchDeviceError:
             name = "name not available"
         return f"<Device({int(self.number)},{self.wpid or self.product_id},{name},{self.serial})>"
 

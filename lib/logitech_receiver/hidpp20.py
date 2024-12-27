@@ -34,7 +34,6 @@ from solaar.i18n import _
 from typing_extensions import Protocol
 
 from . import common
-from . import exceptions
 from . import hidpp10_constants
 from . import special_keys
 from .common import Battery
@@ -42,6 +41,8 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
+from .exceptions import FeatureCallError
+from .exceptions import FeatureNotSupportedError
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
@@ -148,7 +149,7 @@ class FeaturesArray(dict):
         try:
             index = self.__getitem__(feature)
             return index is not None and index is not False
-        except exceptions.FeatureCallError:
+        except FeatureCallError:
             return False
 
     def __getitem__(self, feature: NamedInt) -> Optional[int]:
@@ -315,8 +316,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     mapping_flags_2 = 0
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
-                raise exceptions.FeatureCallError(msg="No reply from device.")
-        except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
+                raise FeatureCallError(msg="No reply from device.")
+        except FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning(
                     f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults"
@@ -357,7 +358,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         bfield = 0
         for f, v in flags.items():
             if v and FLAG_TO_CAPABILITY[f] not in self.flags:
-                raise exceptions.FeatureNotSupported(
+                raise FeatureNotSupportedError(
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
                     + f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
                 )
@@ -370,7 +371,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     self._mapping_flags &= ~int(f)
 
         if remap != 0 and remap not in self.remappable_to:
-            raise exceptions.FeatureNotSupported(
+            raise FeatureNotSupportedError(
                 msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to '
                 + f"on device {self._device}."
             )
@@ -820,7 +821,7 @@ class Spec:
     def read(self):
         try:
             value = self._device.feature_request(SupportedFeature.GESTURE_2, 0x50, self.id, 0xFF)
-        except exceptions.FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
+        except FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning(
                     f"Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None"
@@ -908,7 +909,7 @@ class Backlight:
     def __init__(self, device):
         response = device.feature_request(SupportedFeature.BACKLIGHT2, 0x00)
         if not response:
-            raise exceptions.FeatureCallError(msg="No reply from device.")
+            raise FeatureCallError(msg="No reply from device.")
         self.device = device
         self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = struct.unpack(
             "<BBBHBHHH", response[:12]
@@ -1564,7 +1565,7 @@ class Hidpp20:
             report = device.feature_request(SupportedFeature.ADC_MEASUREMENT)
             if report is not None:
                 return decipher_adc_measurement(report)
-        except exceptions.FeatureCallError:
+        except FeatureCallError:
             return SupportedFeature.ADC_MEASUREMENT if SupportedFeature.ADC_MEASUREMENT in device.features else None
 
     def get_battery(self, device, feature):

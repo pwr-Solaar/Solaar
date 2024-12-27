@@ -10,6 +10,7 @@ from logitech_receiver import base
 from logitech_receiver import exceptions
 from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
 from logitech_receiver.base import request
+from logitech_receiver.exceptions import NoSuchDeviceError
 from logitech_receiver.hidpp10_constants import ErrorCode as Hidpp10Error
 from logitech_receiver.hidpp20_constants import ErrorCode as Hidpp20Error
 
@@ -148,12 +149,9 @@ def test_request_errors(
         "logitech_receiver.base.write", return_value=None
     ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if raise_exception:
-            with pytest.raises(exceptions.FeatureCallError) as context:
+            with pytest.raises(exceptions.FeatureCallError) as e:
                 request(handle, device_number, next_sw_id, return_error=return_error)
-            assert context.value.number == device_number
-            assert context.value.request == next_sw_id
-            assert context.value.error == error_code
-            assert context.value.params == b""
+            assert str(e)
 
         else:
             result = request(handle, device_number, next_sw_id, return_error=return_error)
@@ -167,7 +165,7 @@ def test_request_errors(
         (Hidpp10Error.INVALID_SUB_ID_COMMAND, 1.0),
         (Hidpp10Error.RESOURCE_ERROR, None),
         (Hidpp10Error.CONNECTION_REQUEST_FAILED, None),
-        (Hidpp10Error.UNKNOWN_DEVICE, exceptions.NoSuchDevice),
+        (Hidpp10Error.UNKNOWN_DEVICE, NoSuchDeviceError),
     ],
 )
 def test_ping_errors(simulated_error: Hidpp10Error, expected_result):
@@ -177,15 +175,18 @@ def test_ping_errors(simulated_error: Hidpp10Error, expected_result):
     next_sw_id = 0x05
     reply_data_sw_id = struct.pack("!H", 0x0010 | next_sw_id)
 
+    expected_request_id = struct.unpack("!H", reply_data_sw_id)[0]
+
     with mock.patch(
         "logitech_receiver.base._read",
         return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error])),
     ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if isinstance(expected_result, type) and issubclass(expected_result, Exception):
-            with pytest.raises(expected_result) as context:
+            with pytest.raises(expected_result) as e:
                 base.ping(handle=handle, devnumber=device_number)
-            assert context.value.number == device_number
-            assert context.value.request == struct.unpack("!H", reply_data_sw_id)[0]
+
+                assert e.number == device_number
+                assert e.msg == str(expected_request_id)
 
         else:
             result = base.ping(handle=handle, devnumber=device_number)

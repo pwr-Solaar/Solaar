@@ -27,10 +27,10 @@ import gi
 import logitech_receiver
 
 from logitech_receiver import base
-from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants
 from logitech_receiver import listener
 from logitech_receiver import notifications
+from logitech_receiver.exceptions import ReceiverNotAvailableError
 
 from . import configuration
 from . import dbus
@@ -362,7 +362,7 @@ def _process_add(device_info, retry):
                 _error_callback("permissions", device_info.path)
         else:
             _error_callback("nodevice", device_info.path)
-    except exceptions.NoReceiver:
+    except ReceiverNotAvailableError:
         _error_callback("nodevice", device_info.path)
 
 
