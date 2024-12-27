@@ -18,10 +18,10 @@ import pytest
 import yaml
 
 from logitech_receiver import common
-from logitech_receiver import exceptions
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
+from logitech_receiver.exceptions import FeatureNotSupportedError
 from logitech_receiver.hidpp20_constants import GestureId
 
 from . import fake_hidpp
@@ -257,28 +257,28 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
     if "divertable" in key.flags or not diverted:
         key.set_diverted(diverted)
     else:
-        with pytest.raises(exceptions.FeatureNotSupported):
+        with pytest.raises(FeatureNotSupportedError):
             key.set_diverted(diverted)
     assert ("diverted" in list(key.mapping_flags)) == (diverted and "divertable" in key.flags)
 
     if "persistently divertable" in key.flags or not persistently_diverted:
         key.set_persistently_diverted(persistently_diverted)
     else:
-        with pytest.raises(exceptions.FeatureNotSupported):
+        with pytest.raises(FeatureNotSupportedError):
             key.set_persistently_diverted(persistently_diverted)
     assert ("persistently diverted" in key.mapping_flags) == (persistently_diverted and "persistently divertable" in key.flags)
 
     if "raw XY" in key.flags or not rawXY_reporting:
         key.set_rawXY_reporting(rawXY_reporting)
     else:
-        with pytest.raises(exceptions.FeatureNotSupported):
+        with pytest.raises(FeatureNotSupportedError):
             key.set_rawXY_reporting(rawXY_reporting)
     assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw XY" in key.flags)
 
     if remap in key.remappable_to or remap == 0:
         key.remap(remap)
     else:
-        with pytest.raises(exceptions.FeatureNotSupported):
+        with pytest.raises(FeatureNotSupportedError):
             key.remap(remap)
     assert (key.mapped_to == remap) or (remap not in key.remappable_to and remap != 0)
 

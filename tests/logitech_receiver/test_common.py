@@ -233,13 +233,6 @@ def test_int2bytes():
     assert result == expected
 
 
-def test_kw_exception():
-    e = common.KwException(foo=0, bar="bar")
-
-    assert e.foo == 0
-    assert e.bar == "bar"
-
-
 @pytest.mark.parametrize(
     "status, expected_level, expected_ok, expected_charging, expected_string",
     [

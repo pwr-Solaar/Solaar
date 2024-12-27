@@ -30,15 +30,17 @@ from typing import Protocol
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from .common import Alert
 from .common import Notification
 from .device import Device
+from .exceptions import NoSuchDeviceError
 from .hidpp10_constants import Registers
 
 if typing.TYPE_CHECKING:
+    from hidapi.common import DeviceInfo
+
     from logitech_receiver import common
 
 logger = logging.getLogger(__name__)
@@ -52,6 +54,9 @@ class LowLevelInterface(Protocol):
         ...
 
     def find_paired_node_wpid(self, receiver_path: str, index: int):
+        ...
+
+    def product_information(self, usb_id: int) -> dict:
         ...
 
     def ping(self, handle, number, long_message=False):
@@ -224,9 +229,9 @@ class Receiver:
                 wpid = device_info[3:5].hex().upper()
                 kind = hidpp10_constants.DEVICE_KIND[0x00]  # unknown kind
             else:
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
+                raise NoSuchDeviceError(number=n, receiver=self, msg="read pairing information - non-unifying")
         else:
-            raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
+            raise NoSuchDeviceError(number=n, receiver=self, msg="read pairing information")
         pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.extended_pairing_information + n - 1)
         if pair_info:
             power_switch = hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
@@ -265,7 +270,7 @@ class Receiver:
                 logger.info("%s: found new device %d (%s)", self, number, dev.wpid)
             self._devices[number] = dev
             return dev
-        except exceptions.NoSuchDevice as e:
+        except NoSuchDeviceError as e:
             logger.warning("register new device failed for %s device %d error %s", e.receiver, e.number, e.error)
 
         logger.warning("%s: looked for device %d, not found", self, number)
@@ -423,7 +428,7 @@ class BoltReceiver(Receiver):
             serial = pair_info[4:8].hex().upper()
             return {"wpid": wpid, "kind": kind, "polling": None, "serial": serial, "power_switch": "(unknown)"}
         else:
-            raise exceptions.NoSuchDevice(number=n, receiver=self, error="can't read Bolt pairing register")
+            raise NoSuchDeviceError(number=n, receiver=self, msg="can't read Bolt pairing register")
 
     def discover(self, cancel=False, timeout=30):
         """Discover Logitech Bolt devices."""
@@ -487,7 +492,7 @@ class Ex100Receiver(Receiver):
         wpid = self.low_level.find_paired_node_wpid(self.path, number)
         if not wpid:
             logger.error("Unable to get wpid from udev for device %d of %s", number, self)
-            raise exceptions.NoSuchDevice(number=number, receiver=self, error="Not present 27Mhz device")
+            raise NoSuchDeviceError(number=number, receiver=self, msg="Not present 27Mhz device")
         kind = hidpp10_constants.DEVICE_KIND[_get_kind_from_index(self, number)]
         return {"wpid": wpid, "kind": kind, "polling": "", "serial": None, "power_switch": "(unknown)"}
 
@@ -505,7 +510,7 @@ def _get_kind_from_index(receiver, index):
         kind = 3
     else:  # unknown device number on 27Mhz receiver
         logger.error("failed to calculate device kind for device %d of %s", index, receiver)
-        raise exceptions.NoSuchDevice(number=index, receiver=receiver, error="Unknown 27Mhz device number")
+        raise NoSuchDeviceError(number=index, receiver=receiver, msg="Unknown 27Mhz device number")
     return kind
 
 
@@ -518,7 +523,7 @@ receiver_class_mapping = {
 }
 
 
-def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=None) -> Optional[Receiver]:
+def create_receiver(low_level: LowLevelInterface, device_info: DeviceInfo, setting_callback=None) -> Optional[Receiver]:
     """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
 
     try:

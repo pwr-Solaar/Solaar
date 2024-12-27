@@ -20,7 +20,7 @@ import queue
 import threading
 
 from . import base
-from . import exceptions
+from .exceptions import ReceiverNotAvailableError
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class EventsListener(threading.Thread):
             if self._queued_notifications.empty():
                 try:
                     n = base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
-                except exceptions.NoReceiver:
+                except ReceiverNotAvailableError:
                     logger.warning("%s disconnected", self.receiver.name)
                     self.receiver.close()
                     break

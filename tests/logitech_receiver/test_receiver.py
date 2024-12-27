@@ -54,7 +54,7 @@ def test_get_kind_from_index(index, expected_kind):
     if expected_kind:
         assert receiver._get_kind_from_index(mock_receiver, index) == expected_kind
     else:
-        with pytest.raises(exceptions.NoSuchDevice):
+        with pytest.raises(exceptions.NoSuchDeviceError):
             receiver._get_kind_from_index(mock_receiver, index)
 
 
@@ -187,5 +187,5 @@ def test_receiver_factory_no_device(device_info, responses):
 
     r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
 
-    with pytest.raises(exceptions.NoSuchDevice):
+    with pytest.raises(exceptions.NoSuchDeviceError):
         r.device_pairing_information(1)

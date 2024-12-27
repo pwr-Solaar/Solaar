@@ -15,39 +15,48 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .common import KwException
-
 """Exceptions that may be raised by this API."""
 
-
-class NoReceiver(KwException):
-    """Raised when trying to talk through a previously open handle, when the
-    receiver is no longer available. Should only happen if the receiver is
-    physically disconnected from the machine, or its kernel driver module is
-    unloaded."""
-
-    pass
+from typing import Any
 
 
-class NoSuchDevice(KwException):
-    """Raised when trying to reach a device number not paired to the receiver."""
+class LogitechReceiverError(Exception):
+    """Base class for all exceptions in logitech_receiver package."""
 
     pass
 
 
-class DeviceUnreachable(KwException):
-    """Raised when a request is made to an unreachable (turned off) device."""
+class ReceiverNotAvailableError(LogitechReceiverError):
+    """Raised when a receiver is no longer available.
 
-    pass
+    Trying to talk through a previously open handle, when the
+    receiver is no longer available. Should only happen if the receiver
+    is physically disconnected from the machine, or its kernel driver
+    module is unloaded.
+    """
+
+    def __init__(self, msg: str):
+        super().__init__(msg)
 
 
-class FeatureNotSupported(KwException):
+class NoSuchDeviceError(LogitechReceiverError):
+    """Raised when accessing a device (number) not paired to the receiver."""
+
+    def __init__(self, number: int, receiver: Any, msg: str):
+        super().__init__(msg)
+        self.number = number
+        self.receiver = receiver
+
+
+class FeatureNotSupportedError(LogitechReceiverError):
     """Raised when trying to request a feature not supported by the device."""
 
-    pass
+    def __init__(self, msg: str):
+        super().__init__(msg)
 
 
-class FeatureCallError(KwException):
+class FeatureCallError(LogitechReceiverError):
     """Raised if the device replied to a feature call with an error."""
 
-    pass
+    def __init__(self, msg: str):
+        super().__init__(msg)
