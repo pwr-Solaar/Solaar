@@ -156,6 +156,8 @@ def main():
     if not args:
         return
     if args.action:
+        # explicit close before return
+        temp.close()
         # if any argument, run comandline and exit
         return cli.run(args.action, args.hidraw_path)
 
