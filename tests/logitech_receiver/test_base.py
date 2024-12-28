@@ -9,7 +9,8 @@ import pytest
 from logitech_receiver import base
 from logitech_receiver import exceptions
 from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
-from logitech_receiver.base import request
+from logitech_receiver.common import LOGITECH_VENDOR_ID
+from logitech_receiver.common import BusID
 from logitech_receiver.hidpp10_constants import ErrorCode as Hidpp10Error
 from logitech_receiver.hidpp20_constants import ErrorCode as Hidpp20Error
 
@@ -37,10 +38,9 @@ def test_product_information(usb_id, expected_name, expected_receiver_kind):
 
 def test_filter_receivers_known():
     bus_id = 2
-    vendor_id = 0x046D
     product_id = 0xC548
 
-    receiver_info = base._filter_receivers(bus_id, vendor_id, product_id)
+    receiver_info = base._filter_receivers(bus_id, LOGITECH_VENDOR_ID, product_id)
 
     assert receiver_info["name"] == "Bolt Receiver"
     assert receiver_info["receiver_kind"] == "bolt"
@@ -48,43 +48,51 @@ def test_filter_receivers_known():
 
 def test_filter_receivers_unknown():
     bus_id = 1
-    vendor_id = 0x046D
     product_id = 0xC500
 
-    receiver_info = base._filter_receivers(bus_id, vendor_id, product_id)
+    receiver_info = base._filter_receivers(bus_id, LOGITECH_VENDOR_ID, product_id)
 
     assert receiver_info["bus_id"] == bus_id
     assert receiver_info["product_id"] == product_id
 
 
 @pytest.mark.parametrize(
-    "product_id, hidpp_short, hidpp_long",
+    "product_id, bus, hidpp_short, hidpp_long, expected",
     [
-        (0xC548, True, False),
-        (0xC07E, True, False),
-        (0xC07E, False, True),
-        (0xA07E, False, True),
-        (0xA07E, None, None),
-        (0xA07C, False, False),
+        (0xC548, BusID.USB, True, False, {"name": "Bolt Receiver", "usb_interface": 2}),
+        (0xC07D, BusID.USB, True, False, {"usb_interface": 1}),
+        (0xC07E, BusID.USB, False, True, {"usb_interface": 1}),
+        (0xC07E, BusID.BLUETOOTH, False, True, {"bus_id": 5}),
+        (0xA07E, BusID.USB, False, True, {"product_id": 0xA07E}),
+        (0xA07C, BusID.USB, False, False, None),
+        (0xC07F, BusID.USB, None, None, {"usb_interface": 2}),
+        (0xC07F, BusID.BLUETOOTH, None, None, None),
+        (0xB013, BusID.BLUETOOTH, None, None, {"product_id": 0xB013}),
     ],
 )
-def test_filter_products_of_interest(product_id, hidpp_short, hidpp_long):
-    bus_id = 3
-    vendor_id = 0x046D
-
+def test_filter_products_of_interest(product_id, bus, hidpp_short, hidpp_long, expected):
     receiver_info = base._filter_products_of_interest(
-        bus_id,
-        vendor_id,
+        bus,
+        LOGITECH_VENDOR_ID,
         product_id,
         hidpp_short=hidpp_short,
         hidpp_long=hidpp_long,
     )
 
-    if not hidpp_short and not hidpp_long:
-        assert receiver_info is None
+    if expected is None:
+        assert receiver_info == expected
     else:
-        assert isinstance(receiver_info["vendor_id"], int)
-        assert receiver_info["product_id"] == product_id
+        assert all([receiver_info[key] == expected_value for key, expected_value in expected.items()])
+        assert receiver_info["vendor_id"] == LOGITECH_VENDOR_ID
+        assert receiver_info["product_id"]
+
+
+def test_match():
+    record = {"vendor_id": LOGITECH_VENDOR_ID}
+
+    res = base._match(record, 0, LOGITECH_VENDOR_ID, 0)
+
+    assert res is True
 
 
 @pytest.mark.parametrize(
@@ -149,14 +157,14 @@ def test_request_errors(
     ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if raise_exception:
             with pytest.raises(exceptions.FeatureCallError) as context:
-                request(handle, device_number, next_sw_id, return_error=return_error)
+                base.request(handle, device_number, next_sw_id, return_error=return_error)
             assert context.value.number == device_number
             assert context.value.request == next_sw_id
             assert context.value.error == error_code
             assert context.value.params == b""
 
         else:
-            result = request(handle, device_number, next_sw_id, return_error=return_error)
+            result = base.request(handle, device_number, next_sw_id, return_error=return_error)
             assert result == (error_code if return_error else None)
 
 
