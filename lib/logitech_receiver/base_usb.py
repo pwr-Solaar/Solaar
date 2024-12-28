@@ -27,6 +27,10 @@ USB ids of Logitech wireless receivers.
 Only receivers supporting the HID++ protocol can go in here.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from solaar.i18n import _
 
 # max_devices is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03, default
@@ -174,49 +178,58 @@ LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xC547)
 # EX100 old style receiver pre-unifying protocol
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xC517)
 
-KNOWN_RECEIVERS = (
-    BOLT_RECEIVER_C548,
-    UNIFYING_RECEIVER_C52B,
-    UNIFYING_RECEIVER_C532,
-    NANO_RECEIVER_ADVANCED,
-    NANO_RECEIVER_C518,
-    NANO_RECEIVER_C51A,
-    NANO_RECEIVER_C51B,
-    NANO_RECEIVER_C521,
-    NANO_RECEIVER_C525,
-    NANO_RECEIVER_C526,
-    NANO_RECEIVER_C52E,
-    NANO_RECEIVER_C531,
-    NANO_RECEIVER_C534,
-    NANO_RECEIVER_C535,
-    NANO_RECEIVER_C537,
-    NANO_RECEIVER_6042,
-    LIGHTSPEED_RECEIVER_C539,
-    LIGHTSPEED_RECEIVER_C53A,
-    LIGHTSPEED_RECEIVER_C53D,
-    LIGHTSPEED_RECEIVER_C53F,
-    LIGHTSPEED_RECEIVER_C541,
-    LIGHTSPEED_RECEIVER_C545,
-    LIGHTSPEED_RECEIVER_C547,
-    EX100_27MHZ_RECEIVER_C517,
-)
+KNOWN_RECEIVERS = {
+    0xC548: BOLT_RECEIVER_C548,
+    0xC52B: UNIFYING_RECEIVER_C52B,
+    0xC532: UNIFYING_RECEIVER_C532,
+    0xC52F: NANO_RECEIVER_ADVANCED,
+    0xC518: NANO_RECEIVER_C518,
+    0xC51A: NANO_RECEIVER_C51A,
+    0xC51B: NANO_RECEIVER_C51B,
+    0xC521: NANO_RECEIVER_C521,
+    0xC525: NANO_RECEIVER_C525,
+    0xC526: NANO_RECEIVER_C526,
+    0xC52E: NANO_RECEIVER_C52E,
+    0xC531: NANO_RECEIVER_C531,
+    0xC534: NANO_RECEIVER_C534,
+    0xC535: NANO_RECEIVER_C535,
+    0xC537: NANO_RECEIVER_C537,
+    0x6042: NANO_RECEIVER_6042,
+    0xC539: LIGHTSPEED_RECEIVER_C539,
+    0xC53A: LIGHTSPEED_RECEIVER_C53A,
+    0xC53D: LIGHTSPEED_RECEIVER_C53D,
+    0xC53F: LIGHTSPEED_RECEIVER_C53F,
+    0xC541: LIGHTSPEED_RECEIVER_C541,
+    0xC545: LIGHTSPEED_RECEIVER_C545,
+    0xC547: LIGHTSPEED_RECEIVER_C547,
+    0xC517: EX100_27MHZ_RECEIVER_C517,
+}
 
 
-def get_receiver_info(product_id: int) -> dict:
-    """Returns hardcoded information about Logitech receiver.
+def get_receiver_info(product_id: int) -> dict[str, Any]:
+    """Returns hardcoded information about a Logitech receiver.
 
     Parameters
     ----------
     product_id
-        Product ID of receiver e.g. 0xC548 for a Logitech Bolt receiver.
+        Product ID (pid) of the receiver, e.g. 0xC548 for a Logitech
+        Bolt receiver.
 
     Returns
     -------
-    dict
-        Product info with mandatory vendor_id, product_id,
-        usb_interface, name, receiver_kind
+    dict[str, Any]
+        Receiver info with mandatory fields:
+        - vendor_id
+        - product_id
+
+    Raises
+    ------
+    ValueError
+        If the product ID is unknown.
     """
-    for receiver in KNOWN_RECEIVERS:
-        if product_id == receiver.get("product_id"):
-            return receiver
-    raise ValueError(f"Unknown product ID '0x{product_id:02X}")
+    try:
+        return KNOWN_RECEIVERS[product_id]
+    except KeyError:
+        pass
+
+    raise ValueError(f"Unknown product ID '0x{product_id:02X}'")
