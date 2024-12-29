@@ -40,7 +40,7 @@ def test_filter_receivers_known():
     bus_id = 2
     product_id = 0xC548
 
-    receiver_info = base._filter_receivers(bus_id, LOGITECH_VENDOR_ID, product_id)
+    receiver_info = base.get_known_receiver_info(bus_id, LOGITECH_VENDOR_ID, product_id)
 
     assert receiver_info["name"] == "Bolt Receiver"
     assert receiver_info["receiver_kind"] == "bolt"
@@ -50,7 +50,7 @@ def test_filter_receivers_unknown():
     bus_id = 1
     product_id = 0xC500
 
-    receiver_info = base._filter_receivers(bus_id, LOGITECH_VENDOR_ID, product_id)
+    receiver_info = base.get_known_receiver_info(bus_id, LOGITECH_VENDOR_ID, product_id)
 
     assert receiver_info["bus_id"] == bus_id
     assert receiver_info["product_id"] == product_id
@@ -90,7 +90,7 @@ def test_filter_products_of_interest(product_id, bus, hidpp_short, hidpp_long, e
 def test_match():
     record = {"vendor_id": LOGITECH_VENDOR_ID}
 
-    res = base._match(record, 0, LOGITECH_VENDOR_ID, 0)
+    res = base._match_device(record, 0, LOGITECH_VENDOR_ID, 0)
 
     assert res is True
 
@@ -152,7 +152,7 @@ def test_request_errors(
     with mock.patch(
         "logitech_receiver.base._read",
         return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, prefix + reply_data_sw_id + struct.pack("B", error_code)),
-    ), mock.patch("logitech_receiver.base._skip_incoming", return_value=None), mock.patch(
+    ), mock.patch("logitech_receiver.base._read_input_buffer"), mock.patch(
         "logitech_receiver.base.write", return_value=None
     ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if raise_exception:
