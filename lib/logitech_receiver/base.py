@@ -199,7 +199,7 @@ def receivers():
     yield from hidapi.enumerate(_filter_receivers)
 
 
-def _filter_products_of_interest(
+def filter_products_of_interest(
     bus_id: int, vendor_id: int, product_id: int, hidpp_short: bool = False, hidpp_long: bool = False
 ) -> dict[str, Any] | None:
     """Check that this product is of interest and if so return the device record for further checking"""
@@ -219,7 +219,7 @@ def _filter_products_of_interest(
 
 def receivers_and_devices():
     """Enumerate all the receivers and devices directly attached to the machine."""
-    yield from hidapi.enumerate(_filter_products_of_interest)
+    yield from hidapi.enumerate(filter_products_of_interest)
 
 
 def notify_on_receivers_glib(glib: GLib, callback: Callable):
@@ -230,7 +230,7 @@ def notify_on_receivers_glib(glib: GLib, callback: Callable):
     glib
         GLib instance.
     """
-    return hidapi.monitor_glib(glib, callback, _filter_products_of_interest)
+    return hidapi.monitor_glib(glib, callback, filter_products_of_interest)
 
 
 def open_path(path) -> int:

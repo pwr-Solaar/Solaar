@@ -71,7 +71,7 @@ def test_filter_receivers_unknown():
     ],
 )
 def test_filter_products_of_interest(product_id, bus, hidpp_short, hidpp_long, expected):
-    receiver_info = base._filter_products_of_interest(
+    receiver_info = base.filter_products_of_interest(
         bus,
         LOGITECH_VENDOR_ID,
         product_id,
