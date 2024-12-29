@@ -154,6 +154,8 @@ def main():
 
     args = _parse_arguments()
     if not args:
+        # explicit close before return
+        temp.close()
         return
     if args.action:
         # explicit close before return
