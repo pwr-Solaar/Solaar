@@ -48,6 +48,8 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+NotificationHandler = typing.Callable[["Receiver", "HIDPPNotification"], bool]
+
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
 _F = hidpp20_constants.SupportedFeature
@@ -68,18 +70,20 @@ def process(device: Device | Receiver, notification: HIDPPNotification):
 
 def process_receiver_notification(receiver: Receiver, hidpp_notification: HIDPPNotification) -> bool | None:
     """Process event messages from receivers."""
-    if hidpp_notification.sub_id == Notification.PAIRING_LOCK:
-        return handle_pairing_lock(receiver, hidpp_notification)
-    elif hidpp_notification.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
-        return handle_discovery_status(receiver, hidpp_notification)
-    elif hidpp_notification.sub_id == Registers.DEVICE_DISCOVERY_NOTIFICATION:  # Bolt pairing
-        return handle_device_discovery(receiver, hidpp_notification)
-    elif hidpp_notification.sub_id == Registers.PAIRING_STATUS_NOTIFICATION:  # Bolt pairing
-        return handle_pairing_status(receiver, hidpp_notification)
-    elif hidpp_notification.sub_id == Registers.PASSKEY_REQUEST_NOTIFICATION:  # Bolt pairing
-        return handle_passkey_request(receiver, hidpp_notification)
-    elif hidpp_notification.sub_id == Registers.PASSKEY_PRESSED_NOTIFICATION:  # Bolt pairing
-        return handle_passkey_pressed(receiver, hidpp_notification)
+    event_handler_mapping: dict[int, NotificationHandler] = {
+        Notification.PAIRING_LOCK: handle_pairing_lock,
+        Registers.DEVICE_DISCOVERY_NOTIFICATION: handle_device_discovery,
+        Registers.DISCOVERY_STATUS_NOTIFICATION: handle_discovery_status,
+        Registers.PAIRING_STATUS_NOTIFICATION: handle_pairing_status,
+        Registers.PASSKEY_PRESSED_NOTIFICATION: handle_passkey_pressed,
+        Registers.PASSKEY_REQUEST_NOTIFICATION: handle_passkey_request,
+    }
+
+    try:
+        handler_func = event_handler_mapping[hidpp_notification.sub_id]
+        return handler_func(receiver, hidpp_notification)
+    except KeyError:
+        pass
 
     assert hidpp_notification.sub_id in [
         Notification.CONNECT_DISCONNECT,

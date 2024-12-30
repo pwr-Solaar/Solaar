@@ -277,3 +277,45 @@ def test_process_feature_notification(mocker, hidpp_notification, feature):
     result = notifications._process_feature_notification(fake_device, hidpp_notification, feature)
 
     assert result is True
+
+
+def test_process_receiver_notification_invalid(mocker):
+    invalid_sub_id = 0x30
+    notification_data = b"\x02"
+    notification = HIDPPNotification(0, 0, invalid_sub_id, 0, notification_data)
+    mock_receiver = mocker.Mock()
+
+    with pytest.raises(AssertionError):
+        notifications.process_receiver_notification(mock_receiver, notification)
+
+
+def test_handle_device_discovery():
+    receiver: Receiver = Receiver(MockLowLevelInterface(), None, {}, True, None, None)
+    sub_id = Registers.DISCOVERY_STATUS_NOTIFICATION
+    data = b"\x01\x02\x03\x04\x05\x06"
+    notification = HIDPPNotification(0, 0, sub_id, 0, data)
+
+    result = notifications.handle_device_discovery(receiver, notification)
+
+    assert result
+
+
+def test_handle_passkey_request(mocker):
+    receiver_mock = mocker.Mock()
+    data = b"\x01"
+    notification = HIDPPNotification(0, 0, 0, 0, data)
+
+    result = notifications.handle_passkey_request(receiver_mock, notification)
+
+    assert result is True
+
+
+def test_handle_passkey_pressed(mocker):
+    receiver = mocker.Mock()
+    sub_id = Registers.DISCOVERY_STATUS_NOTIFICATION
+    data = b"\x01\x02\x03\x04\x05\x06"
+    notification = HIDPPNotification(0, 0, sub_id, 0, data)
+
+    result = notifications.handle_passkey_pressed(receiver, notification)
+
+    assert result is True
