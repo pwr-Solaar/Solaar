@@ -34,12 +34,12 @@ from . import diversion
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
-from . import hidpp20_constants
 from . import settings_templates
 from .common import Alert
 from .common import BatteryStatus
 from .common import Notification
 from .hidpp10_constants import Registers
+from .hidpp20_constants import SupportedFeature
 
 if typing.TYPE_CHECKING:
     from .base import HIDPPNotification
@@ -52,8 +52,6 @@ NotificationHandler = typing.Callable[["Receiver", "HIDPPNotification"], bool]
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_F = hidpp20_constants.SupportedFeature
-
 
 notification_lock = threading.Lock()
 
@@ -255,7 +253,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             common.strhex(notification.data),
         )
 
-    if feature == _F.BATTERY_STATUS:
+    if feature == SupportedFeature.BATTERY_STATUS:
         if notification.address == 0x00:
             device.set_battery_info(hidpp20.decipher_battery_status(notification.data)[1])
         elif notification.address == 0x10:
@@ -264,19 +262,19 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
         else:
             logger.warning("%s: unknown BATTERY %s", device, notification)
 
-    elif feature == _F.BATTERY_VOLTAGE:
+    elif feature == SupportedFeature.BATTERY_VOLTAGE:
         if notification.address == 0x00:
             device.set_battery_info(hidpp20.decipher_battery_voltage(notification.data)[1])
         else:
             logger.warning("%s: unknown VOLTAGE %s", device, notification)
 
-    elif feature == _F.UNIFIED_BATTERY:
+    elif feature == SupportedFeature.UNIFIED_BATTERY:
         if notification.address == 0x00:
             device.set_battery_info(hidpp20.decipher_battery_unified(notification.data)[1])
         else:
             logger.warning("%s: unknown UNIFIED BATTERY %s", device, notification)
 
-    elif feature == _F.ADC_MEASUREMENT:
+    elif feature == SupportedFeature.ADC_MEASUREMENT:
         if notification.address == 0x00:
             result = hidpp20.decipher_adc_measurement(notification.data)
             if result:
@@ -286,7 +284,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)
 
-    elif feature == _F.SOLAR_DASHBOARD:
+    elif feature == SupportedFeature.SOLAR_DASHBOARD:
         if notification.data[5:9] == b"GOOD":
             charge, lux, adc = struct.unpack("!BHH", notification.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
@@ -303,17 +301,17 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     logger.debug("%s: Light Check button pressed", device)
                 device.changed(alert=Alert.SHOW_WINDOW)
                 # first cancel any reporting
-                # device.feature_request(_F.SOLAR_DASHBOARD)
+                # device.feature_request(SupportedFeature.SOLAR_DASHBOARD)
                 # trigger a new report chain
                 reports_count = 15
                 reports_period = 2  # seconds
-                device.feature_request(_F.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
+                device.feature_request(SupportedFeature.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
             else:
                 logger.warning("%s: unknown SOLAR CHARGE %s", device, notification)
         else:
             logger.warning("%s: SOLAR CHARGE not GOOD? %s", device, notification)
 
-    elif feature == _F.WIRELESS_DEVICE_STATUS:
+    elif feature == SupportedFeature.WIRELESS_DEVICE_STATUS:
         if notification.address == 0x00:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("wireless status: %s", notification)
@@ -324,7 +322,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
         else:
             logger.warning("%s: unknown WIRELESS %s", device, notification)
 
-    elif feature == _F.TOUCHMOUSE_RAW_POINTS:
+    elif feature == SupportedFeature.TOUCHMOUSE_RAW_POINTS:
         if notification.address == 0x00:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: TOUCH MOUSE points %s", device, notification)
@@ -338,20 +336,20 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             logger.warning("%s: unknown TOUCH MOUSE %s", device, notification)
 
     # TODO: what are REPROG_CONTROLS_V{2,3}?
-    elif feature == _F.REPROG_CONTROLS:
+    elif feature == SupportedFeature.REPROG_CONTROLS:
         if notification.address == 0x00:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: reprogrammable key: %s", device, notification)
         else:
             logger.warning("%s: unknown REPROG_CONTROLS %s", device, notification)
 
-    elif feature == _F.BACKLIGHT2:
+    elif feature == SupportedFeature.BACKLIGHT2:
         if notification.address == 0x00:
             level = struct.unpack("!B", notification.data[1:2])[0]
             if device.setting_callback:
                 device.setting_callback(device, settings_templates.Backlight2Level, [level])
 
-    elif feature == _F.REPROG_CONTROLS_V4:
+    elif feature == SupportedFeature.REPROG_CONTROLS_V4:
         if notification.address == 0x00:
             if logger.isEnabledFor(logging.DEBUG):
                 cid1, cid2, cid3, cid4 = struct.unpack("!HHHH", notification.data[:8])
@@ -366,7 +364,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
         elif logger.isEnabledFor(logging.INFO):
             logger.info("%s: unknown REPROG_CONTROLS_V4 %s", device, notification)
 
-    elif feature == _F.HIRES_WHEEL:
+    elif feature == SupportedFeature.HIRES_WHEEL:
         if notification.address == 0x00:
             if logger.isEnabledFor(logging.INFO):
                 flags, delta_v = struct.unpack(">bh", notification.data[:3])
@@ -384,7 +382,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: unknown WHEEL %s", device, notification)
 
-    elif feature == _F.ONBOARD_PROFILES:
+    elif feature == SupportedFeature.ONBOARD_PROFILES:
         if notification.address > 0x10:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: unknown ONBOARD PROFILES %s", device, notification)
@@ -395,7 +393,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     settings_templates.profile_change(device, profile_sector)
             elif notification.address == 0x10:
                 resolution_index = struct.unpack("!B", notification.data[:1])[0]
-                profile_sector = struct.unpack("!H", device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
+                profile_sector = struct.unpack("!H", device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x40)[:2])[0]
                 if device.setting_callback:
                     for profile in device.profiles.profiles.values() if device.profiles else []:
                         if profile.sector == profile_sector:
@@ -404,7 +402,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                             )
                             break
 
-    elif feature == _F.BRIGHTNESS_CONTROL:
+    elif feature == SupportedFeature.BRIGHTNESS_CONTROL:
         if notification.address > 0x10:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: unknown BRIGHTNESS CONTROL %s", device, notification)
@@ -415,7 +413,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             elif notification.address == 0x10:
                 brightness = notification.data[0] & 0x01
                 if brightness:
-                    brightness = struct.unpack("!H", device.feature_request(_F.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
+                    brightness = struct.unpack("!H", device.feature_request(SupportedFeature.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
 
     diversion.process_notification(device, notification, feature)
