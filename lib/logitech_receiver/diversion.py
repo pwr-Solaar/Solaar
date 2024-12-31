@@ -511,19 +511,17 @@ MOUSE_GESTURE_TESTS = {
     "mouse-noop": [],
 }
 
-# COMPONENTS = {}
 
-
-class RuleComponent:
-    def compile(self, c):
-        if isinstance(c, RuleComponent):
-            return c
-        elif isinstance(c, dict) and len(c) == 1:
-            k, v = next(iter(c.items()))
-            if k in COMPONENTS:
-                return COMPONENTS[k](v)
-        logger.warning("illegal component in rule: %s", c)
-        return Condition()
+def compile_component(c):
+    if isinstance(c, Rule) or isinstance(c, Condition) or isinstance(c, Action):
+        return c
+    elif isinstance(c, dict) and len(c) == 1:
+        k, v = next(iter(c.items()))
+        if k in COMPONENTS:
+            cls = COMPONENTS[k]
+            return cls(v)
+    logger.warning("illegal component in rule: %s", c)
+    return FalllbackCondition()
 
 
 def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
@@ -537,9 +535,9 @@ def _evaluate(components, feature, notification: HIDPPNotification, device, resu
     return res
 
 
-class Rule(RuleComponent):
+class Rule:
     def __init__(self, args, source=None, warn=True):
-        self.components = [self.compile(a) for a in args]
+        self.components = [compile_component(a) for a in args]
         self.source = source
 
     def __str__(self):
@@ -559,7 +557,7 @@ class Rule(RuleComponent):
         return {"Rule": [c.data() for c in self.components]}
 
 
-class Condition(RuleComponent):
+class Condition:
     def __init__(self, *args):
         pass
 
@@ -577,7 +575,7 @@ class Not(Condition):
         if isinstance(op, list) and len(op) == 1:
             op = op[0]
         self.op = op
-        self.component = self.compile(op)
+        self.component = compile_component(op)
 
     def __str__(self):
         return "Not: " + str(self.component)
@@ -594,7 +592,7 @@ class Not(Condition):
 
 class Or(Condition):
     def __init__(self, args, warn=True):
-        self.components = [self.compile(a) for a in args]
+        self.components = [compile_component(a) for a in args]
 
     def __str__(self):
         return "Or: [" + ", ".join(str(c) for c in self.components) + "]"
@@ -617,7 +615,7 @@ class Or(Condition):
 
 class And(Condition):
     def __init__(self, args, warn=True):
-        self.components = [self.compile(a) for a in args]
+        self.components = [compile_component(a) for a in args]
 
     def __str__(self):
         return "And: [" + ", ".join(str(c) for c in self.components) + "]"
@@ -1145,7 +1143,7 @@ class Host(Condition):
         return {"Host": self.host}
 
 
-class Action(RuleComponent):
+class Action:
     def __init__(self, *args):
         pass
 
