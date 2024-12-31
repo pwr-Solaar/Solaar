@@ -274,7 +274,7 @@ def test_process_feature_notification(mocker, hidpp_notification, feature):
     fake_device = fake_hidpp.Device()
     fake_device.receiver = ["rec1", "rec2"]
 
-    result = notifications._process_feature_notification(fake_device, hidpp_notification, feature)
+    result = notifications._process_feature_notification(fake_device, hidpp_notification)
 
     assert result is True
 
@@ -287,6 +287,23 @@ def test_process_receiver_notification_invalid(mocker):
 
     with pytest.raises(AssertionError):
         notifications.process_receiver_notification(mock_receiver, notification)
+
+
+@pytest.mark.parametrize(
+    "sub_id, notification_data, expected",
+    [
+        (Notification.NO_OPERATION, b"\x00", False),
+    ],
+)
+def test_process_device_notification_extended(mocker, sub_id, notification_data, expected):
+    device = mocker.Mock()
+    device.handle_notification.return_value = None
+    device.protocol = 2.0
+    notification = HIDPPNotification(0, 0, sub_id, 0, notification_data)
+
+    result = notifications.process_device_notification(device, notification)
+
+    assert result == expected
 
 
 def test_handle_device_discovery():
