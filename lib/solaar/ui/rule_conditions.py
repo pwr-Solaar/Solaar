@@ -36,7 +36,7 @@ class GtkSignal(Enum):
 
 
 class ConditionUI(RuleComponentUI):
-    CLASS = diversion.Condition
+    CLASS = diversion.ConditionProtocol
 
     @classmethod
     def icon_name(cls):

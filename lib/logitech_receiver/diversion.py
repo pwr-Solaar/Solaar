@@ -512,25 +512,25 @@ MOUSE_GESTURE_TESTS = {
 }
 
 
-def compile_component(c):
-    if isinstance(c, Rule) or isinstance(c, Condition) or isinstance(c, Action):
+def compile_component(c) -> Rule | type[ConditionProtocol] | type[ActionProtocol]:
+    if isinstance(c, Rule) or isinstance(c, ConditionProtocol) or isinstance(c, ActionProtocol):
         return c
     elif isinstance(c, dict) and len(c) == 1:
         k, v = next(iter(c.items()))
         if k in COMPONENTS:
-            cls = COMPONENTS[k]
+            cls: Rule | type[ConditionProtocol] | type[ActionProtocol] = COMPONENTS[k]
             return cls(v)
     logger.warning("illegal component in rule: %s", c)
-    return FalllbackCondition()
+    return FallbackCondition()
 
 
 def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
     res = True
     for component in components:
         res = component.evaluate(feature, notification, device, result)
-        if not isinstance(component, Action) and res is None:
+        if not isinstance(component, ActionProtocol) and res is None:
             return None
-        if isinstance(component, Condition) and not res:
+        if isinstance(component, ConditionProtocol) and not res:
             return res
     return res
 
@@ -557,7 +557,22 @@ class Rule:
         return {"Rule": [c.data() for c in self.components]}
 
 
-class Condition:
+@typing.runtime_checkable
+class ConditionProtocol(typing.Protocol):
+    def __init__(self, args: Any, warn: bool) -> None:
+        ...
+
+    def __str__(self) -> str:
+        ...
+
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result) -> bool:
+        ...
+
+    def data(self) -> dict[str, Any]:
+        ...
+
+
+class FallbackCondition(ConditionProtocol):
     def __init__(self, *args):
         pass
 
@@ -570,7 +585,7 @@ class Condition:
         return False
 
 
-class Not(Condition):
+class Not(ConditionProtocol):
     def __init__(self, op, warn=True):
         if isinstance(op, list) and len(op) == 1:
             op = op[0]
@@ -590,7 +605,7 @@ class Not(Condition):
         return {"Not": self.component.data()}
 
 
-class Or(Condition):
+class Or(ConditionProtocol):
     def __init__(self, args, warn=True):
         self.components = [compile_component(a) for a in args]
 
@@ -603,9 +618,9 @@ class Or(Condition):
         result = False
         for component in self.components:
             result = component.evaluate(feature, notification, device, last_result)
-            if not isinstance(component, Action) and result is None:
+            if not isinstance(component, ActionProtocol) and result is None:
                 return None
-            if isinstance(component, Condition) and result:
+            if isinstance(component, ConditionProtocol) and result:
                 return result
         return result
 
@@ -613,7 +628,7 @@ class Or(Condition):
         return {"Or": [c.data() for c in self.components]}
 
 
-class And(Condition):
+class And(ConditionProtocol):
     def __init__(self, args, warn=True):
         self.components = [compile_component(a) for a in args]
 
@@ -675,7 +690,7 @@ def gnome_dbus_pointer_prog():
     return (wm_class,) if wm_class else None
 
 
-class Process(Condition):
+class Process(ConditionProtocol):
     def __init__(self, process, warn=True):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
@@ -706,7 +721,7 @@ class Process(Condition):
         return {"Process": str(self.process)}
 
 
-class MouseProcess(Condition):
+class MouseProcess(ConditionProtocol):
     def __init__(self, process, warn=True):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
@@ -737,7 +752,7 @@ class MouseProcess(Condition):
         return {"MouseProcess": str(self.process)}
 
 
-class Feature(Condition):
+class Feature(ConditionProtocol):
     def __init__(self, feature: str, warn: bool = True):
         try:
             self.feature = SupportedFeature[feature]
@@ -758,7 +773,7 @@ class Feature(Condition):
         return {"Feature": str(self.feature)}
 
 
-class Report(Condition):
+class Report(ConditionProtocol):
     def __init__(self, report, warn=True):
         if not (isinstance(report, int)):
             if warn:
@@ -780,7 +795,7 @@ class Report(Condition):
 
 
 # Setting(device, setting, [key], value...)
-class Setting(Condition):
+class Setting(ConditionProtocol):
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -827,7 +842,7 @@ MODIFIERS = {
 MODIFIER_MASK = MODIFIERS["Shift"] + MODIFIERS["Control"] + MODIFIERS["Alt"] + MODIFIERS["Super"]
 
 
-class Modifiers(Condition):
+class Modifiers(ConditionProtocol):
     def __init__(self, modifiers, warn=True):
         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
         self.desired = 0
@@ -857,7 +872,7 @@ class Modifiers(Condition):
         return {"Modifiers": [str(m) for m in self.modifiers]}
 
 
-class Key(Condition):
+class Key(ConditionProtocol):
     DOWN = "pressed"
     UP = "released"
 
@@ -912,7 +927,7 @@ class Key(Condition):
         return {"Key": [str(self.key), self.action]}
 
 
-class KeyIsDown(Condition):
+class KeyIsDown(ConditionProtocol):
     def __init__(self, args, warn=True):
         default_key = 0
 
@@ -956,7 +971,7 @@ def range_test(start, end, min, max):
     return range_test_helper
 
 
-class Test(Condition):
+class Test(ConditionProtocol):
     def __init__(self, test, warn=True):
         self.test = ""
         self.parameter = None
@@ -998,7 +1013,7 @@ class Test(Condition):
         return {"Test": ([self.test, self.parameter] if self.parameter is not None else [self.test])}
 
 
-class TestBytes(Condition):
+class TestBytes(ConditionProtocol):
     def __init__(self, test, warn=True):
         self.test = test
         if (
@@ -1026,7 +1041,7 @@ class TestBytes(Condition):
         return {"TestBytes": self.test[:]}
 
 
-class MouseGesture(Condition):
+class MouseGesture(ConditionProtocol):
     MOVEMENTS = [
         "Mouse Up",
         "Mouse Down",
@@ -1081,7 +1096,7 @@ class MouseGesture(Condition):
         return {"MouseGesture": [str(m) for m in self.movements]}
 
 
-class Active(Condition):
+class Active(ConditionProtocol):
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
@@ -1102,7 +1117,7 @@ class Active(Condition):
         return {"Active": self.devID}
 
 
-class Device(Condition):
+class Device(ConditionProtocol):
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
@@ -1122,7 +1137,7 @@ class Device(Condition):
         return {"Device": self.devID}
 
 
-class Host(Condition):
+class Host(ConditionProtocol):
     def __init__(self, host, warn=True):
         if not (isinstance(host, str)):
             if warn:
@@ -1143,12 +1158,16 @@ class Host(Condition):
         return {"Host": self.host}
 
 
-class Action:
-    def __init__(self, *args):
-        pass
+@typing.runtime_checkable
+class ActionProtocol(typing.Protocol):
+    def __init__(self, args: Any, warn: bool) -> None:
+        ...
 
-    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
-        return None
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result) -> None:
+        ...
+
+    def data(self) -> dict[str, Any]:
+        ...
 
 
 def keysym_to_keycode(keysym, _modifiers) -> Tuple[int, int]:  # maybe should take shift into account
@@ -1177,7 +1196,7 @@ def keysym_to_keycode(keysym, _modifiers) -> Tuple[int, int]:  # maybe should ta
     return keycode, level
 
 
-class KeyPress(Action):
+class KeyPress(ActionProtocol):
     def __init__(self, args, warn=True):
         self.key_names, self.action = self.regularize_args(args)
         if not isinstance(self.key_names, list):
@@ -1267,7 +1286,7 @@ class KeyPress(Action):
 #        super().keyUp(self.keys, current_key_modifiers)
 
 
-class MouseScroll(Action):
+class MouseScroll(ActionProtocol):
     def __init__(self, amounts, warn=True):
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
@@ -1295,7 +1314,7 @@ class MouseScroll(Action):
         return {"MouseScroll": self.amounts[:]}
 
 
-class MouseClick(Action):
+class MouseClick(ActionProtocol):
     def __init__(self, args, warn=True):
         if len(args) == 1 and isinstance(args[0], list):
             args = args[0]
@@ -1334,7 +1353,7 @@ class MouseClick(Action):
         return {"MouseClick": [self.button, self.count]}
 
 
-class Set(Action):
+class Set(ActionProtocol):
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -1380,7 +1399,7 @@ class Set(Action):
         return {"Set": self.args[:]}
 
 
-class Execute(Action):
+class Execute(ActionProtocol):
     def __init__(self, args, warn=True):
         if isinstance(args, str):
             args = [args]
@@ -1404,7 +1423,7 @@ class Execute(Action):
         return {"Execute": self.args[:]}
 
 
-class Later(Action):
+class Later(ActionProtocol):
     def __init__(self, args, warn=True):
         self.delay = 0
         self.rule = Rule([])
@@ -1439,7 +1458,7 @@ class Later(Action):
         return {"Later": data}
 
 
-COMPONENTS = {
+COMPONENTS: dict[str, Rule | ConditionProtocol | ActionProtocol] = {
     "Rule": Rule,
     "Not": Not,
     "Or": Or,

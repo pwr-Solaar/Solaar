@@ -36,7 +36,7 @@ class GtkSignal(Enum):
 
 
 class ActionUI(RuleComponentUI):
-    CLASS = diversion.Action
+    CLASS = diversion.ActionProtocol
 
     @classmethod
     def icon_name(cls):
