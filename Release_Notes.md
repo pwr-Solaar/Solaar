@@ -1,5 +1,9 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.15
+
+* Solaar supports configuration of Bluetooth devices on macOS.
+
 ## Version 1.1.13
 
 * Solaar will drop support for Python 3.7 immediately after version 1.1.13.
