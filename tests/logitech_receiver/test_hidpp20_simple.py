@@ -107,7 +107,7 @@ def test_get_battery_voltage():
     feature, battery = _hidpp20.get_battery_voltage(device)
 
     assert feature == SupportedFeature.BATTERY_VOLTAGE
-    assert battery.level == 90
+    assert battery.level == 92
     assert common.BatteryStatus.RECHARGING in battery.status
     assert battery.voltage == 0x1000
 
@@ -130,7 +130,7 @@ def test_get_adc_measurement():
     feature, battery = _hidpp20.get_adc_measurement(device)
 
     assert feature == SupportedFeature.ADC_MEASUREMENT
-    assert battery.level == 90
+    assert battery.level == 92
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
 
@@ -389,7 +389,7 @@ def test_decipher_battery_voltage():
     feature, battery = hidpp20.decipher_battery_voltage(report)
 
     assert feature == SupportedFeature.BATTERY_VOLTAGE
-    assert battery.level == 90
+    assert battery.level == 92
     assert common.BatteryStatus.RECHARGING in battery.status
     assert battery.voltage == 0x1000
 
@@ -410,7 +410,7 @@ def test_decipher_adc_measurement():
     feature, battery = hidpp20.decipher_adc_measurement(report)
 
     assert feature == SupportedFeature.ADC_MEASUREMENT
-    assert battery.level == 90
+    assert battery.level == 92
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
 
@@ -454,36 +454,27 @@ def test_led_zone_locations(code, expected_name):
 @pytest.mark.parametrize(
     "millivolt, expected_percentage",
     [
-        (-1234, None),
+        (-1234, 0),
         (500, 0),
         (2000, 0),
         (3500, 0),
-        (3501, 0),
         (3519, 0),
-        (3520, 0),
-        (3579, 0),
-        (3646, 2),
-        (3580, 2),
-        (3671, 5),
-        (3672, 10),
-        (3717, 10),
-        (3718, 20),
-        (3751, 20),
-        (3752, 30),
-        (3778, 30),
-        (3779, 40),
-        (3811, 40),
-        (3812, 50),
-        (3859, 50),
-        (3860, 60),
-        (3922, 60),
-        (3923, 70),
-        (3989, 70),
-        (3990, 80),
-        (4067, 80),
-        (4068, 90),
-        (4186, 90),
-        (4187, 100),
+        (3520, 1),
+        (3559, 1),
+        (3579, 2),
+        (3646, 5),
+        (3671, 10),
+        (3717, 20),
+        (3751, 30),
+        (3778, 40),
+        (3811, 50),
+        (3859, 60),
+        (3922, 70),
+        (3989, 80),
+        (4067, 90),
+        (4180, 99),
+        (4181, 100),
+        (4186, 100),
         (4500, 100),
     ],
 )
