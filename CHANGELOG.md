@@ -1,4 +1,4 @@
-# 1.1.14rc4
+# 1.1.14
 
 * Handle fake feature enums in show
 * Fix battery entries in config.yaml
