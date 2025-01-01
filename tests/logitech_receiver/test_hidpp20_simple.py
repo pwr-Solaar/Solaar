@@ -449,3 +449,45 @@ def test_feature_flag_names(code, expected_flags):
 )
 def test_led_zone_locations(code, expected_name):
     assert hidpp20.LEDZoneLocations[code] == expected_name
+
+
+@pytest.mark.parametrize(
+    "millivolt, expected_percentage",
+    [
+        (-1234, None),
+        (500, 0),
+        (2000, 0),
+        (3500, 0),
+        (3501, 0),
+        (3519, 0),
+        (3520, 0),
+        (3579, 0),
+        (3646, 2),
+        (3580, 2),
+        (3671, 5),
+        (3672, 10),
+        (3717, 10),
+        (3718, 20),
+        (3751, 20),
+        (3752, 30),
+        (3778, 30),
+        (3779, 40),
+        (3811, 40),
+        (3812, 50),
+        (3859, 50),
+        (3860, 60),
+        (3922, 60),
+        (3923, 70),
+        (3989, 70),
+        (3990, 80),
+        (4067, 80),
+        (4068, 90),
+        (4186, 90),
+        (4187, 100),
+        (4500, 100),
+    ],
+)
+def test_estimate_battery_level_percentage(millivolt, expected_percentage):
+    percentage = hidpp20.estimate_battery_level_percentage(millivolt)
+
+    assert percentage == expected_percentage
