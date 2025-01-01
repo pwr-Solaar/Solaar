@@ -151,8 +151,8 @@ def _print_device(dev, num=None):
             if isinstance(feature, str):
                 feature_bytes = bytes.fromhex(feature[-4:])
             else:
-                feature_bytes = feature.to_bytes(2, byteorder="big")
-            feature_int = int.from_bytes(feature_bytes, byteorder="big")
+                feature_bytes = feature.to_bytes(2, byteorder="little")
+            feature_int = int.from_bytes(feature_bytes, byteorder="little")
             flags = dev.request(0x0000, feature_bytes)
             flags = 0 if flags is None else ord(flags[1:2])
             flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
