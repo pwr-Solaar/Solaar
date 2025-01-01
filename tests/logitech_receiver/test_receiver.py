@@ -220,3 +220,85 @@ def test_notification_information_nano_receiver(nano_recv, address, data, expect
     assert encrypted == expected_encrypted
     assert wpid == "0302"
     assert kind == "keyboard"
+
+
+def test_extract_serial_number():
+    response = b'\x03\x16\xcc\x9c\xb4\x05\x06"\x00\x00\x00\x00\x00\x00\x00\x00'
+
+    serial_number = receiver.extract_serial(response[1:5])
+
+    assert serial_number == "16CC9CB4"
+
+
+def test_extract_max_devices():
+    response = b'\x03\x16\xcc\x9c\xb4\x05\x06"\x00\x00\x00\x00\x00\x00\x00\x00'
+
+    max_devices = receiver.extract_max_devices(response)
+
+    assert max_devices == 6
+
+
+@pytest.mark.parametrize(
+    "response, expected_remaining_pairings",
+    [
+        (b"\x00\x03\x00", -1),
+        (b"\x00\x02\t", 4),
+    ],
+)
+def test_extract_remaining_pairings(response, expected_remaining_pairings):
+    remaining_pairings = receiver.extract_remaining_pairings(response)
+
+    assert remaining_pairings == expected_remaining_pairings
+
+
+def test_extract_codename():
+    response = b"A\x04K520"
+
+    codename = receiver.extract_codename(response)
+
+    assert codename == "K520"
+
+
+def test_extract_power_switch_location():
+    response = b"0\x19\x8e>\xb8\x06\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00"
+
+    ps_location = receiver.extract_power_switch_location(response)
+
+    assert ps_location == "base"
+
+
+def test_extract_connection_count():
+    response = b"\x00\x03\x00"
+
+    connection_count = receiver.extract_connection_count(response)
+
+    assert connection_count == 3
+
+
+def test_extract_wpid():
+    response = b"@\x82"
+
+    res = receiver.extract_wpid(response)
+
+    assert res == "4082"
+
+
+def test_extract_polling_rate():
+    response = b"\x08@\x82\x04\x02\x02\x07\x00\x00\x00\x00\x00\x00\x00"
+
+    polling_rate = receiver.extract_polling_rate(response)
+
+    assert polling_rate == 130
+
+
+@pytest.mark.parametrize(
+    "data, expected_device_kind",
+    [
+        (0x00, "unknown"),
+        (0x03, "numpad"),
+    ],
+)
+def test_extract_device_kind(data, expected_device_kind):
+    device_kind = receiver.extract_device_kind(data)
+
+    assert str(device_kind) == expected_device_kind
