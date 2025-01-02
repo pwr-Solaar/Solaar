@@ -55,8 +55,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
             v = s.read(not force)
         except Exception as e:
             v = None
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
+            logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
     ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
@@ -694,8 +693,7 @@ def _create_sbox(s, _device):
     elif s.kind == settings.Kind.HETERO:
         control = HeteroKeyControl(sbox, change)
     else:
-        if logger.isEnabledFor(logging.WARNING):
-            logger.warning("setting %s display not implemented", s.label)
+        logger.warning("setting %s display not implemented", s.label)
         return None
 
     control.set_sensitive(False)  # the first read will enable it
@@ -821,10 +819,9 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting_class, values):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
+    logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
     setting = next((s for s in device.settings if s.name == setting_class.name), None)
-    if setting is None and logger.isEnabledFor(logging.DEBUG):
+    if setting is None:
         logger.debug(
             "No setting for %s found on %s when trying to record a change made elsewhere",
             setting_class.name,

@@ -58,8 +58,7 @@ if available:
         global available
         if available:
             if not Notify.is_initted():
-                if logger.isEnabledFor(logging.INFO):
-                    logger.info("starting desktop notifications")
+                logger.info("starting desktop notifications")
                 try:
                     return Notify.init(NAME.lower())
                 except Exception:
@@ -70,8 +69,7 @@ if available:
     def uninit():
         """Stop desktop notifications."""
         if available and Notify.is_initted():
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("stopping desktop notifications")
+            logger.info("stopping desktop notifications")
             _notifications.clear()
             Notify.uninit()
 
