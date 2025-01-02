@@ -233,6 +233,7 @@ def _match(
 
     vid = device["vendor_id"]
     pid = device["product_id"]
+    hid_bus_type = device["bus_type"]
 
     # Translate hidapi bus_type to the bus_id values Solaar expects
     if device.get("bus_type") == 0x01:
@@ -241,6 +242,14 @@ def _match(
         bus_id = 0x05  # Bluetooth
     else:
         bus_id = None
+        logger.info(f"Device {device['path']} has an unsupported bus type {hid_bus_type:02X}")
+        return None
+
+    # Skip unlikely devices with all-zero VID PID or unsupported bus IDs
+    if vid == 0 and pid == 0:
+        logger.info(f"Device {device['path']} has all-zero VID and PID")
+        logger.info(f"Skipping unlikely device {device['path']} ({bus_id}/{vid:04X}/{pid:04X})")
+        return None
 
     # Check for hidpp support
     device["hidpp_short"] = False
@@ -265,7 +274,7 @@ def _match(
             close(device_handle)
 
     logger.info(
-        "Found device BID %s VID %04X PID %04X HID++ %s %s",
+        "Found device BID %s VID %04X PID %04X HID++ SHORT %s LONG %s",
         bus_id,
         vid,
         pid,
@@ -316,6 +325,8 @@ def _match(
             hidpp_long=None,
         )
         return d_info
+
+    logger.info(f"Finished checking HIDPP support for device {device['path']} ({bus_id}/{vid:04X}/{pid:04X})")
 
 
 def find_paired_node(receiver_path: str, index: int, timeout: int):
