@@ -411,8 +411,7 @@ def _receiver_row(receiver_path, receiver=None):
         status_icon = None
         row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("new receiver row %s", row_data)
+        logger.debug("new receiver row %s", row_data)
         item = _model.append(None, row_data)
         if _TREE_SEPATATOR:
             _model.append(None, _TREE_SEPATATOR)
@@ -465,8 +464,7 @@ def _device_row(receiver_path, device_number, device=None):
             device,
         )
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("new device row %s at index %d", row_data, new_child_index)
+        logger.debug("new device row %s at index %d", row_data, new_child_index)
         item = _model.insert(receiver_row, new_child_index, row_data)
 
     return item or None
