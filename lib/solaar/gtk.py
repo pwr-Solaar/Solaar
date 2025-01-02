@@ -134,9 +134,8 @@ def _parse_arguments():
         logging.getLogger("").addHandler(stream_handler)
 
     if not args.action:
-        if logger.isEnabledFor(logging.INFO):
-            language, encoding = locale.getlocale()
-            logger.info("version %s, language %s (%s)", __version__, language, encoding)
+        language, encoding = locale.getlocale()
+        logger.info("version %s, language %s (%s)", __version__, language, encoding)
 
     return args
 

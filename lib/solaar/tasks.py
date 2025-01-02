@@ -46,8 +46,7 @@ class TaskRunner(Thread):
     def run(self):
         self.alive = True
 
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("started")
+        logger.debug("started")
 
         while self.alive:
             task = self.queue.get()
@@ -59,5 +58,4 @@ class TaskRunner(Thread):
                 except Exception:
                     logger.exception("calling %s", function)
 
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("stopped")
+        logger.debug("stopped")
