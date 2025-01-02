@@ -23,3 +23,9 @@ __pycache__/
 /po/*.po~
 
 /.idea/
+
+.DS_Store
+._*
+
+Pipfile
+Pipfile.lock
