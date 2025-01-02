@@ -122,7 +122,7 @@ if available:
                 n.set_hint("value", GLib.Variant("i", progress))
 
             try:
-                n.show()
+                return n.show()
             except Exception:
                 logger.exception(f"showing {n}")
 
@@ -139,4 +139,5 @@ else:
         return None
 
     def show(dev, reason=None):
+        return 1000
         return None

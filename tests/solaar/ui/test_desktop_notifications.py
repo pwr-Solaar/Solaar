@@ -2,15 +2,13 @@ from unittest import mock
 
 from solaar.ui import desktop_notifications
 
-
-def test_notifications_available():
-    result = desktop_notifications.notifications_available()
-
-    assert not result
+# depends on external environment, so make some tests dependent on availability
 
 
 def test_init():
-    assert not desktop_notifications.init()
+    result = desktop_notifications.init()
+
+    assert result == desktop_notifications.available
 
 
 def test_uninit():
@@ -22,7 +20,17 @@ def test_alert():
     assert desktop_notifications.alert(reason) is None
 
 
+class MockDevice(mock.Mock):
+    name = "MockDevice"
+
+    def close():
+        return True
+
+
 def test_show():
-    dev = mock.MagicMock()
+    dev = MockDevice()
     reason = "unknown"
-    assert desktop_notifications.show(dev, reason) is None
+    available = desktop_notifications.init()
+
+    result = desktop_notifications.show(dev, reason)
+    assert result is not None if available else result is None
