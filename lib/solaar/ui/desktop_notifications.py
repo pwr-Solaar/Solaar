@@ -139,5 +139,4 @@ else:
         return None
 
     def show(dev, reason=None):
-        return 1000
         return None

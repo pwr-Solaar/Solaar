@@ -33,4 +33,7 @@ def test_show():
     available = desktop_notifications.init()
 
     result = desktop_notifications.show(dev, reason)
-    assert result is not None if available else result is None
+    if available:
+        assert result is not None
+    else:
+        assert result is None
