@@ -73,7 +73,7 @@ If you are running the system version of Python in Debian/Ubuntu you should have
 In Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
-Other system packages may be required depending on your distribution, such as `python-gobject-common-devel`.
+Other system packages may be required depending on your distribution, such as `python-gobject-common-devel` and `python-typing-extensions'.
 Although the Solaar CLI does not require Gtk3,
 `solaar config` does use Gtk3 capabilities to determine whether the Solaar GUI is running
 and thus should tell the Solaar GUI to update its information about settings
