@@ -1159,8 +1159,19 @@ class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_
             self.zones.append(LEDZoneInfo(SupportedFeature.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
 
 
-ButtonBehaviors = common.NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
-ButtonMappingTypes = common.NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
+class ButtonBehavior(IntEnum):
+    MACRO_EXECUTE = 0x0
+    MACRO_STOP = 0x1
+    MACRO_STOP_ALL = 0x2
+    SEND = 0x8
+    FUNCTION = 0x9
+
+
+class ButtonMappingType(IntEnum):
+    NO_ACTION = 0x0
+    BUTTON = 0x1
+    MODIFIER_AND_KEY = 0x2
+    CONSUMER_KEY = 0x3
 
 
 class ButtonFunctions(IntEnum):
@@ -1209,27 +1220,29 @@ class Button:
 
     @classmethod
     def from_bytes(cls, bytes_) -> Button:
-        behavior_id = bytes_[0] >> 4
-        behavior = ButtonBehaviors[behavior_id]
-        if behavior == ButtonBehaviors.MacroExecute or behavior == ButtonBehaviors.MacroStop:
+        behavior = bytes_[0] >> 4
+        if behavior == ButtonBehavior.MACRO_EXECUTE or behavior == ButtonBehavior.MACRO_STOP:
             sector = ((bytes_[0] & 0x0F) << 8) + bytes_[1]
             address = (bytes_[2] << 8) + bytes_[3]
             result = cls(behavior=behavior, sector=sector, address=address)
-        elif behavior == ButtonBehaviors.Send:
-            mapping_type = ButtonMappingTypes[bytes_[1]]
-            if mapping_type == ButtonMappingTypes.Button:
-                value = ButtonButtons[(bytes_[2] << 8) + bytes_[3]]
-                result = cls(behavior=behavior, type=mapping_type, value=value)
-            elif mapping_type == ButtonMappingTypes.Modifier_And_Key:
-                modifiers = bytes_[2]
-                value = ButtonKeys[bytes_[3]]
-                result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
-            elif mapping_type == ButtonMappingTypes.Consumer_Key:
-                value = ButtonConsumerKeys[(bytes_[2] << 8) + bytes_[3]]
-                result = cls(behavior=behavior, type=mapping_type, value=value)
-            elif mapping_type == ButtonMappingTypes.No_Action:
-                result = cls(behavior=behavior, type=mapping_type)
-        elif behavior == ButtonBehaviors.Function:
+        elif behavior == ButtonBehavior.SEND:
+            try:
+                mapping_type = ButtonMappingType(bytes_[1]).value
+                if mapping_type == ButtonMappingType.BUTTON:
+                    value = ButtonButtons[(bytes_[2] << 8) + bytes_[3]]
+                    result = cls(behavior=behavior, type=mapping_type, value=value)
+                elif mapping_type == ButtonMappingType.MODIFIER_AND_KEY:
+                    modifiers = bytes_[2]
+                    value = ButtonKeys[bytes_[3]]
+                    result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
+                elif mapping_type == ButtonMappingType.CONSUMER_KEY:
+                    value = ButtonConsumerKeys[(bytes_[2] << 8) + bytes_[3]]
+                    result = cls(behavior=behavior, type=mapping_type, value=value)
+                elif mapping_type == ButtonMappingType.NO_ACTION:
+                    result = cls(behavior=behavior, type=mapping_type)
+            except Exception:
+                pass
+        elif behavior == ButtonBehavior.FUNCTION:
             second_byte = bytes_[1]
             try:
                 btn_func = ButtonFunctions(second_byte).value
@@ -1243,20 +1256,20 @@ class Button:
 
     def to_bytes(self):
         bytes = common.int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
-        if self.behavior == ButtonBehaviors.MacroExecute or self.behavior == ButtonBehaviors.MacroStop:
+        if self.behavior == ButtonBehavior.MACRO_EXECUTE.value or self.behavior == ButtonBehavior.MACRO_STOP.value:
             bytes = common.int2bytes((self.behavior << 12) + self.sector, 2) + common.int2bytes(self.address, 2)
-        elif self.behavior == ButtonBehaviors.Send:
+        elif self.behavior == ButtonBehavior.SEND.value:
             bytes += common.int2bytes(self.type, 1)
-            if self.type == ButtonMappingTypes.Button:
+            if self.type == ButtonMappingType.BUTTON:
                 bytes += common.int2bytes(self.value, 2)
-            elif self.type == ButtonMappingTypes.Modifier_And_Key:
+            elif self.type == ButtonMappingType.MODIFIER_AND_KEY:
                 bytes += common.int2bytes(self.modifiers, 1)
                 bytes += common.int2bytes(self.value, 1)
-            elif self.type == ButtonMappingTypes.Consumer_Key:
+            elif self.type == ButtonMappingType.CONSUMER_KEY:
                 bytes += common.int2bytes(self.value, 2)
-            elif self.type == ButtonMappingTypes.No_Action:
+            elif self.type == ButtonMappingType.NO_ACTION:
                 bytes += b"\xff\xff"
-        elif self.behavior == ButtonBehaviors.Function:
+        elif self.behavior == ButtonBehavior.FUNCTION:
             data = common.int2bytes(self.data, 1) if self.data else b"\x00"
             bytes += common.int2bytes(self.value, 1) + b"\xff" + data
         else:
