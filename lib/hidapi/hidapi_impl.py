@@ -253,28 +253,25 @@ def _match(
             if len(report) == 1 + 6 and report[0] == 0x10:
                 device["hidpp_short"] = True
         except HIDError as e:
-            if logger.isEnabledFor(logging.INFO):
-                logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
         try:
             report = _get_input_report(device_handle, 0x11, 32)
             if len(report) == 1 + 19 and report[0] == 0x11:
                 device["hidpp_long"] = True
         except HIDError as e:
-            if logger.isEnabledFor(logging.INFO):
-                logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
     finally:
         if device_handle:
             close(device_handle)
 
-    if logger.isEnabledFor(logging.INFO):
-        logger.info(
-            "Found device BID %s VID %04X PID %04X HID++ %s %s",
-            bus_id,
-            vid,
-            pid,
-            device["hidpp_short"],
-            device["hidpp_long"],
-        )
+    logger.info(
+        "Found device BID %s VID %04X PID %04X HID++ %s %s",
+        bus_id,
+        vid,
+        pid,
+        device["hidpp_short"],
+        device["hidpp_long"],
+    )
 
     if not device["hidpp_short"] and not device["hidpp_long"]:
         return None

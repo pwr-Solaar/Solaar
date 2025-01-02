@@ -86,8 +86,7 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
     interest to Solaar. It is given the bus id, vendor id, and product
     id and returns a dictionary with the required hid_driver and
     usb_interface and whether this is a receiver or device."""
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"Dbus event {action} {device}")
+    logger.debug(f"Dbus event {action} {device}")
     hid_device = device.find_parent("hid")
     if hid_device is None:  # only HID devices are of interest to Solaar
         return
@@ -137,18 +136,17 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
-        if logger.isEnabledFor(logging.INFO):
-            logger.info(
-                "Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s",
-                device.device_node,
-                bid,
-                vid,
-                pid,
-                hidpp_short,
-                hidpp_long,
-                usb_interface,
-                interface_number,
-            )
+        logger.info(
+            "Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s",
+            device.device_node,
+            bid,
+            vid,
+            pid,
+            hidpp_short,
+            hidpp_long,
+            usb_interface,
+            interface_number,
+        )
         if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
             return
         attrs = intf_device.attributes if intf_device is not None else None
@@ -268,8 +266,7 @@ def monitor_glib(glib: GLib, callback: Callable, filter_func: Callable):
         except Exception:
             glib.io_add_watch(m, glib.IO_IN, _process_udev_event, callback, filter_func)
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("Starting dbus monitoring")
+    logger.debug("Starting dbus monitoring")
     m.start()
 
 
@@ -282,8 +279,7 @@ def enumerate(filter_func: typing.Callable[[int, int, int, bool, bool], dict[str
     :returns: a list of matching ``DeviceInfo`` tuples.
     """
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("Starting dbus enumeration")
+    logger.debug("Starting dbus enumeration")
     for dev in pyudev.Context().list_devices(subsystem="hidraw"):
         dev_info = _match(ACTION_ADD, dev, filter_func)
         if dev_info:
