@@ -1167,11 +1167,11 @@ class Multiplatform(settings.Setting):
                     if version == 0:
                         return ""
                     elif version & 0xFF:
-                        return str(version >> 8) + "." + str(version & 0xFF)
+                        return f"{str(version >> 8)}.{str(version & 0xFF)}"
                     else:
                         return str(version >> 8)
 
-                return "" if low == 0 and high == 0 else " " + _str_os_version(low) + "-" + _str_os_version(high)
+                return "" if low == 0 and high == 0 else f" {_str_os_version(low)}-{_str_os_version(high)}"
 
             infos = device.feature_request(_F.MULTIPLATFORM)
             assert infos, "Oops, multiplatform count cannot be retrieved!"
@@ -1227,7 +1227,7 @@ class ChangeHost(settings.Setting):
             choices = common.NamedInts()
             for host in range(0, numHosts):
                 paired, hostName = hostNames.get(host, (True, ""))
-                choices[host] = str(host + 1) + ":" + hostName if hostName else str(host + 1)
+                choices[host] = f"{str(host + 1)}:{hostName}" if hostName else str(host + 1)
             return cls(choices=choices, read_skip_byte_count=1) if choices and len(choices) > 1 else None
 
 
@@ -1735,7 +1735,7 @@ class PerKeyLighting(settings.Settings):
                     key = (
                         setting_class.keys_universe[i]
                         if i in setting_class.keys_universe
-                        else common.NamedInt(i, "KEY " + str(i))
+                        else common.NamedInt(i, f"KEY {str(i)}")
                     )
                     choices_map[key] = setting_class.choices_universe
             result = cls(choices_map) if choices_map else None

@@ -564,7 +564,7 @@ def _update_details(button):
 
         def _make_text(items):
             text = "\n".join("%-13s: %s" % (name, value) for name, value in items)
-            return "<small><tt>" + text + "</tt></small>"
+            return f"<small><tt>{text}</tt></small>"
 
         def _displayable_items(items):
             for name, value in items:
@@ -866,7 +866,7 @@ def update(device, need_popup=False, refresh=False):
 
     else:
         path = device.receiver.path if device.receiver is not None else device.path
-        assert device.number is not None and device.number >= 0, "invalid device number" + str(device.number)
+        assert device.number is not None and device.number >= 0, f"invalid device number{str(device.number)}"
         item = _device_row(path, device.number, device if bool(device) else None)
 
         if bool(device) and item:
