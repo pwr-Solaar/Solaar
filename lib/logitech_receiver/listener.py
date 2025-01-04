@@ -117,7 +117,7 @@ class EventsListener(threading.Thread):
             path_name = receiver.path.split("/")[2]
         except IndexError:
             path_name = receiver.path
-        super().__init__(name=self.__class__.__name__ + ":" + path_name)
+        super().__init__(name=f"{self.__class__.__name__}:{path_name}")
         self.daemon = True
         self._active = False
         self.receiver = receiver

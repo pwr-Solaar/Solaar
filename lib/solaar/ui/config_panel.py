@@ -386,7 +386,7 @@ class MultipleToggleControl(MultipleControl):
                 elem.set_state(v)
             if elem.get_state():
                 active += 1
-            to_join.append(lbl.get_text() + ": " + str(elem.get_state()))
+            to_join.append(f"{lbl.get_text()}: {str(elem.get_state())}")
         b = ", ".join(to_join)
         self._button.set_label(f"{active} / {total}")
         self._button.set_tooltip_text(b)
@@ -470,7 +470,7 @@ class MultipleRangeControl(MultipleControl):
             item = ch._setting_item
             v = value.get(int(item), None)
             if v is not None:
-                b += str(item) + ": ("
+                b += f"{str(item)}: ("
                 to_join = []
                 for c in ch._sub_items:
                     sub_item = c._setting_sub_item
@@ -480,7 +480,7 @@ class MultipleRangeControl(MultipleControl):
                         sub_item_value = c._control.get_value()
                     c._control.set_value(sub_item_value)
                     n += 1
-                    to_join.append(str(sub_item) + f"={sub_item_value}")
+                    to_join.append(f"{str(sub_item)}={sub_item_value}")
                 b += ", ".join(to_join) + ") "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
@@ -533,7 +533,7 @@ class PackedRangeControl(MultipleRangeControl):
                 h.control.set_value(v)
             else:
                 v = self.sbox.setting._value[int(item)]
-            b += str(item) + ": (" + str(v) + ") "
+            b += f"{str(item)}: ({str(v)}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)

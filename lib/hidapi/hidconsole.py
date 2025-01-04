@@ -50,7 +50,7 @@ print_lock = Lock()
 def _print(marker, data, scroll=False):
     t = time.time() - start_time
     if isinstance(data, str):
-        s = marker + " " + data
+        s = f"{marker} {data}"
     else:
         hexs = strhex(data)
         s = "%s (% 8.3f) [%s %s %s %s] %s" % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
@@ -90,7 +90,7 @@ def _continuous_read(handle, timeout=2000):
         try:
             reply = hidapi.read(handle, 128, timeout)
         except OSError as e:
-            _error("Read failed, aborting: " + str(e), True)
+            _error(f"Read failed, aborting: {str(e)}", True)
             break
         assert reply is not None
         if reply:
@@ -101,7 +101,7 @@ def _validate_input(line, hidpp=False):
     try:
         data = unhexlify(line.encode("ascii"))
     except Exception as e:
-        _error("Invalid input: " + str(e))
+        _error(f"Invalid input: {str(e)}")
         return None
 
     if hidpp:
