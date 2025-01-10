@@ -47,7 +47,7 @@ def set_locale_to_system_default():
     """
     try:
         locale.setlocale(locale.LC_ALL, "")
-    except PermissionError:
+    except Exception:
         pass
 
     try:
