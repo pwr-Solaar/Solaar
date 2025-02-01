@@ -540,7 +540,10 @@ class Device:
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
         handle = self.handle or self.receiver.handle
-        protocol = self.low_level.ping(handle, self.number, long_message=long)
+        try:
+            protocol = self.low_level.ping(handle, self.number, long_message=long)
+        except exceptions.NoReceiver:  # if ping fails, device is offline
+            protocol = None
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol
