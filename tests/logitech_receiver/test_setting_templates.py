@@ -502,7 +502,8 @@ def test_simple_template(test, mocker, mock_gethostname):
         assert setting.choices == test.choices
 
     value = setting.read(cached=False)
-    assert value == tst.initial_value
+    unreadable = hasattr(setting._rw, "read_fnid") and setting._rw.read_fnid is None
+    assert value == (tst.initial_value if not unreadable else None)
 
     cached_value = setting.read(cached=True)
     assert cached_value == tst.initial_value

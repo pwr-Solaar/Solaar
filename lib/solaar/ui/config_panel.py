@@ -715,7 +715,10 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         return
     sbox._failed.set_visible(False)
     sbox._control.set_sensitive(False)
-    sbox._control.set_value(value)
+    try:  # a call was producing a TypeError so guard against that
+        sbox._control.set_value(value)
+    except TypeError as e:
+        logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
