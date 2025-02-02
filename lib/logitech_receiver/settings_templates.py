@@ -1621,7 +1621,7 @@ class LEDZoneSetting(settings.Setting):
             prefix = common.int2bytes(zone.index, 1)
             rw = settings.FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix, suffix=suffix)
             validator = settings_validator.HeteroValidator(
-                data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable
+                data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable and read_fnid is not None
             )
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
@@ -1657,7 +1657,7 @@ class RGBEffectSetting(LEDZoneSetting):
 
     @classmethod
     def build(cls, device):
-        return cls.setup(device, 0xE0, 0x10, b"\x01")
+        return cls.setup(device, None, 0x10, b"\x01")
 
 
 class PerKeyLighting(settings.Settings):
