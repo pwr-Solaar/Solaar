@@ -742,7 +742,7 @@ class MouseProcess(Condition):
 class Feature(Condition):
     def __init__(self, feature: str, warn: bool = True):
         try:
-            self.feature = SupportedFeature[feature]
+            self.feature = SupportedFeature[feature.replace(" ", "_")]
         except KeyError:
             self.feature = None
             if warn:
