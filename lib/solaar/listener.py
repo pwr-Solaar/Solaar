@@ -54,18 +54,14 @@ logger = logging.getLogger(__name__)
 
 ACTION_ADD = "add"
 
-_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
+_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online", "path"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 
 
 def _ghost(device):
     return _GHOST_DEVICE(
-        receiver=device.receiver,
-        number=device.number,
-        name=device.name,
-        kind=device.kind,
-        online=False,
+        receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False, path=None
     )
 
 
