@@ -257,18 +257,16 @@ def _match(
     device_handle = None
     try:
         device_handle = open_path(device["path"])
-        try:
-            report = _get_input_report(device_handle, 0x10, 32)
-            if len(report) == 1 + 6 and report[0] == 0x10:
-                device["hidpp_short"] = True
-        except HIDError as e:
-            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
-        try:
-            report = _get_input_report(device_handle, 0x11, 32)
-            if len(report) == 1 + 19 and report[0] == 0x11:
-                device["hidpp_long"] = True
-        except HIDError as e:
-            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+        
+        report = _get_input_report(device_handle, 0x10, 32)
+        if len(report) == 1 + 6 and report[0] == 0x10:
+            device["hidpp_short"] = True
+
+        report = _get_input_report(device_handle, 0x11, 32)
+        if len(report) == 1 + 19 and report[0] == 0x11:
+            device["hidpp_long"] = True
+    except HIDError as e:
+        logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
     finally:
         if device_handle:
             close(device_handle)
