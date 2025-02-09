@@ -274,7 +274,8 @@ def _match(
                 check_func()
             except HIDError as e:
                 logger.info(
-                    f"Error while {check_func.__name__} on device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}"
+                    f"Error while {check_func.__name__}"
+                    f"on device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}"
                 )
     except HIDError as e:
         logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
