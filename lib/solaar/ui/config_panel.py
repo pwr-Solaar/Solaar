@@ -231,6 +231,9 @@ class ChoiceControlBig(Gtk.Entry, Control):
         key = self.get_text()
         return next((x for x in self.choices if x == key), None)
 
+    def set_choices(self, choices):
+        self.choices = choices
+
     def changed(self, *args):
         self.value = self.get_choice()
         icon = "dialog-warning" if self.value is None else "dialog-question" if self.get_sensitive() else ""
@@ -283,7 +286,6 @@ class MapChoiceControl(Gtk.HBox, Control):
         choices = self.sbox.setting.choices[key_choice]
         if choices != self.value_choices:
             self.value_choices = choices
-            self.valueBox.remove_all()
             self.valueBox.set_choices(choices)
         current = self.sbox.setting._value.get(key_choice) if self.sbox.setting._value else None
         if current is not None:
