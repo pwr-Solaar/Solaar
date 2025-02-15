@@ -634,7 +634,10 @@ class FeatureRW:
 
     def read(self, device, data_bytes=b""):
         assert self.feature is not None
-        return device.feature_request(self.feature, self.read_fnid, self.prefix, self.read_prefix, data_bytes)
+        if self.read_fnid is not None:
+            return device.feature_request(self.feature, self.read_fnid, self.prefix, self.read_prefix, data_bytes)
+        else:
+            return b""
 
     def write(self, device, data_bytes):
         assert self.feature is not None

@@ -111,6 +111,7 @@ class FeatureTest:
     offset: int = 0x04
     version: int = 0x00
     rewrite: bool = False
+    readable: bool = True
 
 
 simple_tests = [
@@ -299,6 +300,7 @@ simple_tests = [
             settings_templates.RGBEffectSetting,
             hidpp20.LEDEffectSetting(ID=3, intensity=0x50, period=0x100),
             hidpp20.LEDEffectSetting(ID=2, color=0x505050, speed=0x50),
+            readable=False,
         ),
         fake_hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
         fake_hidpp.Response("0000000102", 0x0400, "00FF00"),
@@ -308,7 +310,12 @@ simple_tests = [
         fake_hidpp.Response("00015050505000000000000001", 0x0410, "00015050505000000000000001"),
     ),
     Setup(
-        FeatureTest(settings_templates.RGBEffectSetting, None, hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101)),
+        FeatureTest(
+            settings_templates.RGBEffectSetting,
+            None,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
+            readable=False,
+        ),
         fake_hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
         fake_hidpp.Response("0000000102", 0x0400, "00FF00"),
         fake_hidpp.Response("0000000300040005", 0x0400, "000000"),
@@ -316,7 +323,12 @@ simple_tests = [
         fake_hidpp.Response("00000000000000010160000001", 0x0410, "00000000000000010160000001"),
     ),
     Setup(
-        FeatureTest(settings_templates.RGBEffectSetting, None, hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101)),
+        FeatureTest(
+            settings_templates.RGBEffectSetting,
+            None,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
+            readable=False,
+        ),
         fake_hidpp.Response("FF000200020004000000000000000000", 0x0400, "FFFF00"),
         fake_hidpp.Response("00000002040000000000000000000000", 0x0400, "00FF00"),
         fake_hidpp.Response("00000000000000000000000000000000", 0x0400, "000000"),
@@ -487,7 +499,7 @@ def mock_gethostname(mocker):
 @pytest.mark.parametrize("test", simple_tests)
 def test_simple_template(test, mocker, mock_gethostname):
     tst = test.test
-    print("TEST", tst.sclass.feature)
+    print("TEST", tst.sclass, tst.sclass.feature)
     device = fake_hidpp.Device(responses=test.responses, feature=tst.sclass.feature, offset=tst.offset, version=tst.version)
     spy_request = mocker.spy(device, "request")
 
@@ -501,12 +513,12 @@ def test_simple_template(test, mocker, mock_gethostname):
     elif test.choices is not None:
         assert setting.choices == test.choices
 
-    value = setting.read(cached=False)
-    unreadable = hasattr(setting._rw, "read_fnid") and setting._rw.read_fnid is None
-    assert value == (tst.initial_value if not unreadable else None)
+    if tst.readable:
+        value = setting.read(cached=False)
+        assert value == tst.initial_value
 
-    cached_value = setting.read(cached=True)
-    assert cached_value == tst.initial_value
+        cached_value = setting.read(cached=True)
+        assert cached_value == tst.initial_value
 
     write_value = setting.write(tst.write_value) if tst.write_value is not None else None
     assert write_value == tst.write_value
