@@ -16,6 +16,7 @@ nav:
   - Translation: i18n.md
   - Implementation: implementation.md
   - Installation: installation.md
+  - Uninstallation: uninstallation.md
   - Rules: rules.md
   - Usage: usage.md
 
