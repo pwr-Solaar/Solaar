@@ -47,6 +47,7 @@ DEVICE_KIND = NamedInts(
 
 
 class PowerSwitchLocation(IntEnum):
+    unknown = 0x00
     BASE = 0x01
     TOP_CASE = 0x02
     EDGE_OF_TOP_RIGHT_CORNER = 0x03
@@ -58,6 +59,13 @@ class PowerSwitchLocation(IntEnum):
     RIGHT_EDGE = 0x0A
     LEFT_EDGE = 0x0B
     BOTTOM_EDGE = 0x0C
+
+    @classmethod
+    def location(cls, loc):
+        try:
+            return cls(loc)
+        except ValueError:
+            return cls.unknown
 
 
 class NotificationFlag(Flag):
