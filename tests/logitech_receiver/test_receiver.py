@@ -259,12 +259,22 @@ def test_extract_codename():
     assert codename == "K520"
 
 
-def test_extract_power_switch_location():
-    response = b"0\x19\x8e>\xb8\x06\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00"
+@pytest.mark.parametrize(
+    "power_switch_byte, expected_location",
+    [
+        (b"\x01", "base"),
+        (b"\x09", "top_edge"),
+        (b"\x0c", "bottom_edge"),
+        (b"\x00", "unknown"),
+        (b"\x0f", "unknown"),
+    ],
+)
+def test_extract_power_switch_location(power_switch_byte, expected_location):
+    response = b"\x19\x8e>\xb8\x06\x00\x00\x00\x00" + power_switch_byte + b"\x00\x00\x00\x00\x00"
 
     ps_location = receiver.extract_power_switch_location(response)
 
-    assert ps_location == "base"
+    assert ps_location == expected_location
 
 
 def test_extract_connection_count():

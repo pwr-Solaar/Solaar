@@ -108,7 +108,7 @@ def extract_codename(response: bytes) -> str:
 def extract_power_switch_location(response: bytes) -> str:
     """Extracts power switch location from response."""
     index = response[9] & 0x0F
-    return hidpp10_constants.PowerSwitchLocation(index).name.lower()
+    return hidpp10_constants.PowerSwitchLocation.location(index).name.lower()
 
 
 def extract_connection_count(response: bytes) -> int:
