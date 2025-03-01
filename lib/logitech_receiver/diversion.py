@@ -541,7 +541,7 @@ class Rule:
         self.source = source
 
     def __str__(self):
-        source = "(" + self.source + ")" if self.source else ""
+        source = f"({self.source})" if self.source else ""
         return f"Rule{source}[{', '.join([c.__str__() for c in self.components])}]"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
@@ -593,7 +593,7 @@ class Not(ConditionProtocol):
         self.component = compile_component(op)
 
     def __str__(self):
-        return "Not: " + str(self.component)
+        return f"Not: {str(self.component)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -706,7 +706,7 @@ class Process(ConditionProtocol):
             self.process = str(process)
 
     def __str__(self):
-        return "Process: " + str(self.process)
+        return f"Process: {str(self.process)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -737,7 +737,7 @@ class MouseProcess(ConditionProtocol):
             self.process = str(process)
 
     def __str__(self):
-        return "MouseProcess: " + str(self.process)
+        return f"MouseProcess: {str(self.process)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -755,14 +755,14 @@ class MouseProcess(ConditionProtocol):
 class Feature(ConditionProtocol):
     def __init__(self, feature: str, warn: bool = True):
         try:
-            self.feature = SupportedFeature[feature]
+            self.feature = SupportedFeature[feature.replace(" ", "_")]
         except KeyError:
             self.feature = None
             if warn:
                 logger.warning("rule Feature argument not name of a feature: %s", feature)
 
     def __str__(self):
-        return "Feature: " + str(self.feature)
+        return f"Feature: {str(self.feature)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -783,7 +783,7 @@ class Report(ConditionProtocol):
             self.report = report
 
     def __str__(self):
-        return "Report: " + str(self.report)
+        return f"Report: {str(self.report)}"
 
     def evaluate(self, report, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -856,7 +856,7 @@ class Modifiers(ConditionProtocol):
                     logger.warning("unknown rule Modifier value: %s", k)
 
     def __str__(self):
-        return "Modifiers: " + str(self.desired)
+        return f"Modifiers: {str(self.desired)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1002,7 +1002,7 @@ class Test(ConditionProtocol):
                 logger.warning("rule Test argument not valid %s", test)
 
     def __str__(self):
-        return "Test: " + str(self.test)
+        return f"Test: {str(self.test)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1030,7 +1030,7 @@ class TestBytes(ConditionProtocol):
                 logger.warning("rule TestBytes argument not valid %s", test)
 
     def __str__(self):
-        return "TestBytes: " + str(self.test)
+        return f"TestBytes: {str(self.test)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1105,7 +1105,7 @@ class Active(ConditionProtocol):
         self.devID = devID
 
     def __str__(self):
-        return "Active: " + str(self.devID)
+        return f"Active: {str(self.devID)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1126,7 +1126,7 @@ class Device(ConditionProtocol):
         self.devID = devID
 
     def __str__(self):
-        return "Device: " + str(self.devID)
+        return f"Device: {str(self.devID)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1146,7 +1146,7 @@ class Host(ConditionProtocol):
         self.host = host
 
     def __str__(self):
-        return "Host: " + str(self.host)
+        return f"Host: {str(self.host)}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1442,7 +1442,7 @@ class Later(ActionProtocol):
             self.components = self.rule.components
 
     def __str__(self):
-        return "Later: [" + str(self.delay) + ", " + ", ".join(str(c) for c in self.components) + "]"
+        return f"Later: [{str(self.delay)}, " + ", ".join(str(c) for c in self.components) + "]"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if self.delay and self.rule:

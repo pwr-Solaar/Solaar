@@ -132,8 +132,7 @@ def _scroll(tray_icon, event, direction=None):
             _picked_device = None
 
     _picked_device = candidate or _picked_device
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("scroll: picked %s", _picked_device)
+    logger.debug("scroll: picked %s", _picked_device)
     _update_tray_icon()
 
 
@@ -153,8 +152,7 @@ try:
             # treat unavailable versions the same as unavailable packages
             raise ImportError from exc
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
+    logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
@@ -212,8 +210,7 @@ try:
             GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
 except ImportError:
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("using StatusIcon")
+    logger.debug("using StatusIcon")
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(icons.TRAY_INIT)
@@ -317,8 +314,7 @@ def _pick_device_with_lowest_battery():
             picked = info
             picked_level = level or 0
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("picked device with lowest battery: %s", picked)
+    logger.debug("picked device with lowest battery: %s", picked)
 
     return picked
 

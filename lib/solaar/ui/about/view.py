@@ -34,7 +34,7 @@ class AboutView:
     def init_ui(self) -> None:
         self.view = Gtk.AboutDialog()
         self.view.set_program_name(NAME)
-        self.view.set_icon_name(NAME.lower())
+        self.view.set_logo_icon_name(NAME.lower())
         self.view.set_license_type(Gtk.License.GPL_2_0)
 
         self.view.connect(GtkSignal.RESPONSE.value, lambda x, y: self.handle_close(x))

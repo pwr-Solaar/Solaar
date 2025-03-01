@@ -1101,8 +1101,11 @@ class UnsupportedRuleComponentUI(RuleComponentUI):
 
     def create_widgets(self):
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_("This editor does not support the selected rule component yet."))
+        self.label.set_text(_("This editor does not support the selected rule component yet.") if self.component else "")
         self.widgets[self.label] = (0, 0, 1, 1)
+
+    def collect_value(self):
+        return self.component.components[:]  # not editable on the bottom panel
 
     @classmethod
     def right_label(cls, component):

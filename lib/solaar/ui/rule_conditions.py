@@ -383,7 +383,7 @@ class TestUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return component.test + (" " + repr(component.parameter) if component.parameter is not None else "")
+        return component.test + (f" {repr(component.parameter)}" if component.parameter is not None else "")
 
 
 @dataclass

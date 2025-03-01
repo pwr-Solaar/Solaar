@@ -86,7 +86,7 @@ if available:
             n.set_urgency(Notify.Urgency.NORMAL)
             n.set_hint("desktop-entry", GLib.Variant("s", "solaar"))  # replace with better name late
             try:
-                n.show()
+                return n.show()
             except Exception:
                 logger.exception(f"showing {n}")
 

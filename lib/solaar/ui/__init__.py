@@ -56,8 +56,7 @@ class GtkSignal(Enum):
 
 
 def _startup(app, startup_hook, use_tray, show_window):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
+    logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
     common.start_async()
     desktop_notifications.init()
     if use_tray:
@@ -67,8 +66,7 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 
 def _activate(app):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("activate")
+    logger.debug("activate")
     if app.get_windows():
         window.popup()
     else:
@@ -81,8 +79,7 @@ def _command_line(app, command_line):
     if not args:
         _activate(app)
     elif args[0] == "config":  # config call from remote instance
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("remote command line %s", args)
+        logger.info("remote command line %s", args)
         dev = find_device(args[1])
         if dev:
             setting = next((s for s in dev.settings if s.name == args[2]), None)
@@ -92,8 +89,7 @@ def _command_line(app, command_line):
 
 
 def _shutdown(_app, shutdown_hook):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("shutdown")
+    logger.debug("shutdown")
     shutdown_hook()
     common.stop_async()
     tray.destroy()
@@ -127,8 +123,7 @@ def run_loop(
 
 def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("status changed: %s (%s) %s", device, alert, reason)
+    logger.debug("status changed: %s (%s) %s", device, alert, reason)
     if alert is None:
         alert = Alert.NONE
 

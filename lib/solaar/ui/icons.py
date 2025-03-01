@@ -37,8 +37,7 @@ def _init_icon_paths():
         return
 
     _default_theme = Gtk.IconTheme.get_default()
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("icon theme paths: %s", _default_theme.get_search_path())
+    logger.debug("icon theme paths: %s", _default_theme.get_search_path())
 
     if gtk.battery_icons_style == "symbolic":
         global TRAY_OKAY
@@ -57,8 +56,7 @@ def battery(level=None, charging=False):
     if not _default_theme.has_icon(icon_name):
         logger.warning("icon %s not found in current theme", icon_name)
         return TRAY_OKAY  # use Solaar icon if battery icon not available
-    elif logger.isEnabledFor(logging.DEBUG):
-        logger.debug("battery icon for %s:%s = %s", level, charging, icon_name)
+    logger.debug("battery icon for %s:%s = %s", level, charging, icon_name)
     return icon_name
 
 
@@ -105,7 +103,7 @@ def device_icon_set(name="_", kind=None):
                 icon_set += ("input-mouse",)
             elif str(kind) == "headset":
                 icon_set += ("audio-headphones", "audio-headset")
-            icon_set += ("input-" + str(kind),)
+            icon_set += (f"input-{str(kind)}",)
         # icon_set += (name.replace(' ', '-'),)
         _ICON_SETS[name] = icon_set
     return icon_set

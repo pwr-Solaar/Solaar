@@ -316,9 +316,9 @@ CONTROL = NamedInts(
 )
 
 for i in range(1, 33):  # add in G keys - these are not really Logitech Controls
-    CONTROL[0x1000 + i] = "G" + str(i)
+    CONTROL[0x1000 + i] = f"G{str(i)}"
 for i in range(1, 9):  # add in M keys - these are not really Logitech Controls
-    CONTROL[0x1100 + i] = "M" + str(i)
+    CONTROL[0x1100 + i] = f"M{str(i)}"
 CONTROL[0x1200] = "MR"  # add in MR key - this is not really a Logitech Control
 
 CONTROL._fallback = lambda x: f"unknown:{x:04X}"

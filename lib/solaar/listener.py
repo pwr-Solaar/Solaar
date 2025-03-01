@@ -54,18 +54,14 @@ logger = logging.getLogger(__name__)
 
 ACTION_ADD = "add"
 
-_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
+_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online", "path"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 
 
 def _ghost(device):
     return _GHOST_DEVICE(
-        receiver=device.receiver,
-        number=device.number,
-        name=device.name,
-        kind=device.kind,
-        online=False,
+        receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False, path=None
     )
 
 
@@ -79,15 +75,13 @@ class SolaarListener(listener.EventsListener):
         receiver.status_callback = self._status_changed
 
     def has_started(self):
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
+        logger.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
         nfs = self.receiver.enable_connection_notifications()
-        if logger.isEnabledFor(logging.WARNING):
-            if not self.receiver.isDevice and not ((nfs if nfs else 0) & hidpp10_constants.NotificationFlag.WIRELESS.value):
-                logger.warning(
-                    "Receiver on %s might not support connection notifications, GUI might not show its devices",
-                    self.receiver.path,
-                )
+        if not self.receiver.isDevice and not ((nfs if nfs else 0) & hidpp10_constants.NotificationFlag.WIRELESS.value):
+            logger.warning(
+                "Receiver on %s might not support connection notifications, GUI might not show its devices",
+                self.receiver.path,
+            )
         self.receiver.notification_flags = nfs
         self.receiver.notify_devices()
         self._status_changed(self.receiver)
@@ -95,8 +89,7 @@ class SolaarListener(listener.EventsListener):
     def has_stopped(self):
         r, self.receiver = self.receiver, None
         assert r is not None
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("%s: notifications listener has stopped", r)
+        logger.info("%s: notifications listener has stopped", r)
 
         # because udev is not notifying us about device removal, make sure to clean up in _all_listeners
         _all_listeners.pop(r.path, None)
@@ -144,8 +137,7 @@ class SolaarListener(listener.EventsListener):
         if not device:
             # Device was unpaired, and isn't valid anymore.
             # We replace it with a ghost so that the UI has something to work with while cleaning up.
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("device %s was unpaired, ghosting", device)
+            logger.info("device %s was unpaired, ghosting", device)
             device = _ghost(device)
 
         self.status_changed_callback(device, alert, reason)
@@ -163,20 +155,17 @@ class SolaarListener(listener.EventsListener):
 
         # a notification that came in to the device listener - strange, but nothing needs to be done here
         if self.receiver.isDevice:
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("Notification %s via device %s being ignored.", n, self.receiver)
+            logger.debug("Notification %s via device %s being ignored.", n, self.receiver)
             return
 
         # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
         if n.sub_id == 0x41 and n.report_id == base.DJ_MESSAGE_ID:
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("ignoring DJ pairing notification %s", n)
+            logger.info("ignoring DJ pairing notification %s", n)
             return
 
         # a device notification
         if not (0 < n.devnumber <= 16):  # some receivers have devices past their max # devices
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("Unexpected device number (%s) in notification %s.", n.devnumber, n)
+            logger.warning("Unexpected device number (%s) in notification %s.", n.devnumber, n)
             return
         already_known = n.devnumber in self.receiver
 
@@ -221,8 +210,7 @@ class SolaarListener(listener.EventsListener):
 
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("connection %s for device wpid %s kind %s serial %s", n, dev.wpid, dev.kind, dev._serial)
+            logger.info("connection %s for device wpid %s kind %s serial %s", n, dev.wpid, dev.kind, dev._serial)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
@@ -234,10 +222,8 @@ class SolaarListener(listener.EventsListener):
 
         if self.receiver.pairing.lock_open and not already_known:
             # this should be the first notification after a device was paired
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("first notification was not a connection notification")
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("%s: pairing detected new device", self.receiver)
+            logger.warning("first notification was not a connection notification")
+            logger.info("%s: pairing detected new device", self.receiver)
             self.receiver.pairing.new_device = dev
         elif dev.online is None:
             dev.ping()
@@ -253,17 +239,16 @@ def _process_bluez_dbus(device: Device, path, dictionary: dict, signature):
     if device:
         if dictionary.get("Connected") is not None:
             connected = dictionary.get("Connected")
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("bluez dbus for %s: %s", device, "CONNECTED" if connected else "DISCONNECTED")
+            logger.info("bluez dbus for %s: %s", device, "CONNECTED" if connected else "DISCONNECTED")
             device.changed(connected, reason=i18n._("connected") if connected else i18n._("disconnected"))
     elif device is not None:
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("bluez cleanup for %s", device)
+        logger.info("bluez cleanup for %s", device)
         _cleanup_bluez_dbus(device)
 
 
 def _cleanup_bluez_dbus(device: Device):
     """Remove dbus signal receiver for device"""
+    diversion_remove_inheritance
     if device and logger.isEnabledFor(logging.INFO):
         logger.info(f"bluez cleanup for {device}")
     dbus.watch_bluez_connect(device.hid_serial, None)
@@ -296,8 +281,7 @@ def _start(device_info: DeviceInfo):
 
 def start_all():
     stop_all()  # just in case this it called twice in a row...
-    if logger.isEnabledFor(logging.INFO):
-        logger.info("starting receiver listening threads")
+    logger.info("starting receiver listening threads")
     for device_info in base.receivers_and_devices():
         _process_receiver_event(ACTION_ADD, device_info)
 
@@ -306,8 +290,7 @@ def stop_all():
     listeners = list(_all_listeners.values())
     _all_listeners.clear()
     if listeners:
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("stopping receiver listening threads %s", listeners)
+        logger.info("stopping receiver listening threads %s", listeners)
         for listener_thread in listeners:
             listener_thread.stop()
     configuration.save()
@@ -319,8 +302,7 @@ def stop_all():
 # after a resume, the device may have been off so mark its saved status to ensure
 # that the status is pushed to the device when it comes back
 def ping_all(resuming=False):
-    if logger.isEnabledFor(logging.INFO):
-        logger.info("ping all devices%s", " when resuming" if resuming else "")
+    logger.info("ping all devices%s", " when resuming" if resuming else "")
     for listener_thread in _all_listeners.values():
         if listener_thread.receiver.isDevice:
             if resuming:
@@ -363,8 +345,7 @@ def _process_add(device_info: DeviceInfo, retry):
         if e.errno == errno.EACCES:
             try:
                 output = subprocess.check_output(["/usr/bin/getfacl", "-p", device_info.path], text=True)
-                if logger.isEnabledFor(logging.WARNING):
-                    logger.warning("Missing permissions on %s\n%s.", device_info.path, output)
+                logger.warning("Missing permissions on %s\n%s.", device_info.path, output)
             except Exception:
                 pass
             if retry:
@@ -382,8 +363,7 @@ def _process_receiver_event(action, device_info):
     assert action is not None
     assert device_info is not None
     assert _error_callback
-    if logger.isEnabledFor(logging.INFO):
-        logger.info("receiver event %s %s", action, device_info)
+    logger.info("receiver event %s %s", action, device_info)
     # whatever the action, stop any previous receivers at this path
     listener_thread = _all_listeners.pop(device_info.path, None)
     if listener_thread is not None:

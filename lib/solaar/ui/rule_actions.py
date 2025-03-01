@@ -138,7 +138,7 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return " + ".join(component.key_names) + ("  (" + component.action + ")" if component.action != CLICK else "")
+        return " + ".join(component.key_names) + (f"  ({component.action})" if component.action != CLICK else "")
 
 
 class MouseScrollUI(ActionUI):

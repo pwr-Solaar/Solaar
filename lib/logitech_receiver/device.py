@@ -231,14 +231,14 @@ class Device:
                     self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = "? (%s)" % (self.wpid or self.product_id)
-        return self._codename or "?? (%s)" % (self.wpid or self.product_id)
+        return self._codename or f"?? ({self.wpid or self.product_id})"
 
     @property
     def name(self):
         if not self._name:
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self._codename or "Unknown device %s" % (self.wpid or self.product_id)
+        return self._name or self._codename or f"Unknown device {self.wpid or self.product_id}"
 
     def get_ids(self):
         ids = _hidpp20.get_ids(self)
@@ -540,7 +540,10 @@ class Device:
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
         handle = self.handle or self.receiver.handle
-        protocol = self.low_level.ping(handle, self.number, long_message=long)
+        try:
+            protocol = self.low_level.ping(handle, self.number, long_message=long)
+        except exceptions.NoReceiver:  # if ping fails, device is offline
+            protocol = None
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol

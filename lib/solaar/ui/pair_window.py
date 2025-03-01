@@ -99,8 +99,7 @@ def prepare(receiver):
 
 def check_lock_state(assistant, receiver, count=2):
     if not assistant.is_drawable():
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("assistant %s destroyed, bailing out", assistant)
+        logger.debug("assistant %s destroyed, bailing out", assistant)
         return False
     return _check_lock_state(assistant, receiver, count)
 
@@ -136,21 +135,18 @@ def _check_lock_state(assistant, receiver, count):
 
 def _pairing_failed(assistant, receiver, error):
     assistant.remove_page(0)  # needed to reset the window size
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("%s fail: %s", receiver, error)
+    logger.debug("%s fail: %s", receiver, error)
     _create_failure_page(assistant, error)
 
 
 def _pairing_succeeded(assistant, receiver, device):
     assistant.remove_page(0)  # needed to reset the window size
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("%s success: %s", receiver, device)
+    logger.debug("%s success: %s", receiver, device)
     _create_success_page(assistant, device)
 
 
 def _finish(assistant, receiver):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("finish %s", assistant)
+    logger.debug("finish %s", assistant)
     assistant.destroy()
     receiver.pairing.new_device = None
     if receiver.pairing.lock_open:
@@ -165,8 +161,7 @@ def _finish(assistant, receiver):
 
 
 def _show_passcode(assistant, receiver, passkey):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("%s show passkey: %s", receiver, passkey)
+    logger.debug("%s show passkey: %s", receiver, passkey)
     name = receiver.pairing.device_name
     authentication = receiver.pairing.device_authentication
     intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}

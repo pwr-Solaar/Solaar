@@ -31,7 +31,7 @@ def _find_locale_path(locale_domain: str) -> str:
     src_share = os.path.normpath(os.path.join(os.path.realpath(sys.path[0]), "..", "share"))
 
     for location in prefix_share, src_share:
-        mo_files = glob(os.path.join(location, "locale", "*", "LC_MESSAGES", locale_domain + ".mo"))
+        mo_files = glob(os.path.join(location, "locale", "*", "LC_MESSAGES", f"{locale_domain}.mo"))
         if mo_files:
             return os.path.join(location, "locale")
     raise FileNotFoundError(f"Could not find locale path for {locale_domain}")
@@ -47,7 +47,7 @@ def set_locale_to_system_default():
     """
     try:
         locale.setlocale(locale.LC_ALL, "")
-    except PermissionError:
+    except Exception:
         pass
 
     try:

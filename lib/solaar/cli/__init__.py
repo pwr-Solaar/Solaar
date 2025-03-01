@@ -116,8 +116,7 @@ def _receivers(dev_path=None):
             continue
         try:
             r = receiver.create_receiver(base, dev_info)
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("[%s] => %s", dev_info.path, r)
+            logger.debug("[%s] => %s", dev_info.path, r)
             if r:
                 yield r
         except Exception as e:
@@ -135,8 +134,7 @@ def _receivers_and_devices(dev_path=None):
             else:
                 d = receiver.create_receiver(base, dev_info)
 
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("[%s] => %s", dev_info.path, d)
+            logger.debug("[%s] => %s", dev_info.path, d)
             if d is not None:
                 yield d
         except Exception as e:

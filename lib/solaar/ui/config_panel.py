@@ -55,8 +55,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
             v = s.read(not force)
         except Exception as e:
             v = None
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
+            logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
     ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
@@ -232,6 +231,9 @@ class ChoiceControlBig(Gtk.Entry, Control):
         key = self.get_text()
         return next((x for x in self.choices if x == key), None)
 
+    def set_choices(self, choices):
+        self.choices = choices
+
     def changed(self, *args):
         self.value = self.get_choice()
         icon = "dialog-warning" if self.value is None else "dialog-question" if self.get_sensitive() else ""
@@ -284,7 +286,6 @@ class MapChoiceControl(Gtk.HBox, Control):
         choices = self.sbox.setting.choices[key_choice]
         if choices != self.value_choices:
             self.value_choices = choices
-            self.valueBox.remove_all()
             self.valueBox.set_choices(choices)
         current = self.sbox.setting._value.get(key_choice) if self.sbox.setting._value else None
         if current is not None:
@@ -387,7 +388,7 @@ class MultipleToggleControl(MultipleControl):
                 elem.set_state(v)
             if elem.get_state():
                 active += 1
-            to_join.append(lbl.get_text() + ": " + str(elem.get_state()))
+            to_join.append(f"{lbl.get_text()}: {str(elem.get_state())}")
         b = ", ".join(to_join)
         self._button.set_label(f"{active} / {total}")
         self._button.set_tooltip_text(b)
@@ -471,7 +472,7 @@ class MultipleRangeControl(MultipleControl):
             item = ch._setting_item
             v = value.get(int(item), None)
             if v is not None:
-                b += str(item) + ": ("
+                b += f"{str(item)}: ("
                 to_join = []
                 for c in ch._sub_items:
                     sub_item = c._setting_sub_item
@@ -481,7 +482,7 @@ class MultipleRangeControl(MultipleControl):
                         sub_item_value = c._control.get_value()
                     c._control.set_value(sub_item_value)
                     n += 1
-                    to_join.append(str(sub_item) + f"={sub_item_value}")
+                    to_join.append(f"{str(sub_item)}={sub_item_value}")
                 b += ", ".join(to_join) + ") "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
@@ -534,7 +535,7 @@ class PackedRangeControl(MultipleRangeControl):
                 h.control.set_value(v)
             else:
                 v = self.sbox.setting._value[int(item)]
-            b += str(item) + ": (" + str(v) + ") "
+            b += f"{str(item)}: ({str(v)}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
@@ -694,8 +695,7 @@ def _create_sbox(s, _device):
     elif s.kind == settings.Kind.HETERO:
         control = HeteroKeyControl(sbox, change)
     else:
-        if logger.isEnabledFor(logging.WARNING):
-            logger.warning("setting %s display not implemented", s.label)
+        logger.warning("setting %s display not implemented", s.label)
         return None
 
     control.set_sensitive(False)  # the first read will enable it
@@ -717,7 +717,10 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         return
     sbox._failed.set_visible(False)
     sbox._control.set_sensitive(False)
-    sbox._control.set_value(value)
+    try:  # a call was producing a TypeError so guard against that
+        sbox._control.set_value(value)
+    except TypeError as e:
+        logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
@@ -821,10 +824,9 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting_class, values):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
+    logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
     setting = next((s for s in device.settings if s.name == setting_class.name), None)
-    if setting is None and logger.isEnabledFor(logging.DEBUG):
+    if setting is None:
         logger.debug(
             "No setting for %s found on %s when trying to record a change made elsewhere",
             setting_class.name,

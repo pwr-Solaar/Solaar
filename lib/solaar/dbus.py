@@ -68,8 +68,7 @@ def watch_suspend_resume(
             dbus_interface=_LOGIND_INTERFACE,
             path=_LOGIND_PATH,
         )
-    if logger.isEnabledFor(logging.INFO):
-        logger.info("connected to system dbus, watching for suspend/resume events")
+    logger.info("connected to system dbus, watching for suspend/resume events")
 
 
 _BLUETOOTH_PATH_PREFIX = "/org/bluez/hci0/dev_"
