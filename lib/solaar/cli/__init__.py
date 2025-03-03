@@ -75,10 +75,7 @@ def _create_parser():
     )
     sp.add_argument(
         "device",
-        help=(
-            "device to configure; may be a device number (1..6), a serial number, ",
-            "or a substring of a device's name",
-        ),
+        help="device to configure; may be a device number (1..6), a serial number, " "or a substring of a device's name",
     )
     sp.add_argument("setting", nargs="?", help="device-specific setting; leave empty to list available settings")
     sp.add_argument("value_key", nargs="?", help="new value for the setting or key for keyed settings")
