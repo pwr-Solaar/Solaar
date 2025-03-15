@@ -9,6 +9,7 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants
+from logitech_receiver.hidpp10_constants import PairingError
 from logitech_receiver.hidpp10_constants import Registers
 
 _hidpp10 = hidpp10.Hidpp10()
@@ -338,3 +339,11 @@ def test_set_configuration_pending_flags(device, expected_result):
     result = hidpp10.set_configuration_pending_flags(device, 0x00)
 
     assert result == expected_result
+
+
+def test_pairing_error():
+    expected_label = "device not supported"
+
+    res = PairingError.DEVICE_NOT_SUPPORTED.label
+
+    assert res == expected_label
