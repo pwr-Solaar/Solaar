@@ -1649,6 +1649,8 @@ class RGBControl(settings.Setting):
     choices_universe = common.NamedInts(Device=0, Solaar=1)
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
+    initializer_fnid = 0x70  # function to set power mode
+    initializer_bytes = bytes.fromhex("000000FFFF0000")  # control power from device but never go into power saving mode
 
 
 class RGBEffectSetting(LEDZoneSetting):
