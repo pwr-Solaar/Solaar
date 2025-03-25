@@ -1012,9 +1012,9 @@ class ExtendedAdjustableDpi(settings.Setting):
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x60}
     keys_universe = common.NamedInts(X=0, Y=1, LOD=2)
     choices_universe = common.NamedInts.range(100, 4000, str, 50)
-    choices_universe[0] = "LOW"
-    choices_universe[1] = "MEDIUM"
-    choices_universe[2] = "HIGH"
+    choices_universe[1] = "LOW"
+    choices_universe[2] = "MEDIUM"
+    choices_universe[3] = "HIGH"
     keys = common.NamedInts(X=0, Y=1, LOD=2)
 
     def write_key_value(self, key, value, save=True):
