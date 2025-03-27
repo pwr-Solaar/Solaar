@@ -1646,11 +1646,13 @@ class RGBControl(settings.Setting):
     description = _("Switch control of LED zones between device and Solaar")
     feature = _F.RGB_EFFECTS
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
-    choices_universe = common.NamedInts(Device=0, Solaar=1)
+    choices_universe = common.NamedInts(Device=0x0, Solaar=0x3)
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
-    initializer_fnid = 0x70  # function to set power mode
-    initializer_bytes = bytes.fromhex("000000FFFF0000")  # control power from device but never go into power saving mode
+
+
+#    initializer_fnid = 0x70  # function to set power mode
+#    initializer_bytes = bytes.fromhex("000000FFFF0000")  # control power from device but never go into power saving mode
 
 
 class RGBEffectSetting(LEDZoneSetting):
