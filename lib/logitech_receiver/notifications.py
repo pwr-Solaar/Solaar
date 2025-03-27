@@ -277,9 +277,10 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
     elif feature == SupportedFeature.ADC_MEASUREMENT:
         if notification.address == 0x00:
             result = hidpp20.decipher_adc_measurement(notification.data)
-            if result:
+            if result:  # this may be the only message signalling that the device has become active
                 device.set_battery_info(result[1])
-            else:  # this feature is used to signal device becoming inactive
+                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification"))
+            else:  # this feature is also used to signal device becoming inactive
                 device.changed(active=False)
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)

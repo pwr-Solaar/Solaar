@@ -32,6 +32,7 @@ from . import common
 from . import descriptors
 from . import desktop_notifications
 from . import diversion
+from . import exceptions
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
@@ -1534,6 +1535,7 @@ class ADCPower(settings.Setting):
     label = _("Power Management")
     description = _("Power off in minutes (0 for never).")
     feature = _F.ADC_MEASUREMENT
+    min_version = 2  # documentation for version 1 does not mention this capability
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = settings_validator.RangeValidator
     min_value = 0x00
@@ -1905,7 +1907,7 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
         logger.error(
             "check_feature %s [%s] error %s\n%s", settings_class.name, settings_class.feature, e, traceback.format_exc()
         )
-        return False  # differentiate from an error-free determination that the setting is not supported
+        raise e  # differentiate from an error-free determination that the setting is not supported
 
 
 def check_feature_settings(device, already_known) -> bool:
@@ -1914,7 +1916,7 @@ def check_feature_settings(device, already_known) -> bool:
     Returns
     -------
     bool
-        True, if device was queried to find features, False otherwise.
+        True, if device was fully queried to find features, False otherwise.
     """
     if not device.features or not device.online:
         return False
@@ -1926,7 +1928,20 @@ def check_feature_settings(device, already_known) -> bool:
         if sclass.feature:
             known_present = device.persister and sclass.name in device.persister
             if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
-                setting = check_feature(device, sclass)
+                try:
+                    setting = check_feature(device, sclass)
+                except Exception as err:
+                    # on an internal HID++ error, assume offline and stop further checking
+                    if (
+                        isinstance(err, exceptions.FeatureCallError)
+                        and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR
+                    ):
+                        logger.warning(f"HID++ internal error when checking feature {sclass.name}: make device offline")
+                        device.online = False
+                        return False
+                    else:
+                        logger.warning(f"ignore feature {sclass.name} because of error {err}")
+
                 if isinstance(setting, list):
                     for s in setting:
                         already_known.append(s)
@@ -1948,6 +1963,9 @@ def check_feature_settings(device, already_known) -> bool:
 def check_feature_setting(device, setting_name: str) -> settings.Setting | None:
     for sclass in SETTINGS:
         if sclass.feature and sclass.name == setting_name and device.features:
-            setting = check_feature(device, sclass)
+            try:
+                setting = check_feature(device, sclass)
+            except Exception:
+                return None
             if setting:
                 return setting
