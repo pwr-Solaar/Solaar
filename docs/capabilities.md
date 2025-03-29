@@ -186,13 +186,13 @@ Solaar is uses the standard US keyboard layout.  This currently only matters for
 This is an experimental feature and may be modified or even eliminated.
 
 
-### Device Profiles
+### Onboard Profiles
 
-Some mice store one or more profiles, which control aspects of the behavior of the device.
+Some mice store one or more profiles onboard.  An onboard profile controls certain aspects of the behavior of the mouse, including the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, LED effects, and maybe more.  Solaar has a setting that switches between profiles or disables all profiles.
 
-Profiles can control the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, and its LED effects.  Solaar can dump the entire set of profiles into a YAML file can load an entire set of profiles from a file.  Users can edit the file to effect changes to the profiles.  Solaar has a setting that switches between profiles or disables all profiles.  When switching between profiles or using a button to change resolution Solaar keeps track of the changes in the settings for these features.
+When an onboard profile is active it may not be possible to change the aspects that the profile controls.  This is often seen for the Report Rate setting.   For some devices it is possible to make changes to the Sensitivity setting and to LED settings.  These changes are likely to only be temporary and may be overridden when the device reconnects or when Solaar is restarted.  This is in keeping with the intent of Onboard Profiles as controlling the device behavior.  To make the changes to these settings permanent it is necessary to disable onboard profiles.  Alternatively, multiple profiles can be set up as described below and these settings controlled by switching between the profiles.
 
-When profiles are active changes cannot be made to the Report Rate setting.   Changes can be made to the Sensitivity setting and to LED settings.  To keep the profile values make these setting ignored.
+Solaar can dump the entire set of profiles into a YAML file and can load the entire set of profiles from a file.  Users can edit the file to effect changes to the profiles.
 
 A profile file has some bookkeeping information, including profile version and the name of the device, and a sequence of profiles.
 
@@ -247,7 +247,7 @@ See USB_HID_KEYCODES and HID_CONSUMERCODES in lib/logitech_receiver/special_keys
 
 Buttons can also execute macros but Solaar does not provide any support for macros.
 
-Lighting information is a sequence of lighting effects, with the first for the logo LEDs and the second for the side LEDs.
+Lighting information is a sequence of lighting effects, with the first usually for the logo LEDs and the second usually for the side LEDs.
 
 The fields possible in an effect are:
 - ID: The kind of effect:
