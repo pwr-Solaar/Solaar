@@ -39,8 +39,8 @@ Feature                                | ID       | Status             | Notes
 `CONFIG_DEVICE_PROPS`                  | `0x1806` | Unsupported        |
 `CHANGE_HOST`                          | `0x1814` | Supported          | `ChangeHost`
 `HOSTS_INFO`                           | `0x1815` | Partial Support    | `get_host_names`, partial listing only
-`BACKLIGHT`                            | `0x1981` | Unsupported        |
-`BACKLIGHT2`                           | `0x1982` | Supported          | `Backlight2`
+`BACKLIGHT`                            | `0x1981` | Supported          | `Backlight`
+`BACKLIGHT2`                           | `0x1982` | Supported          | `Backlight2`, ...
 `BACKLIGHT3`                           | `0x1983` | Unsupported        |
 `PRESENTER_CONTROL`                    | `0x1A00` | Unsupported        |
 `SENSOR_3D`                            | `0x1A01` | Unsupported        |
@@ -54,7 +54,7 @@ Feature                                | ID       | Status             | Notes
 `WIRELESS_DEVICE_STATUS`               | `0x1D4B` | Read only          | status reporting from device
 `REMAINING_PAIRING`                    | `0x1DF0` | Unsupported        |
 `FIRMWARE_PROPERTIES`                  | `0x1F1F` | Unsupported        |
-`ADC_MEASUREMENT`                      | `0x1F20` | Unsupported        |
+`ADC_MEASUREMENT`                      | `0x1F20` | Supported          | `ADCPower`
 `LEFT_RIGHT_SWAP`                      | `0x2001` | Unsupported        |
 `SWAP_BUTTON_CANCEL`                   | `0x2005` | Unsupported        |
 `POINTER_AXIS_ORIENTATION`             | `0x2006` | Unsupported        |
@@ -97,22 +97,22 @@ Feature                                | ID       | Status             | Notes
 `GESTURE`                              | `0x6500` | Unsupported        |
 `GESTURE_2`                            | `0x6501` | Partial Support    | `Gesture2Gestures`, `Gesture2Params`
 `GKEY`                                 | `0x8010` | Partial Support    | `DivertGkeys`
-`MKEYS`                                | `0x8020` | Unsupported        |
-`MR`                                   | `0x8030` | Unsupported        |
-`BRIGHTNESS_CONTROL`                   | `0x8040` | Unsupported        |
-`REPORT_RATE`                          | `0x8060` | Supported          |  `ReportRate`
-`COLOR_LED_EFFECTS`                    | `0x8070` | Unsupported        |
-`RGB_EFFECTS`                          | `0X8071` | Unsupported        |
+`MKEYS`                                | `0x8020` | Supported          | `MkeyLEDs`
+`MR`                                   | `0x8030` | Supported          | `MRKeyLED`
+`BRIGHTNESS_CONTROL`                   | `0x8040` | Supported          | `BrightnessControl`
+`REPORT_RATE`                          | `0x8060` | Supported          | `ReportRate`
+`COLOR_LED_EFFECTS`                    | `0x8070` | Supported          | `LEDControl`, `LEDZoneSetting`
+`RGB_EFFECTS`                          | `0X8071` | Supported          | `RGBControl`, `RGBEffectSetting`
 `PER_KEY_LIGHTING`                     | `0x8080` | Unsupported        |
-`PER_KEY_LIGHTING_V2`                  | `0x8081` | Unsupported        |
+`PER_KEY_LIGHTING_V2`                  | `0x8081` | Supported          | `PerKeyLighting`
 `MODE_STATUS`                          | `0x8090` | Unsupported        |
-`ONBOARD_PROFILES`                     | `0x8100` | Unsupported        |
+`ONBOARD_PROFILES`                     | `0x8100` | Supported          |
 `MOUSE_BUTTON_SPY`                     | `0x8110` | Unsupported        |
 `LATENCY_MONITORING`                   | `0x8111` | Unsupported        |
 `GAMING_ATTACHMENTS`                   | `0x8120` | Unsupported        |
 `FORCE_FEEDBACK`                       | `0x8123` | Unsupported        |
-`SIDETONE`                             | `0x8300` | Unsupported        |
-`EQUALIZER`                            | `0x8310` | Unsupported        |
+`SIDETONE`                             | `0x8300` | Supported          | `Sidetone`
+`EQUALIZER`                            | `0x8310` | Supported          | `Equalizer`
 `HEADSET_OUT`                          | `0x8320` | Unsupported        |
 
 A “read only” note means the feature is a read-only feature.
