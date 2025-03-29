@@ -22,11 +22,11 @@ nav:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - python -m pip install .
+#  - mkdocstrings:
+#      handlers:
+#        python:
+#          setup_commands:
+#            - python -m pip install .
   - mermaid2
 markdown_extensions:
   - pymdownx.superfences
