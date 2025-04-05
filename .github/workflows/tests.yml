@@ -19,9 +19,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Ubuntu dependencies
+    - name: Install Ubuntu dependencies for python 3.8
+      if: matrix.python-version == '3.8'
       run: |
         make install_apt
+
+    - name: Install Ubuntu dependencies for python 3.13
+      if: matrix.python-version == '3.13'
+      run: |
+        make install_apt_python3.13
 
     - name: Install Python dependencies
       run: |
