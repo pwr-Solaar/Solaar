@@ -138,7 +138,7 @@ def _print_device(dev, num=None):
         device_features = _hidpp10.get_device_features(dev)
         if device_features is not None:
             if device_features:
-                device_features_names = hidpp10_constants.DEVICE_FEATURES.flag_names(device_features)
+                device_features_names = hidpp10_constants.DeviceFeature.flag_names(device_features)
                 print(f"     Features: {', '.join(device_features_names)} (0x{device_features:06X})")
             else:
                 print("     Features: (none)")
