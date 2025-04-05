@@ -467,12 +467,10 @@ class Device:
             return False
 
         if enable:
-            set_flag_bits = (
-                NotificationFlag.BATTERY_STATUS | NotificationFlag.UI | NotificationFlag.CONFIGURATION_COMPLETE
-            ).value
+            flags = NotificationFlag.BATTERY_STATUS | NotificationFlag.UI | NotificationFlag.CONFIGURATION_COMPLETE
         else:
-            set_flag_bits = 0
-        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+            flags = 0
+        ok = _hidpp10.set_notification_flags(self, flags)
         if not ok:
             logger.warning("%s: failed to %s device notifications", self, "enable" if enable else "disable")
 
