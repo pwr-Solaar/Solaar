@@ -220,6 +220,25 @@ class DeviceFeature(Flag):
     https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
     """
 
+    @classmethod
+    def flag_names(cls, flag_bits: int) -> List[str]:
+        """Extract the names of the flags from the integer."""
+        indexed = {item.value: item.name for item in cls}
+
+        flag_names = []
+        unknown_bits = flag_bits
+        for k in indexed:
+            # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+            assert bin(k).count("1") == 1
+            if k & flag_bits == k:
+                unknown_bits &= ~k
+                flag_names.append(indexed[k].replace("_", " ").lower())
+
+        # Yield any remaining unknown bits
+        if unknown_bits != 0:
+            flag_names.append(f"unknown:{unknown_bits:06X}")
+        return flag_names
+
     RESERVED1 = 0x010000
     SPECIAL_BUTTONS = 0x020000
     ENHANCED_KEY_USAGE = 0x040000
