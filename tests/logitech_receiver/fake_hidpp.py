@@ -389,6 +389,7 @@ class Device:
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
     number = "d1"
+    present = True
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register

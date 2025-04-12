@@ -1936,8 +1936,9 @@ def check_feature_settings(device, already_known) -> bool:
                         isinstance(err, exceptions.FeatureCallError)
                         and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR
                     ):
-                        logger.warning(f"HID++ internal error when checking feature {sclass.name}: make device offline")
+                        logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
                         device.online = False
+                        device.present = False
                         return False
                     else:
                         logger.warning(f"ignore feature {sclass.name} because of error {err}")
