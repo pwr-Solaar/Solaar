@@ -238,6 +238,7 @@ def _process_hidpp10_notification(device: Device, notification: HIDPPNotificatio
 
 
 def _process_feature_notification(device: Device, notification: HIDPPNotification):
+    present = True  # the device is generating a feature notification so it must be present and active
     try:
         feature = device.features.get_feature(notification.sub_id)
     except IndexError:
@@ -279,8 +280,9 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             result = hidpp20.decipher_adc_measurement(notification.data)
             if result:  # this may be the only message signalling that the device has become active
                 device.set_battery_info(result[1])
-                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification"))
+                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification", push=not device.present))
             else:  # this feature is also used to signal device becoming inactive
+                present = False  # exception to device presence
                 device.changed(active=False)
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)
@@ -417,6 +419,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     brightness = struct.unpack("!H", device.feature_request(SupportedFeature.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
 
+    device.present = present
     diversion.process_notification(device, notification, feature)
     return True
 
