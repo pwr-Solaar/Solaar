@@ -430,7 +430,8 @@ def handle_pairing_lock(receiver: Receiver, notification: HIDPPNotification) -> 
         receiver.pairing.new_device = None
     pair_error = ord(notification.data[:1])
     if pair_error:
-        receiver.pairing.error = error_string = hidpp10_constants.PairingError(pair_error)
+        error_string = hidpp10_constants.PairingError(pair_error).label
+        receiver.pairing.error = error_string
         receiver.pairing.new_device = None
         logger.warning("pairing error %d: %s", pair_error, error_string)
     receiver.changed(reason=reason)
