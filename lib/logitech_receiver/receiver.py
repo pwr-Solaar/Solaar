@@ -533,7 +533,7 @@ class Ex100Receiver(Receiver):
         online = True
         encrypted = bool(notification.data[0] & 0x80)
         kind = extract_device_kind(_get_kind_from_index(self, number))
-        wpid = extract_wpid("00" + notification.data[2:3])
+        wpid = "00" + extract_wpid(notification.data[2:3])
         return online, encrypted, wpid, kind
 
     def device_pairing_information(self, number: int) -> dict:
