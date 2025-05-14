@@ -131,6 +131,6 @@ and set the LANGUAGE environment variable appropriately when running Solaar.
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
 `/etc/xdg/autostart/solaar.desktop`. An example of this file content can be seen in the repository at
-[`share/autostart/solaar.desktop`](/share/autostart/solaar.desktop).
+[`share/autostart/solaar.desktop`](https://github.com/pwr-Solaar/Solaar/blob/master/share/autostart/solaar.desktop).
 
 If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.
