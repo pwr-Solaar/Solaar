@@ -92,10 +92,11 @@ If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also see desktop notifications when devices come online and go offline.
 
-If the `hid_parser` Python package is available, Solaar parses HID report descriptors
-and can control more HID++ devices that do not use a receiver.
-This package may not be available in some distributions but can be installed using pip
-via `pip install --user hid-parser`.
+Solaar includes its own version of `hid_parser` because the version that is in PyPi
+(at https://pypi.org/project/hid-parser/) does not have some changes that are in
+https://github.com/usb-tools/python-hid-parser and are needed for some devices.
+Do not use pip to install hid_parser!
+Some distributions (e.g., Fedora) may separately package this code.
 
 If the `gitinfo` Python package is available, Solaar shows better information
 about which version of Solaar is running.
