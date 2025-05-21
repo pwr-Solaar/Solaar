@@ -238,6 +238,7 @@ def _process_hidpp10_notification(device: Device, notification: HIDPPNotificatio
 
 
 def _process_feature_notification(device: Device, notification: HIDPPNotification):
+    old_present, device.present = device.present, True  # the device is generating a feature notification so it must be present
     try:
         feature = device.features.get_feature(notification.sub_id)
     except IndexError:
@@ -277,9 +278,11 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
     elif feature == SupportedFeature.ADC_MEASUREMENT:
         if notification.address == 0x00:
             result = hidpp20.decipher_adc_measurement(notification.data)
-            if result:
+            if result:  # if good data and  the device was not present then a push is needed
                 device.set_battery_info(result[1])
-            else:  # this feature is used to signal device becoming inactive
+                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification"), push=not old_present)
+            else:  # this feature is also used to signal device becoming inactive
+                device.present = False  # exception to device presence
                 device.changed(active=False)
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)
