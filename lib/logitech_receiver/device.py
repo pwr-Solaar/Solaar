@@ -397,8 +397,8 @@ class Device:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None:
-                        self.persister["_battery"] = result
+                    if self.persister and battery_feature is None and result is not None:
+                        self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
         """Update battery information for device, calling changed callback if necessary"""
