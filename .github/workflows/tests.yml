@@ -54,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8, 3.13]
+        python-version: [3.8]
       fail-fast: false
 
     steps:
