@@ -274,7 +274,7 @@ msgstr "funktion"
 
 #: lib/logitech_receiver/settings_templates.py:139
 msgid "Swap Fx function"
-msgstr "Skifta Fx-funktion"
+msgstr "Byt Fx-funktion"
 
 #: lib/logitech_receiver/settings_templates.py:140
 msgid ""
