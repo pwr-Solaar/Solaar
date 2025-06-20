@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
-from typing import Callable
 from typing import List
 from typing import Optional
-from unittest import mock
 
 import gi
 import pytest
@@ -26,7 +24,6 @@ class Device:
 
 @dataclass
 class Receiver:
-    find_paired_node_wpid_func: Callable[[str, int], Any]
     name: str
     receiver_kind: str
     _set_lock: bool = True
@@ -87,12 +84,12 @@ class Assistant:
 @pytest.mark.parametrize(
     "receiver, lock_open, discovering, page_type",
     [
-        (Receiver(mock.Mock(), "unifying", "unifying", True), True, False, Gtk.AssistantPageType.PROGRESS),
-        (Receiver(mock.Mock(), "unifying", "unifying", False), False, False, Gtk.AssistantPageType.SUMMARY),
-        (Receiver(mock.Mock(), "nano", "nano", True, _remaining_pairings=5), True, False, Gtk.AssistantPageType.PROGRESS),
-        (Receiver(mock.Mock(), "nano", "nano", False), False, False, Gtk.AssistantPageType.SUMMARY),
-        (Receiver(mock.Mock(), "bolt", "bolt", True), False, True, Gtk.AssistantPageType.PROGRESS),
-        (Receiver(mock.Mock(), "bolt", "bolt", False), False, False, Gtk.AssistantPageType.SUMMARY),
+        (Receiver("unifying", "unifying", True), True, False, Gtk.AssistantPageType.PROGRESS),
+        (Receiver("unifying", "unifying", False), False, False, Gtk.AssistantPageType.SUMMARY),
+        (Receiver("nano", "nano", True, _remaining_pairings=5), True, False, Gtk.AssistantPageType.PROGRESS),
+        (Receiver("nano", "nano", False), False, False, Gtk.AssistantPageType.SUMMARY),
+        (Receiver("bolt", "bolt", True), False, True, Gtk.AssistantPageType.PROGRESS),
+        (Receiver("bolt", "bolt", False), False, False, Gtk.AssistantPageType.SUMMARY),
     ],
 )
 def test_create(receiver, lock_open, discovering, page_type):
@@ -108,10 +105,10 @@ def test_create(receiver, lock_open, discovering, page_type):
 @pytest.mark.parametrize(
     "receiver, expected_result, expected_error",
     [
-        (Receiver(mock.Mock(), "unifying", "unifying", True), True, False),
-        (Receiver(mock.Mock(), "unifying", "unifying", False), False, True),
-        (Receiver(mock.Mock(), "bolt", "bolt", True), True, False),
-        (Receiver(mock.Mock(), "bolt", "bolt", False), False, True),
+        (Receiver("unifying", "unifying", True), True, False),
+        (Receiver("unifying", "unifying", False), False, True),
+        (Receiver("bolt", "bolt", True), True, False),
+        (Receiver("bolt", "bolt", False), False, True),
     ],
 )
 def test_prepare(receiver, expected_result, expected_error):
@@ -123,7 +120,7 @@ def test_prepare(receiver, expected_result, expected_error):
 
 @pytest.mark.parametrize("assistant, expected_result", [(Assistant(True), True), (Assistant(False), False)])
 def test_check_lock_state_drawable(assistant, expected_result):
-    r = Receiver(mock.Mock(), "succeed", "unifying", True, receiver.Pairing(lock_open=True))
+    r = Receiver("succeed", "unifying", True, receiver.Pairing(lock_open=True))
 
     result = pair_window.check_lock_state(assistant, r, 2)
 
@@ -134,24 +131,23 @@ def test_check_lock_state_drawable(assistant, expected_result):
 @pytest.mark.parametrize(
     "receiver, count, expected_result",
     [
-        (Receiver(mock.Mock(), "fail", "unifying", False, receiver.Pairing(lock_open=False)), 2, False),
-        (Receiver(mock.Mock(), "succeed", "unifying", True, receiver.Pairing(lock_open=True)), 1, True),
-        (Receiver(mock.Mock(), "error", "unifying", True, receiver.Pairing(error="error")), 0, False),
-        (Receiver(mock.Mock(), "new device", "unifying", True, receiver.Pairing(new_device=Device())), 2, False),
-        (Receiver(mock.Mock(), "closed", "unifying", True, receiver.Pairing()), 2, False),
-        (Receiver(mock.Mock(), "closed", "unifying", True, receiver.Pairing()), 1, False),
-        (Receiver(mock.Mock(), "closed", "unifying", True, receiver.Pairing()), 0, False),
-        (Receiver(mock.Mock(), "fail bolt", "bolt", False), 1, False),
-        (Receiver(mock.Mock(), "succeed bolt", "bolt", True, receiver.Pairing(lock_open=True)), 0, True),
-        (Receiver(mock.Mock(), "error bolt", "bolt", True, receiver.Pairing(error="error")), 2, False),
-        (Receiver(mock.Mock(), "new device", "bolt", True, receiver.Pairing(lock_open=True, new_device=Device())), 1, False),
-        (Receiver(mock.Mock(), "discovering", "bolt", True, receiver.Pairing(lock_open=True)), 1, True),
-        (Receiver(mock.Mock(), "closed", "bolt", True, receiver.Pairing()), 2, False),
-        (Receiver(mock.Mock(), "closed", "bolt", True, receiver.Pairing()), 1, False),
-        (Receiver(mock.Mock(), "closed", "bolt", True, receiver.Pairing()), 0, False),
+        (Receiver("fail", "unifying", False, receiver.Pairing(lock_open=False)), 2, False),
+        (Receiver("succeed", "unifying", True, receiver.Pairing(lock_open=True)), 1, True),
+        (Receiver("error", "unifying", True, receiver.Pairing(error="error")), 0, False),
+        (Receiver("new device", "unifying", True, receiver.Pairing(new_device=Device())), 2, False),
+        (Receiver("closed", "unifying", True, receiver.Pairing()), 2, False),
+        (Receiver("closed", "unifying", True, receiver.Pairing()), 1, False),
+        (Receiver("closed", "unifying", True, receiver.Pairing()), 0, False),
+        (Receiver("fail bolt", "bolt", False), 1, False),
+        (Receiver("succeed bolt", "bolt", True, receiver.Pairing(lock_open=True)), 0, True),
+        (Receiver("error bolt", "bolt", True, receiver.Pairing(error="error")), 2, False),
+        (Receiver("new device", "bolt", True, receiver.Pairing(lock_open=True, new_device=Device())), 1, False),
+        (Receiver("discovering", "bolt", True, receiver.Pairing(lock_open=True)), 1, True),
+        (Receiver("closed", "bolt", True, receiver.Pairing()), 2, False),
+        (Receiver("closed", "bolt", True, receiver.Pairing()), 1, False),
+        (Receiver("closed", "bolt", True, receiver.Pairing()), 0, False),
         (
             Receiver(
-                mock.Mock(),
                 "pass1",
                 "bolt",
                 True,
@@ -162,7 +158,6 @@ def test_check_lock_state_drawable(assistant, expected_result):
         ),
         (
             Receiver(
-                mock.Mock(),
                 "pass2",
                 "bolt",
                 True,
@@ -173,7 +168,6 @@ def test_check_lock_state_drawable(assistant, expected_result):
         ),
         (
             Receiver(
-                mock.Mock(),
                 "adt",
                 "bolt",
                 True,
@@ -185,7 +179,6 @@ def test_check_lock_state_drawable(assistant, expected_result):
         ),
         (
             Receiver(
-                mock.Mock(),
                 "adf",
                 "bolt",
                 True,
@@ -195,7 +188,7 @@ def test_check_lock_state_drawable(assistant, expected_result):
             2,
             False,
         ),
-        (Receiver(mock.Mock(), "add fail", "bolt", False, receiver.Pairing(device_address=2, device_passkey=5)), 2, False),
+        (Receiver("add fail", "bolt", False, receiver.Pairing(device_address=2, device_passkey=5)), 2, False),
     ],
 )
 def test_check_lock_state(receiver, count, expected_result):
@@ -210,22 +203,22 @@ def test_check_lock_state(receiver, count, expected_result):
     "receiver, pair_device, set_lock, discover, error",
     [
         (
-            Receiver(mock.Mock(), "unifying", "unifying", pairing=receiver.Pairing(lock_open=False, error="error")),
+            Receiver("unifying", "unifying", pairing=receiver.Pairing(lock_open=False, error="error")),
             0,
             0,
             0,
             None,
         ),
         (
-            Receiver(mock.Mock(), "unifying", "unifying", pairing=receiver.Pairing(lock_open=True, error="error")),
+            Receiver("unifying", "unifying", pairing=receiver.Pairing(lock_open=True, error="error")),
             0,
             1,
             0,
             "error",
         ),
-        (Receiver(mock.Mock(), "bolt", "bolt", pairing=receiver.Pairing(lock_open=False, error="error")), 0, 0, 0, None),
-        (Receiver(mock.Mock(), "bolt", "bolt", pairing=receiver.Pairing(lock_open=True, error="error")), 1, 0, 0, "error"),
-        (Receiver(mock.Mock(), "bolt", "bolt", pairing=receiver.Pairing(discovering=True, error="error")), 0, 0, 1, "error"),
+        (Receiver("bolt", "bolt", pairing=receiver.Pairing(lock_open=False, error="error")), 0, 0, 0, None),
+        (Receiver("bolt", "bolt", pairing=receiver.Pairing(lock_open=True, error="error")), 1, 0, 0, "error"),
+        (Receiver("bolt", "bolt", pairing=receiver.Pairing(discovering=True, error="error")), 0, 0, 1, "error"),
     ],
 )
 def test_finish(receiver, pair_device, set_lock, discover, error, mocker):
@@ -247,6 +240,6 @@ def test_finish(receiver, pair_device, set_lock, discover, error, mocker):
 def test_create_failure_page(error, mocker):
     spy_create = mocker.spy(pair_window, "_create_page")
 
-    pair_window._pairing_failed(Assistant(True), Receiver(mock.Mock(), "nano", "nano"), error)
+    pair_window._pairing_failed(Assistant(True), Receiver("nano", "nano"), error)
 
     assert spy_create.call_count == 1
