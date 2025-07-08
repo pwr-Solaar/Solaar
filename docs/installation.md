@@ -42,8 +42,8 @@ or `make install_dnf` or `make install_brew`.
 These might not install all needed packages in older versions of your distribution.
 Next, install the Solaar rule via `make install_udev`.
 If you are using Wayland instead of X11 you may want to instead `make install_udev_uinput`
-Finally, install Solaar via `make install_pip` or `make install_pipx`.
 so that Solaar rules can simulate input in Wayland.
+Finally, install Solaar via `make install_pip` or `make install_pipx`.
 
 Parts of the installation process require sudo privileges so you may be asked for your password.
 
