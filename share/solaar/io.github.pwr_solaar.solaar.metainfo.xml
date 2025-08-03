@@ -8,7 +8,8 @@
   <developer id="pwr-solaar.github.io">
     <name>pwr-Solaar</name>
   </developer>
-  <url type="homepage">https://github.com/pwr-Solaar/Solaar</url>
+  <url type="homepage">https://pwr-solaar.github.io/Solaar/</url>
+  <url type="vcs-browser">https://github.com/pwr-Solaar/Solaar</url>
   <content_rating type="oars-1.0" />
   <update_contact>pfpschneider_AT_gmail.com</update_contact>
 
