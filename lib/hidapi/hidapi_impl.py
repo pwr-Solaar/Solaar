@@ -24,7 +24,6 @@ which is MIT licensed.
 """
 
 from __future__ import annotations
-
 import atexit
 import ctypes
 import logging
