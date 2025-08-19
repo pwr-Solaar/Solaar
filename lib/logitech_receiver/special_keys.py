@@ -15,20 +15,22 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Reprogrammable keys information
-# Mostly from Logitech documentation, but with some edits for better Lunix compatibility
+# Mostly from Logitech documentation, but with some edits for better Linux compatibility
 
-import os as _os
+import os
 
-import yaml as _yaml
+from enum import IntEnum
 
-from .common import NamedInts as _NamedInts
-from .common import UnsortedNamedInts as _UnsortedNamedInts
+import yaml
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _os.path.expanduser(_os.path.join("~", ".config"))
-_keys_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
+from .common import NamedInts
+from .common import UnsortedNamedInts
+
+_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
+_keys_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
 
 # <controls.xml awk -F\" '/<Control /{sub(/^LD_FINFO_(CTRLID_)?/, "", $2);printf("\t%s=0x%04X,\n", $2, $4)}' | sort -t= -k2
-CONTROL = _NamedInts(
+CONTROL = NamedInts(
     {
         "Volume_Up": 0x0001,
         "Volume_Down": 0x0002,
@@ -314,290 +316,293 @@ CONTROL = _NamedInts(
 )
 
 for i in range(1, 33):  # add in G keys - these are not really Logitech Controls
-    CONTROL[0x1000 + i] = "G" + str(i)
+    CONTROL[0x1000 + i] = f"G{str(i)}"
 for i in range(1, 9):  # add in M keys - these are not really Logitech Controls
-    CONTROL[0x1100 + i] = "M" + str(i)
+    CONTROL[0x1100 + i] = f"M{str(i)}"
 CONTROL[0x1200] = "MR"  # add in MR key - this is not really a Logitech Control
 
 CONTROL._fallback = lambda x: f"unknown:{x:04X}"
 
-# <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'
-TASK = _NamedInts(
-    Volume_Up=0x0001,
-    Volume_Down=0x0002,
-    Mute=0x0003,
+
+class Task(IntEnum):
+    """
+    <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'
+    """
+
+    VOLUME_UP = 0x0001
+    VOLUME_DOWN = 0x0002
+    MUTE = 0x0003
     # Multimedia tasks:
-    Play__Pause=0x0004,
-    Next=0x0005,
-    Previous=0x0006,
-    Stop=0x0007,
-    Application_Switcher=0x0008,
-    BurnMediaPlayer=0x0009,
-    Calculator=0x000A,
-    Calendar=0x000B,
-    Close_Application=0x000C,
-    Eject=0x000D,
-    Email=0x000E,
-    Help=0x000F,
-    OffDocument=0x0010,
-    OffSpreadsheet=0x0011,
-    OffPowerpnt=0x0012,
-    Undo=0x0013,
-    Redo=0x0014,
-    Print=0x0015,
-    Save=0x0016,
-    SmartKeySet=0x0017,
-    Favorites=0x0018,
-    GadgetsSet=0x0019,
-    HomePage=0x001A,
-    WindowsRestore=0x001B,
-    WindowsMinimize=0x001C,
-    Music=0x001D,  # also known as MediaPlayer
+    PLAY_PAUSE = 0x0004
+    NEXT = 0x0005
+    PREVIOUS = 0x0006
+    STOP = 0x0007
+    APPLICATION_SWITCHER = 0x0008
+    BURN_MEDIA_PLAYER = 0x0009
+    CALCULATOR = 0x000A
+    CALENDAR = 0x000B
+    CLOSE_APPLICATION = 0x000C
+    EJECT = 0x000D
+    EMAIL = 0x000E
+    HELP = 0x000F
+    OFF_DOCUMENT = 0x0010
+    OFF_SPREADSHEET = 0x0011
+    OFF_POWERPNT = 0x0012
+    UNDO = 0x0013
+    REDO = 0x0014
+    PRINT = 0x0015
+    SAVE = 0x0016
+    SMART_KEY_SET = 0x0017
+    FAVORITES = 0x0018
+    GADGETS_SET = 0x0019
+    HOME_PAGE = 0x001A
+    WINDOWS_RESTORE = 0x001B
+    WINDOWS_MINIMIZE = 0x001C
+    MUSIC = 0x001D  # also known as MediaPlayer
     # Both 0x001E and 0x001F are known as MediaCenterSet
-    Media_Center_Logitech=0x001E,
-    Media_Center_Microsoft=0x001F,
-    UserMenu=0x0020,
-    Messenger=0x0021,
-    PersonalFolders=0x0022,
-    MyMusic=0x0023,
-    Webcam=0x0024,
-    PicturesFolder=0x0025,
-    MyVideos=0x0026,
-    My_Computer=0x0027,
-    PictureAppSet=0x0028,
-    Search=0x0029,  # also known as AdvSmartSearch
-    RecordMediaPlayer=0x002A,
-    BrowserRefresh=0x002B,
-    RotateRight=0x002C,
-    Search_Files=0x002D,  # SearchForFiles
-    MM_SHUFFLE=0x002E,
-    Sleep=0x002F,  # also known as StandBySet
-    BrowserStop=0x0030,
-    OneTouchSync=0x0031,
-    ZoomSet=0x0032,
-    ZoomBtnInSet2=0x0033,
-    ZoomBtnInSet=0x0034,
-    ZoomBtnOutSet2=0x0035,
-    ZoomBtnOutSet=0x0036,
-    ZoomBtnResetSet=0x0037,
-    Left_Click=0x0038,  # LeftClick
-    Right_Click=0x0039,  # RightClick
-    Mouse_Middle_Button=0x003A,  # from M510v2 was MiddleMouseButton
-    Back=0x003B,
-    Mouse_Back_Button=0x003C,  # from M510v2 was BackEx
-    BrowserForward=0x003D,
-    Mouse_Forward_Button=0x003E,  # from M510v2 was BrowserForwardEx
-    Mouse_Scroll_Left_Button_=0x003F,  # from M510v2 was HorzScrollLeftSet
-    Mouse_Scroll_Right_Button=0x0040,  # from M510v2 was HorzScrollRightSet
-    QuickSwitch=0x0041,
-    BatteryStatus=0x0042,
-    Show_Desktop=0x0043,  # ShowDesktop
-    WindowsLock=0x0044,
-    FileLauncher=0x0045,
-    FolderLauncher=0x0046,
-    GotoWebAddress=0x0047,
-    GenericMouseButton=0x0048,
-    KeystrokeAssignment=0x0049,
-    LaunchProgram=0x004A,
-    MinMaxWindow=0x004B,
-    VOLUMEMUTE_NoOSD=0x004C,
-    New=0x004D,
-    Copy=0x004E,
-    CruiseDown=0x004F,
-    CruiseUp=0x0050,
-    Cut=0x0051,
-    Do_Nothing=0x0052,
-    PageDown=0x0053,
-    PageUp=0x0054,
-    Paste=0x0055,
-    SearchPicture=0x0056,
-    Reply=0x0057,
-    PhotoGallerySet=0x0058,
-    MM_REWIND=0x0059,
-    MM_FASTFORWARD=0x005A,
-    Send=0x005B,
-    ControlPanel=0x005C,
-    UniversalScroll=0x005D,
-    AutoScroll=0x005E,
-    GenericButton=0x005F,
-    MM_NEXT=0x0060,
-    MM_PREVIOUS=0x0061,
-    Do_Nothing_One=0x0062,  # also known as Do_Nothing
-    SnapLeft=0x0063,
-    SnapRight=0x0064,
-    WinMinRestore=0x0065,
-    WinMaxRestore=0x0066,
-    WinStretch=0x0067,
-    SwitchMonitorLeft=0x0068,
-    SwitchMonitorRight=0x0069,
-    ShowPresentation=0x006A,
-    ShowMobilityCenter=0x006B,
-    HorzScrollNoRepeatSet=0x006C,
-    TouchBackForwardHorzScroll=0x0077,
-    MetroAppSwitch=0x0078,
-    MetroAppBar=0x0079,
-    MetroCharms=0x007A,
-    Calculator_VKEY=0x007B,  # also known as Calculator
-    MetroSearch=0x007C,
-    MetroStartScreen=0x0080,
-    MetroShare=0x007D,
-    MetroSettings=0x007E,
-    MetroDevices=0x007F,
-    MetroBackLeftHorz=0x0082,
-    MetroForwRightHorz=0x0083,
-    Win8_Back=0x0084,  # also known as MetroCharms
-    Win8_Forward=0x0085,  # also known as AppSwitchBar
-    Win8Charm_Appswitch_GifAnimation=0x0086,
-    Win8BackHorzLeft=0x008B,  # also known as Back
-    Win8ForwardHorzRight=0x008C,  # also known as BrowserForward
-    MetroSearch2=0x0087,
-    MetroShare2=0x0088,
-    MetroSettings2=0x008A,
-    MetroDevices2=0x0089,
-    Win8MetroWin7Forward=0x008D,  # also known as MetroStartScreen
-    Win8ShowDesktopWin7Back=0x008E,  # also known as ShowDesktop
-    MetroApplicationSwitch=0x0090,  # also known as MetroStartScreen
-    ShowUI=0x0092,
+    MEDIA_CENTER_LOGITECH = 0x001E
+    MEDIA_CENTER_MICROSOFT = 0x001F
+    USER_MENU = 0x0020
+    MESSENGER = 0x0021
+    PERSONAL_FOLDERS = 0x0022
+    MY_MUSIC = 0x0023
+    WEBCAM = 0x0024
+    PICTURES_FOLDER = 0x0025
+    MY_VIDEOS = 0x0026
+    MY_COMPUTER = 0x0027
+    PICTURE_APP_SET = 0x0028
+    SEARCH = 0x0029  # also known as AdvSmartSearch
+    RECORD_MEDIA_PLAYER = 0x002A
+    BROWSER_REFRESH = 0x002B
+    ROTATE_RIGHT = 0x002C
+    SEARCH_FILES = 0x002D  # SearchForFiles
+    MM_SHUFFLE = 0x002E
+    SLEEP = 0x002F  # also known as StandBySet
+    BROWSER_STOP = 0x0030
+    ONE_TOUCH_SYNC = 0x0031
+    ZOOM_SET = 0x0032
+    ZOOM_BTN_IN_SET_2 = 0x0033
+    ZOOM_BTN_IN_SET = 0x0034
+    ZOOM_BTN_OUT_SET_2 = 0x0035
+    ZOOM_BTN_OUT_SET = 0x0036
+    ZOOM_BTN_RESET_SET = 0x0037
+    LEFT_CLICK = 0x0038  # LeftClick
+    RIGHT_CLICK = 0x0039  # RightClick
+    MOUSE_MIDDLE_BUTTON = 0x003A  # from M510v2 was MiddleMouseButton
+    BACK = 0x003B
+    MOUSE_BACK_BUTTON = 0x003C  # from M510v2 was BackEx
+    BROWSER_FORWARD = 0x003D
+    MOUSE_FORWARD_BUTTON = 0x003E  # from M510v2 was BrowserForwardEx
+    MOUSE_SCROLL_LEFT_BUTTON = 0x003F  # from M510v2 was HorzScrollLeftSet
+    MOUSE_SCROLL_RIGHT_BUTTON = 0x0040  # from M510v2 was HorzScrollRightSet
+    QUICK_SWITCH = 0x0041
+    BATTERY_STATUS = 0x0042
+    SHOW_DESKTOP = 0x0043  # ShowDesktop
+    WINDOWS_LOCK = 0x0044
+    FILE_LAUNCHER = 0x0045
+    FOLDER_LAUNCHER = 0x0046
+    GOTO_WEB_ADDRESS = 0x0047
+    GENERIC_MOUSE_BUTTON = 0x0048
+    KEYSTROKE_ASSIGNMENT = 0x0049
+    LAUNCH_PROGRAM = 0x004A
+    MIN_MAX_WINDOW = 0x004B
+    VOLUME_MUTE_NO_OSD = 0x004C
+    NEW = 0x004D
+    COPY = 0x004E
+    CRUISE_DOWN = 0x004F
+    CRUISE_UP = 0x0050
+    CUT = 0x0051
+    DO_NOTHING = 0x0052
+    PAGE_DOWN = 0x0053
+    PAGE_UP = 0x0054
+    PASTE = 0x0055
+    SEARCH_PICTURE = 0x0056
+    REPLY = 0x0057
+    PHOTO_GALLERY_SET = 0x0058
+    MM_REWIND = 0x0059
+    MM_FASTFORWARD = 0x005A
+    SEND = 0x005B
+    CONTROL_PANEL = 0x005C
+    UNIVERSAL_SCROLL = 0x005D
+    AUTO_SCROLL = 0x005E
+    GENERIC_BUTTON = 0x005F
+    MM_NEXT = 0x0060
+    MM_PREVIOUS = 0x0061
+    DO_NOTHING_ONE = 0x0062  # also known as Do_Nothing
+    SNAP_LEFT = 0x0063
+    SNAP_RIGHT = 0x0064
+    WIN_MIN_RESTORE = 0x0065
+    WIN_MAX_RESTORE = 0x0066
+    WIN_STRETCH = 0x0067
+    SWITCH_MONITOR_LEFT = 0x0068
+    SWITCH_MONITOR_RIGHT = 0x0069
+    SHOW_PRESENTATION = 0x006A
+    SHOW_MOBILITY_CENTER = 0x006B
+    HORZ_SCROLL_NO_REPEAT_SET = 0x006C
+    TOUCH_BACK_FORWARD_HORZ_SCROLL = 0x0077
+    METRO_APP_SWITCH = 0x0078
+    METRO_APP_BAR = 0x0079
+    METRO_CHARMS = 0x007A
+    CALCULATOR_VKEY = 0x007B  # also known as Calculator
+    METRO_SEARCH = 0x007C
+    METRO_START_SCREEN = 0x0080
+    METRO_SHARE = 0x007D
+    METRO_SETTINGS = 0x007E
+    METRO_DEVICES = 0x007F
+    METRO_BACK_LEFT_HORZ = 0x0082
+    METRO_FORW_RIGHT_HORZ = 0x0083
+    WIN8_BACK = 0x0084  # also known as MetroCharms
+    WIN8_FORWARD = 0x0085  # also known as AppSwitchBar
+    WIN8_CHARM_APPSWITCH_GIF_ANIMATION = 0x0086
+    WIN8_BACK_HORZ_LEFT = 0x008B  # also known as Back
+    WIN8_FORWARD_HORZ_RIGHT = 0x008C  # also known as BrowserForward
+    METRO_SEARCH_2 = 0x0087
+    METROA_SHARE_2 = 0x0088
+    METRO_SETTINGS_2 = 0x008A
+    METRO_DEVICES_2 = 0x0089
+    WIN8_METRO_WIN7_FORWARD = 0x008D  # also known as MetroStartScreen
+    WIN8_SHOW_DESKTOP_WIN7_BACK = 0x008E  # also known as ShowDesktop
+    METRO_APPLICATION_SWITCH = 0x0090  # also known as MetroStartScreen
+    SHOW_UI = 0x0092
     # https://docs.google.com/document/d/1Dpx_nWRQAZox_zpZ8SNc9nOkSDE9svjkghOCbzopabc/edit
     # Extract to csv.  Eliminate extra linefeeds and spaces. Turn / into __ and space into _
     # awk -F, '/0x/{gsub(" \\+ ","_",$2);  gsub("_-","_Down",$2); gsub("_\\+","_Up",$2);
     # gsub("[()\"-]","",$2); gsub(" ","_",$2); printf("\t%s=0x%04X,\n", $2, $1)}' < tasks.csv > tasks.py
-    Switch_Presentation__Switch_Screen=0x0093,  # on K400 Plus
-    Minimize_Window=0x0094,
-    Maximize_Window=0x0095,  # on K400 Plus
-    MultiPlatform_App_Switch=0x0096,
-    MultiPlatform_Home=0x0097,
-    MultiPlatform_Menu=0x0098,
-    MultiPlatform_Back=0x0099,
-    Switch_Language=0x009A,  # Mac_switch_language
-    Screen_Capture=0x009B,  # Mac_screen_Capture, on Craft Keyboard
-    Gesture_Button=0x009C,
-    Smart_Shift=0x009D,
-    AppExpose=0x009E,
-    Smart_Zoom=0x009F,
-    Lookup=0x00A0,
-    Microphone_on__off=0x00A1,
-    Wifi_on__off=0x00A2,
-    Brightness_Down=0x00A3,
-    Brightness_Up=0x00A4,
-    Display_Out=0x00A5,
-    View_Open_Apps=0x00A6,
-    View_All_Open_Apps=0x00A7,
-    AppSwitch=0x00A8,
-    Gesture_Button_Navigation=0x00A9,  # Mouse_Thumb_Button on MX Master
-    Fn_inversion=0x00AA,
-    Multiplatform_Back=0x00AB,
-    Multiplatform_Forward=0x00AC,
-    Multiplatform_Gesture_Button=0x00AD,
-    HostSwitch_Channel_1=0x00AE,
-    HostSwitch_Channel_2=0x00AF,
-    HostSwitch_Channel_3=0x00B0,
-    Multiplatform_Search=0x00B1,
-    Multiplatform_Home__Mission_Control=0x00B2,
-    Multiplatform_Menu__Launchpad=0x00B3,
-    Virtual_Gesture_Button=0x00B4,
-    Cursor=0x00B5,
-    Keyboard_Right_Arrow=0x00B6,
-    SW_Custom_Highlight=0x00B7,
-    Keyboard_Left_Arrow=0x00B8,
-    TBD=0x00B9,
-    Multiplatform_Language_Switch=0x00BA,
-    SW_Custom_Highlight_2=0x00BB,
-    Fast_Forward=0x00BC,
-    Fast_Backward=0x00BD,
-    Switch_Highlighting=0x00BE,
-    Mission_Control__Task_View=0x00BF,  # Switch_Workspace on Craft Keyboard
-    Dashboard_Launchpad__Action_Center=0x00C0,  # Application_Launcher on Craft Keyboard
-    Backlight_Down=0x00C1,  # Backlight_Down_FW_internal_function
-    Backlight_Up=0x00C2,  # Backlight_Up_FW_internal_function
-    Right_Click__App_Contextual_Menu=0x00C3,  # Context_Menu on Craft Keyboard
-    DPI_Change=0x00C4,
-    New_Tab=0x00C5,
-    F2=0x00C6,
-    F3=0x00C7,
-    F4=0x00C8,
-    F5=0x00C9,
-    F6=0x00CA,
-    F7=0x00CB,
-    F8=0x00CC,
-    F1=0x00CD,
-    Laser_Button=0x00CE,
-    Laser_Button_Long_Press=0x00CF,
-    Start_Presentation=0x00D0,
-    Blank_Screen=0x00D1,
-    DPI_Switch=0x00D2,  # AdjustDPI on MX Vertical
-    Home__Show_Desktop=0x00D3,
-    App_Switch__Dashboard=0x00D4,
-    App_Switch=0x00D5,
-    Fn_Inversion=0x00D6,
-    LeftAndRightClick=0x00D7,
-    Voice_Dictation=0x00D8,
-    Emoji_Smiling_Face_With_Heart_Shaped_Eyes=0x00D9,
-    Emoji_Loudly_Crying_Face=0x00DA,
-    Emoji_Smiley=0x00DB,
-    Emoji_Smiley_With_Tears=0x00DC,
-    Open_Emoji_Panel=0x00DD,
-    Multiplatform_App_Switch__Launchpad=0x00DE,
-    Snipping_Tool=0x00DF,
-    Grave_Accent=0x00E0,
-    Standard_Tab_Key=0x00E1,
-    Caps_Lock=0x00E2,
-    Left_Shift=0x00E3,
-    Left_Control=0x00E4,
-    Left_Option__Start=0x00E5,
-    Left_Command__Alt=0x00E6,
-    Right_Command__Alt=0x00E7,
-    Right_Option__Start=0x00E8,
-    Right_Control=0x00E9,
-    Right_Shift=0x0EA,
-    Insert=0x00EB,
-    Delete=0x00EC,
-    Home=0x00ED,
-    End=0x00EE,
-    Page_Up=0x00EF,
-    Page_Down=0x00F0,
-    Mute_Microphone=0x00F1,
-    Do_Not_Disturb=0x00F2,
-    Backslash=0x00F3,
-    Refresh=0x00F4,
-    Close_Tab=0x00F5,
-    Lang_Switch=0x00F6,
-    Standard_Alphabetical_Key=0x00F7,
-    Right_Option__Start__2=0x00F8,
-    Left_Option=0x00F9,
-    Right_Option=0x00FA,
-    Left_Cmd=0x00FB,
-    Right_Cmd=0x00FC,
-)
-TASK._fallback = lambda x: f"unknown:{x:04X}"
-# Capabilities and desired software handling for a control
-# Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
-# We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
-KEY_FLAG = _NamedInts(
-    analytics_key_events=0x400,
-    force_raw_XY=0x200,
-    raw_XY=0x100,
-    virtual=0x80,
-    persistently_divertable=0x40,
-    divertable=0x20,
-    reprogrammable=0x10,
-    FN_sensitive=0x08,
-    nonstandard=0x04,
-    is_FN=0x02,
-    mse=0x01,
-)
-# Flags describing the reporting method of a control
-# We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
-MAPPING_FLAG = _NamedInts(
-    analytics_key_events_reporting=0x100,
-    force_raw_XY_diverted=0x40,
-    raw_XY_diverted=0x10,
-    persistently_diverted=0x04,
-    diverted=0x01,
-)
-CID_GROUP_BIT = _NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
-CID_GROUP = _NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
-DISABLE = _NamedInts(
+    SWITCH_PRESENTATION_SWITCH_SCREEN = 0x0093  # on K400 Plus
+    MINIMIZE_WINDOW = 0x0094
+    MAXIMIZE_WINDOW = 0x0095  # on K400 Plus
+    MULTI_PLATFORM_APP_SWITCH = 0x0096
+    MULTI_PLATFORM_HOME = 0x0097
+    MULTI_PLATFORM_MENU = 0x0098
+    MULTI_PLATFORM_BACK = 0x0099
+    SWITCH_LANGUAGE = 0x009A  # Mac_switch_language
+    SCREEN_CAPTURE = 0x009B  # Mac_screen_Capture, on Craft Keyboard
+    GESTURE_BUTTON = 0x009C
+    SMART_SHIFT = 0x009D
+    APP_EXPOSE = 0x009E
+    SMART_ZOOM = 0x009F
+    LOOKUP = 0x00A0
+    MICROPHEON_ON_OFF = 0x00A1
+    WIFI_ON_OFF = 0x00A2
+    BRIGHTNESS_DOWN = 0x00A3
+    BRIGHTNESS_UP = 0x00A4
+    DISPLAY_OUT = 0x00A5
+    VIEW_OPEN_APPS = 0x00A6
+    VIEW_ALL_OPEN_APPS = 0x00A7
+    APP_SWITCH = 0x00A8
+    GESTURE_BUTTON_NAVIGATION = 0x00A9  # Mouse_Thumb_Button on MX Master
+    FN_INVERSION = 0x00AA
+    MULTI_PLATFORM_BACK_2 = 0x00AB  # Alternative
+    MULTI_PLATFORM_FORWARD = 0x00AC
+    MULTI_PLATFORM_Gesture_Button = 0x00AD
+    HostSwitch_Channel_1 = 0x00AE
+    HostSwitch_Channel_2 = 0x00AF
+    HostSwitch_Channel_3 = 0x00B0
+    MULTI_PLATFORM_SEARCH = 0x00B1
+    MULTI_PLATFORM_HOME_MISSION_CONTROL = 0x00B2
+    MULTI_PLATFORM_MENU_LAUNCHPAD = 0x00B3
+    VIRTUAL_GESTURE_BUTTON = 0x00B4
+    CURSOR = 0x00B5
+    KEYBOARD_RIGHT_ARROW = 0x00B6
+    SW_CUSTOM_HIGHLIGHT = 0x00B7
+    KEYBOARD_LEFT_ARROW = 0x00B8
+    TBD = 0x00B9
+    MULTI_PLATFORM_Language_Switch = 0x00BA
+    SW_CUSTOM_HIGHLIGHT_2 = 0x00BB
+    FAST_FORWARD = 0x00BC
+    FAST_BACKWARD = 0x00BD
+    SWITCH_HIGHLIGHTING = 0x00BE
+    MISSION_CONTROL_TASK_VIEW = 0x00BF  # Switch_Workspace on Craft Keyboard
+    DASHBOARD_LAUNCHPAD_ACTION_CENTER = 0x00C0  # Application_Launcher on Craft
+    # Keyboard
+    BACKLIGHT_DOWN = 0x00C1  # Backlight_Down_FW_internal_function
+    BACKLIGHT_UP = 0x00C2  # Backlight_Up_FW_internal_function
+    RIGHT_CLICK_APP_CONTEXT_MENU = 0x00C3  # Context_Menu on Craft Keyboard
+    DPI_Change = 0x00C4
+    NEW_TAB = 0x00C5
+    F2 = 0x00C6
+    F3 = 0x00C7
+    F4 = 0x00C8
+    F5 = 0x00C9
+    F6 = 0x00CA
+    F7 = 0x00CB
+    F8 = 0x00CC
+    F1 = 0x00CD
+    LASER_BUTTON = 0x00CE
+    LASER_BUTTON_LONG_PRESS = 0x00CF
+    START_PRESENTATION = 0x00D0
+    BLANK_SCREEN = 0x00D1
+    DPI_Switch = 0x00D2  # AdjustDPI on MX Vertical
+    HOME_SHOW_DESKTOP = 0x00D3
+    APP_SWITCH_DASHBOARD = 0x00D4
+    APP_SWITCH_2 = 0x00D5  # Alternative
+    FN_INVERSION_2 = 0x00D6  # Alternative
+    LEFT_AND_RIGHT_CLICK = 0x00D7
+    VOICE_DICTATION = 0x00D8
+    EMOJI_SMILING_FACE_WITH_HEART_SHAPED_EYES = 0x00D9
+    EMOJI_LOUDLY_CRYING_FACE = 0x00DA
+    EMOJI_SMILEY = 0x00DB
+    EMOJI_SMILE_WITH_TEARS = 0x00DC
+    OPEN_EMOJI_PANEL = 0x00DD
+    MULTI_PLATFORM_APP_SWITCH_LAUNCHPAD = 0x00DE
+    SNIPPING_TOOL = 0x00DF
+    GRAVE_ACCENT = 0x00E0
+    STANDARD_TAB_KEY = 0x00E1
+    CAPS_LOCK = 0x00E2
+    LEFT_SHIFT = 0x00E3
+    LEFT_CONTROL = 0x00E4
+    LEFT_OPTION_START = 0x00E5
+    LEFT_COMMAND_ALT = 0x00E6
+    RIGHT_COMMAND_ALT = 0x00E7
+    RIGHT_OPTION_START = 0x00E8
+    RIGHT_CONTROL = 0x00E9
+    RIGHT_SHIFT = 0x0EA
+    INSERT = 0x00EB
+    DELETE = 0x00EC
+    HOME = 0x00ED
+    END = 0x00EE
+    PAGE_UP_2 = 0x00EF  # Alternative
+    PAGE_DOWN_2 = 0x00F0  # Alternative
+    MUTE_MICROPHONE = 0x00F1
+    DO_NOT_DISTURB = 0x00F2
+    BACKSLASH = 0x00F3
+    REFRESH = 0x00F4
+    CLOSE_TAB = 0x00F5
+    LANG_SWITCH = 0x00F6
+    STANDARD_ALPHABETICAL_KEY = 0x00F7
+    RRIGH_OPTION_START_2 = 0x00F8
+    LEFT_OPTION = 0x00F9
+    RIGHT_OPTION = 0x00FA
+    LEFT_CMD = 0x00FB
+    RIGHT_CMD = 0x00FC
+
+    def __str__(self):
+        return self.name.replace("_", " ").title()
+
+
+class CIDGroupBit(IntEnum):
+    g1 = 0x01
+    g2 = 0x02
+    g3 = 0x04
+    g4 = 0x08
+    g5 = 0x10
+    g6 = 0x20
+    g7 = 0x40
+    g8 = 0x80
+
+
+class CidGroup(IntEnum):
+    g1 = 1
+    g2 = 2
+    g3 = 3
+    g4 = 4
+    g5 = 5
+    g6 = 6
+    g7 = 7
+    g8 = 8
+
+
+DISABLE = NamedInts(
     Caps_Lock=0x01,
     Num_Lock=0x02,
     Scroll_Lock=0x04,
@@ -608,7 +613,7 @@ DISABLE._fallback = lambda x: f"unknown:{x:02X}"
 
 # HID USB Keycodes from https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 # Modified by information from Linux HID driver linux/drivers/hid/hid-input.c
-USB_HID_KEYCODES = _NamedInts(
+USB_HID_KEYCODES = NamedInts(
     A=0x04,
     B=0x05,
     C=0x06,
@@ -780,7 +785,7 @@ USB_HID_KEYCODES[0x26] = "9"
 USB_HID_KEYCODES[0x27] = "0"
 USB_HID_KEYCODES[0x64] = "102ND"
 
-HID_CONSUMERCODES = _NamedInts(
+HID_CONSUMERCODES = NamedInts(
     {
         #    Unassigned=0x00,
         #    Consumer_Control=0x01,
@@ -1167,9 +1172,9 @@ HID_CONSUMERCODES._fallback = lambda x: f"unknown:{x:04X}"
 
 ## Information for x1c00 Persistent from https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28
 
-KEYMOD = _NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
+KEYMOD = NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
 
-ACTIONID = _NamedInts(
+ACTIONID = NamedInts(
     Empty=0x00,
     Key=0x01,
     Mouse=0x02,
@@ -1182,7 +1187,7 @@ ACTIONID = _NamedInts(
     Power=0x09,
 )
 
-MOUSE_BUTTONS = _NamedInts(
+MOUSE_BUTTONS = NamedInts(
     Mouse_Button_Left=0x0001,
     Mouse_Button_Right=0x0002,
     Mouse_Button_Middle=0x0004,
@@ -1202,14 +1207,14 @@ MOUSE_BUTTONS = _NamedInts(
 )
 MOUSE_BUTTONS._fallback = lambda x: f"unknown mouse button:{x:04X}"
 
-HORIZONTAL_SCROLL = _NamedInts(
-    Horizontal_Scroll_Left=0x4000,
-    Horizontal_Scroll_Right=0x8000,
-)
-HORIZONTAL_SCROLL._fallback = lambda x: f"unknown horizontal scroll:{x:04X}"
+
+class HorizontalScroll(IntEnum):
+    Left = 0x4000
+    Right = 0x8000
+
 
 # Construct universe for Persistent Remappable Keys setting (only for supported values)
-KEYS = _UnsortedNamedInts()
+KEYS = UnsortedNamedInts()
 KEYS_Default = 0x7FFFFFFF  # Special value to reset key to default - has to be different from all others
 KEYS[KEYS_Default] = "Default"  # Value to reset to default
 KEYS[0] = "None"  # Value for no output
@@ -1241,13 +1246,13 @@ for code in MOUSE_BUTTONS:
     KEYS[(ACTIONID.Mouse << 24) + (int(code) << 8)] = str(code)
 
 # Add Horizontal Scroll
-for code in HORIZONTAL_SCROLL:
+for code in HorizontalScroll:
     KEYS[(ACTIONID.Hscroll << 24) + (int(code) << 8)] = str(code)
 
 
 # Construct subsets for known devices
 def persistent_keys(action_ids):
-    keys = _UnsortedNamedInts()
+    keys = UnsortedNamedInts()
     keys[KEYS_Default] = "Default"  # Value to reset to default
     keys[0] = "No Output (only as default)"
     for key in KEYS:
@@ -1259,7 +1264,7 @@ def persistent_keys(action_ids):
 KEYS_KEYS_CONSUMER = persistent_keys([ACTIONID.Key, ACTIONID.Consumer])
 KEYS_KEYS_MOUSE_HSCROLL = persistent_keys([ACTIONID.Key, ACTIONID.Mouse, ACTIONID.Hscroll])
 
-COLORS = _UnsortedNamedInts(
+COLORS = UnsortedNamedInts(
     {
         # from Xorg rgb.txt,v 1.3 2000/08/17
         "red": 0xFF0000,
@@ -1400,7 +1405,11 @@ COLORS = _UnsortedNamedInts(
     }
 )
 
-KEYCODES = _NamedInts(
+COLORSPLUS = UnsortedNamedInts({"No change": -1})
+for i in COLORS:
+    COLORSPLUS[int(i)] = str(i)
+
+KEYCODES = NamedInts(
     {
         "A": 1,
         "B": 2,
@@ -1525,11 +1534,11 @@ KEYCODES = _NamedInts(
 
 # load in override dictionary for KEYCODES
 try:
-    if _os.path.isfile(_keys_file_path):
+    if os.path.isfile(_keys_file_path):
         with open(_keys_file_path) as keys_file:
-            keys = _yaml.safe_load(keys_file)
+            keys = yaml.safe_load(keys_file)
             if isinstance(keys, dict):
-                keys = _NamedInts(**keys)
+                keys = NamedInts(**keys)
                 for k in KEYCODES:
                     if int(k) not in keys and str(k) not in keys:
                         keys[int(k)] = str(k)

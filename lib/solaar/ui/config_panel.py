@@ -18,18 +18,18 @@
 import logging
 import traceback
 
-from threading import Timer as _Timer
+from enum import Enum
+from threading import Timer
 
 import gi
 
-from logitech_receiver.hidpp20 import LEDEffectSetting as _LEDEffectSetting
-from logitech_receiver.settings import KIND as _SETTING_KIND
-from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
+from logitech_receiver import hidpp20
+from logitech_receiver import settings
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from .common import ui_async as _ui_async
+from .common import ui_async
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gdk  # NOQA: E402
@@ -39,21 +39,30 @@ from gi.repository import Gtk  # NOQA: E402
 logger = logging.getLogger(__name__)
 
 
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    MATCH_SELECTED = "match_selected"
+    NOTIFY_ACTIVE = "notify::active"
+    TOGGLED = "toggled"
+    VALUE_CHANGED = "value-changed"
+
+
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
     def _do_read(s, force, sb, online, sensitive):
         try:
             v = s.read(not force)
         except Exception as e:
             v = None
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
+            logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
-    _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
+    ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
-    def _do_write(s, v, sb, key):
+    def _do_write(_s, v, sb, key):
         try:
             if key is None:
                 v = setting.write(v)
@@ -71,7 +80,7 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
         sbox._failed.set_visible(False)
         sbox._spinner.set_visible(True)
         sbox._spinner.start()
-    _ui_async(_do_write, setting, value, sbox, key)
+    ui_async(_do_write, setting, value, sbox, key)
 
 
 class ComboBoxText(Gtk.ComboBoxText):
@@ -88,8 +97,9 @@ class Scale(Gtk.Scale):
 
 
 class Control:
-    def __init__(**kwargs):
-        pass
+    def __init__(self, **kwargs):
+        self.sbox = None
+        self.delegate = None
 
     def init(self, sbox, delegate):
         self.sbox = sbox
@@ -105,7 +115,7 @@ class Control:
     def layout(self, sbox, label, change, spinner, failed):
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
-        fill = sbox.setting.kind == _SETTING_KIND.range or sbox.setting.kind == _SETTING_KIND.hetero
+        fill = sbox.setting.kind == settings.Kind.RANGE or sbox.setting.kind == settings.Kind.HETERO
         sbox.pack_end(self, fill, fill, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
@@ -116,7 +126,7 @@ class ToggleControl(Gtk.Switch, Control):
     def __init__(self, sbox, delegate=None):
         super().__init__(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
         self.init(sbox, delegate)
-        self.connect("notify::active", self.changed)
+        self.connect(GtkSignal.NOTIFY_ACTIVE.value, self.changed)
 
     def set_value(self, value):
         if value is not None:
@@ -135,7 +145,7 @@ class SliderControl(Gtk.Scale, Control):
         self.set_round_digits(0)
         self.set_digits(0)
         self.set_increments(1, 5)
-        self.connect("value-changed", self.changed)
+        self.connect(GtkSignal.VALUE_CHANGED.value, self.changed)
 
     def get_value(self):
         return int(super().get_value())
@@ -144,7 +154,7 @@ class SliderControl(Gtk.Scale, Control):
         if self.get_sensitive():
             if self.timer:
                 self.timer.cancel()
-            self.timer = _Timer(0.5, lambda: GLib.idle_add(self.do_change))
+            self.timer = Timer(0.5, lambda: GLib.idle_add(self.do_change))
             self.timer.start()
 
     def do_change(self):
@@ -167,7 +177,7 @@ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
         self.choices = choices if choices is not None else sbox.setting.choices
         for entry in self.choices:
             self.append(str(int(entry)), str(entry))
-        self.connect("changed", self.changed)
+        self.connect(GtkSignal.CHANGED.value, self.changed)
 
     def get_value(self):
         return int(self.get_active_id()) if self.get_active_id() is not None else None
@@ -205,9 +215,9 @@ class ChoiceControlBig(Gtk.Entry, Control):
         completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][1]))
         completion.set_text_column(1)
         self.set_completion(completion)
-        self.connect("changed", self.changed)
-        self.connect("activate", self.activate)
-        completion.connect("match_selected", self.select)
+        self.connect(GtkSignal.CHANGED.value, self.changed)
+        self.connect(GtkSignal.ACTIVATE.value, self.activate)
+        completion.connect(GtkSignal.MATCH_SELECTED.value, self.select)
 
     def get_value(self):
         choice = self.get_choice()
@@ -221,6 +231,9 @@ class ChoiceControlBig(Gtk.Entry, Control):
         key = self.get_text()
         return next((x for x in self.choices if x == key), None)
 
+    def set_choices(self, choices):
+        self.choices = choices
+
     def changed(self, *args):
         self.value = self.get_choice()
         icon = "dialog-warning" if self.value is None else "dialog-question" if self.get_sensitive() else ""
@@ -228,12 +241,12 @@ class ChoiceControlBig(Gtk.Entry, Control):
         tooltip = _("Incomplete") if self.value is None else _("Complete - ENTER to change")
         self.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, tooltip)
 
-    def activate(self, *args):
+    def activate(self, *_args):
         if self.value is not None and self.get_sensitive():
             self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "")
             self.delegate.update()
 
-    def select(self, completion, model, iter):
+    def select(self, _completion, model, iter):
         self.set_value(model.get(iter, 0)[0])
         if self.value and self.get_sensitive():
             self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "")
@@ -253,7 +266,7 @@ class MapChoiceControl(Gtk.HBox, Control):
         self.valueBox = _create_choice_control(sbox.setting, choices=self.value_choices, delegate=self)
         self.pack_start(self.keyBox, False, False, 0)
         self.pack_end(self.valueBox, False, False, 0)
-        self.keyBox.connect("changed", self.map_value_notify_key)
+        self.keyBox.connect(GtkSignal.CHANGED.value, self.map_value_notify_key)
 
     def get_value(self):
         key_choice = int(self.keyBox.get_active_id())
@@ -273,13 +286,12 @@ class MapChoiceControl(Gtk.HBox, Control):
         choices = self.sbox.setting.choices[key_choice]
         if choices != self.value_choices:
             self.value_choices = choices
-            self.valueBox.remove_all()
             self.valueBox.set_choices(choices)
         current = self.sbox.setting._value.get(key_choice) if self.sbox.setting._value else None
         if current is not None:
             self.valueBox.set_value(current)
 
-    def map_value_notify_key(self, *args):
+    def map_value_notify_key(self, *_args):
         key_choice = int(self.keyBox.get_active_id())
         if self.keyBox.get_sensitive():
             self.map_populate_value_box(key_choice)
@@ -301,7 +313,7 @@ class MultipleControl(Gtk.ListBox, Control):
         self._showing = True
         self.setup(sbox.setting)  # set up the data and boxes for the sub-controls
         btn = Gtk.Button(label=button_label)
-        btn.connect("clicked", self.toggle_display)
+        btn.connect(GtkSignal.CLICKED.value, self.toggle_display)
         self._button = btn
         hbox = Gtk.HBox(homogeneous=False, spacing=6)
         hbox.pack_end(change, False, False, 0)
@@ -322,7 +334,7 @@ class MultipleControl(Gtk.ListBox, Control):
         sbox._button = self._button
         return True
 
-    def toggle_display(self, *args):
+    def toggle_display(self, *_args):
         self._showing = not self._showing
         if not self._showing:
             for c in self.get_children():
@@ -349,14 +361,14 @@ class MultipleToggleControl(MultipleControl):
             h.set_tooltip_text(lbl_tooltip or " ")
             control = Gtk.Switch()
             control._setting_key = int(k)
-            control.connect("notify::active", self.toggle_notify)
+            control.connect(GtkSignal.NOTIFY_ACTIVE.value, self.toggle_notify)
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, False, False, 0)
             lbl.set_margin_start(30)
             self.add(h)
             self._label_control_pairs.append((lbl, control))
 
-    def toggle_notify(self, switch, active):
+    def toggle_notify(self, switch, _active):
         if switch.get_sensitive():
             key = switch._setting_key
             new_state = switch.get_state()
@@ -376,7 +388,7 @@ class MultipleToggleControl(MultipleControl):
                 elem.set_state(v)
             if elem.get_state():
                 active += 1
-            to_join.append(lbl.get_text() + ": " + str(elem.get_state()))
+            to_join.append(f"{lbl.get_text()}: {str(elem.get_state())}")
         b = ", ".join(to_join)
         self._button.set_label(f"{active} / {total}")
         self._button.set_tooltip_text(b)
@@ -411,7 +423,12 @@ class MultipleRangeControl(MultipleControl):
                 h.pack_start(sub_item_lbl, False, False, 0)
                 sub_item_lbl.set_margin_start(30)
                 if sub_item.widget == "Scale":
-                    control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, sub_item.minimum, sub_item.maximum, 1)
+                    control = Gtk.Scale.new_with_range(
+                        Gtk.Orientation.HORIZONTAL,
+                        sub_item.minimum,
+                        sub_item.maximum,
+                        1,
+                    )
                     control.set_round_digits(0)
                     control.set_digits(0)
                     h.pack_end(control, True, True, 0)
@@ -421,7 +438,7 @@ class MultipleRangeControl(MultipleControl):
                     h.pack_end(control, False, False, 0)
                 else:
                     raise NotImplementedError
-                control.connect("value-changed", self.changed, item, sub_item)
+                control.connect(GtkSignal.VALUE_CHANGED.value, self.changed, item, sub_item)
                 item_lb.add(h)
                 h._setting_sub_item = sub_item
                 h._label, h._control = sub_item_lbl, control
@@ -435,7 +452,7 @@ class MultipleRangeControl(MultipleControl):
         if control.get_sensitive():
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.5, lambda: GLib.idle_add(self._write, control, item, sub_item))
+            control._timer = Timer(0.5, lambda: GLib.idle_add(self._write, control, item, sub_item))
             control._timer.start()
 
     def _write(self, control, item, sub_item):
@@ -455,7 +472,7 @@ class MultipleRangeControl(MultipleControl):
             item = ch._setting_item
             v = value.get(int(item), None)
             if v is not None:
-                b += str(item) + ": ("
+                b += f"{str(item)}: ("
                 to_join = []
                 for c in ch._sub_items:
                     sub_item = c._setting_sub_item
@@ -465,7 +482,7 @@ class MultipleRangeControl(MultipleControl):
                         sub_item_value = c._control.get_value()
                     c._control.set_value(sub_item_value)
                     n += 1
-                    to_join.append(str(sub_item) + f"={sub_item_value}")
+                    to_join.append(f"{str(sub_item)}={sub_item_value}")
                 b += ", ".join(to_join) + ") "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
@@ -474,15 +491,15 @@ class MultipleRangeControl(MultipleControl):
 
 class PackedRangeControl(MultipleRangeControl):
     def setup(self, setting):
-        validator = setting._validator
         self._items = []
+        validator = setting._validator
         for item in range(validator.count):
             h = Gtk.HBox(homogeneous=False, spacing=0)
             lbl = Gtk.Label(label=str(validator.keys[item]))
             control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, validator.min_value, validator.max_value, 1)
             control.set_round_digits(0)
             control.set_digits(0)
-            control.connect("value-changed", self.changed, validator.keys[item])
+            control.connect(GtkSignal.VALUE_CHANGED.value, self.changed, validator.keys[item])
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, True, True, 0)
             h._setting_item = validator.keys[item]
@@ -495,7 +512,7 @@ class PackedRangeControl(MultipleRangeControl):
         if control.get_sensitive():
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
+            control._timer = Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
             control._timer.start()
 
     def _write(self, control, item):
@@ -518,7 +535,7 @@ class PackedRangeControl(MultipleRangeControl):
                 h.control.set_value(v)
             else:
                 v = self.sbox.setting._value[int(item)]
-            b += str(item) + ": (" + str(v) + ") "
+            b += f"{str(item)}: ({str(v)}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
@@ -537,20 +554,21 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_lblbox.set_visible(False)
             else:
                 item_lblbox = None
-            if item["kind"] == _SETTING_KIND.choice:
-                item_box = ComboBoxText()
+
+            item_box = ComboBoxText()
+            if item["kind"] == settings.Kind.CHOICE:
                 for entry in item["choices"]:
                     item_box.append(str(int(entry)), str(entry))
                 item_box.set_active(0)
-                item_box.connect("changed", self.changed)
+                item_box.connect(GtkSignal.CHANGED.value, self.changed)
                 self.pack_start(item_box, False, False, 0)
-            elif item["kind"] == _SETTING_KIND.range:
+            elif item["kind"] == settings.Kind.RANGE:
                 item_box = Scale()
                 item_box.set_range(item["min"], item["max"])
                 item_box.set_round_digits(0)
                 item_box.set_digits(0)
                 item_box.set_increments(1, 5)
-                item_box.connect("value-changed", self.changed)
+                item_box.connect(GtkSignal.VALUE_CHANGED.value, self.changed)
                 self.pack_start(item_box, True, True, 0)
             item_box.set_visible(False)
             self._items[str(item["name"])] = (item_lblbox, item_box)
@@ -559,7 +577,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
         result = {}
         for k, (_lblbox, box) in self._items.items():
             result[str(k)] = box.get_value()
-        result = _LEDEffectSetting(**result)
+        result = hidpp20.LEDEffectSetting(**result)
         return result
 
     def set_value(self, value):
@@ -573,8 +591,8 @@ class HeteroKeyControl(Gtk.HBox, Control):
             self.sbox._failed.set_visible(True)
         self.setup_visibles(value.ID if value is not None else 0)
 
-    def setup_visibles(self, ID):
-        fields = self.sbox.setting.fields_map[ID][1] if ID in self.sbox.setting.fields_map else {}
+    def setup_visibles(self, id_):
+        fields = self.sbox.setting.fields_map[id_][1] if id_ in self.sbox.setting.fields_map else {}
         for name, (lblbox, box) in self._items.items():
             visible = name in fields or name == "ID"
             if lblbox:
@@ -587,7 +605,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 self.setup_visibles(int(self._items["ID"][1].get_value()))
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.3, lambda: GLib.idle_add(self._write, control))
+            control._timer = Timer(0.3, lambda: GLib.idle_add(self._write, control))
             control._timer.start()
 
     def _write(self, control):
@@ -598,17 +616,13 @@ class HeteroKeyControl(Gtk.HBox, Control):
             _write_async(self.sbox.setting, new_state, self.sbox)
 
 
-#
-#
-#
-
-_allowables_icons = {True: "changes-allow", False: "changes-prevent", _SENSITIVITY_IGNORE: "dialog-error"}
+_allowables_icons = {True: "changes-allow", False: "changes-prevent", settings.SENSITIVITY_IGNORE: "dialog-error"}
 _allowables_tooltips = {
     True: _("Changes allowed"),
     False: _("No changes allowed"),
-    _SENSITIVITY_IGNORE: _("Ignore this setting"),
+    settings.SENSITIVITY_IGNORE: _("Ignore this setting"),
 }
-_next_allowable = {True: False, False: _SENSITIVITY_IGNORE, _SENSITIVITY_IGNORE: True}
+_next_allowable = {True: False, False: settings.SENSITIVITY_IGNORE, settings.SENSITIVITY_IGNORE: True}
 _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 
 
@@ -622,7 +636,7 @@ def _change_click(button, sbox):
     _change_icon(new_allowed, icon)
     if sbox.setting._device.persister:  # remember the new setting sensitivity
         sbox.setting._device.persister.set_sensitivity(sbox.setting.name, new_allowed)
-    if allowed == _SENSITIVITY_IGNORE:  # update setting if it was being ignored
+    if allowed == settings.SENSITIVITY_IGNORE:  # update setting if it was being ignored
         setting = next((s for s in sbox.setting._device.settings if s.name == sbox.setting.name), None)
         if setting:
             persisted = sbox.setting._device.persister.get(setting.name) if sbox.setting._device.persister else None
@@ -640,7 +654,7 @@ def _change_icon(allowed, icon):
         icon.set_tooltip_text(_allowables_tooltips[allowed])
 
 
-def _create_sbox(s, device):
+def _create_sbox(s, _device):
     sbox = Gtk.HBox(homogeneous=False, spacing=6)
     sbox.setting = s
     sbox.kind = s.kind
@@ -662,27 +676,26 @@ def _create_sbox(s, device):
     change.set_relief(Gtk.ReliefStyle.NONE)
     change.add(change_icon)
     change.set_sensitive(True)
-    change.connect("clicked", _change_click, sbox)
+    change.connect(GtkSignal.CLICKED.value, _change_click, sbox)
 
-    if s.kind == _SETTING_KIND.toggle:
+    if s.kind == settings.Kind.TOGGLE:
         control = ToggleControl(sbox)
-    elif s.kind == _SETTING_KIND.range:
+    elif s.kind == settings.Kind.RANGE:
         control = SliderControl(sbox)
-    elif s.kind == _SETTING_KIND.choice:
+    elif s.kind == settings.Kind.CHOICE:
         control = _create_choice_control(sbox)
-    elif s.kind == _SETTING_KIND.map_choice:
+    elif s.kind == settings.Kind.MAP_CHOICE:
         control = MapChoiceControl(sbox)
-    elif s.kind == _SETTING_KIND.multiple_toggle:
+    elif s.kind == settings.Kind.MULTIPLE_TOGGLE:
         control = MultipleToggleControl(sbox, change)
-    elif s.kind == _SETTING_KIND.multiple_range:
+    elif s.kind == settings.Kind.MULTIPLE_RANGE:
         control = MultipleRangeControl(sbox, change)
-    elif s.kind == _SETTING_KIND.packed_range:
+    elif s.kind == settings.Kind.PACKED_RANGE:
         control = PackedRangeControl(sbox, change)
-    elif s.kind == _SETTING_KIND.hetero:
+    elif s.kind == settings.Kind.HETERO:
         control = HeteroKeyControl(sbox, change)
     else:
-        if logger.isEnabledFor(logging.WARNING):
-            logger.warning("setting %s display not implemented", s.label)
+        logger.warning("setting %s display not implemented", s.label)
         return None
 
     control.set_sensitive(False)  # the first read will enable it
@@ -694,18 +707,20 @@ def _create_sbox(s, device):
     return sbox
 
 
-def _update_setting_item(sbox, value, is_online=True, sensitive=True, nullOK=False):
-    #    sbox._spinner.set_visible(False)   # don't repack item box
+def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=False):
     sbox._spinner.stop()
     sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
-    if value is None and not nullOK:
+    if value is None and not null_okay:
         sbox._control.set_sensitive(sensitive is True)
         _change_icon(sensitive, sbox._change_icon)
         sbox._failed.set_visible(is_online)
         return
     sbox._failed.set_visible(False)
     sbox._control.set_sensitive(False)
-    sbox._control.set_value(value)
+    try:  # a call was producing a TypeError so guard against that
+        sbox._control.set_value(value)
+    except TypeError as e:
+        logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
@@ -809,11 +824,14 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting_class, values):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
+    logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
     setting = next((s for s in device.settings if s.name == setting_class.name), None)
-    if setting is None and logger.isEnabledFor(logging.DEBUG):
-        logger.debug("No setting for %s found on %s when trying to record a change made elsewhere", setting_class.name, device)
+    if setting is None:
+        logger.debug(
+            "No setting for %s found on %s when trying to record a change made elsewhere",
+            setting_class.name,
+            device,
+        )
     if setting:
         assert device == setting._device
         if len(values) > 1:

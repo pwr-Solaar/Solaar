@@ -13,11 +13,14 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import abc
 
 from contextlib import contextmanager as contextlib_contextmanager
+from typing import Any
+from typing import Callable
 
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
+from logitech_receiver import diversion
 
 
 def norm(s):
@@ -46,10 +49,10 @@ class CompletionEntry(Gtk.Entry):
             liststore.append((v,))
 
 
-class RuleComponentUI:
-    CLASS = _DIV.RuleComponent
+class RuleComponentUI(abc.ABC):
+    CLASS = diversion.RuleComponent
 
-    def __init__(self, panel, on_update=None):
+    def __init__(self, panel, on_update: Callable = None):
         self.panel = panel
         self.widgets = {}  # widget -> coord. in grid
         self.component = None
@@ -57,15 +60,17 @@ class RuleComponentUI:
         self._on_update_callback = (lambda: None) if on_update is None else on_update
         self.create_widgets()
 
-    def create_widgets(self):
+    @abc.abstractmethod
+    def create_widgets(self) -> dict:
         pass
 
     def show(self, component, editable=True):
         self._show_widgets(editable)
         self.component = component
 
-    def collect_value(self):
-        return None
+    @abc.abstractmethod
+    def collect_value(self) -> Any:
+        pass
 
     @contextlib_contextmanager
     def ignore_changes(self):
@@ -89,20 +94,20 @@ class RuleComponentUI:
             widget.show()
 
     @classmethod
-    def left_label(cls, component):
+    def left_label(cls, component) -> str:
         return type(component).__name__
 
     @classmethod
-    def right_label(cls, _component):
+    def right_label(cls, _component) -> str:
         return ""
 
     @classmethod
-    def icon_name(cls):
+    def icon_name(cls) -> str:
         return ""
 
     def _remove_panel_items(self):
         for c in self.panel.get_children():
             self.panel.remove(c)
 
-    def update_devices(self):
+    def update_devices(self):  # noqa: B027
         pass

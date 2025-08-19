@@ -36,18 +36,20 @@
   <launchable type="desktop-id">solaar.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-button-actions.png</image>
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/screenshots/Solaar-main-window-button-actions.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-receiver.png</image>
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/screenshots/Solaar-main-window-receiver.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-menu.png</image>
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/screenshots/Solaar-menu.png</image>
     </screenshot>
   </screenshots>
 
   <releases>
-    <release version="1.1.12rc2" date="2024-04-22"/>
+    <release version="1.1.14" date="2025-01-01"/>
+    <release version="1.1.13" date="2024-05-11"/>
+    <release version="1.1.12" date="2024-04-27"/>
     <release version="1.1.11" date="2024-02-18"/>
     <release version="1.1.10" date="2023-09-23"/>
     <release version="1.1.9" date="2023-04-05"/>

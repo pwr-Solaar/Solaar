@@ -22,7 +22,7 @@ The following is an image of the Solaar menu and the icon (the battery
 symbol is in the system tray at the left of the image). The icon can
 also be other battery icons or versions of the Logitech Unifying icon.
 
-![Solaar-menu](Solaar-menu.png)
+![Solaar-menu](screenshots/Solaar-menu.png)
 
 Clicking on “Quit” in the Solaar menu terminates the program.
 Clicking on “About Solaar” pops up a window with further information about Solaar.
@@ -64,7 +64,7 @@ To pair with a Bolt receiver you have to type a passcode followed by enter
 or click the left and right buttons in the correct sequence followed by
 clicking both buttons simultaneously.
 
-![Solaar-main-window-receiver](Solaar-main-window-receiver.png)
+![Solaar-main-window-receiver](screenshots/Solaar-main-window-receiver.png)
 
 When a device is selected you can unpair the device if your receiver supports
 unpairing. To unpair the device, just click on the “Unpair” button and
@@ -93,26 +93,26 @@ You can also see and change the settings of devices.
 Changing settings is performed by clicking on buttons,
 moving sliders, or selecting from alternatives.
 
-![Solaar-main-window-keyboard](Solaar-main-window-keyboard.png)
+![Solaar-main-window-keyboard](screenshots/Solaar-main-window-keyboard.png)
 
-![Solaar-main-window-mouse](Solaar-main-window-mouse.png)
+![Solaar-main-window-mouse](screenshots/Solaar-main-window-mouse.png)
 
 Device settings now have a clickable icon that determines whether the
 setting can be changed and whether the setting is ignored.
 
-![Solaar-divert-back](Solaar-main-window-back-divert.png)
+![Solaar-divert-back](screenshots/Solaar-main-window-back-divert.png)
 
 If the selected device that is paired with a receiver is powered down or
 otherwise disconnected its settings cannot be changed
 but it still can be unpaired if its receiver allows unpairing.
 
-![Solaar-main-window-offline](Solaar-main-window-offline.png)
+![Solaar-main-window-offline](screenshots/Solaar-main-window-offline.png)
 
 If a device is paired with a receiver but directly connected via USB or Bluetooth
 the receiver pairing will show up as well as the direct connection.
 The device can only be manipulated using the direct connection.
 
-![Solaar-main-window-multiple](Solaar-main-window-multiple.png)
+![Solaar-main-window-multiple](screenshots/Solaar-main-window-multiple.png)
 
 #### Remapping key and button actions
 
@@ -127,7 +127,7 @@ action is always the one shown first in the list. As with all settings,
 Solaar will remember past action settings and restore them on the device
 from then on.
 
-![Solaar-main-window-actions](Solaar-main-window-button-actions.png)
+![Solaar-main-window-actions](screenshots/Solaar-main-window-button-actions.png)
 
 The names of the keys, buttons, and actions are mostly taken from Logitech
 documentation and may not be completely obvious.
@@ -136,9 +136,9 @@ It is possible to end up with an unusable system, for example by having no
 way to do a mouse left click, so exercise caution when remapping keys or
 buttons that are needed to operate your system.
 
-## Solaar command line interface
+## Solaar command-line interface
 
-Solaar also has a command line interface that can do most of what can be
+Solaar also has a command-line interface that can do most of what can be
 done using the main window. For more information on the
 command line interface, run `solaar --help` to see the commands and
 then `solaar <command> --help` to see the arguments to any of the commands.

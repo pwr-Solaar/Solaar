@@ -18,25 +18,21 @@
 
 import logging
 
-from threading import Thread as _Thread
+from threading import Thread
 
 logger = logging.getLogger(__name__)
 
 try:
-    from Queue import Queue as _Queue
+    from Queue import Queue
 except ImportError:
-    from queue import Queue as _Queue
-
-#
-#
-#
+    from queue import Queue
 
 
-class TaskRunner(_Thread):
+class TaskRunner(Thread):
     def __init__(self, name):
         super().__init__(name=name)
         self.daemon = True
-        self.queue = _Queue(16)
+        self.queue = Queue(16)
         self.alive = False
 
     def __call__(self, function, *args, **kwargs):
@@ -50,8 +46,7 @@ class TaskRunner(_Thread):
     def run(self):
         self.alive = True
 
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("started")
+        logger.debug("started")
 
         while self.alive:
             task = self.queue.get()
@@ -63,5 +58,4 @@ class TaskRunner(_Thread):
                 except Exception:
                     logger.exception("calling %s", function)
 
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("stopped")
+        logger.debug("stopped")

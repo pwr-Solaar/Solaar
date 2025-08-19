@@ -13,24 +13,30 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
+from enum import Enum
 from shlex import quote as shlex_quote
 
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
+from logitech_receiver import diversion
 from logitech_receiver.diversion import CLICK
 from logitech_receiver.diversion import DEPRESS
 from logitech_receiver.diversion import RELEASE
-from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
-from logitech_receiver.diversion import buttons as _buttons
+from logitech_receiver.diversion import XK_KEYS
+from logitech_receiver.diversion import buttons
 
 from solaar.i18n import _
 from solaar.ui.rule_base import CompletionEntry
 from solaar.ui.rule_base import RuleComponentUI
 
 
+class GtkSignal(Enum):
+    CHANGED = "changed"
+    CLICKED = "clicked"
+    TOGGLED = "toggled"
+
+
 class ActionUI(RuleComponentUI):
-    CLASS = _DIV.Action
+    CLASS = diversion.Action
 
     @classmethod
     def icon_name(cls):
@@ -38,8 +44,8 @@ class ActionUI(RuleComponentUI):
 
 
 class KeyPressUI(ActionUI):
-    CLASS = _DIV.KeyPress
-    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
+    CLASS = diversion.KeyPress
+    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in XK_KEYS.items() if isinstance(v, int)]
 
     def create_widgets(self):
         self.widgets = {}
@@ -51,21 +57,21 @@ class KeyPressUI(ActionUI):
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
         self.add_btn = Gtk.Button(label=_("Add key"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        self.add_btn.connect("clicked", self._clicked_add)
+        self.add_btn.connect(GtkSignal.CLICKED.value, self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
         self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
-        self.action_clicked_radio.connect("toggled", self._on_update, CLICK)
+        self.action_clicked_radio.connect(GtkSignal.TOGGLED.value, self._on_update, CLICK)
         self.widgets[self.action_clicked_radio] = (0, 3, 1, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _("Depress"))
-        self.action_pressed_radio.connect("toggled", self._on_update, DEPRESS)
+        self.action_pressed_radio.connect(GtkSignal.TOGGLED.value, self._on_update, DEPRESS)
         self.widgets[self.action_pressed_radio] = (1, 3, 1, 1)
         self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Release"))
-        self.action_released_radio.connect("toggled", self._on_update, RELEASE)
+        self.action_released_radio.connect(GtkSignal.TOGGLED.value, self._on_update, RELEASE)
         self.widgets[self.action_released_radio] = (2, 3, 1, 1)
 
     def _create_field(self):
         field_entry = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        field_entry.connect("changed", self._on_update)
+        field_entry.connect(GtkSignal.CHANGED.value, self._on_update)
         self.fields.append(field_entry)
         self.widgets[field_entry] = (len(self.fields) - 1, 1, 1, 1)
         return field_entry
@@ -74,7 +80,7 @@ class KeyPressUI(ActionUI):
         btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
+        btn.connect(GtkSignal.CLICKED.value, self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, _btn):
@@ -107,7 +113,6 @@ class KeyPressUI(ActionUI):
             self._create_field()
             self._create_del_btn()
 
-        #        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
         self.widgets[self.add_btn] = (n, 1, 1, 1)
         super().show(component, editable)
         for i in range(n):
@@ -133,11 +138,11 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return " + ".join(component.key_names) + ("  (" + component.action + ")" if component.action != CLICK else "")
+        return " + ".join(component.key_names) + (f"  ({component.action})" if component.action != CLICK else "")
 
 
 class MouseScrollUI(ActionUI):
-    CLASS = _DIV.MouseScroll
+    CLASS = diversion.MouseScroll
     MIN_VALUE = -2000
     MAX_VALUE = 2000
 
@@ -154,8 +159,8 @@ class MouseScrollUI(ActionUI):
         for f in [self.field_x, self.field_y]:
             f.set_halign(Gtk.Align.CENTER)
             f.set_valign(Gtk.Align.START)
-        self.field_x.connect("changed", self._on_update)
-        self.field_y.connect("changed", self._on_update)
+        self.field_x.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.field_y.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.label_x] = (0, 1, 1, 1)
         self.widgets[self.field_x] = (1, 1, 1, 1)
         self.widgets[self.label_y] = (2, 1, 1, 1)
@@ -169,7 +174,7 @@ class MouseScrollUI(ActionUI):
         except (TypeError, ValueError):
             return 0
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field_x.set_value(self.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0))
@@ -191,10 +196,10 @@ class MouseScrollUI(ActionUI):
 
 
 class MouseClickUI(ActionUI):
-    CLASS = _DIV.MouseClick
+    CLASS = diversion.MouseClick
     MIN_VALUE = 1
     MAX_VALUE = 9
-    BUTTONS = list(_buttons.keys())
+    BUTTONS = list(buttons.keys())
     ACTIONS = [CLICK, DEPRESS, RELEASE]
 
     def create_widgets(self):
@@ -211,16 +216,16 @@ class MouseClickUI(ActionUI):
         for f in [self.field_b, self.field_c]:
             f.set_halign(Gtk.Align.CENTER)
             f.set_valign(Gtk.Align.START)
-        self.field_b.connect("changed", self._on_update)
-        self.field_c.connect("changed", self._on_update)
-        self.field_d.connect("changed", self._on_update)
+        self.field_b.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.field_c.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.field_d.connect(GtkSignal.CHANGED.value, self._on_update)
         self.widgets[self.label_b] = (0, 1, 1, 1)
         self.widgets[self.field_b] = (1, 1, 1, 1)
         self.widgets[self.label_c] = (2, 1, 1, 1)
         self.widgets[self.field_c] = (3, 1, 1, 1)
         self.widgets[self.field_d] = (4, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field_b.set_text(component.button)
@@ -249,7 +254,7 @@ class MouseClickUI(ActionUI):
 
 
 class ExecuteUI(ActionUI):
-    CLASS = _DIV.Execute
+    CLASS = diversion.Execute
 
     def create_widgets(self):
         self.widgets = {}
@@ -258,13 +263,13 @@ class ExecuteUI(ActionUI):
         self.fields = []
         self.add_btn = Gtk.Button(label=_("Add argument"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.del_btns = []
-        self.add_btn.connect("clicked", self._clicked_add)
+        self.add_btn.connect(GtkSignal.CLICKED.value, self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
 
     def _create_field(self):
         field_entry = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         field_entry.set_size_request(150, 0)
-        field_entry.connect("changed", self._on_update)
+        field_entry.connect(GtkSignal.CHANGED.value, self._on_update)
         self.fields.append(field_entry)
         self.widgets[field_entry] = (len(self.fields) - 1, 1, 1, 1)
         return field_entry
@@ -274,7 +279,7 @@ class ExecuteUI(ActionUI):
         btn.set_size_request(150, 0)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
+        btn.connect(GtkSignal.CLICKED.value, self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, *_args):
@@ -289,7 +294,7 @@ class ExecuteUI(ActionUI):
         self.show(self.component, editable=True)
         self._on_update_callback()
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         n = len(component.args)
         while len(self.fields) < n:
             self._create_field()

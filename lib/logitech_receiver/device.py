@@ -15,64 +15,104 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import errno as _errno
+from __future__ import annotations
+
+import errno
 import logging
-import threading as _threading
+import threading
 import time
+import typing
 
+from typing import Callable
 from typing import Optional
+from typing import Protocol
 
-import hidapi as _hid
-import solaar.configuration as _configuration
+from solaar import configuration
 
-from . import base
 from . import descriptors
 from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
-from . import hidpp20_constants
 from . import settings
-from .common import ALERT
+from . import settings_templates
+from .common import Alert
 from .common import Battery
-from .settings_templates import check_feature_settings as _check_feature_settings
+from .hidpp10_constants import NotificationFlag
+from .hidpp20_constants import SupportedFeature
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver import common
 
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_R = hidpp10_constants.REGISTERS
-_IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
-class DeviceFactory:
-    @staticmethod
-    def create_device(device_info, setting_callback=None):
-        """Opens a Logitech Device found attached to the machine, by Linux device path.
-        :returns: An open file handle for the found receiver, or None.
-        """
-        try:
-            handle = base.open_path(device_info.path)
-            if handle:
-                # a direct connected device might not be online (as reported by user)
-                return Device(None, None, None, handle=handle, device_info=device_info, setting_callback=setting_callback)
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == _errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)
+class LowLevelInterface(Protocol):
+    def open_path(self, path) -> int:
+        ...
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        ...
+
+    def ping(self, handle, number, long_message: bool):
+        ...
+
+    def request(self, handle, devnumber, request_id, *params, **kwargs):
+        ...
+
+    def close(self, handle, *args, **kwargs) -> bool:
+        ...
+
+
+def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
+    """Opens a Logitech Device found attached to the machine, by Linux device path.
+    :returns: An open file handle for the found receiver, or None.
+    """
+    try:
+        handle = low_level.open_path(device_info.path)
+        if handle:
+            # a direct connected device might not be online (as reported by user)
+            return Device(
+                low_level,
+                None,
+                None,
+                None,
+                handle=handle,
+                device_info=device_info,
+                setting_callback=setting_callback,
+            )
+    except OSError as e:
+        logger.exception("open %s", device_info)
+        if e.errno == errno.EACCES:
+            raise
+    except Exception:
+        logger.exception("open %s", device_info)
+        raise
 
 
 class Device:
     instances = []
-    read_register = hidpp10.read_register
-    write_register = hidpp10.write_register
+    read_register: Callable = hidpp10.read_register
+    write_register: Callable = hidpp10.write_register
 
-    def __init__(self, receiver, number, online, pairing_info=None, handle=None, device_info=None, setting_callback=None):
+    def __init__(
+        self,
+        low_level: LowLevelInterface,
+        receiver,
+        number,
+        online,
+        pairing_info=None,
+        handle=None,
+        device_info=None,
+        setting_callback=None,
+    ):
         assert receiver or device_info
         if receiver:
             assert 0 < number <= 15  # some receivers have devices past their max # of devices
+        self.low_level = low_level
         self.number = number  # will be None at this point for directly connected devices
         self.online = online  # is the device online? - gates many atempts to contact the device
         self.descriptor = None
@@ -107,23 +147,24 @@ class Device:
         self.battery_info = None
         self.link_encrypted = None
         self._active = None  # lags self.online - is used to help determine when to setup devices
+        self.present = True  # used for devices that are integral with their receiver but that separately be disconnected
 
         self._feature_settings_checked = False
-        self._gestures_lock = _threading.Lock()
-        self._settings_lock = _threading.Lock()
-        self._persister_lock = _threading.Lock()
+        self._gestures_lock = threading.Lock()
+        self._settings_lock = threading.Lock()
+        self._persister_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
 
         if not self.path:
-            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else None
+            self.path = self.low_level.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
-                self.handle = base.open_path(self.path) if self.path else None
+                self.handle = self.low_level.open_path(self.path) if self.path else None
             except Exception:  # maybe the device wasn't set up
                 try:
                     time.sleep(1)
-                    self.handle = base.open_path(self.path) if self.path else None
+                    self.handle = self.low_level.open_path(self.path) if self.path else None
                 except Exception:  # give up
                     self.handle = None  # should this give up completely?
 
@@ -143,7 +184,11 @@ class Device:
                 descriptors.get_btid(self.product_id) if self.bluetooth else descriptors.get_usbid(self.product_id)
             )
             if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
-                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
+                if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0:
+                    number = 0x00
+                else:
+                    number = 0xFF
+                self.number = number
             self.ping()  # determine whether a direct-connected device is online
 
         if self.descriptor:
@@ -177,8 +222,6 @@ class Device:
     @property
     def codename(self):
         if not self._codename:
-            if not self.online:  # be very defensive
-                self.ping()
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
                 if not self._codename:
@@ -188,20 +231,15 @@ class Device:
                 if codename:
                     self._codename = codename
                 elif self.protocol < 2.0:
-                    self._codename = "? (%s)" % (self.wpid or hex(self.product_id)[2:].upper())
-        return self._codename or "?? (%s)" % (self.wpid or hex(self.product_id)[2:].upper())
+                    self._codename = "? (%s)" % (self.wpid or self.product_id)
+        return self._codename or f"?? ({self.wpid or self.product_id})"
 
     @property
     def name(self):
         if not self._name:
-            if not self.online:  # be very defensive
-                try:
-                    self.ping()
-                except exceptions.NoSuchDevice:
-                    pass
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self._codename or ("Unknown device %s" % (self.wpid or hex(self.product_id)[2:].upper()))
+        return self._name or self._codename or f"Unknown device {self.wpid or self.product_id}"
 
     def get_ids(self):
         ids = _hidpp20.get_ids(self)
@@ -235,7 +273,7 @@ class Device:
         return self._kind or "?"
 
     @property
-    def firmware(self):
+    def firmware(self) -> tuple[common.FirmwareInfo]:
         if self._firmware is None and self.online:
             if self.protocol >= 2.0:
                 self._firmware = _hidpp20.get_firmware(self)
@@ -265,9 +303,9 @@ class Device:
     @property
     def led_effects(self):
         if not self._led_effects and self.online and self.protocol >= 2.0:
-            if hidpp20_constants.FEATURE.COLOR_LED_EFFECTS in self.features:
+            if SupportedFeature.COLOR_LED_EFFECTS in self.features:
                 self._led_effects = hidpp20.LEDEffectsInfo(self)
-            elif hidpp20_constants.FEATURE.RGB_EFFECTS in self.features:
+            elif SupportedFeature.RGB_EFFECTS in self.features:
                 self._led_effects = hidpp20.RGBEffectsInfo(self)
         return self._led_effects
 
@@ -308,9 +346,9 @@ class Device:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
 
-    def set_configuration(self, configuration, no_reply=False):
+    def set_configuration(self, configuration_, no_reply=False):
         if self.online and self.protocol >= 2.0:
-            _hidpp20.config_change(self, configuration, no_reply=no_reply)
+            _hidpp20.config_change(self, configuration_, no_reply=no_reply)
 
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
@@ -320,7 +358,7 @@ class Device:
         if not self._persister:
             with self._persister_lock:
                 if not self._persister:
-                    self._persister = _configuration.persister(self)
+                    self._persister = configuration.persister(self)
         return self._persister
 
     @property
@@ -343,7 +381,7 @@ class Device:
         if not self._feature_settings_checked:
             with self._settings_lock:
                 if not self._feature_settings_checked:
-                    self._feature_settings_checked = _check_feature_settings(self, self._settings)
+                    self._feature_settings_checked = settings_templates.check_feature_settings(self, self._settings)
         return self._settings
 
     def battery(self):  # None  or  level, next, status, voltage
@@ -356,11 +394,11 @@ class Device:
                 try:
                     feature, battery = result
                     if self.persister and battery_feature is None:
-                        self.persister["_battery"] = feature
+                        self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None:
-                        self.persister["_battery"] = result
+                    if self.persister and battery_feature is None and result is not None:
+                        self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
         """Update battery information for device, calling changed callback if necessary"""
@@ -374,11 +412,11 @@ class Device:
         if old_info is None:
             old_info = Battery(None, None, None, None)
 
-        alert, reason = ALERT.NONE, None
+        alert, reason = Alert.NONE, None
         if not info.ok():
             logger.warning("%s: battery %d%%, ALERT %s", self, info.level, info.status)
             if old_info.status != info.status:
-                alert = ALERT.NOTIFICATION | ALERT.ATTENTION
+                alert = Alert.NOTIFICATION | Alert.ATTENTION
             reason = info.to_str()
 
         if changed or reason:
@@ -392,9 +430,11 @@ class Device:
             battery = self.battery()
             self.set_battery_info(battery if battery is not None else Battery(None, None, None, None))
 
-    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
+    def changed(self, active=None, alert=Alert.NONE, reason=None, push=False):
         """The status of the device had changed, so invoke the status callback.
         Also push notifications and settings to the device when necessary."""
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("device %d changing: active=%s %s present=%s", self.number, active, self._active, self.present)
         if active is not None:
             self.online = active
             was_active, self._active = self._active, active
@@ -405,7 +445,7 @@ class Device:
                     was_active is None
                     or not was_active
                     or push
-                    and (not self.features or hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in self.features)
+                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
@@ -417,7 +457,7 @@ class Device:
                         self.set_configuration(0x11)  # signal end of configuration
                     self.read_battery()  # battery information may have changed so try to read it now
             elif was_active and self.receiver:  # need to set configuration pending flag in receiver
-                hidpp10.Hidpp10().set_configuration_pending_flags(self.receiver, 0xFF)
+                hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
         if self.status_callback is not None:
@@ -430,11 +470,7 @@ class Device:
             return False
 
         if enable:
-            set_flag_bits = (
-                hidpp10_constants.NOTIFICATION_FLAG.battery_status
-                | hidpp10_constants.NOTIFICATION_FLAG.ui
-                | hidpp10_constants.NOTIFICATION_FLAG.configuration_complete
-            )
+            set_flag_bits = NotificationFlag.BATTERY_STATUS | NotificationFlag.UI | NotificationFlag.CONFIGURATION_COMPLETE
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
@@ -443,8 +479,12 @@ class Device:
 
         flag_bits = _hidpp10.get_notification_flags(self)
         if logger.isEnabledFor(logging.INFO):
-            flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
-            logger.info("%s: device notifications %s %s", self, "enabled" if enable else "disabled", flag_names)
+            if flag_bits is None:
+                flag_names = None
+            else:
+                flag_names = hidpp10_constants.NotificationFlag.flag_names(flag_bits)
+            is_enabled = "enabled" if enable else "disabled"
+            logger.info(f"{self}: device notifications {is_enabled} {flag_names}")
         return flag_bits if ok else None
 
     def add_notification_handler(self, id: str, fn):
@@ -481,7 +521,7 @@ class Device:
             long = self.hidpp_long is True or (
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
-            return base.request(
+            return self.low_level.request(
                 self.handle or self.receiver.handle,
                 self.number,
                 request_id,
@@ -496,14 +536,21 @@ class Device:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
     def ping(self):
-        """Checks if the device is online, returns True of False"""
+        """Checks if the device is online and present, returns True of False.
+        Some devices are integral with their receiver but may not be present even if the receiver responds to ping."""
         long = self.hidpp_long is True or (
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
-        protocol = base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
-        self.online = protocol is not None
+        handle = self.handle or self.receiver.handle
+        try:
+            protocol = self.low_level.ping(handle, self.number, long_message=long)
+        except exceptions.NoReceiver:  # if ping fails, device is offline
+            protocol = None
+        self.online = protocol is not None and self.present
         if protocol:
             self._protocol = protocol
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("pinged %s: online %s protocol %s present %s", self.number, self.online, protocol, self.present)
         return self.online
 
     def notify_devices(self):  # no need to notify, as there are none
@@ -516,7 +563,7 @@ class Device:
         if hasattr(self, "cleanups"):
             for cleanup in self.cleanups:
                 cleanup(self)
-        return handle and base.close(handle)
+        return handle and self.low_level.close(handle)
 
     def __index__(self):
         return self.number

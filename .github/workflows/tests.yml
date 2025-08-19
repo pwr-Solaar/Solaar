@@ -8,7 +8,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.7, 3.12]
+        python-version: [3.8, 3.13]
+      fail-fast: false
 
     steps:
     - name: Checkout
@@ -19,9 +20,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Ubuntu dependencies
+    - name: Install Ubuntu dependencies for python 3.8
+      if: matrix.python-version == '3.8'
       run: |
         make install_apt
+
+    - name: Install Ubuntu dependencies for python 3.13
+      if: matrix.python-version == '3.13'
+      run: |
+        make install_apt_python3.13
 
     - name: Install Python dependencies
       run: |
@@ -31,30 +38,50 @@ jobs:
       run: |
         make test
 
-#  macos-tests:
-#    runs-on: macos-latest
-#
-#    strategy:
-#      matrix:
-#        python-version: [3.7, 3.12]
-#
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v4
-#
-#    - name: Set up Python ${{ matrix.python-version }}
-#      uses: actions/setup-python@v5
-#      with:
-#        python-version: ${{ matrix.python-version }}
-#
-#    - name: Set up macOS dependencies
-#      run: |
-#        make install_brew
-#
-#    - name: Install Python dependencies
-#      run: |
-#        make install_pip PIP_ARGS='.["test"]'
-#
-#    - name: Run tests on macOS
-#      run: |
-#        make test
+    - name: Upload coverage to Codecov
+      if: github.ref == 'refs/heads/master'
+      uses: codecov/codecov-action@v4.5.0
+      with:
+        directory: ./coverage/reports/
+        env_vars: OS, PYTHON
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  macos-tests:
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.13]
+      fail-fast: false
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up macOS dependencies
+      run: |
+        make install_brew
+    - name: Install Python dependencies
+      run: |
+        make install_pip PIP_ARGS='.["test"]'
+    - name: Run tests on macOS
+      run: |
+        export DYLD_LIBRARY_PATH=$(brew --prefix hidapi)/lib:$DYLD_LIBRARY_PATH && pytest --cov --cov-report=xml
+    - name: Upload coverage to Codecov
+      if: github.ref == 'refs/heads/master'
+      uses: codecov/codecov-action@v4.5.0
+      with:
+        directory: ./coverage/reports/
+        env_vars: OS, PYTHON
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}

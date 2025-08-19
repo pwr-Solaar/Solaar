@@ -15,7 +15,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """Low-level interface for devices using Logitech HID++ protocol.
 
-Uses the HID api exposed through hidapi.py, a Python thin layer over a native
+Uses the HID api exposed through hidapi_impl.py, a Python thin layer over a native
 implementation.
 """
 

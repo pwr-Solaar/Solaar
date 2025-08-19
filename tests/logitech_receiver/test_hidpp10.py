@@ -9,7 +9,7 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants
-from logitech_receiver import hidpp20_constants
+from logitech_receiver.hidpp10_constants import Registers
 
 _hidpp10 = hidpp10.Hidpp10()
 
@@ -28,7 +28,7 @@ class Device:
     kind: str = "fake"
     protocol: float = 1.0
     isDevice: bool = False  # incorrect, but useful here
-    registers: List[common.NamedInt] = field(default_factory=list)
+    registers: List[Registers] = field(default_factory=list)
     responses: List[Response] = field(default_factory=list)
 
     def request(self, id, params=None, no_reply=False):
@@ -42,27 +42,25 @@ class Device:
 
 
 device_offline = Device("OFFLINE", False)
-device_leds = Device(
-    "LEDS", True, registers=[hidpp10_constants.REGISTERS.three_leds, hidpp10_constants.REGISTERS.battery_status]
-)
+device_leds = Device("LEDS", True, registers=[Registers.THREE_LEDS, Registers.BATTERY_STATUS])
 device_features = Device("FEATURES", True, protocol=4.5)
 
-registers_standard = [hidpp10_constants.REGISTERS.battery_status, hidpp10_constants.REGISTERS.firmware]
+registers_standard = [Registers.BATTERY_STATUS, Registers.FIRMWARE]
 responses_standard = [
-    Response("555555", 0x8100 | hidpp10_constants.REGISTERS.battery_status, 0x00),
-    Response("666666", 0x8100 | hidpp10_constants.REGISTERS.battery_status, 0x10),
-    Response("777777", 0x8000 | hidpp10_constants.REGISTERS.battery_status, 0x00),
-    Response("888888", 0x8000 | hidpp10_constants.REGISTERS.battery_status, 0x10),
-    Response("052100", 0x8100 | hidpp10_constants.REGISTERS.battery_status, []),
-    Response("ABCDEF", 0x8100 | hidpp10_constants.REGISTERS.firmware, 0x01),
-    Response("ABCDEF", 0x8100 | hidpp10_constants.REGISTERS.firmware, 0x02),
-    Response("ABCDEF", 0x8100 | hidpp10_constants.REGISTERS.firmware, 0x03),
-    Response("ABCDEF", 0x8100 | hidpp10_constants.REGISTERS.firmware, 0x04),
-    Response("000900", 0x8100 | hidpp10_constants.REGISTERS.notifications, []),
-    Response("101010", 0x8100 | hidpp10_constants.REGISTERS.mouse_button_flags, []),
-    Response("010101", 0x8100 | hidpp10_constants.REGISTERS.keyboard_fn_swap, []),
-    Response("020202", 0x8100 | hidpp10_constants.REGISTERS.devices_configuration, []),
-    Response("030303", 0x8000 | hidpp10_constants.REGISTERS.devices_configuration, 0x00),
+    Response("555555", 0x8100 | Registers.BATTERY_STATUS, 0x00),
+    Response("666666", 0x8100 | Registers.BATTERY_STATUS, 0x10),
+    Response("777777", 0x8000 | Registers.BATTERY_STATUS, 0x00),
+    Response("888888", 0x8000 | Registers.BATTERY_STATUS, 0x10),
+    Response("052100", 0x8100 | Registers.BATTERY_STATUS, []),
+    Response("ABCDEF", 0x8100 | Registers.FIRMWARE, 0x01),
+    Response("ABCDEF", 0x8100 | Registers.FIRMWARE, 0x02),
+    Response("ABCDEF", 0x8100 | Registers.FIRMWARE, 0x03),
+    Response("ABCDEF", 0x8100 | Registers.FIRMWARE, 0x04),
+    Response("000900", 0x8100 | Registers.NOTIFICATIONS, []),
+    Response("101010", 0x8100 | Registers.MOUSE_BUTTON_FLAGS, []),
+    Response("010101", 0x8100 | Registers.KEYBOARD_FN_SWAP, []),
+    Response("020202", 0x8100 | Registers.DEVICES_CONFIGURATION, []),
+    Response("030303", 0x8000 | Registers.DEVICES_CONFIGURATION, 0x00),
 ]
 device_standard = Device("STANDARD", True, registers=registers_standard, responses=responses_standard)
 
@@ -70,10 +68,10 @@ device_standard = Device("STANDARD", True, registers=registers_standard, respons
 @pytest.mark.parametrize(
     "device, register, param, expected_result",
     [
-        (device_offline, hidpp10_constants.REGISTERS.three_leds, 0x00, None),
-        (device_standard, hidpp10_constants.REGISTERS.three_leds, 0x00, None),
-        (device_standard, hidpp10_constants.REGISTERS.battery_status, 0x00, "555555"),
-        (device_standard, hidpp10_constants.REGISTERS.battery_status, 0x10, "666666"),
+        (device_offline, Registers.THREE_LEDS, 0x00, None),
+        (device_standard, Registers.THREE_LEDS, 0x00, None),
+        (device_standard, Registers.BATTERY_STATUS, 0x00, "555555"),
+        (device_standard, Registers.BATTERY_STATUS, 0x10, "666666"),
     ],
 )
 def test_read_register(device, register, param, expected_result, mocker):
@@ -88,10 +86,10 @@ def test_read_register(device, register, param, expected_result, mocker):
 @pytest.mark.parametrize(
     "device, register, param, expected_result",
     [
-        (device_offline, hidpp10_constants.REGISTERS.three_leds, 0x00, None),
-        (device_standard, hidpp10_constants.REGISTERS.three_leds, 0x00, None),
-        (device_standard, hidpp10_constants.REGISTERS.battery_status, 0x00, "777777"),
-        (device_standard, hidpp10_constants.REGISTERS.battery_status, 0x10, "888888"),
+        (device_offline, Registers.THREE_LEDS, 0x00, None),
+        (device_standard, Registers.THREE_LEDS, 0x00, None),
+        (device_standard, Registers.BATTERY_STATUS, 0x00, "777777"),
+        (device_standard, Registers.BATTERY_STATUS, 0x10, "888888"),
     ],
 )
 def test_write_register(device, register, param, expected_result, mocker):
@@ -104,7 +102,7 @@ def test_write_register(device, register, param, expected_result, mocker):
 
 
 def device_charge(name, response):
-    responses = [Response(response, 0x8100 | hidpp10_constants.REGISTERS.battery_charge, [])]
+    responses = [Response(response, 0x8100 | Registers.BATTERY_CHARGE, [])]
     return Device(name, registers=[], responses=responses)
 
 
@@ -115,7 +113,7 @@ device_charge4 = device_charge("OTHER", "220000")
 
 
 def device_status(name, response):
-    responses = [Response(response, 0x8100 | hidpp10_constants.REGISTERS.battery_status, [])]
+    responses = [Response(response, 0x8100 | Registers.BATTERY_STATUS, [])]
     return Device(name, registers=[], responses=responses)
 
 
@@ -135,54 +133,50 @@ device_status6 = device_status("NOSTATUS", "002200")
         (device_leds, None, None),
         (
             device_standard,
-            common.Battery(common.Battery.APPROX.good, None, common.Battery.STATUS.recharging, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.GOOD, None, common.BatteryStatus.RECHARGING, None),
+            Registers.BATTERY_STATUS,
         ),
-        (
-            device_charge1,
-            common.Battery(0x55, None, common.Battery.STATUS.discharging, None),
-            hidpp10_constants.REGISTERS.battery_charge,
-        ),
+        (device_charge1, common.Battery(0x55, None, common.BatteryStatus.DISCHARGING, None), Registers.BATTERY_CHARGE),
         (
             device_charge2,
-            common.Battery(0x44, None, common.Battery.STATUS.recharging, None),
-            hidpp10_constants.REGISTERS.battery_charge,
+            common.Battery(0x44, None, common.BatteryStatus.RECHARGING, None),
+            Registers.BATTERY_CHARGE,
         ),
         (
             device_charge3,
-            common.Battery(0x60, None, common.Battery.STATUS.full, None),
-            hidpp10_constants.REGISTERS.battery_charge,
+            common.Battery(0x60, None, common.BatteryStatus.FULL, None),
+            Registers.BATTERY_CHARGE,
         ),
-        (device_charge4, common.Battery(0x22, None, None, None), hidpp10_constants.REGISTERS.battery_charge),
+        (device_charge4, common.Battery(0x22, None, None, None), Registers.BATTERY_CHARGE),
         (
             device_status1,
-            common.Battery(common.Battery.APPROX.full, None, common.Battery.STATUS.full, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.FULL, None, common.BatteryStatus.FULL, None),
+            Registers.BATTERY_STATUS,
         ),
         (
             device_status2,
-            common.Battery(common.Battery.APPROX.good, None, common.Battery.STATUS.recharging, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.GOOD, None, common.BatteryStatus.RECHARGING, None),
+            Registers.BATTERY_STATUS,
         ),
         (
             device_status3,
-            common.Battery(common.Battery.APPROX.low, None, common.Battery.STATUS.full, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.LOW, None, common.BatteryStatus.FULL, None),
+            Registers.BATTERY_STATUS,
         ),
         (
             device_status4,
-            common.Battery(common.Battery.APPROX.critical, None, None, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.CRITICAL, None, None, None),
+            Registers.BATTERY_STATUS,
         ),
         (
             device_status5,
-            common.Battery(common.Battery.APPROX.empty, None, common.Battery.STATUS.discharging, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(common.BatteryLevelApproximation.EMPTY, None, common.BatteryStatus.DISCHARGING, None),
+            Registers.BATTERY_STATUS,
         ),
         (
             device_status6,
-            common.Battery(None, None, common.Battery.STATUS.full, None),
-            hidpp10_constants.REGISTERS.battery_status,
+            common.Battery(None, None, common.BatteryStatus.FULL, None),
+            Registers.BATTERY_STATUS,
         ),
     ],
 )
@@ -195,28 +189,38 @@ def test_hidpp10_get_battery(device, expected_result, expected_register):
 
 
 @pytest.mark.parametrize(
-    "device, expected_length",
+    "device, expected_firmwares",
     [
-        (device_offline, 0),
-        (device_standard, 3),
+        (device_offline, []),
+        (
+            device_standard,
+            [
+                common.FirmwareKind.Firmware,
+                common.FirmwareKind.Bootloader,
+                common.FirmwareKind.Other,
+            ],
+        ),
     ],
 )
-def test_hidpp10_get_firmware(device, expected_length):
+def test_hidpp10_get_firmware(device, expected_firmwares):
     firmwares = _hidpp10.get_firmware(device)
 
-    assert len(firmwares) == expected_length if expected_length > 0 else firmwares is None
-    for firmware in firmwares if firmwares is not None else []:
-        assert firmware.kind in hidpp20_constants.FIRMWARE_KIND
+    if not expected_firmwares:
+        assert firmwares is None
+    else:
+        firmware_types = [firmware.kind for firmware in firmwares]
+        assert firmware_types == expected_firmwares
+        assert len(firmwares) == len(expected_firmwares)
 
 
 @pytest.mark.parametrize(
     "device, level, charging, warning, p1, p2",
     [
-        (device_leds, common.Battery.APPROX.empty, False, False, 0x33, 0x00),
-        (device_leds, common.Battery.APPROX.critical, False, False, 0x22, 0x00),
-        (device_leds, common.Battery.APPROX.low, False, False, 0x20, 0x00),
-        (device_leds, common.Battery.APPROX.good, False, False, 0x20, 0x02),
-        (device_leds, common.Battery.APPROX.full, False, False, 0x20, 0x22),
+        (device_leds, common.BatteryLevelApproximation.EMPTY, False, False, 0x33, 0x00),
+        (device_leds, common.BatteryLevelApproximation.CRITICAL, False, False, 0x22, 0x00),
+        (device_leds, common.BatteryLevelApproximation.LOW, False, False, 0x20, 0x00),
+        (device_leds, common.BatteryLevelApproximation.GOOD, False, False, 0x20, 0x02),
+        (device_leds, common.BatteryLevelApproximation.FULL, False, False, 0x20, 0x22),
         (device_leds, None, True, False, 0x30, 0x33),
         (device_leds, None, False, True, 0x02, 0x00),
         (device_leds, None, False, False, 0x11, 0x11),
@@ -227,10 +231,10 @@ def test_set_3leds(device, level, charging, warning, p1, p2, mocker):
 
     _hidpp10.set_3leds(device, level, charging, warning)
 
-    spy_request.assert_called_once_with(0x8000 | hidpp10_constants.REGISTERS.three_leds, p1, p2)
+    spy_request.assert_called_once_with(0x8000 | Registers.THREE_LEDS, p1, p2)
 
 
-@pytest.mark.parametrize("device", [(device_offline), (device_features)])
+@pytest.mark.parametrize("device", [device_offline, device_features])
 def test_set_3leds_missing(device, mocker):
     spy_request = mocker.spy(device, "request")
 
@@ -251,10 +255,10 @@ def test_set_notification_flags(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
-    spy_request.assert_called_once_with(0x8000 | hidpp10_constants.REGISTERS.notifications, b"\x10\x01\x00")
+    spy_request.assert_called_once_with(0x8000 | Registers.NOTIFICATIONS, b"\x10\x01\x00")
     assert result is not None
 
 
@@ -263,11 +267,30 @@ def test_set_notification_flags_bad(mocker):
     spy_request = mocker.spy(device, "request")
 
     result = _hidpp10.set_notification_flags(
-        device, hidpp10_constants.NOTIFICATION_FLAG.battery_status, hidpp10_constants.NOTIFICATION_FLAG.wireless
+        device, hidpp10_constants.NotificationFlag.BATTERY_STATUS, hidpp10_constants.NotificationFlag.WIRELESS
     )
 
     assert spy_request.call_count == 0
     assert result is None
+
+
+@pytest.mark.parametrize(
+    "flag_bits, expected_names",
+    [
+        (None, ""),
+        (0x0, "none"),
+        (0x009020, "multi touch\n               unknown:008020"),
+        (0x080000, "mouse extra buttons"),
+        (
+            0x080000 + 0x000400,
+            ("link quality\n               mouse extra buttons"),
+        ),
+    ],
+)
+def test_notification_flag_str(flag_bits, expected_names):
+    flag_names = hidpp10_constants.flags_to_str(flag_bits, fallback="none")
+
+    assert flag_names == expected_names
 
 
 def test_get_device_features():
@@ -279,10 +302,10 @@ def test_get_device_features():
 @pytest.mark.parametrize(
     "device, register, expected_result",
     [
-        (device_standard, hidpp10_constants.REGISTERS.battery_status, "052100"),
-        (device_standard, hidpp10_constants.REGISTERS.mouse_button_flags, "101010"),
-        (device_standard, hidpp10_constants.REGISTERS.keyboard_illumination, None),
-        (device_features, hidpp10_constants.REGISTERS.keyboard_illumination, None),
+        (device_standard, Registers.BATTERY_STATUS, "052100"),
+        (device_standard, Registers.MOUSE_BUTTON_FLAGS, "101010"),
+        (device_standard, Registers.KEYBOARD_ILLUMINATION, None),
+        (device_features, Registers.KEYBOARD_ILLUMINATION, None),
     ],
 )
 def test_get_register(device, register, expected_result):
@@ -299,7 +322,7 @@ def test_get_register(device, register, expected_result):
     ],
 )
 def test_get_configuration_pending_flags(device, expected_result):
-    result = _hidpp10.get_configuration_pending_flags(device)
+    result = hidpp10.get_configuration_pending_flags(device)
 
     assert result == expected_result
 
@@ -312,6 +335,6 @@ def test_get_configuration_pending_flags(device, expected_result):
     ],
 )
 def test_set_configuration_pending_flags(device, expected_result):
-    result = _hidpp10.set_configuration_pending_flags(device, 0x00)
+    result = hidpp10.set_configuration_pending_flags(device, 0x00)
 
     assert result == expected_result

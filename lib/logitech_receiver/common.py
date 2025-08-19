@@ -14,27 +14,27 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
 
-# Some common functions and types.
+import binascii
+import dataclasses
+import typing
 
-from binascii import hexlify as _hexlify
-from collections import namedtuple
-from dataclasses import dataclass
+from enum import Flag
+from enum import IntEnum
+from typing import Generator
+from typing import Iterable
 from typing import Optional
 from typing import Union
 
-import yaml as _yaml
+import yaml
 
 from solaar.i18n import _
 
+if typing.TYPE_CHECKING:
+    from logitech_receiver.hidpp20_constants import FirmwareKind
 
-def is_string(d):
-    return isinstance(d, str)
-
-
-#
-#
-#
+LOGITECH_VENDOR_ID = 0x046D
 
 
 def crc16(data: bytes):
@@ -314,7 +314,7 @@ class NamedInt(int):
     (case-insensitive)."""
 
     def __new__(cls, value, name):
-        assert is_string(name)
+        assert isinstance(name, str)
         obj = int.__new__(cls, value)
         obj.name = str(name)
         return obj
@@ -329,11 +329,11 @@ class NamedInt(int):
             return int(self) == int(other) and self.name == other.name
         if isinstance(other, int):
             return int(self) == int(other)
-        if is_string(other):
+        if isinstance(other, str):
             return self.name.lower() == other.lower()
         # this should catch comparisons with bytes in Py3
         if other is not None:
-            raise TypeError("Unsupported type " + str(type(other)))
+            raise TypeError(f"Unsupported type {str(type(other))}")
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -357,8 +357,8 @@ class NamedInt(int):
         return dumper.represent_mapping("!NamedInt", {"value": int(data), "name": data.name}, flow_style=True)
 
 
-_yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
-_yaml.add_representer(NamedInt, NamedInt.to_yaml)
+yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
+yaml.add_representer(NamedInt, NamedInt.to_yaml)
 
 
 class NamedInts:
@@ -377,12 +377,12 @@ class NamedInts:
 
     __slots__ = ("__dict__", "_values", "_indexed", "_fallback", "_is_sorted")
 
-    def __init__(self, dict=None, **kwargs):
+    def __init__(self, dict_=None, **kwargs):
         def _readable_name(n):
             return n.replace("__", "/").replace("_", " ")
 
         # print (repr(kwargs))
-        elements = dict if dict else kwargs
+        elements = dict_ if dict_ else kwargs
         values = {k: NamedInt(v, _readable_name(k)) for (k, v) in elements.items()}
         self.__dict__ = values
         self._is_sorted = False
@@ -430,7 +430,7 @@ class NamedInts:
                 self._sort_values()
                 return value
 
-        elif is_string(index):
+        elif isinstance(index, str):
             if index in self.__dict__:
                 return self.__dict__[index]
             return next((x for x in self._values if str(x) == index), None)
@@ -467,9 +467,9 @@ class NamedInts:
     def __setitem__(self, index, name):
         assert isinstance(index, int), type(index)
         if isinstance(name, NamedInt):
-            assert int(index) == int(name), repr(index) + " " + repr(name)
+            assert int(index) == int(name), f"{repr(index)} {repr(name)}"
             value = name
-        elif is_string(name):
+        elif isinstance(name, str):
             value = NamedInt(index, name)
         else:
             raise TypeError("name must be a string")
@@ -490,7 +490,7 @@ class NamedInts:
             return self[value] == value
         elif isinstance(value, int):
             return value in self._indexed
-        elif is_string(value):
+        elif isinstance(value, str):
             return value in self.__dict__ or value in self._values
 
     def __iter__(self):
@@ -506,7 +506,32 @@ class NamedInts:
         return NamedInts(**self.__dict__, **other.__dict__)
 
     def __eq__(self, other):
-        return type(self) == type(other) and self._values == other._values
+        return isinstance(other, self.__class__) and self._values == other._values
+
+
+def flag_names(enum_class: Iterable, value: int) -> Generator[str]:
+    """Extracts single bit flags from a (binary) number.
+
+    Parameters
+    ----------
+    enum_class
+        Enum class to extract flags from.
+    value
+        Number to extract binary flags from.
+    """
+    indexed = {item.value: item.name for item in enum_class}
+
+    unknown_bits = value
+    for k in indexed:
+        # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+        assert bin(k).count("1") == 1
+        if k & value == k:
+            unknown_bits &= ~k
+            yield indexed[k].lower()
+
+    # Yield any remaining unknown bits
+    if unknown_bits != 0:
+        yield f"unknown:{unknown_bits:06X}"
 
 
 class UnsortedNamedInts(NamedInts):
@@ -521,7 +546,7 @@ class UnsortedNamedInts(NamedInts):
 def strhex(x):
     assert x is not None
     """Produce a hex-string representation of a sequence of bytes."""
-    return _hexlify(x).decode("ascii").upper()
+    return binascii.hexlify(x).decode("ascii").upper()
 
 
 def bytes2int(x, signed=False):
@@ -550,63 +575,102 @@ class KwException(Exception):
             return self.args[0].get(k)  # was self.args[0][k]
 
 
-"""Firmware information."""
-FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
+class FirmwareKind(IntEnum):
+    Firmware = 0x00
+    Bootloader = 0x01
+    Hardware = 0x02
+    Other = 0x03
 
 
-@dataclass
+@dataclasses.dataclass
+class FirmwareInfo:
+    kind: FirmwareKind
+    name: str
+    version: str
+    extras: str | None
+
+
+class BatteryStatus(Flag):
+    DISCHARGING = 0x00
+    RECHARGING = 0x01
+    ALMOST_FULL = 0x02
+    FULL = 0x03
+    SLOW_RECHARGE = 0x04
+    INVALID_BATTERY = 0x05
+    THERMAL_ERROR = 0x06
+
+
+class BatteryLevelApproximation(IntEnum):
+    EMPTY = 0
+    CRITICAL = 5
+    LOW = 20
+    GOOD = 50
+    FULL = 90
+
+
+@dataclasses.dataclass
 class Battery:
     """Information about the current state of a battery"""
 
-    level: Optional[Union[NamedInt, int]]
+    ATTENTION_LEVEL = 5
+
+    level: Optional[Union[BatteryLevelApproximation, int]]
     next_level: Optional[Union[NamedInt, int]]
-    status: Optional[NamedInt]
+    status: Optional[BatteryStatus]
     voltage: Optional[int]
     light_level: Optional[int] = None  # light level for devices with solaar recharging
 
     def __post_init__(self):
         if self.level is None:  # infer level from status if needed and possible
-            if self.status == Battery.STATUS.full:
-                self.level = Battery.APPROX.full
-            elif self.status in (Battery.STATUS.almost_full, Battery.STATUS.recharging):
-                self.level = Battery.APPROX.good
-            elif self.status == Battery.STATUS.slow_recharge:
-                self.level = Battery.APPROX.low
+            if self.status == BatteryStatus.FULL:
+                self.level = BatteryLevelApproximation.FULL
+            elif self.status in (BatteryStatus.ALMOST_FULL, BatteryStatus.RECHARGING):
+                self.level = BatteryLevelApproximation.GOOD
+            elif self.status == BatteryStatus.SLOW_RECHARGE:
+                self.level = BatteryLevelApproximation.LOW
 
-    STATUS = NamedInts(
-        discharging=0x00,
-        recharging=0x01,
-        almost_full=0x02,
-        full=0x03,
-        slow_recharge=0x04,
-        invalid_battery=0x05,
-        thermal_error=0x06,
-    )
-
-    APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
-
-    ATTENTION_LEVEL = 5
-
-    def ok(self):
-        return self.status not in (Battery.STATUS.invalid_battery, Battery.STATUS.thermal_error) and (
+    def ok(self) -> bool:
+        return self.status not in (BatteryStatus.INVALID_BATTERY, BatteryStatus.THERMAL_ERROR) and (
             self.level is None or self.level > Battery.ATTENTION_LEVEL
         )
 
-    def charging(self):
+    def charging(self) -> bool:
         return self.status in (
-            Battery.STATUS.recharging,
-            Battery.STATUS.almost_full,
-            Battery.STATUS.full,
-            Battery.STATUS.slow_recharge,
+            BatteryStatus.RECHARGING,
+            BatteryStatus.ALMOST_FULL,
+            BatteryStatus.FULL,
+            BatteryStatus.SLOW_RECHARGE,
         )
 
-    def to_str(self):
-        if isinstance(self.level, NamedInt):
-            return _("Battery: %(level)s (%(status)s)") % {"level": _(self.level), "status": _(self.status)}
+    def to_str(self) -> str:
+        if isinstance(self.level, BatteryLevelApproximation):
+            level = self.level.name.lower()
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
+            return _("Battery: %(level)s (%(status)s)") % {"level": _(level), "status": _(status)}
         elif isinstance(self.level, int):
-            return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(self.status)}
-        else:
-            return ""
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
+            return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
+        return ""
 
 
-ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
+class Alert(IntEnum):
+    NONE = 0x00
+    NOTIFICATION = 0x01
+    SHOW_WINDOW = 0x02
+    ATTENTION = 0x04
+    ALL = 0xFF
+
+
+class Notification(IntEnum):
+    NO_OPERATION = 0x00
+    CONNECT_DISCONNECT = 0x40
+    DJ_PAIRING = 0x41
+    CONNECTED = 0x42
+    RAW_INPUT = 0x49
+    PAIRING_LOCK = 0x4A
+    POWER = 0x4B
+
+
+class BusID(IntEnum):
+    USB = 0x03
+    BLUETOOTH = 0x05

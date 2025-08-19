@@ -15,14 +15,12 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .common import KwException as _KwException
+from .common import KwException
 
-#
-# Exceptions that may be raised by this API.
-#
+"""Exceptions that may be raised by this API."""
 
 
-class NoReceiver(_KwException):
+class NoReceiver(KwException):
     """Raised when trying to talk through a previously open handle, when the
     receiver is no longer available. Should only happen if the receiver is
     physically disconnected from the machine, or its kernel driver module is
@@ -31,25 +29,25 @@ class NoReceiver(_KwException):
     pass
 
 
-class NoSuchDevice(_KwException):
+class NoSuchDevice(KwException):
     """Raised when trying to reach a device number not paired to the receiver."""
 
     pass
 
 
-class DeviceUnreachable(_KwException):
+class DeviceUnreachable(KwException):
     """Raised when a request is made to an unreachable (turned off) device."""
 
     pass
 
 
-class FeatureNotSupported(_KwException):
+class FeatureNotSupported(KwException):
     """Raised when trying to request a feature not supported by the device."""
 
     pass
 
 
-class FeatureCallError(_KwException):
+class FeatureCallError(KwException):
     """Raised if the device replied to a feature call with an error."""
 
     pass

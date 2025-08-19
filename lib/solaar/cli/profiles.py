@@ -14,12 +14,12 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import traceback as _traceback
+import traceback
 
-import yaml as _yaml
+import yaml
 
-from logitech_receiver.hidpp20 import OnboardProfiles as _OnboardProfiles
-from logitech_receiver.hidpp20 import OnboardProfilesVersion as _OnboardProfilesVersion
+from logitech_receiver.hidpp20 import OnboardProfiles
+from logitech_receiver.hidpp20 import OnboardProfilesVersion
 
 
 def run(receivers, args, find_receiver, find_device):
@@ -42,15 +42,15 @@ def run(receivers, args, find_receiver, find_device):
         print(f"Device {dev.name} is either offline or has no onboard profiles")
     elif not profiles_file:
         print(f"#Dumping profiles from {dev.name}")
-        print(_yaml.dump(dev.profiles))
+        print(yaml.dump(dev.profiles))
     else:
         try:
             with open(profiles_file, "r") as f:
                 print(f"Reading profiles from {profiles_file}")
-                profiles = _yaml.safe_load(f)
-                if not isinstance(profiles, _OnboardProfiles):
+                profiles = yaml.safe_load(f)
+                if not isinstance(profiles, OnboardProfiles):
                     print("Profiles file does not contain current onboard profiles")
-                elif getattr(profiles, "version", None) != _OnboardProfilesVersion:
+                elif getattr(profiles, "version", None) != OnboardProfilesVersion:
                     version = getattr(profiles, "version", None)
                     print(f"Missing or incorrect profile version {version} in loaded profile")
                 elif getattr(profiles, "name", None) != dev.name:
@@ -62,4 +62,4 @@ def run(receivers, args, find_receiver, find_device):
                     print(f"Wrote {written} sectors to {dev.name}")
         except Exception as exc:
             print("Profiles not written:", exc)
-            print(_traceback.format_exc())
+            print(traceback.format_exc())

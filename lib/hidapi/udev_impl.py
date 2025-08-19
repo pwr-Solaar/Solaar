@@ -13,6 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 """Generic Human Interface Device API.
 
 It is currently a partial pure-Python implementation of the native HID API
@@ -22,52 +23,37 @@ The docstrings are mostly copied from the hidapi API header, with changes where
 necessary.
 """
 
-import errno as _errno
+from __future__ import annotations
+
+import errno
 import logging
-import os as _os
-import warnings as _warnings
+import os
+import typing
+import warnings
 
 
 # the tuple object we'll expose when enumerating devices
-from collections import namedtuple
-from select import select as _select
+from select import select
 from time import sleep
-from time import time as _timestamp
+from time import time
+from typing import Callable
 
-import gi
+import pyudev
 
-from pyudev import Context as _Context
-from pyudev import Device as _Device
-from pyudev import DeviceNotFoundError
-from pyudev import Devices as _Devices
-from pyudev import Monitor as _Monitor
+from hidapi.common import DeviceInfo
 
-gi.require_version("Gdk", "3.0")
-from gi.repository import GLib  # NOQA: E402
+if typing.TYPE_CHECKING:
+    import gi
+
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-native_implementation = "udev"
 fileopen = open
 
-DeviceInfo = namedtuple(
-    "DeviceInfo",
-    [
-        "path",
-        "bus_id",
-        "vendor_id",
-        "product_id",
-        "interface",
-        "driver",
-        "manufacturer",
-        "product",
-        "serial",
-        "release",
-        "isDevice",
-        "hidpp_short",
-        "hidpp_long",
-    ],
-)
+ACTION_ADD = "add"
+ACTION_REMOVE = "remove"
 
 #
 # exposed API
@@ -93,12 +79,14 @@ def exit():
     return True
 
 
-# The filterfn is used to determine whether this is a device of interest to Solaar.
-# It is given the bus id, vendor id, and product id and returns a dictionary
-# with the required hid_driver and usb_interface and whether this is a receiver or device.
-def _match(action, device, filterfn):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"Dbus event {action} {device}")
+def _match(action: str, device, filter_func: typing.Callable[[int, int, int, bool, bool], dict[str, typing.Any]]):
+    """
+
+    The filter_func is used to determine whether this is a device of
+    interest to Solaar. It is given the bus id, vendor id, and product
+    id and returns a dictionary with the required hid_driver and
+    usb_interface and whether this is a receiver or device."""
+    logger.debug(f"Dbus event {action} {device}")
     hid_device = device.find_parent("hid")
     if hid_device is None:  # only HID devices are of interest to Solaar
         return
@@ -111,14 +99,14 @@ def _match(action, device, filterfn):
         return  # these are devices connected through a receiver so don't pick them up here
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
-        from hid_parser import ReportDescriptor as _ReportDescriptor
+        from hid_parser import ReportDescriptor
 
         hidpp_short = hidpp_long = False
         devfile = "/sys" + hid_device.properties.get("DEVPATH") + "/report_descriptor"
         with fileopen(devfile, "rb") as fd:
-            with _warnings.catch_warnings():
-                _warnings.simplefilter("ignore")
-                rd = _ReportDescriptor(fd.read())
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                rd = ReportDescriptor(fd.read())
             hidpp_short = 0x10 in rd.input_report_ids and 6 * 8 == int(rd.get_input_report_size(0x10))
             # and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages  # be more permissive
             hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(rd.get_input_report_size(0x11))
@@ -126,43 +114,39 @@ def _match(action, device, filterfn):
         if not hidpp_short and not hidpp_long:
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
-        hidpp_short = hidpp_long = None
+        hidpp_short = None
+        hidpp_long = None
         logger.info(
-            "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s", device.device_node, bid, vid, pid, e
+            "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s",
+            device.device_node,
+            bid,
+            vid,
+            pid,
+            e,
         )
 
-    filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
-    if not filter:
+    filtered_result = filter_func(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
+    if not filtered_result:
         return
-    hid_driver = filter.get("hid_driver")
-    interface_number = filter.get("usb_interface")
-    isDevice = filter.get("isDevice")
+    interface_number = filtered_result.get("usb_interface")
+    isDevice = filtered_result.get("isDevice")
 
-    if action == "add":
+    if action == ACTION_ADD:
         hid_driver_name = hid_device.properties.get("DRIVER")
-        # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
-        if hid_driver:
-            if isinstance(hid_driver, tuple):
-                if hid_driver_name not in hid_driver:
-                    return
-            elif hid_driver_name != hid_driver:
-                return
-
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
-        if logger.isEnabledFor(logging.INFO):
-            logger.info(
-                "Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s",
-                device.device_node,
-                bid,
-                vid,
-                pid,
-                hidpp_short,
-                hidpp_long,
-                usb_interface,
-                interface_number,
-            )
+        logger.info(
+            "Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s",
+            device.device_node,
+            bid,
+            vid,
+            pid,
+            hidpp_short,
+            hidpp_long,
+            usb_interface,
+            interface_number,
+        )
         if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
             return
         attrs = intf_device.attributes if intf_device is not None else None
@@ -184,9 +168,7 @@ def _match(action, device, filterfn):
         )
         return d_info
 
-    elif action == "remove":
-        # print (dict(device), dict(usb_device))
-
+    elif action == ACTION_REMOVE:
         d_info = DeviceInfo(
             path=device.device_node,
             bus_id=None,
@@ -205,31 +187,31 @@ def _match(action, device, filterfn):
         return d_info
 
 
-def find_paired_node(receiver_path, index, timeout):
+def find_paired_node(receiver_path: str, index: int, timeout: int):
     """Find the node of a device paired with a receiver"""
-    context = _Context()
-    receiver_phys = _Devices.from_device_file(context, receiver_path).find_parent("hid").get("HID_PHYS")
+    context = pyudev.Context()
+    receiver_phys = pyudev.Devices.from_device_file(context, receiver_path).find_parent("hid").get("HID_PHYS")
 
     if not receiver_phys:
         return None
 
     phys = f"{receiver_phys}:{index}"  # noqa: E231
-    timeout += _timestamp()
-    delta = _timestamp()
+    timeout += time()
+    delta = time()
     while delta < timeout:
         for dev in context.list_devices(subsystem="hidraw"):
             dev_phys = dev.find_parent("hid").get("HID_PHYS")
             if dev_phys and dev_phys == phys:
                 return dev.device_node
-        delta = _timestamp()
+        delta = time()
 
     return None
 
 
-def find_paired_node_wpid(receiver_path, index):
+def find_paired_node_wpid(receiver_path: str, index: int):
     """Find the node of a device paired with a receiver, get wpid from udev"""
-    context = _Context()
-    receiver_phys = _Devices.from_device_file(context, receiver_path).find_parent("hid").get("HID_PHYS")
+    context = pyudev.Context()
+    receiver_phys = pyudev.Devices.from_device_file(context, receiver_path).find_parent("hid").get("HID_PHYS")
 
     if not receiver_phys:
         return None
@@ -247,55 +229,48 @@ def find_paired_node_wpid(receiver_path, index):
     return None
 
 
-def monitor_glib(callback, filterfn):
-    c = _Context()
+def monitor_glib(glib: GLib, callback: Callable, filter_func: Callable):
+    """Monitor GLib.
 
-    # already existing devices
-    # for device in c.list_devices(subsystem='hidraw'):
-    #     # print (device, dict(device), dict(device.attributes))
-    #     for filter in device_filters:
-    #         d_info = _match('add', device, *filter)
-    #         if d_info:
-    #             GLib.idle_add(callback, 'add', d_info)
-    #             break
-
-    m = _Monitor.from_netlink(c)
+    Parameters
+    ----------
+    glib
+        GLib instance.
+    """
+    c = pyudev.Context()
+    m = pyudev.Monitor.from_netlink(c)
     m.filter_by(subsystem="hidraw")
 
-    def _process_udev_event(monitor, condition, cb, filterfn):
-        if condition == GLib.IO_IN:
+    def _process_udev_event(monitor, condition, cb, filter_func):
+        if condition == glib.IO_IN:
             event = monitor.receive_device()
             if event:
                 action, device = event
                 # print ("***", action, device)
-                if action == "add":
-                    d_info = _match(action, device, filterfn)
+                if action == ACTION_ADD:
+                    d_info = _match(action, device, filter_func)
                     if d_info:
-                        GLib.idle_add(cb, action, d_info)
-                elif action == "remove":
+                        glib.idle_add(cb, action, d_info)
+                elif action == ACTION_REMOVE:
                     # the GLib notification does _not_ match!
                     pass
         return True
 
     try:
         # io_add_watch_full may not be available...
-        GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-        # print ("did io_add_watch_full")
+        glib.io_add_watch_full(m, glib.PRIORITY_LOW, glib.IO_IN, _process_udev_event, callback, filter_func)
     except AttributeError:
         try:
             # and the priority parameter appeared later in the API
-            GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch with priority")
+            glib.io_add_watch(m, glib.PRIORITY_LOW, glib.IO_IN, _process_udev_event, callback, filter_func)
         except Exception:
-            GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch")
+            glib.io_add_watch(m, glib.IO_IN, _process_udev_event, callback, filter_func)
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("Starting dbus monitoring")
+    logger.debug("Starting dbus monitoring")
     m.start()
 
 
-def enumerate(filterfn):
+def enumerate(filter_func: typing.Callable[[int, int, int, bool, bool], dict[str, typing.Any]]):
     """Enumerate the HID Devices.
 
     List all the HID devices attached to the system, optionally filtering by
@@ -304,10 +279,9 @@ def enumerate(filterfn):
     :returns: a list of matching ``DeviceInfo`` tuples.
     """
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("Starting dbus enumeration")
-    for dev in _Context().list_devices(subsystem="hidraw"):
-        dev_info = _match("add", dev, filterfn)
+    logger.debug("Starting dbus enumeration")
+    for dev in pyudev.Context().list_devices(subsystem="hidraw"):
+        dev_info = _match(ACTION_ADD, dev, filter_func)
         if dev_info:
             yield dev_info
 
@@ -343,22 +317,22 @@ def open_path(device_path):
     while retrycount < 3:
         retrycount += 1
         try:
-            return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
+            return os.open(device_path, os.O_RDWR | os.O_SYNC)
         except OSError as e:
             logger.info("OPEN PATH FAILED %s ERROR %s %s", device_path, e.errno, e)
-            if e.errno == _errno.EACCES:
+            if e.errno == errno.EACCES:
                 sleep(0.1)
             else:
                 raise
 
 
-def close(device_handle):
+def close(device_handle) -> None:
     """Close a HID device.
 
     :param device_handle: a device handle returned by open() or open_path().
     """
     assert device_handle
-    _os.close(device_handle)
+    os.close(device_handle)
 
 
 def write(device_handle, data):
@@ -390,14 +364,14 @@ def write(device_handle, data):
     while retrycount < 3:
         try:
             retrycount += 1
-            bytes_written = _os.write(device_handle, data)
+            bytes_written = os.write(device_handle, data)
         except OSError as e:
-            if e.errno == _errno.EPIPE:
+            if e.errno == errno.EPIPE:
                 sleep(0.1)
         else:
             break
     if bytes_written != len(data):
-        raise OSError(_errno.EIO, f"written {int(bytes_written)} bytes out of expected {len(data)}")
+        raise OSError(errno.EIO, f"written {int(bytes_written)} bytes out of expected {len(data)}")
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
@@ -418,15 +392,15 @@ def read(device_handle, bytes_count, timeout_ms=-1):
     """
     assert device_handle
     timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
-    rlist, wlist, xlist = _select([device_handle], [], [device_handle], timeout)
+    rlist, wlist, xlist = select([device_handle], [], [device_handle], timeout)
 
     if xlist:
         assert xlist == [device_handle]
-        raise OSError(_errno.EIO, f"exception on file descriptor {int(device_handle)}")
+        raise OSError(errno.EIO, f"exception on file descriptor {int(device_handle)}")
 
     if rlist:
         assert rlist == [device_handle]
-        data = _os.read(device_handle, bytes_count)
+        data = os.read(device_handle, bytes_count)
         assert data is not None
         assert isinstance(data, bytes), (repr(data), type(data))
         return data
@@ -482,10 +456,10 @@ def get_indexed_string(device_handle, index):
         return None
 
     assert device_handle
-    stat = _os.fstat(device_handle)
+    stat = os.fstat(device_handle)
     try:
-        dev = _Device.from_device_number(_Context(), "char", stat.st_rdev)
-    except (DeviceNotFoundError, ValueError):
+        dev = pyudev.Devices.from_device_number(pyudev.Context(), "char", stat.st_rdev)
+    except (pyudev.DeviceNotFoundError, ValueError):
         return None
 
     hid_dev = dev.find_parent("hid")

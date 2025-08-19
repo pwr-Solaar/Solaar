@@ -18,7 +18,8 @@
 import logging
 import os
 
-from time import time as _timestamp
+from enum import Enum
+from time import time
 
 import gi
 
@@ -31,16 +32,20 @@ import solaar.gtk as gtk
 from solaar import NAME
 from solaar.i18n import _
 
-from . import icons as _icons
-from .about import show_window as _show_about_window
-from .action import make_image_menu_item
-from .window import popup as _window_popup
-from .window import toggle as _window_toggle
+from . import action
+from . import icons
+from . import window
+from .about import about
 
 logger = logging.getLogger(__name__)
 
 _TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    SCROLL_EVENT = "scroll-event"
 
 
 def _create_menu(quit_handler):
@@ -52,8 +57,8 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(make_image_menu_item(_("About %s") % NAME, "help-about", _show_about_window))
-    menu.append(make_image_menu_item(_("Quit %s") % NAME, "application-exit", quit_handler))
+    menu.append(action.make_image_menu_item(_("About %s") % NAME, "help-about", about.show))
+    menu.append(action.make_image_menu_item(_("Quit %s") % NAME, "application-exit", quit_handler))
 
     menu.show_all()
     return menu
@@ -73,12 +78,13 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
+    # don't bother even trying to scroll if less than two devices
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:
         return
 
     # scroll events come way too fast (at least 5-6 at once) so take a little break between them
     global _last_scroll
-    now = now or _timestamp()
+    now = now or time()
     if now - _last_scroll < 0.33:  # seconds
         return
     _last_scroll = now
@@ -126,8 +132,7 @@ def _scroll(tray_icon, event, direction=None):
             _picked_device = None
 
     _picked_device = candidate or _picked_device
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("scroll: picked %s", _picked_device)
+    logger.debug("scroll: picked %s", _picked_device)
     _update_tray_icon()
 
 
@@ -147,8 +152,7 @@ try:
             # treat unavailable versions the same as unavailable packages
             raise ImportError from exc
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
+    logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
@@ -162,17 +166,17 @@ try:
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
-        _icons._init_icon_paths()
+        icons._init_icon_paths()
         ind = AppIndicator3.Indicator.new(
-            "indicator-solaar", _icon_file(_icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE
+            "indicator-solaar", _icon_file(icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE
         )
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-        # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
+        # ind.set_attention_icon_full(_icon_file(icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
         # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
-        ind.connect("scroll-event", _scroll)
+        ind.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
 
         return ind
 
@@ -187,36 +191,38 @@ try:
             _ignore, _ignore, name, device = _picked_device
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
-            tray_icon_name = _icons.battery(battery_level, battery_charging)
+            tray_icon_name = icons.battery(battery_level, battery_charging)
             description = f"{name}: {device.status_string()}"
         else:
             # there may be a receiver, but no peripherals
-            tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
+            tray_icon_name = icons.TRAY_OKAY if _devices_info else icons.TRAY_INIT
 
             description_lines = _generate_description_lines()
             description = "\n".join(description_lines).rstrip("\n")
 
-        # icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
+        # icon_file = icons.icon_file(icon_name, _TRAY_ICON_SIZE)
         _icon.set_icon_full(_icon_file(tray_icon_name), description)
 
     def attention(reason=None):
         if _icon.get_status() != AppIndicator3.IndicatorStatus.ATTENTION:
-            # _icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
+            # _icon.set_attention_icon_full(_icon_file(icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
             _icon.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
             GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
 except ImportError:
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("using StatusIcon")
+    logger.debug("using StatusIcon")
 
     def _create(menu):
-        icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
+        icon = Gtk.StatusIcon.new_from_icon_name(icons.TRAY_INIT)
         icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
-        icon.connect("activate", _window_toggle)
-        icon.connect("scroll-event", _scroll)
-        icon.connect("popup-menu", lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
+        icon.connect(GtkSignal.ACTIVATE.value, window.toggle)
+        icon.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
+        icon.connect(
+            "popup-menu",
+            lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time),
+        )
 
         return icon
 
@@ -235,10 +241,10 @@ except ImportError:
             _ignore, _ignore, name, device = _picked_device
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
-            tray_icon_name = _icons.battery(battery_level, battery_charging)
+            tray_icon_name = icons.battery(battery_level, battery_charging)
         else:
             # there may be a receiver, but no peripherals
-            tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_ATTENTION
+            tray_icon_name = icons.TRAY_OKAY if _devices_info else icons.TRAY_ATTENTION
         _icon.set_from_icon_name(tray_icon_name)
 
     _icon_before_attention = None
@@ -246,7 +252,7 @@ except ImportError:
     def _blink(count):
         global _icon_before_attention
         if count % 2:
-            _icon.set_from_icon_name(_icons.TRAY_ATTENTION)
+            _icon.set_from_icon_name(icons.TRAY_ATTENTION)
         else:
             _icon.set_from_icon_name(_icon_before_attention)
 
@@ -308,8 +314,7 @@ def _pick_device_with_lowest_battery():
             picked = info
             picked_level = level or 0
 
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("picked device with lowest battery: %s", picked)
+    logger.debug("picked device with lowest battery: %s", picked)
 
     return picked
 
@@ -337,7 +342,7 @@ def _add_device(device):
     _devices_info.insert(index, new_device_info)
 
     label = ("   " if device.number else "") + device.name
-    new_menu_item = make_image_menu_item(label, None, _window_popup, receiver_path, device.number)
+    new_menu_item = action.make_image_menu_item(label, None, window.popup, receiver_path, device.number)
     _menu.insert(new_menu_item, index)
 
     return index
@@ -360,8 +365,8 @@ def _add_receiver(receiver):
     index = len(_devices_info)
     new_receiver_info = (receiver.path, None, receiver.name, None)
     _devices_info.insert(index, new_receiver_info)
-    icon_name = _icons.device_icon_name(receiver.name, receiver.kind)
-    new_menu_item = make_image_menu_item(receiver.name, icon_name, _window_popup, receiver.path)
+    icon_name = icons.device_icon_name(receiver.name, receiver.kind)
+    new_menu_item = action.make_image_menu_item(receiver.name, icon_name, window.popup, receiver.path)
     _menu.insert(new_menu_item, index)
     return 0
 
@@ -385,7 +390,7 @@ def _update_menu_item(index, device):
     menu_item = menu_items[index]
     level = device.battery_info.level if device.battery_info is not None else None
     charging = device.battery_info.charging() if device.battery_info is not None else None
-    icon_name = _icons.battery(level, charging)
+    icon_name = icons.battery(level, charging)
     menu_item.label.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
     image_widget = menu_item.icon
     image_widget.set_sensitive(bool(device.online))

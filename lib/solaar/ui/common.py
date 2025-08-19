@@ -16,10 +16,13 @@
 
 import logging
 
+from enum import Enum
+from typing import Tuple
+
 import gi
 
 from solaar.i18n import _
-from solaar.tasks import TaskRunner as _TaskRunner
+from solaar.tasks import TaskRunner
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib  # NOQA: E402
@@ -28,35 +31,45 @@ from gi.repository import Gtk  # NOQA: E402
 logger = logging.getLogger(__name__)
 
 
-def _error_dialog(reason, object):
-    logger.error("error: %s %s", reason, object)
+class ErrorReason(Enum):
+    PERMISSIONS = "Permissions"
+    NO_DEVICE = "No device"
+    UNPAIR = "Unpair"
 
-    if reason == "permissions":
+
+def _create_error_text(reason: ErrorReason, object_) -> Tuple[str, str]:
+    if reason == ErrorReason.PERMISSIONS:
         title = _("Permissions error")
         text = (
-            _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object
+            _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object_
             + "\n\n"
             + _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
         )
-    elif reason == "nodevice":
+    elif reason == ErrorReason.NO_DEVICE:
         title = _("Cannot connect to device error")
         text = (
-            _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object
+            _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object_
             + "\n\n"
             + _("Try disconnecting the device and then reconnecting it or turning it off and then on.")
         )
-    elif reason == "unpair":
+    elif reason == ErrorReason.UNPAIR:
         title = _("Unpairing failed")
         text = (
-            _("Failed to unpair %{device} from %{receiver}.").format(device=object.name, receiver=object.receiver.name)
+            _("Failed to unpair %{device} from %{receiver}.").format(
+                device=object_.name,
+                receiver=object_.receiver.name,
+            )
             + "\n\n"
             + _("The receiver returned an error, with no further details.")
         )
     else:
-        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
+        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason.name, object_)
+    return title, text
 
-    assert title
-    assert text
+
+def _error_dialog(reason: ErrorReason, object_):
+    logger.error("error: %s %s", reason, object_)
+    title, text = _create_error_text(reason, object_)
 
     m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
     m.set_title(title)
@@ -64,21 +77,16 @@ def _error_dialog(reason, object):
     m.destroy()
 
 
-def error_dialog(reason, object):
-    assert reason is not None
-    GLib.idle_add(_error_dialog, reason, object)
+def error_dialog(reason: ErrorReason, object_):
+    GLib.idle_add(_error_dialog, reason, object_)
 
-
-#
-#
-#
 
 _task_runner = None
 
 
 def start_async():
     global _task_runner
-    _task_runner = _TaskRunner("AsyncUI")
+    _task_runner = TaskRunner("AsyncUI")
     _task_runner.start()
 
 
@@ -89,5 +97,6 @@ def stop_async():
 
 
 def ui_async(function, *args, **kwargs):
+    """Runs a function asynchronously."""
     if _task_runner:
         _task_runner(function, *args, **kwargs)

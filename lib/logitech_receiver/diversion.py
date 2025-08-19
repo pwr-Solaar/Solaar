@@ -14,45 +14,50 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ctypes as _ctypes
+from __future__ import annotations
+
+import ctypes
 import logging
 import math
 import numbers
-import os as _os
-import os.path as _path
-import platform as _platform
+import os
+import platform
 import socket
+import struct
 import subprocess
-import sys as _sys
+import sys
+import time
+import typing
 import threading
-import time as _time
 
-import dbus
+from typing import Any
+from typing import Dict
+from typing import Tuple
+
 import gi
-import keysyms.keysymdef as _keysymdef
 import psutil
+import yaml
+
+from keysyms import keysymdef
 
 # There is no evdev on macOS or Windows. Diversion will not work without
 # it but other Solaar functionality is available.
-if _platform.system() in ("Darwin", "Windows"):
+if platform.system() in ("Darwin", "Windows"):
     evdev = None
 else:
     import evdev
 
-from math import sqrt as _sqrt
-from struct import unpack as _unpack
-
-from yaml import add_representer as _yaml_add_representer
-from yaml import dump_all as _yaml_dump_all
-from yaml import safe_load_all as _yaml_safe_load_all
 
 from . import language_switcher as _language_switcher
 from .common import NamedInt
-from .hidpp20 import FEATURE as _F
-from .special_keys import CONTROL as _CONTROL
+from .hidpp20 import SupportedFeature
+from .special_keys import CONTROL
 
 gi.require_version("Gdk", "3.0")  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
+
+if typing.TYPE_CHECKING:
+    from .base import HIDPPNotification
 
 logger = logging.getLogger(__name__)
 switcher = _language_switcher.LanguageSwitcher()
@@ -86,7 +91,7 @@ switcher = _language_switcher.LanguageSwitcher()
 # Xtest extension to X11 - provides input simulation, partly works under Wayland
 # Wayland - provides input simulation
 
-XK_KEYS = _keysymdef.keysymdef
+XK_KEYS: Dict[str, int] = keysymdef.key_symbols
 
 # Event codes - can't use Xlib.X codes because Xlib might not be available
 _KEY_RELEASE = 0
@@ -101,7 +106,7 @@ gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if logger.isEnabledFor(logging.INFO):
     logger.info("GDK Keymap %sset up", "" if gkeymap else "not ")
 
-wayland = _os.getenv("WAYLAND_DISPLAY")  # is this Wayland?
+wayland = os.getenv("WAYLAND_DISPLAY")  # is this Wayland?
 if wayland:
     logger.warning(
         "rules cannot access modifier keys in Wayland, "
@@ -115,35 +120,55 @@ try:
 except Exception:
     _x11 = False  # X11 is not available
 
+# Globals
 xtest_available = True  # Xtest might be available
 xdisplay = None
+
+
 Xkbdisplay = None  # xkb might be available
+X11Lib = None
+
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
+NET_ACTIVE_WINDOW = None
+NET_WM_PID = None
+WM_CLASS = None
+
+
+udevice = None
+
+key_down = None
+key_up = None
+
+keys_down = []
+g_keys_down = 0
+m_keys_down = 0
+mr_key_down = False
+thumb_wheel_displacement = 0
 
 _dbus_interface = None
 
 
-class XkbDisplay(_ctypes.Structure):
+class XkbDisplay(ctypes.Structure):
     """opaque struct"""
 
 
-class XkbStateRec(_ctypes.Structure):
+class XkbStateRec(ctypes.Structure):
     _fields_ = [
-        ("group", _ctypes.c_ubyte),
-        ("locked_group", _ctypes.c_ubyte),
-        ("base_group", _ctypes.c_ushort),
-        ("latched_group", _ctypes.c_ushort),
-        ("mods", _ctypes.c_ubyte),
-        ("base_mods", _ctypes.c_ubyte),
-        ("latched_mods", _ctypes.c_ubyte),
-        ("locked_mods", _ctypes.c_ubyte),
-        ("compat_state", _ctypes.c_ubyte),
-        ("grab_mods", _ctypes.c_ubyte),
-        ("compat_grab_mods", _ctypes.c_ubyte),
-        ("lookup_mods", _ctypes.c_ubyte),
-        ("compat_lookup_mods", _ctypes.c_ubyte),
-        ("ptr_buttons", _ctypes.c_ushort),
+        ("group", ctypes.c_ubyte),
+        ("locked_group", ctypes.c_ubyte),
+        ("base_group", ctypes.c_ushort),
+        ("latched_group", ctypes.c_ushort),
+        ("mods", ctypes.c_ubyte),
+        ("base_mods", ctypes.c_ubyte),
+        ("latched_mods", ctypes.c_ubyte),
+        ("locked_mods", ctypes.c_ubyte),
+        ("compat_state", ctypes.c_ubyte),
+        ("grab_mods", ctypes.c_ubyte),
+        ("compat_grab_mods", ctypes.c_ubyte),
+        ("lookup_mods", ctypes.c_ubyte),
+        ("compat_lookup_mods", ctypes.c_ubyte),
+        ("ptr_buttons", ctypes.c_ushort),
     ]  # something strange is happening here but it is not being used
 
 
@@ -163,7 +188,7 @@ def x11_setup():
         if logger.isEnabledFor(logging.INFO):
             logger.info("X11 library loaded and display set up")
     except Exception:
-        logger.warning("X11 not available - some rule capabilities inoperable", exc_info=_sys.exc_info())
+        logger.warning("X11 not available - some rule capabilities inoperable", exc_info=sys.exc_info())
         _x11 = False
         xtest_available = False
     return _x11
@@ -174,11 +199,16 @@ def gnome_dbus_interface_setup():
     if _dbus_interface is not None:
         return _dbus_interface
     try:
+        import dbus
+
         bus = dbus.SessionBus()
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
     except dbus.exceptions.DBusException:
-        logger.warning("Solaar Gnome extension not installed - some rule capabilities inoperable", exc_info=_sys.exc_info())
+        logger.warning(
+            "Solaar Gnome extension not installed - some rule capabilities inoperable",
+            exc_info=sys.exc_info(),
+        )
         _dbus_interface = False
     return _dbus_interface
 
@@ -188,14 +218,14 @@ def xkb_setup():
     if Xkbdisplay is not None:
         return Xkbdisplay
     try:  # set up to get keyboard state using ctypes interface to libx11
-        X11Lib = _ctypes.cdll.LoadLibrary("libX11.so")
-        X11Lib.XOpenDisplay.restype = _ctypes.POINTER(XkbDisplay)
-        X11Lib.XkbGetState.argtypes = [_ctypes.POINTER(XkbDisplay), _ctypes.c_uint, _ctypes.POINTER(XkbStateRec)]
+        X11Lib = ctypes.cdll.LoadLibrary("libX11.so")
+        X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
+        X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
         Xkbdisplay = X11Lib.XOpenDisplay(None)
         if logger.isEnabledFor(logging.INFO):
             logger.info("XKB display set up")
     except Exception:
-        logger.warning("XKB display not available - rules cannot access keyboard group", exc_info=_sys.exc_info())
+        logger.warning("XKB display not available - rules cannot access keyboard group", exc_info=sys.exc_info())
         Xkbdisplay = False
     return Xkbdisplay
 
@@ -212,6 +242,8 @@ if evdev:
         "scroll_right": (7, evdev.ecodes.ecodes["BTN_7"]),
         "button8": (8, evdev.ecodes.ecodes["BTN_8"]),
         "button9": (9, evdev.ecodes.ecodes["BTN_9"]),
+        "back": (10, evdev.ecodes.ecodes["BTN_SIDE"]),
+        "forward": (11, evdev.ecodes.ecodes["BTN_EXTRA"]),
     }
 
     # uinput capability for keyboard keys, mouse buttons, and scrolling
@@ -219,14 +251,15 @@ if evdev:
     for _, evcode in buttons.values():
         if evcode:
             key_events.append(evcode)
-    devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
+    devicecap = {
+        evdev.ecodes.EV_KEY: key_events,
+        evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+    }
 else:
     # Just mock these since they won't be useful without evdev anyway
     buttons = {}
     key_events = []
     devicecap = {}
-
-udevice = None
 
 
 def setup_uinput():
@@ -249,7 +282,7 @@ if wayland:  # Wayland can't use xtest so may as well set up uinput now
 def kbdgroup():
     if xkb_setup():
         state = XkbStateRec()
-        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, _ctypes.pointer(state))
+        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, ctypes.pointer(state))
         return state.group
     else:
         return None
@@ -263,26 +296,22 @@ def modifier_code(keycode):
             return m
 
 
-key_down = None
-key_up = None
-
-
-def signed(bytes):
-    return int.from_bytes(bytes, "big", signed=True)
+def signed(bytes_: bytes) -> int:
+    return int.from_bytes(bytes_, "big", signed=True)
 
 
 def xy_direction(_x, _y):
     # normalize x and y
-    m = _sqrt((_x * _x) + (_y * _y))
+    m = math.sqrt((_x * _x) + (_y * _y))
     if m == 0:
         return "noop"
     x = round(_x / m)
     y = round(_y / m)
     if x < 0 and y < 0:
         return "Mouse Up-left"
-    elif x > 0 and y < 0:
+    elif x > 0 > y:
         return "Mouse Up-right"
-    elif x < 0 and y > 0:
+    elif x < 0 < y:
         return "Mouse Down-left"
     elif x > 0 and y > 0:
         return "Mouse Down-right"
@@ -340,7 +369,7 @@ def simulate_uinput(what, code, arg):
 def simulate_key(code, event):  # X11 keycode but Solaar event code
     if not wayland and simulate_xtest(code, event):
         return True
-    if simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
+    if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
     logger.warning("no way to simulate key input")
 
@@ -410,7 +439,7 @@ def simulate_scroll(dx, dy):
 
 def thumb_wheel_up(f, r, d, a):
     global thumb_wheel_displacement
-    if f != _F.THUMB_WHEEL or r != 0:
+    if f != SupportedFeature.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) < 0 and signed(d[0:2])
@@ -423,7 +452,7 @@ def thumb_wheel_up(f, r, d, a):
 
 def thumb_wheel_down(f, r, d, a):
     global thumb_wheel_displacement
-    if f != _F.THUMB_WHEEL or r != 0:
+    if f != SupportedFeature.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) > 0 and signed(d[0:2])
@@ -434,11 +463,11 @@ def thumb_wheel_down(f, r, d, a):
         return False
 
 
-def charging(f, r, d, a):
+def charging(f, r, d, _a):
     if (
-        (f == _F.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
-        or (f == _F.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
-        or (f == _F.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
+        (f == SupportedFeature.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
+        or (f == SupportedFeature.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
+        or (f == SupportedFeature.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
     ):
         return 1
     else:
@@ -446,20 +475,32 @@ def charging(f, r, d, a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
-    "crown_tap": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
-    "crown_start_press": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
-    "crown_end_press": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
+    "crown_right": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] < 128 and d[1], False],
+    "crown_left": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
+    "crown_right_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] < 128 and d[2], False],
+    "crown_left_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
+    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
+    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
+    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
-    "lowres_wheel_up": [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]), False],
-    "lowres_wheel_down": [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]), False],
-    "hires_wheel_up": [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]), False],
-    "hires_wheel_down": [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]), False],
+    "lowres_wheel_up": [
+        lambda f, r, d, a: f == SupportedFeature.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
+        False,
+    ],
+    "lowres_wheel_down": [
+        lambda f, r, d, a: f == SupportedFeature.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
+        False,
+    ],
+    "hires_wheel_up": [
+        lambda f, r, d, a: f == SupportedFeature.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
+        False,
+    ],
+    "hires_wheel_down": [
+        lambda f, r, d, a: f == SupportedFeature.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
+        False,
+    ],
     "charging": [charging, False],
     "False": [lambda f, r, d, a: False, False],
     "True": [lambda f, r, d, a: True, False],
@@ -473,7 +514,7 @@ MOUSE_GESTURE_TESTS = {
     "mouse-noop": [],
 }
 
-COMPONENTS = {}
+# COMPONENTS = {}
 
 
 class RuleComponent:
@@ -488,28 +529,32 @@ class RuleComponent:
         return Condition()
 
 
+def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
+    res = True
+    for component in components:
+        res = component.evaluate(feature, notification, device, result)
+        if not isinstance(component, Action) and res is None:
+            return None
+        if isinstance(component, Condition) and not res:
+            return res
+    return res
+
+
 class Rule(RuleComponent):
     def __init__(self, args, source=None, warn=True):
         self.components = [self.compile(a) for a in args]
         self.source = source
 
     def __str__(self):
-        source = "(" + self.source + ")" if self.source else ""
+        source = f"({self.source})" if self.source else ""
         return f"Rule{source}[{', '.join([c.__str__() for c in self.components])}]"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate rule: %s", self)
-        result = True
-        for component in self.components:
-            result = component.evaluate(feature, notification, device, result)
-            if not isinstance(component, Action) and result is None:
-                return None
-            if isinstance(component, Condition) and not result:
-                return result
-        return result
+        return _evaluate(self.components, feature, notification, device, True)
 
-    def once(self, feature, notification, device, last_result):
+    def once(self, feature, notification: HIDPPNotification, device, last_result):
         self.evaluate(feature, notification, device, last_result)
         return False
 
@@ -524,7 +569,7 @@ class Condition(RuleComponent):
     def __str__(self):
         return "CONDITION"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return False
@@ -538,9 +583,9 @@ class Not(Condition):
         self.component = self.compile(op)
 
     def __str__(self):
-        return "Not: " + str(self.component)
+        return f"Not: {str(self.component)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         result = self.component.evaluate(feature, notification, device, last_result)
@@ -557,7 +602,7 @@ class Or(Condition):
     def __str__(self):
         return "Or: [" + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         result = False
@@ -580,17 +625,10 @@ class And(Condition):
     def __str__(self):
         return "And: [" + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        result = True
-        for component in self.components:
-            result = component.evaluate(feature, notification, device, last_result)
-            if not isinstance(component, Action) and result is None:
-                return None
-            if isinstance(component, Condition) and not result:
-                return result
-        return result
+        return _evaluate(self.components, feature, notification, device, last_result)
 
     def data(self):
         return {"And": [c.data() for c in self.components]}
@@ -648,7 +686,8 @@ class Process(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 logger.warning(
-                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s",
+                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome "
+                    "extension - %s",
                     self,
                 )
         if not isinstance(process, str):
@@ -657,9 +696,9 @@ class Process(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return "Process: " + str(self.process)
+        return f"Process: {str(self.process)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
@@ -688,9 +727,9 @@ class MouseProcess(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return "MouseProcess: " + str(self.process)
+        return f"MouseProcess: {str(self.process)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
@@ -704,17 +743,18 @@ class MouseProcess(Condition):
 
 
 class Feature(Condition):
-    def __init__(self, feature, warn=True):
-        if not (isinstance(feature, str) and feature in _F):
+    def __init__(self, feature: str, warn: bool = True):
+        try:
+            self.feature = SupportedFeature[feature.replace(" ", "_")]
+        except KeyError:
+            self.feature = None
             if warn:
                 logger.warning("rule Feature argument not name of a feature: %s", feature)
-            self.feature = None
-        self.feature = _F[feature]
 
     def __str__(self):
-        return "Feature: " + str(self.feature)
+        return f"Feature: {str(self.feature)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return feature == self.feature
@@ -733,9 +773,9 @@ class Report(Condition):
             self.report = report
 
     def __str__(self):
-        return "Report: " + str(self.report)
+        return f"Report: {str(self.report)}"
 
-    def evaluate(self, report, notification, device, last_result):
+    def evaluate(self, report, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return (notification.address >> 4) == self.report
@@ -757,7 +797,7 @@ class Setting(Condition):
     def __str__(self):
         return "Setting: " + " ".join([str(a) for a in self.args])
 
-    def evaluate(self, report, notification, device, last_result):
+    def evaluate(self, report, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if len(self.args) < 3:
@@ -806,9 +846,9 @@ class Modifiers(Condition):
                     logger.warning("unknown rule Modifier value: %s", k)
 
     def __str__(self):
-        return "Modifiers: " + str(self.desired)
+        return f"Modifiers: {str(self.desired)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if gkeymap:
@@ -848,8 +888,11 @@ class Key(Condition):
             elif len(args) >= 2:
                 key, action = args[:2]
 
-        if isinstance(key, str) and key in _CONTROL:
-            self.key = _CONTROL[key]
+        if isinstance(key, str) and key in CONTROL:
+            self.key = CONTROL[key]
+        elif isinstance(key, str) and key.startswith("unknown:"):
+            logger.info(f"rule Key key name currently unknown: {key}")
+            self.key = CONTROL[int(key[-4:], 16)]
         else:
             if warn:
                 logger.warning(f"rule Key key name not name of a Logitech key: {key}")
@@ -865,7 +908,7 @@ class Key(Condition):
     def __str__(self):
         return f"Key: {str(self.key) if self.key else 'None'} ({self.action})"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
@@ -887,8 +930,8 @@ class KeyIsDown(Condition):
         elif isinstance(args, str):
             key = args
 
-        if isinstance(key, str) and key in _CONTROL:
-            self.key = _CONTROL[key]
+        if isinstance(key, str) and key in CONTROL:
+            self.key = CONTROL[key]
         else:
             if warn:
                 logger.warning(f"rule Key key name not name of a Logitech key: {key}")
@@ -897,7 +940,7 @@ class KeyIsDown(Condition):
     def __str__(self):
         return f"KeyIsDown: {str(self.key) if self.key else 'None'}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return key_is_down(self.key)
@@ -911,7 +954,7 @@ def bit_test(start, end, bits):
 
 
 def range_test(start, end, min, max):
-    def range_test_helper(f, r, d):
+    def range_test_helper(_f, _r, d):
         value = int.from_bytes(d[start:end], byteorder="big", signed=True)
         return min <= value <= max and (value if value else True)
 
@@ -949,9 +992,9 @@ class Test(Condition):
                 logger.warning("rule Test argument not valid %s", test)
 
     def __str__(self):
-        return "Test: " + str(self.test)
+        return f"Test: {str(self.test)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return self.function(feature, notification.address, notification.data, self.parameter)
@@ -967,10 +1010,8 @@ class TestBytes(Condition):
             isinstance(test, list)
             and 2 < len(test) <= 4
             and all(isinstance(t, int) for t in test)
-            and test[0] >= 0
-            and test[0] <= 16
-            and test[1] >= 0
-            and test[1] <= 16
+            and 0 <= test[0] <= 16
+            and 0 <= test[1] <= 16
             and test[0] < test[1]
         ):
             self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
@@ -979,9 +1020,9 @@ class TestBytes(Condition):
                 logger.warning("rule TestBytes argument not valid %s", test)
 
     def __str__(self):
-        return "TestBytes: " + str(self.test)
+        return f"TestBytes: {str(self.test)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return self.function(feature, notification.address, notification.data)
@@ -1006,7 +1047,7 @@ class MouseGesture(Condition):
         if isinstance(movements, str):
             movements = [movements]
         for x in movements:
-            if x not in self.MOVEMENTS and x not in _CONTROL:
+            if x not in self.MOVEMENTS and x not in CONTROL:
                 if warn:
                     logger.warning("rule Mouse Gesture argument not direction or name of a Logitech key: %s", x)
         self.movements = movements
@@ -1014,17 +1055,17 @@ class MouseGesture(Condition):
     def __str__(self):
         return "MouseGesture: " + " ".join(self.movements)
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        if feature == _F.MOUSE_GESTURE:
+        if feature == SupportedFeature.MOUSE_GESTURE:
             d = notification.data
-            data = _unpack("!" + (int(len(d) / 2) * "h"), d)
+            data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
             data_offset = 1
             movement_offset = 0
             if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
                 movement_offset = 1
-                if self.movements[0] != str(_CONTROL[data[0]]):
+                if self.movements[0] != str(CONTROL[data[0]]):
                     return False
             for m in self.movements[movement_offset:]:
                 if data_offset >= len(data):
@@ -1035,7 +1076,7 @@ class MouseGesture(Condition):
                         return False
                     data_offset += 3
                 elif data[data_offset] == 1:
-                    if m != str(_CONTROL[data[data_offset + 1]]):
+                    if m != str(CONTROL[data[data_offset + 1]]):
                         return False
                     data_offset += 2
             return data_offset == len(data)
@@ -1054,9 +1095,9 @@ class Active(Condition):
         self.devID = devID
 
     def __str__(self):
-        return "Active: " + str(self.devID)
+        return f"Active: {str(self.devID)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         dev = device.find(self.devID)
@@ -1075,9 +1116,9 @@ class Device(Condition):
         self.devID = devID
 
     def __str__(self):
-        return "Device: " + str(self.devID)
+        return f"Device: {str(self.devID)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return device.unitId == self.devID or device.serial == self.devID
@@ -1095,9 +1136,9 @@ class Host(Condition):
         self.host = host
 
     def __str__(self):
-        return "Host: " + str(self.host)
+        return f"Host: {str(self.host)}"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         hostname = socket.getfqdn()
@@ -1111,8 +1152,34 @@ class Action(RuleComponent):
     def __init__(self, *args):
         pass
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         return None
+
+
+def keysym_to_keycode(keysym, _modifiers) -> Tuple[int, int]:  # maybe should take shift into account
+    """Reverse the keycode to keysym mapping.
+
+    Warning:
+    This is an attempt to reverse the keycode to keysym mappping in XKB.
+    It may not be completely general.
+    """
+    group = kbdgroup() or 0
+    keycodes = gkeymap.get_entries_for_keyval(keysym)
+    (keycode, level) = (None, None)
+    for k in keycodes.keys:  # mappings that have the correct group
+        if group == k.group and k.keycode < 256 and (level is None or k.level < level):
+            keycode = k.keycode
+            level = k.level
+    if keycode or group == 0:
+        return keycode, level
+
+    for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
+        if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
+            (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
+            if a and all(mk.group == 0 for mk in m):
+                keycode = k.keycode
+                level = k.level
+    return keycode, level
 
 
 class KeyPress(Action):
@@ -1139,25 +1206,6 @@ class KeyPress(Action):
             action = args[1]
         return keys, action
 
-    # WARNING:  This is an attempt to reverse the keycode to keysym mappping in XKB.  It may not be completely general.
-    def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
-        group = kbdgroup() or 0
-        keycodes = gkeymap.get_entries_for_keyval(keysym)
-        (keycode, level) = (None, None)
-        for k in keycodes.keys:  # mappings that have the correct group
-            if group == k.group and k.keycode < 256 and (level is None or k.level < level):
-                keycode = k.keycode
-                level = k.level
-        if keycode or group == 0:
-            return (keycode, level)
-        for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
-            if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
-                (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
-                if a and all(mk.group == 0 for mk in m):
-                    keycode = k.keycode
-                    level = k.level
-        return (keycode, level)
-
     def __str__(self):
         return "KeyPress: " + " ".join(self.key_names) + " " + self.action
 
@@ -1167,40 +1215,46 @@ class KeyPress(Action):
 
     def mods(self, level, modifiers, direction):
         if level == 2 or level == 3:
-            (sk, _) = self.keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
         if level == 1 or level == 3:
-            (sk, _) = self.keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
 
-    def keyDown(self, keysyms, modifiers):
-        for k in keysyms:
-            (keycode, level) = self.keysym_to_keycode(k, modifiers)
+    def keyDown(self, keysyms_, modifiers):
+        for k in keysyms_:
+            (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode is None:
                 logger.warning("rule KeyPress key symbol not currently available %s", self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
-    def keyUp(self, keysyms, modifiers):
-        for k in keysyms:
-            (keycode, level) = self.keysym_to_keycode(k, modifiers)
+    def keyUp(self, keysyms_, modifiers):
+        for k in keysyms_:
+            (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if gkeymap:
             current = gkeymap.get_modifier_state()
             if logger.isEnabledFor(logging.INFO):
-                logger.info("KeyPress action: %s %s, group %s, modifiers %s", self.key_names, self.action, kbdgroup(), current)
+                logger.info(
+                    "KeyPress action: %s %s, group %s, modifiers %s",
+                    self.key_names,
+                    self.action,
+                    kbdgroup(),
+                    current,
+                )
             if self.action != RELEASE:
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
-            _time.sleep(0.01)
+            time.sleep(0.01)
         else:
             logger.warning("no keymap so cannot determine which keycode to send")
         return None
@@ -1211,10 +1265,10 @@ class KeyPress(Action):
 
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable
 # class KeyDown(KeyPress):
-#    def evaluate(self, feature, notification, device, last_result):
+#    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
 #        super().keyDown(self.keys, current_key_modifiers)
 # class KeyUp(KeyPress):
-#    def evaluate(self, feature, notification, device, last_result):
+#    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
 #        super().keyUp(self.keys, current_key_modifiers)
 
 
@@ -1231,7 +1285,7 @@ class MouseScroll(Action):
     def __str__(self):
         return "MouseScroll: " + " ".join([str(a) for a in self.amounts])
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
@@ -1239,7 +1293,7 @@ class MouseScroll(Action):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
         simulate_scroll(dx, dy)
-        _time.sleep(0.01)
+        time.sleep(0.01)
         return None
 
     def data(self):
@@ -1264,18 +1318,21 @@ class MouseClick(Action):
             if count in [CLICK, DEPRESS, RELEASE]:
                 self.count = count
             elif warn:
-                logger.warning("rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE", count)
+                logger.warning(
+                    "rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE",
+                    count,
+                )
                 self.count = 1
 
     def __str__(self):
         return f"MouseClick: {self.button} ({int(self.count)})"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
             logger.info(f"MouseClick action: {int(self.count)} {self.button}")
         if self.button and self.count:
             click(buttons[self.button], self.count)
-        _time.sleep(0.01)
+        time.sleep(0.01)
         return None
 
     def data(self):
@@ -1294,7 +1351,7 @@ class Set(Action):
     def __str__(self):
         return "Set: " + " ".join([str(a) for a in self.args])
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if len(self.args) < 3:
             return None
         if logger.isEnabledFor(logging.INFO):
@@ -1309,7 +1366,12 @@ class Set(Action):
             return None
         args = setting.acceptable(self.args[2:], setting.read())
         if args is None:
-            logger.warning("Set Action: invalid args %s for setting %s of %s", self.args[2:], self.args[1], self.args[0])
+            logger.warning(
+                "Set Action: invalid args %s for setting %s of %s",
+                self.args[2:],
+                self.args[1],
+                self.args[0],
+            )
             return None
         if len(args) > 1:
             setting.write_key_value(args[0], args[1])
@@ -1337,7 +1399,7 @@ class Execute(Action):
     def __str__(self):
         return "Execute: " + " ".join([a for a in self.args])
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
             logger.info("Execute action: %s", self.args)
         subprocess.Popen(self.args)
@@ -1366,9 +1428,9 @@ class Later(Action):
             self.components = self.rule.components
 
     def __str__(self):
-        return "Later: [" + str(self.delay) + ", " + ", ".join(str(c) for c in self.components) + "]"
+        return f"Later: [{str(self.delay)}, " + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, last_result):
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if self.delay and self.rule:
             if self.delay >= 1:
                 GLib.timeout_add_seconds(int(self.delay), Rule.once, self.rule, feature, notification, device, last_result)
@@ -1409,88 +1471,82 @@ COMPONENTS = {
     "Later": Later,
 }
 
-built_in_rules = Rule([])
-if True:
-    built_in_rules = Rule(
-        [
-            {
-                "Rule": [  # Implement problematic keys for Craft and MX Master
-                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
-                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
-                ]
-            },
-        ]
-    )
 
-keys_down = []
-g_keys_down = 0
-m_keys_down = 0
-mr_key_down = False
-thumb_wheel_displacement = 0
+built_in_rules = Rule(
+    [
+        {
+            "Rule": [  # Implement problematic keys for Craft and MX Master
+                {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+            ]
+        },
+    ]
+)
 
 
-def key_is_down(key):
-    if key == _CONTROL.MR:
+def key_is_down(key: NamedInt) -> bool:
+    """Checks if given key is pressed or not."""
+    if key == CONTROL.MR:
         return mr_key_down
-    elif _CONTROL.M1 <= key <= _CONTROL.M8:
-        return bool(m_keys_down & (0x01 << (key - _CONTROL.M1)))
-    elif _CONTROL.G1 <= key <= _CONTROL.G32:
-        return bool(g_keys_down & (0x01 << (key - _CONTROL.G1)))
-    else:
-        return key in keys_down
+    elif CONTROL.M1 <= key <= CONTROL.M8:
+        return bool(m_keys_down & (0x01 << (key - CONTROL.M1)))
+    elif CONTROL.G1 <= key <= CONTROL.G32:
+        return bool(g_keys_down & (0x01 << (key - CONTROL.G1)))
+    return key in keys_down
 
 
-def evaluate_rules(feature, notification, device):
+def evaluate_rules(feature, notification: HIDPPNotification, device):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s", notification)
     rules.evaluate(feature, notification, device, True)
 
 
-# process a notification
-def process_notification(device, notification, feature):
+def process_notification(device, notification: HIDPPNotification, feature) -> None:
+    """Processes HID++ notifications."""
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
-    if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
-        new_keys_down = _unpack("!4H", notification.data[:8])
-        for key in new_keys_down:
-            if key and key not in keys_down:
-                key_down = key
-        for key in keys_down:
-            if key and key not in new_keys_down:
-                key_up = key
-        keys_down = new_keys_down
-    # and also G keys down
-    elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack("<I", notification.data[:4])[0]
-        for i in range(32):
-            if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
-                key_down = _CONTROL["G" + str(i + 1)]
-            if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
-                key_up = _CONTROL["G" + str(i + 1)]
-        g_keys_down = new_g_keys_down
-    # and also M keys down
-    elif feature == _F.MKEYS and notification.address == 0x00:
-        new_m_keys_down = _unpack("!1B", notification.data[:1])[0]
-        for i in range(1, 9):
-            if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
-                key_down = _CONTROL["M" + str(i)]
-            if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
-                key_up = _CONTROL["M" + str(i)]
-        m_keys_down = new_m_keys_down
-    # and also MR key
-    elif feature == _F.MR and notification.address == 0x00:
-        new_mr_key_down = _unpack("!1B", notification.data[:1])[0]
-        if not mr_key_down and new_mr_key_down:
-            key_down = _CONTROL["MR"]
-        if mr_key_down and not new_mr_key_down:
-            key_up = _CONTROL["MR"]
-        mr_key_down = new_mr_key_down
-    # keep track of thumb wheel movment
-    elif feature == _F.THUMB_WHEEL and notification.address == 0x00:
-        if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
-            thumb_wheel_displacement = 0
-        thumb_wheel_displacement += signed(notification.data[0:2])
+    if notification.address == 0x00:
+        if feature == SupportedFeature.REPROG_CONTROLS_V4:
+            new_keys_down = struct.unpack("!4H", notification.data[:8])
+            for key in new_keys_down:
+                if key and key not in keys_down:
+                    key_down = key
+            for key in keys_down:
+                if key and key not in new_keys_down:
+                    key_up = key
+            keys_down = new_keys_down
+        # and also G keys down
+        elif feature == SupportedFeature.GKEY:
+            new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
+            for i in range(32):
+                if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
+                    key_down = CONTROL["G" + str(i + 1)]
+                if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
+                    key_up = CONTROL["G" + str(i + 1)]
+            g_keys_down = new_g_keys_down
+        # and also M keys down
+        elif feature == SupportedFeature.MKEYS:
+            new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
+            for i in range(1, 9):
+                if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
+                    key_down = CONTROL["M" + str(i)]
+                if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
+                    key_up = CONTROL["M" + str(i)]
+            m_keys_down = new_m_keys_down
+        # and also MR key
+        elif feature == SupportedFeature.MR:
+            new_mr_key_down = struct.unpack("!1B", notification.data[:1])[0]
+            if not mr_key_down and new_mr_key_down:
+                key_down = CONTROL["MR"]
+            if mr_key_down and not new_mr_key_down:
+                key_up = CONTROL["MR"]
+            mr_key_down = new_mr_key_down
+        # keep track of thumb wheel movement
+        elif feature == SupportedFeature.THUMB_WHEEL:
+            if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
+                thumb_wheel_displacement = 0
+            thumb_wheel_displacement += signed(notification.data[0:2])
 
     def switch_and_evaluate(feature, notification, device):
         done_switching = threading.Event()
@@ -1510,13 +1566,13 @@ def process_notification(device, notification, feature):
     GLib.idle_add(switch_and_evaluate, feature, notification, device)
 
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
-_file_path = _path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
+_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
+_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 
 rules = built_in_rules
 
 
-def _save_config_rule_file(file_name=_file_path):
+def _save_config_rule_file(file_name: str = _file_path):
     # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
     class inline_list(list):
         pass
@@ -1524,7 +1580,7 @@ def _save_config_rule_file(file_name=_file_path):
     def blockseq_rep(dumper, data):
         return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
-    _yaml_add_representer(inline_list, blockseq_rep)
+    yaml.add_representer(inline_list, blockseq_rep)
 
     def convert(elem):
         if isinstance(elem, list):
@@ -1550,37 +1606,43 @@ def _save_config_rule_file(file_name=_file_path):
     }
     # Save only user-defined rules
     rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == file_name), [])
-    if True:  # save even if there are no rules to save
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
-        try:
-            with open(file_name, "w") as f:
-                if rules_to_save:
-                    f.write("%YAML 1.3\n")  # Write version manually
-                _yaml_dump_all(convert([r["Rule"] for r in rules_to_save]), f, **dump_settings)
-        except Exception as e:
-            logger.error("failed to save to %s\n%s", file_name, e)
-            return False
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
+    try:
+        with open(file_name, "w") as f:
+            if rules_to_save:
+                f.write("%YAML 1.3\n")  # Write version manually
+            dump_data = [r["Rule"] for r in rules_to_save]
+            yaml.dump_all(convert(dump_data), f, **dump_settings)
+    except Exception as e:
+        logger.error("failed to save to %s\n%s", file_name, e)
+        return False
     return True
 
 
-def _load_config_rule_file():
+def load_config_rule_file():
+    """Loads user configured rules."""
     global rules
+
+    if os.path.isfile(_file_path):
+        rules = _load_rule_config(_file_path)
+
+
+def _load_rule_config(file_path: str) -> Rule:
     loaded_rules = []
-    if _path.isfile(_file_path):
-        try:
-            with open(_file_path) as config_file:
-                loaded_rules = []
-                for loaded_rule in _yaml_safe_load_all(config_file):
-                    rule = Rule(loaded_rule, source=_file_path)
-                    if logger.isEnabledFor(logging.DEBUG):
-                        logger.debug("load rule: %s", rule)
-                    loaded_rules.append(rule)
-                if logger.isEnabledFor(logging.INFO):
-                    logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
-        except Exception as e:
-            logger.error("failed to load from %s\n%s", _file_path, e)
-    rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
+    try:
+        with open(file_path) as config_file:
+            loaded_rules = []
+            for loaded_rule in yaml.safe_load_all(config_file):
+                rule = Rule(loaded_rule, source=file_path)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("load rule: %s", rule)
+                loaded_rules.append(rule)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
+    except Exception as e:
+        logger.error("failed to load from %s\n%s", file_path, e)
+    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
 
 
-_load_config_rule_file()
+load_config_rule_file()

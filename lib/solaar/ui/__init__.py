@@ -17,10 +17,13 @@
 
 import logging
 
-import gi
-import yaml as _yaml
+from enum import Enum
+from typing import Callable
 
-from logitech_receiver.common import ALERT
+import gi
+import yaml
+
+from logitech_receiver.common import Alert
 
 from solaar.i18n import _
 from solaar.ui.config_panel import change_setting
@@ -28,8 +31,8 @@ from solaar.ui.config_panel import record_setting
 from solaar.ui.window import find_device
 
 from . import common
+from . import desktop_notifications
 from . import diversion_rules
-from . import notify
 from . import tray
 from . import window
 
@@ -43,11 +46,19 @@ logger = logging.getLogger(__name__)
 assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
 
+APP_ID = "io.github.pwr_solaar.solaar"
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    COMMAND_LINE = "command-line"
+    SHUTDOWN = "shutdown"
+
+
 def _startup(app, startup_hook, use_tray, show_window):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
+    logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
     common.start_async()
-    notify.init()
+    desktop_notifications.init()
     if use_tray:
         tray.init(lambda _ignore: window.destroy())
     window.init(show_window, use_tray)
@@ -55,8 +66,7 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 
 def _activate(app):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("activate")
+    logger.debug("activate")
     if app.get_windows():
         window.popup()
     else:
@@ -65,12 +75,11 @@ def _activate(app):
 
 def _command_line(app, command_line):
     args = command_line.get_arguments()
-    args = _yaml.safe_load("".join(args)) if args else args
+    args = yaml.safe_load("".join(args)) if args else args
     if not args:
         _activate(app)
     elif args[0] == "config":  # config call from remote instance
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("remote command line %s", args)
+        logger.info("remote command line %s", args)
         dev = find_device(args[1])
         if dev:
             setting = next((s for s in dev.settings if s.name == args[2]), None)
@@ -79,24 +88,32 @@ def _command_line(app, command_line):
     return 0
 
 
-def _shutdown(app, shutdown_hook):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("shutdown")
+def _shutdown(_app, shutdown_hook):
+    logger.debug("shutdown")
     shutdown_hook()
     common.stop_async()
     tray.destroy()
-    notify.uninit()
+    desktop_notifications.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
+def run_loop(
+    startup_hook: Callable[[], None],
+    shutdown_hook: Callable[[], None],
+    use_tray: bool,
+    show_window: bool,
+):
     assert use_tray or show_window, "need either tray or visible window"
-    APP_ID = "io.github.pwr_solaar.solaar"
+
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
-    application.connect("startup", lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
-    application.connect("command-line", _command_line)
-    application.connect("activate", _activate)
-    application.connect("shutdown", _shutdown, shutdown_hook)
+    application.connect(
+        "startup",
+        lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window),
+        startup_hook,
+    )
+    application.connect(GtkSignal.COMMAND_LINE.value, _command_line)
+    application.connect(GtkSignal.ACTIVATE.value, _activate)
+    application.connect(GtkSignal.SHUTDOWN.value, _shutdown, shutdown_hook)
 
     application.register()
     if application.get_is_remote():
@@ -106,24 +123,23 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
 
 def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("status changed: %s (%s) %s", device, alert, reason)
+    logger.debug("status changed: %s (%s) %s", device, alert, reason)
     if alert is None:
-        alert = ALERT.NONE
+        alert = Alert.NONE
 
     tray.update(device)
-    if alert & ALERT.ATTENTION:
+    if alert & Alert.ATTENTION:
         tray.attention(reason)
 
-    need_popup = alert & ALERT.SHOW_WINDOW
+    need_popup = alert & Alert.SHOW_WINDOW
     window.update(device, need_popup, refresh)
     diversion_rules.update_devices()
 
-    if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
-        notify.show(device, reason)
+    if alert & (Alert.NOTIFICATION | Alert.ATTENTION):
+        desktop_notifications.show(device, reason)
 
 
-def status_changed(device, alert=ALERT.NONE, reason=None, refresh=False):
+def status_changed(device, alert=Alert.NONE, reason=None, refresh=False):
     GLib.idle_add(_status_changed, device, alert, reason, refresh)
 
 

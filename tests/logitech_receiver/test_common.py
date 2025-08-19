@@ -1,3 +1,5 @@
+from enum import IntFlag
+
 import pytest
 import yaml
 
@@ -121,18 +123,41 @@ def test_named_ints_range():
     assert 6 not in named_ints_range
 
 
-def test_named_ints_flag_names():
-    named_ints_flag_bits = common.NamedInts(one=1, two=2, three=4)
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0, []),
+        (0b0010, ["two"]),
+        (0b0101, ["one", "three"]),
+        (0b1001, ["one", "unknown:000008"]),
+    ],
+)
+def test_named_ints_flag_names(code, expected_flags):
+    named_ints_flag_bits = common.NamedInts(one=0b001, two=0b010, three=0b100)
 
-    flags0 = list(named_ints_flag_bits.flag_names(0))
-    flags2 = list(named_ints_flag_bits.flag_names(2))
-    flags5 = list(named_ints_flag_bits.flag_names(5))
-    flags9 = list(named_ints_flag_bits.flag_names(9))
+    flags = list(named_ints_flag_bits.flag_names(code))
 
-    assert flags0 == []
-    assert flags2 == ["two"]
-    assert flags5 == ["one", "three"]
-    assert flags9 == ["one", "unknown:000008"]
+    assert flags == expected_flags
+
+
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0, []),
+        (0b0010, ["two"]),
+        (0b0101, ["one", "three"]),
+        (0b1001, ["one", "unknown:000008"]),
+    ],
+)
+def test_flag_names(code, expected_flags):
+    class ExampleFlag(IntFlag):
+        one = 0x1
+        two = 0x2
+        three = 0x4
+
+    flags = common.flag_names(ExampleFlag, code)
+
+    assert list(flags) == expected_flags
 
 
 def test_named_ints_setitem():
@@ -218,11 +243,17 @@ def test_kw_exception():
 @pytest.mark.parametrize(
     "status, expected_level, expected_ok, expected_charging, expected_string",
     [
-        (common.Battery.STATUS.full, common.Battery.APPROX.full, True, True, "Battery: full (full)"),
-        (common.Battery.STATUS.almost_full, common.Battery.APPROX.good, True, True, "Battery: good (almost full)"),
-        (common.Battery.STATUS.recharging, common.Battery.APPROX.good, True, True, "Battery: good (recharging)"),
-        (common.Battery.STATUS.slow_recharge, common.Battery.APPROX.low, True, True, "Battery: low (slow recharge)"),
-        (common.Battery.STATUS.discharging, None, True, False, ""),
+        (common.BatteryStatus.FULL, common.BatteryLevelApproximation.FULL, True, True, "Battery: full (full)"),
+        (common.BatteryStatus.ALMOST_FULL, common.BatteryLevelApproximation.GOOD, True, True, "Battery: good (almost full)"),
+        (common.BatteryStatus.RECHARGING, common.BatteryLevelApproximation.GOOD, True, True, "Battery: good (recharging)"),
+        (
+            common.BatteryStatus.SLOW_RECHARGE,
+            common.BatteryLevelApproximation.LOW,
+            True,
+            True,
+            "Battery: low (slow recharge)",
+        ),
+        (common.BatteryStatus.DISCHARGING, None, True, False, ""),
     ],
 )
 def test_battery(status, expected_level, expected_ok, expected_charging, expected_string):
@@ -236,9 +267,9 @@ def test_battery(status, expected_level, expected_ok, expected_charging, expecte
 
 
 def test_battery_2():
-    battery = common.Battery(50, None, common.Battery.STATUS.discharging, None)
+    battery = common.Battery(50, None, common.BatteryStatus.DISCHARGING, None)
 
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
     assert battery.level == 50
     assert battery.ok()
     assert not battery.charging()

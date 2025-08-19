@@ -16,6 +16,8 @@
 
 """HID++ data and functions common to several logitech_receiver test files"""
 
+from __future__ import annotations
+
 import errno
 import threading
 
@@ -42,7 +44,17 @@ def ping(responses, handle, devnumber, long_message=False):
             return r.response
 
 
-def request(responses, handle, devnumber, id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+def request(
+    responses,
+    handle,
+    devnumber,
+    id,
+    *params,
+    no_reply=False,
+    return_error=False,
+    long_message=False,
+    protocol=1.0,
+):
     params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
     print("REQUEST ", hex(handle), hex(devnumber), hex(id), params.hex())
     for r in responses:
@@ -53,7 +65,7 @@ def request(responses, handle, devnumber, id, *params, no_reply=False, return_er
 
 @dataclass
 class Response:
-    response: Optional[str]
+    response: str | float
     id: int
     params: str = ""
     handle: int = 0x11
@@ -376,6 +388,8 @@ class Device:
     setting_callback: Any = None
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
+    number = "d1"
+    present = True
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register
@@ -393,10 +407,20 @@ class Device:
         self.persister = configuration._DeviceEntry()
         self.features = hidpp20.FeaturesArray(self)
         self.settings = []
+        self.receiver = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
-            self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
-            self.responses.append(Response(f"{self.offset:0>2X}00{self.version:0>2X}", 0x0000, f"{self.feature:0>4X}"))
+            self.responses = [
+                Response("010001", 0x0000, "0001"),
+                Response("20", 0x0100),
+            ] + self.responses
+            self.responses.append(
+                Response(
+                    f"{int(self.offset):0>2X}00{int(self.version):0>2X}",
+                    0x0000,
+                    f"{int(self.feature):0>4X}",
+                )
+            )
         if self.setting_callback is None:
             self.setting_callback = lambda x, y, z: None
         self.add_notification_handler = lambda x, y: None
@@ -413,6 +437,18 @@ class Device:
     def ping(self, handle=None, devnumber=None, long_message=False):
         print("PING", self._protocol)
         return self._protocol
+
+    def handle_notification(self, handle):
+        pass
+
+    def changed(self, *args, **kwargs):
+        pass
+
+    def set_battery_info(self, *args, **kwargs):
+        pass
+
+    def status_string(self):
+        pass
 
 
 def match_requests(number, responses, call_args_list):

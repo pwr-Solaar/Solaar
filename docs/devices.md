@@ -209,6 +209,7 @@ so what is important for support is the USB WPID or Bluetooth model ID.
 
 | Device                       | WPID | HID++ |
 |------------------------------|------|-------|
+| G604 Wireless Gaming Mouse   | 4085 | 4.2   |
 | PRO X Superlight Wireless    | 4093 | 4.2   |
 
 ### Trackballs (Unifying)

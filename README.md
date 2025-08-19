@@ -1,9 +1,10 @@
-# <img src="https://pwr-solaar.github.io/Solaar/assets/solaar.svg" width="60px"/> Solaar
+# <img src="https://pwr-solaar.github.io/Solaar/img/solaar.svg" width="60px"/> Solaar
 
 Solaar is a Linux manager for many Logitech keyboards, mice, and other devices
 that connect wirelessly to a Unifying, Bolt, Lightspeed or Nano receiver
 as well as many Logitech devices that connect via a USB cable or Bluetooth.
-
+Solaar is not a device driver and responds only to special messages from devices
+that are otherwise ignored by the Linux input system.
 
 <a href="https://pwr-solaar.github.io/Solaar/index">More Information</a> -
 <a href="https://pwr-solaar.github.io/Solaar/usage">Usage</a> -
@@ -12,18 +13,19 @@ as well as many Logitech devices that connect via a USB cable or Bluetooth.
 <a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a>
 
 
+[![codecov](https://codecov.io/gh/pwr-Solaar/Solaar/graph/badge.svg?token=D7YWFEWID6)](https://codecov.io/gh/pwr-Solaar/Solaar)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../LICENSE.txt)
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="54%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-multiple.png" width="54%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="43%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-receiver.png" width="43%"/>
 </p>
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="49%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-back-divert.png" width="49%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="48%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-rule-editor.png" width="48%"/>
 </p>
 
 Solaar supports:

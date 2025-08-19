@@ -3,11 +3,39 @@ title: Solaar Implementation
 layout: page
 ---
 
-TODO:  improve the callback mechanism(s) to support the explicit calls of the UI
-
 # Solaar Implementation
 
 Solaar has three main components: code mostly about receivers and devices, code for the command line interface, and code for the graphical user interface.
+
+The following graph shows the main components of Solaar and how they interact.
+```mermaid
+graph TD
+    subgraph User interface
+    U[UI]
+    C[CLI]
+    end
+
+    subgraph Core
+    U --> S{Solaar}
+    C --> S
+    S --> L[Logitech receiver]
+    L --> R[Receiver]
+    L --> D[Device]
+    S --> B[dbus]
+    end
+
+    subgraph Hardware interface
+    R --> A
+    D --> A
+    A[hidapi]--> P[hid parser]
+    end
+
+    subgraph Peripherals
+    P <-.-> M[Logitech mouse]
+    P <-.-> K[Logitech keyboard]
+    end
+```
+
 
 ## Receivers and Devices
 
@@ -40,9 +68,9 @@ Many devices allow reprogramming some keys or buttons.  One the main reasons for
 
 Many pointing devices provide a facility for recognizing gestures and sending an HID message for the gesture.  The `Gesture` class stores inforation for one gesture and the `Gestures` class stores information for all the gestures on a device.  Functions in the Device class request `KeysArray` information and store it on devices.  Functions in the Device class request `Gestures` information for a device when appropriate and store it on the device.
 
-Many gaming devices provide an interface to controlling their LEDs by zone.  The `LEDEffectSetting` class stores the current state of one zone of LEDs.   This information can come directly from an LED feature but is also part of device profiles so this class provides a byte string interface.   Solaar stores this information in YAML so this class provides a YAML interface.   The `LEDEffectsInfo` class stores information about what LED zones are on a device and what effects they can perform and provides a method that builds an object by querying a device.
+Many gaming devices provide an interface to controlling their LEDs by zone.  The `LEDEffectSetting` class stores the current state of one zone of LEDs.   This information can come directly from an LED feature but is also part of Onboard Profiles so this class provides a byte string interface.   Solaar stores this information in YAML so this class provides a YAML interface.   The `LEDEffectsInfo` class stores information about what LED zones are on a device and what effects they can perform and provides a method that builds an object by querying a device.
 
-Many gaming devices can be controlled by selecting one of their profiles.  A profile sets up the rate at which the device reports movement, a set of sensitivites of its movement detector, a set of actions to be performed by mouse buttons or G and M keys, and effects for up to two LED zones.  The `Button` class stores information about a button or key action.  The `OnboardProfile` class stores a single profile, using the `LEDEffectSetting` and `Button` classes.  Because retrieving and changing a profile is complex, this class provides a byte string interface.  Because Solaar dumps profiles from devices as YAML documents and loads them into devices from YAML documents, this class provides a YAML interface.  The `OnboardProfiles` class class stores the entire profiles information for a device.  It provides an interface to construct an `OnboardProfiles` object by querying a device.
+Many gaming devices can be controlled by selecting one of their Onboard Profiles.  An Onboard Profile sets up the rate at which the device reports movement, a set of sensitivites of its movement detector, a set of actions to be performed by mouse buttons or G and M keys, and effects for up to two LED zones.  The `Button` class stores information about a button or key action.  The `OnboardProfile` class stores a single profile, using the `LEDEffectSetting` and `Button` classes.  Because retrieving and changing a profile is complex, this class provides a byte string interface.  Because Solaar dumps profiles from devices as YAML documents and loads them into devices from YAML documents, this class provides a YAML interface.  The `OnboardProfiles` class class stores the entire profiles information for a device.  It provides an interface to construct an `OnboardProfiles` object by querying a device.
 Because Solaar dumps profiles from devices as YAML documents and loads them into devices from YAML documents, these classes also provide a YAML interface.
 
 #### HID++ 1.0
@@ -57,8 +85,6 @@ The module `descriptors` sets up information on device models for which Solaar n
 
 
 The module `base_usb` sets up information for most of the receiver models that Solaar supports, including USB id, USB interface used for HID++ messages, what kind of receiver model it is, and some capabilities of the receiver model.  Solaar can now support other receivers as long as they are not too unusual.  The module lso sets up lists of device models by USB ID and Bluetooth ID and provides a function to determine whether a USB ID or Bluetooth ID is an HID++ device model
-
-TODO?  Move some information down to descriptors?
 
 The module `base` provides functions that call discovery to enumerate all current receivers and devices and to set up a callback for when new receivers or devices are discovered.  It provides functions to open and close I/O channels to receivers and devices, write HID++ messages to receivers and devices, and read HID++ messages from receivers and devices.  It provides a function to turn an HID++ message into a notification.
 
@@ -78,8 +104,6 @@ The module contains code that determines the meaning of a notification based on 
 After this processing HID++ 2.0 notifications are sent to the `diversion` module where they initiate Solaar rule processing.
 
 The `status` module provides the `DeviceStatus` class to record the battery status of a device.  It also provides an interface to signal changes to the connection status of the device that can invoke a callback.  This callback is used to update the Solaar user interface when the status changes.
-
-TODO:  check why solaar/listener.py sets the callback multiple times
 
 
 ### Settings
@@ -123,10 +147,6 @@ The Solaar GUI takes these settings and constructs an interface for displaying a
 
 This setup allows for very quick implementation of simple settings but it bypasses the data stored in a device object.
 
-TODO:  Refactor settings so that they always use data stored in device objects.  Set up code to create a device data as easily as simple settings are creates.  Set up code to use this to create a setting object for the Solaar GUI.  Use callbacks to control GUI redisplay whenever the device data changes.
-
-
-
 
 ### Solaar Rules
 
@@ -142,8 +162,6 @@ The module `common.py` provides utility functions, structures, and classes.
 `NamedInt`, `NamedInts`, and `UnsortedNamedInts` provide integers and sets of integers with attached names.
 `FirmwareInfo` provides information about device firmware.
 `BATTERY_APPROX` provides named integers used for approximate battery levels of devices.
-
-TODO: Move a couple of things from hidpp20 to here.
 
 `i18n.py` provides a few strings that need translations and might not otherwise be visible to translation software.
 
@@ -161,8 +179,6 @@ The code now also identifies HID ++ devices that are directly connected via eith
 Device and receiver discovery is performed when Solaar starts.  While the Solaar GUI is running the `udev` code also listens for connections of new hardware using facilities from `GLib`.
 
 This code is also responsible for actual writing data to devices and receivers and reading data from them.
-
-TOD:  Is this actually the case?
 
 
 ## Solaar

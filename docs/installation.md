@@ -73,7 +73,7 @@ If you are running the system version of Python in Debian/Ubuntu you should have
 In Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
-Other system packages may be required depending on your distribution, such as `python-gobject-common-devel`.
+Other system packages may be required depending on your distribution, such as `python-gobject-common-devel` and `python-typing-extensions'.
 Although the Solaar CLI does not require Gtk3,
 `solaar config` does use Gtk3 capabilities to determine whether the Solaar GUI is running
 and thus should tell the Solaar GUI to update its information about settings
@@ -92,10 +92,11 @@ If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also see desktop notifications when devices come online and go offline.
 
-If the `hid_parser` Python package is available, Solaar parses HID report descriptors
-and can control more HID++ devices that do not use a receiver.
-This package may not be available in some distributions but can be installed using pip
-via `pip install --user hid-parser`.
+Solaar includes its own version of `hid_parser` because the version that is in PyPi
+(at https://pypi.org/project/hid-parser/) does not have some changes that are in
+https://github.com/usb-tools/python-hid-parser and are needed for some devices.
+Do not use pip to install hid_parser!
+Some distributions (e.g., Fedora) may separately package this code.
 
 If the `gitinfo` Python package is available, Solaar shows better information
 about which version of Solaar is running.
@@ -131,6 +132,6 @@ and set the LANGUAGE environment variable appropriately when running Solaar.
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
 `/etc/xdg/autostart/solaar.desktop`. An example of this file content can be seen in the repository at
-[`share/autostart/solaar.desktop`](/share/autostart/solaar.desktop).
+[`share/autostart/solaar.desktop`](https://github.com/pwr-Solaar/Solaar/blob/master/share/autostart/solaar.desktop).
 
 If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.

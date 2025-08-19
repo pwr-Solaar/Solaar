@@ -14,14 +14,19 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from enum import Enum
 
 from gi.repository import Gdk
 from gi.repository import Gtk
 
 from solaar.i18n import _
+from solaar.ui import common
 
 from . import pair_window
-from .common import error_dialog
+
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
 
 
 def make_image_menu_item(label, icon_name, function, *args):
@@ -33,7 +38,7 @@ def make_image_menu_item(label, icon_name, function, *args):
     menu_item = Gtk.MenuItem()
     menu_item.add(box)
     menu_item.show_all()
-    menu_item.connect("activate", function, *args)
+    menu_item.connect(GtkSignal.ACTIVATE.value, function, *args)
     menu_item.label = label
     menu_item.icon = icon
     return menu_item
@@ -45,7 +50,7 @@ def make(name, label, function, stock_id=None, *args):
     if stock_id is not None:
         action.set_stock_id(stock_id)
     if function:
-        action.connect("activate", function, *args)
+        action.connect(GtkSignal.ACTIVATE.value, function, *args)
     return action
 
 
@@ -54,7 +59,7 @@ def make_toggle(name, label, function, stock_id=None, *args):
     action.set_icon_name(name)
     if stock_id is not None:
         action.set_stock_id(stock_id)
-    action.connect("activate", function, *args)
+    action.connect(GtkSignal.ACTIVATE.value, function, *args)
     return action
 
 
@@ -95,4 +100,4 @@ def unpair(window, device):
         try:
             del receiver[device_number]
         except Exception:
-            error_dialog("unpair", device)
+            common.error_dialog(common.ErrorReason.UNPAIR, device)

@@ -1,5 +1,15 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.15
+
+* Solaar supports configuration of Bluetooth devices on macOS.
+
+## Version 1.1.13
+
+* Solaar will drop support for Python 3.7 immediately after version 1.1.13.
+
+* Version 1.1.12 does not push settings to many devices after a resume resulting in the device reverting to its default behaviour.  This is fixed in 1.1.13.
+
 ## Version 1.1.12
 
 * Solaar now processes DBus disconnection and connection messages from Bluez and re-initializes devices when they reconnect, to handle to a change introduced in Bluez 5.73. The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling. Until the issue is resolved having Scroll Wheel Resolution set to true (and not ignored) may be helpful.

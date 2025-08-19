@@ -14,16 +14,12 @@ from typing import Dict
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import TextIO
 from typing import Tuple
 from typing import Union
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 import hid_parser.data
 
@@ -564,7 +560,8 @@ class ArrayItem(MainItem):
                 )
                 continue
 
-            if usage in self._usages and all(usage_type not in self._INCOMPATIBLE_TYPES for usage_type in usage.usage_types):
+            not_incompatible_type = all(usage_type not in self._INCOMPATIBLE_TYPES for usage_type in usage.usage_types)
+            if usage in self._usages and not_incompatible_type:
                 usage_values[usage] = UsageValue(self, True)
 
         return usage_values
@@ -824,14 +821,28 @@ class ReportDescriptor:
                     if data is None:
                         raise InvalidReportDescriptor("Invalid output item")
                     self._append_items(
-                        offset_output, self._output, report_id, report_count, report_size, usages, data, {**glob, **local}
+                        offset_output,
+                        self._output,
+                        report_id,
+                        report_count,
+                        report_size,
+                        usages,
+                        data,
+                        {**glob, **local},
                     )
 
                 elif tag == TagMain.FEATURE:
                     if data is None:
                         raise InvalidReportDescriptor("Invalid feature item")
                     self._append_items(
-                        offset_feature, self._feature, report_id, report_count, report_size, usages, data, {**glob, **local}
+                        offset_feature,
+                        self._feature,
+                        report_id,
+                        report_count,
+                        report_size,
+                        usages,
+                        data,
+                        {**glob, **local},
                     )
 
                 # clear local

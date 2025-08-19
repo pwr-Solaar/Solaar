@@ -17,7 +17,7 @@ Solaar runs as a regular user process, albeit with direct access to the Linux in
 that lets it directly communicate with the Logitech devices it manages using special
 Logitech-proprietary (HID++) commands.
 Each Logitech device implements a different subset of these commands.
-Solaar is thus only able to make the changes to devices that devices implement.
+Solaar is thus only able to make the changes that a particular device supports.
 
 Solaar is not a device driver and does not process normal input from devices.
 It is thus unable to fix problems that arise from incorrect handling of
@@ -46,8 +46,8 @@ and for more information on its capabilities see
 
 Solaar's GUI normally uses an icon in the system tray and starts with its main window visible.
 This aspect of Solaar depends on having an active system tray, which is not the default
-situation for recent versions of Gnome.  For information on to set up a system tray under Gnome see
-[the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
+situation for recent versions of Gnome.  For information on how to set up a system tray under
+Gnome see [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
 
 Solaar's GUI can be started in several ways
 
@@ -95,7 +95,7 @@ which is done using the usual Bluetooth mechanisms.
 For a partial list of supported devices
 and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/devices).
 
-[logo]: https://pwr-solaar.github.io/Solaar/assets/solaar.svg
+[logo]: https://pwr-solaar.github.io/Solaar/img/solaar.svg
 
 ## Prebuilt packages
 
@@ -133,6 +133,10 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
+- Onboard Profiles, when active, can prevent changes to other settings, such as Polling Rate, DPI, and various LED settings. Which settings are affected depends on the device.  To make changes to affected settings, disable Onboard Profiles.  If Onboard Profiles are later enabled the affected settings may change to the value in the profile.
+
+- Solaar version 1.1.12 has a bug resulting in devices remaining in their default configuration after a system resume.  This is fixed in 1.1.13.
+
 - Bluez 5.73 does not remove Bluetooth devices when they disconnect.
   Solaar 1.1.12 processes the DBus disconnection and connection messages from Bluez and does re-initialize devices when they reconnect.
   The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling.
@@ -156,9 +160,6 @@ for the step-by-step procedure for manual installation.
 - The driver sends messages to devices that do not conform with the Logitech HID++ specification
   resulting in responses being sent back that look like other messages.  For some devices this causes
   Solaar to report incorrect battery levels.
-
-- If the Python hid-parser package is not available, Solaar will not recognize some devices.
-  Use pip to install hid-parser.
 
 - Solaar normally uses icon names for its icons, which in some system tray implementations
   results in missing or wrong-sized icons.
