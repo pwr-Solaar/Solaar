@@ -102,7 +102,6 @@ def run_loop(
     use_tray: bool,
     show_window: bool,
 ):
-    assert use_tray or show_window, "need either tray or visible window"
 
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 

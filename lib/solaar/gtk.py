@@ -83,8 +83,8 @@ def create_parser():
     arg_parser.add_argument(
         "-w",
         "--window",
-        choices=("show", "hide", "only"),
-        help="start with window showing / hidden / only (no tray icon)",
+        choices=("show", "hide", "only", "none"),
+        help="start with window showing / hidden / only (no tray icon) / none (no window nor tray icon)",
     )
     arg_parser.add_argument(
         "-b",
@@ -198,7 +198,7 @@ def main():
         configuration.defer_saves = True  # allow configuration saves to be deferred
 
         # main UI event loop
-        ui.run_loop(listener.start_all, listener.stop_all, args.window != "only", args.window != "hide")
+        ui.run_loop(listener.start_all, listener.stop_all, (args.window != "only") and (args.window != "none"), (args.window != "hide") and (args.window != "none"))
     except Exception:
         sys.exit(f"{NAME.lower()}: error: {format_exc()}")
 
