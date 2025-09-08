@@ -54,7 +54,7 @@ def set_locale_to_system_default() -> None:
     try:
         locale.setlocale(locale.LC_ALL, "")  # system default
     except locale.Error:
-        logger.debug("System locale not supported, using no translation.")
+        logger.error("User locale not supported by system, using no translation.")
         locale.setlocale(locale.LC_ALL, "C")  # untranslated (English)
         return
 
