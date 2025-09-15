@@ -48,7 +48,7 @@ class ProcessUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("X11 active process. For use in X11 only."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
@@ -78,7 +78,7 @@ class MouseProcessUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("X11 mouse process. For use in X11 only."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
@@ -119,7 +119,7 @@ class FeatureUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("Feature name of notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.ComboBoxText.new_with_entry()
@@ -165,7 +165,7 @@ class ReportUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("Report number of notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
@@ -197,7 +197,7 @@ class ModifiersUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("Active keyboard modifiers. Not always available in Wayland."))
         self.widgets[self.label] = (0, 0, 5, 1)
         self.labels = {}
@@ -235,7 +235,7 @@ class KeyUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(
             _(
                 "Diverted key or button depressed or released.\n"
@@ -287,7 +287,7 @@ class KeyIsDownUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(
             _(
                 "Diverted key or button is currently down.\n"
@@ -327,7 +327,7 @@ class TestUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("Test condition on notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 4, 1)
         lbl = Gtk.Label(label=_("Test"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
@@ -433,7 +433,7 @@ class TestBytesUI(ConditionUI):
         self.fields = {}
         self.field_labels = {}
         self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
         self.label.set_text(_("Bit or range test on bytes in notification message triggering rule processing."))
         self.widgets[self.label] = (0, 0, 5, 1)
         col = 0
@@ -534,6 +534,7 @@ class MouseGestureUI(ConditionUI):
         self.label = Gtk.Label(
             label=_("Mouse gesture with optional initiating button followed by zero or more mouse movements."),
             halign=Gtk.Align.CENTER,
+            justify=Gtk.Justification.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
@@ -592,7 +593,6 @@ class MouseGestureUI(ConditionUI):
             field = self.fields[i]
             with self.ignore_changes():
                 field.get_child().set_text(component.movements[i])
-            field.set_size_request(int(0.3 * self.panel.get_toplevel().get_size()[0]), 0)
             field.show_all()
             self.del_btns[i].show()
         for i in range(n, len(self.fields)):
