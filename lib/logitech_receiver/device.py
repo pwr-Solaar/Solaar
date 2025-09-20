@@ -147,6 +147,7 @@ class Device:
         self.battery_info = None
         self.link_encrypted = None
         self._active = None  # lags self.online - is used to help determine when to setup devices
+        self.present = True  # used for devices that are integral with their receiver but that separately be disconnected
 
         self._feature_settings_checked = False
         self._gestures_lock = threading.Lock()
@@ -396,8 +397,8 @@ class Device:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None:
-                        self.persister["_battery"] = result
+                    if self.persister and battery_feature is None and result is not None:
+                        self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
         """Update battery information for device, calling changed callback if necessary"""
@@ -432,6 +433,8 @@ class Device:
     def changed(self, active=None, alert=Alert.NONE, reason=None, push=False):
         """The status of the device had changed, so invoke the status callback.
         Also push notifications and settings to the device when necessary."""
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("device %d changing: active=%s %s present=%s", self.number, active, self._active, self.present)
         if active is not None:
             self.online = active
             was_active, self._active = self._active, active
@@ -533,7 +536,8 @@ class Device:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
     def ping(self):
-        """Checks if the device is online, returns True of False"""
+        """Checks if the device is online and present, returns True of False.
+        Some devices are integral with their receiver but may not be present even if the receiver responds to ping."""
         long = self.hidpp_long is True or (
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
@@ -542,9 +546,11 @@ class Device:
             protocol = self.low_level.ping(handle, self.number, long_message=long)
         except exceptions.NoReceiver:  # if ping fails, device is offline
             protocol = None
-        self.online = protocol is not None
+        self.online = protocol is not None and self.present
         if protocol:
             self._protocol = protocol
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("pinged %s: online %s protocol %s present %s", self.number, self.online, protocol, self.present)
         return self.online
 
     def notify_devices(self):  # no need to notify, as there are none

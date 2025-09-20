@@ -42,8 +42,8 @@ or `make install_dnf` or `make install_brew`.
 These might not install all needed packages in older versions of your distribution.
 Next, install the Solaar rule via `make install_udev`.
 If you are using Wayland instead of X11 you may want to instead `make install_udev_uinput`
-Finally, install Solaar via `make install_pip` or `make install_pipx`.
 so that Solaar rules can simulate input in Wayland.
+Finally, install Solaar via `make install_pip` or `make install_pipx`.
 
 Parts of the installation process require sudo privileges so you may be asked for your password.
 
@@ -92,10 +92,11 @@ If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also see desktop notifications when devices come online and go offline.
 
-If the `hid_parser` Python package is available, Solaar parses HID report descriptors
-and can control more HID++ devices that do not use a receiver.
-This package may not be available in some distributions but can be installed using pip
-via `pip install --user hid-parser`.
+Solaar includes its own version of `hid_parser` because the version that is in PyPi
+(at https://pypi.org/project/hid-parser/) does not have some changes that are in
+https://github.com/usb-tools/python-hid-parser and are needed for some devices.
+Do not use pip to install hid_parser!
+Some distributions (e.g., Fedora) may separately package this code.
 
 If the `gitinfo` Python package is available, Solaar shows better information
 about which version of Solaar is running.
@@ -131,6 +132,6 @@ and set the LANGUAGE environment variable appropriately when running Solaar.
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
 `/etc/xdg/autostart/solaar.desktop`. An example of this file content can be seen in the repository at
-[`share/autostart/solaar.desktop`](/share/autostart/solaar.desktop).
+[`share/autostart/solaar.desktop`](https://github.com/pwr-Solaar/Solaar/blob/master/share/autostart/solaar.desktop).
 
 If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.

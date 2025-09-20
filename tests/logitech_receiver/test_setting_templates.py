@@ -268,7 +268,7 @@ simple_tests = [
         fake_hidpp.Response("0A", 0x0410, "0A"),
     ),
     Setup(
-        FeatureTest(settings_templates.ADCPower, 5, 0xA),
+        FeatureTest(settings_templates.ADCPower, 5, 0xA, version=0x03),
         fake_hidpp.Response("05", 0x0410),
         fake_hidpp.Response("0A", 0x0420, "0A"),
     ),

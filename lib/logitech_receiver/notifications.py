@@ -238,6 +238,7 @@ def _process_hidpp10_notification(device: Device, notification: HIDPPNotificatio
 
 
 def _process_feature_notification(device: Device, notification: HIDPPNotification):
+    old_present, device.present = device.present, True  # the device is generating a feature notification so it must be present
     try:
         feature = device.features.get_feature(notification.sub_id)
     except IndexError:
@@ -277,9 +278,11 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
     elif feature == SupportedFeature.ADC_MEASUREMENT:
         if notification.address == 0x00:
             result = hidpp20.decipher_adc_measurement(notification.data)
-            if result:
+            if result:  # if good data and  the device was not present then a push is needed
                 device.set_battery_info(result[1])
-            else:  # this feature is used to signal device becoming inactive
+                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification"), push=not old_present)
+            else:  # this feature is also used to signal device becoming inactive
+                device.present = False  # exception to device presence
                 device.changed(active=False)
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)
@@ -451,7 +454,7 @@ def handle_discovery_status(receiver: Receiver, notification: HIDPPNotification)
         receiver.pairing.device_passkey = None
         discover_error = ord(notification.data[:1])
         if discover_error:
-            receiver.pairing.error = discover_string = hidpp10_constants.BoltPairingError(discover_error)
+            receiver.pairing.error = discover_string = hidpp10_constants.BoltPairingError(discover_error).name
             logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
         receiver.changed(reason=reason)
         return True
@@ -493,7 +496,7 @@ def handle_pairing_status(receiver: Receiver, notification: HIDPPNotification) -
         elif notification.address == 0x02 and not pair_error:
             receiver.pairing.new_device = receiver.register_new_device(notification.data[7])
         if pair_error:
-            receiver.pairing.error = error_string = hidpp10_constants.BoltPairingError(pair_error)
+            receiver.pairing.error = error_string = hidpp10_constants.BoltPairingError(pair_error).name
             receiver.pairing.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         receiver.changed(reason=reason)
