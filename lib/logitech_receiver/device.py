@@ -207,10 +207,10 @@ class Device:
 
         Device.instances.append(self)
 
-    def find(self, id):  # find a device by serial number or unit ID
-        assert id, "need serial number or unit ID to find a device"
+    def find(self, id):  # find a device by serial number or unit ID or name or codename
+        assert id, "need id to find a device"
         for device in Device.instances:
-            if device.online and (device.unitId == id or device.serial == id):
+            if device.online and (device.unitId == id or device.serial == id or device.name == id or device.codename == id):
                 return device
 
     @property
