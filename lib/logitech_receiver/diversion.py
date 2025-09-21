@@ -1118,7 +1118,12 @@ class Device(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        return device.unitId == self.devID or device.serial == self.devID
+        return (
+            device.unitId == self.devID
+            or device.serial == self.devID
+            or device.codename == self.devID
+            or device.name == self.devID
+        )
 
     def data(self):
         return {"Device": self.devID}
