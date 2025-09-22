@@ -575,6 +575,10 @@ class Task(IntEnum):
     RIGHT_OPTION = 0x00FA
     LEFT_CMD = 0x00FB
     RIGHT_CMD = 0x00FC
+    CIRCLE = 0x01A3
+    TRIANGLE = 0x01A4
+    DIAMOND = 0x01A5
+    STAR = 0x01A6
 
     def __str__(self):
         return self.name.replace("_", " ").title()
