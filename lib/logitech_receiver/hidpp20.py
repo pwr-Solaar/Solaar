@@ -296,7 +296,10 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self._mapped_to is None:
             self._getCidReporting()
         self._device.keys._ensure_all_keys_queried()
-        task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
+        try:
+            task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
+        except ValueError:
+            task = f"Unknown_{self._mapped_to:x}"
         return NamedInt(self._mapped_to, task)
 
     @property
