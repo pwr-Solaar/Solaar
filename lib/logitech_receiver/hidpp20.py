@@ -1576,7 +1576,7 @@ class Hidpp20:
             except Exception:
                 return None
 
-    def get_name(self, device: Device):
+    def get_name(self, device: Device) -> str:
         """Reads a device's name.
 
         :returns: a string with the device name, or ``None`` if the device is not
@@ -1692,7 +1692,7 @@ class Hidpp20:
         if SupportedFeature.ONBOARD_PROFILES in device.features:
             return OnboardProfiles.from_device(device)
 
-    def get_mouse_pointer_info(self, device: Device):
+    def get_mouse_pointer_info(self, device: Device) -> dict[str, Any]:
         pointer_info = device.feature_request(SupportedFeature.MOUSE_POINTER)
         if pointer_info:
             dpi, flags = struct.unpack("!HB", pointer_info[:3])
@@ -1706,7 +1706,7 @@ class Hidpp20:
                 "suggest_vertical_orientation": suggest_vertical_orientation,
             }
 
-    def get_vertical_scrolling_info(self, device: Device):
+    def get_vertical_scrolling_info(self, device: Device) -> dict[str, Any]:
         vertical_scrolling_info = device.feature_request(SupportedFeature.VERTICAL_SCROLLING)
         if vertical_scrolling_info:
             roller, ratchet, lines = struct.unpack("!BBB", vertical_scrolling_info[:3])
@@ -1722,13 +1722,13 @@ class Hidpp20:
             )[roller]
             return {"roller": roller_type, "ratchet": ratchet, "lines": lines}
 
-    def get_hi_res_scrolling_info(self, device: Device):
+    def get_hi_res_scrolling_info(self, device: Device) -> tuple[int, int]:
         hi_res_scrolling_info = device.feature_request(SupportedFeature.HI_RES_SCROLLING)
         if hi_res_scrolling_info:
             mode, resolution = struct.unpack("!BB", hi_res_scrolling_info[:2])
             return mode, resolution
 
-    def get_pointer_speed_info(self, device: Device):
+    def get_pointer_speed_info(self, device: Device) -> float:
         pointer_speed_info = device.feature_request(SupportedFeature.POINTER_SPEED)
         if pointer_speed_info:
             pointer_speed_hi, pointer_speed_lo = struct.unpack("!BB", pointer_speed_info[:2])
