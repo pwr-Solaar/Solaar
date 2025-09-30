@@ -55,6 +55,8 @@ class Setting:
     rw_options = {}
     validator_class = None
     validator_options = {}
+    initializer_fnid = None
+    initializer_bytes = None
 
     def __init__(self, device, rw, validator):
         self._device = device
@@ -184,6 +186,8 @@ class Setting:
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: apply (%s)", self.name, self._device)
         try:
+            if self.initializer_bytes:  # initialize the setting (e.g., to set RGB power save off)
+                self._rw.write(self._device, self.initializer_bytes, bare=True, fnid=self.initializer_fnid)
             value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
             if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
                 self.write(value, save=False)
@@ -639,10 +643,12 @@ class FeatureRW:
         else:
             return b""
 
-    def write(self, device, data_bytes):
+    def write(self, device, data_bytes, bare=False, fnid=None):
         assert self.feature is not None
-        write_bytes = self.prefix + (data_bytes.to_bytes(1) if isinstance(data_bytes, int) else data_bytes) + self.suffix
-        reply = device.feature_request(self.feature, self.write_fnid, write_bytes, no_reply=self.no_reply)
+        fnid = self.write_fnid if fnid is None else fnid
+        data = data_bytes.to_bytes(1) if isinstance(data_bytes, int) else data_bytes
+        write_bytes = self.prefix + data + self.suffix if not bare else data
+        reply = device.feature_request(self.feature, fnid, write_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
 
