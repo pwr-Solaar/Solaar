@@ -16,6 +16,7 @@
 
 import gettext
 import locale
+import logging
 import os
 import sys
 
@@ -24,6 +25,8 @@ from glob import glob
 from solaar import NAME
 
 _LOCALE_DOMAIN = NAME.lower()
+
+logger = logging.getLogger(__name__)
 
 
 def _find_locale_path(locale_domain: str) -> str:
@@ -37,8 +40,11 @@ def _find_locale_path(locale_domain: str) -> str:
     raise FileNotFoundError(f"Could not find locale path for {locale_domain}")
 
 
-def set_locale_to_system_default():
+def set_locale_to_system_default() -> None:
     """Sets locale for translations to the system default.
+
+    If locale is unsupported, fallback to standard English without
+    translation 'C'.
 
     Set LC_ALL environment variable to enforce a locale setting e.g.
     'de_DE.UTF-8'. Run Solaar with your desired localization, for German
@@ -46,9 +52,11 @@ def set_locale_to_system_default():
     'LC_ALL=de_DE.UTF-8 solaar'
     """
     try:
-        locale.setlocale(locale.LC_ALL, "")
-    except Exception:
-        pass
+        locale.setlocale(locale.LC_ALL, "")  # system default
+    except locale.Error:
+        logger.error("User locale not supported by system, using no translation.")
+        locale.setlocale(locale.LC_ALL, "C")  # untranslated (English)
+        return
 
     try:
         path = _find_locale_path(_LOCALE_DOMAIN)

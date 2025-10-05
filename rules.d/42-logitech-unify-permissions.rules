@@ -4,7 +4,7 @@
 # Allowing users to write to the device is potentially dangerous
 # because they could perform firmware updates.
 
-ACTION != "add", GOTO="solaar_end"
+ACTION == "remove", GOTO="solaar_end"
 SUBSYSTEM != "hidraw", GOTO="solaar_end"
 
 # USB-connected Logitech receivers and devices
