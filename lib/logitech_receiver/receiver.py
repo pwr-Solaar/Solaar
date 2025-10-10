@@ -599,6 +599,6 @@ def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=
     except OSError as e:
         logger.exception("open %s", device_info)
         if e.errno == errno.EACCES:
-            raise
+            raise e
     except Exception:
         logger.exception("open %s", device_info)

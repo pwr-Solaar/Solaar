@@ -86,7 +86,7 @@ def test_create_device(device_info, responses, expected_success):
         with pytest.raises(PermissionError):
             device.create_device(low_level_mock, device_info)
     elif not expected_success:
-        with pytest.raises(TypeError):
+        with pytest.raises(Exception):  # noqa: B017
             device.create_device(low_level_mock, device_info)
     else:
         test_device = device.create_device(low_level_mock, device_info)

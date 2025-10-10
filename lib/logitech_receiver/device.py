@@ -87,10 +87,10 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
     except OSError as e:
         logger.exception("open %s", device_info)
         if e.errno == errno.EACCES:
-            raise
-    except Exception:
+            raise e
+    except Exception as e:
         logger.exception("open %s", device_info)
-        raise
+        raise e
 
 
 class Device:
