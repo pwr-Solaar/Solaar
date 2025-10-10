@@ -1,5 +1,8 @@
 # 1.1.15rc1
 
+* Center labels and remove buggy entry resizing logic
+* Add shape keys from Key POP Icon
+* Device and Action rule conditions match on codename and name
 * Fix listing hidpp10 devices - bytes vs string concatenation (#2856)
 * Add present flag, unset when internal error occurs, set when notification appears
 * Pause setting up features when error occurs; use ADC message to signal connection and disconnection

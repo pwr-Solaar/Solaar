@@ -2,6 +2,7 @@
 
 ## Version 1.1.15
 
+* Device and Action rule conditions match on device codename and name
 * Solaar supports configuration of Bluetooth devices on macOS.
 
 ## Version 1.1.13
