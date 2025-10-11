@@ -522,7 +522,7 @@ class Device:
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
             return self.low_level.request(
-                self.handle or self.receiver.handle,
+                self.handle or (self.receiver.handle if self.receiver else None),
                 self.number,
                 request_id,
                 *params,
