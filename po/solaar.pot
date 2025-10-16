@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.1.14\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2025-10-15 00:20+0300\n"
+        "POT-Creation-Date: 2025-10-16 18:53+0300\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,7 +177,7 @@ msgstr  ""
 msgid   "recharging"
 msgstr  ""
 
-#: lib/logitech_receiver/i18n.py:37
+#: lib/logitech_receiver/i18n.py:37 lib/solaar/ui/window.py:700
 msgid   "charging"
 msgstr  ""
 
@@ -237,7 +237,7 @@ msgstr  ""
 msgid   "sequence timeout"
 msgstr  ""
 
-#: lib/logitech_receiver/i18n.py:54
+#: lib/logitech_receiver/i18n.py:54 lib/solaar/ui/window.py:555
 msgid   "Firmware"
 msgstr  ""
 
@@ -1827,6 +1827,7 @@ msgid   "no receiver"
 msgstr  ""
 
 #: lib/solaar/ui/tray.py:294 lib/solaar/ui/tray.py:299
+#: lib/solaar/ui/window.py:728
 msgid   "offline"
 msgstr  ""
 
@@ -1907,6 +1908,10 @@ msgstr  ""
 msgid   "Unit ID"
 msgstr  ""
 
+#: lib/solaar/ui/window.py:559
+msgid   "none"
+msgstr  ""
+
 #: lib/solaar/ui/window.py:560
 msgid   "Notifications"
 msgstr  ""
@@ -1921,6 +1926,10 @@ msgid   "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
 msgstr[0]       ""
 msgstr[1]       ""
+
+#: lib/solaar/ui/window.py:620
+msgid   "Only one device can be paired to this receiver."
+msgstr  ""
 
 #: lib/solaar/ui/window.py:624
 #, python-format
@@ -1951,6 +1960,10 @@ msgstr  ""
 
 #: lib/solaar/ui/window.py:697
 msgid   " and next level to be reported."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:702
+msgid   "last known"
 msgstr  ""
 
 #: lib/solaar/ui/window.py:713
