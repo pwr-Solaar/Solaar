@@ -1107,6 +1107,22 @@ msgstr "Läs-/skrivoperationen misslyckades."
 msgid "Built-in rules"
 msgstr "Inbyggda regler"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Aktivera stegvisning (utlös upprepade gånger var N pixlar)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Stegavstånd:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Död zon:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pixlar"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid "User-defined rules"
 msgstr "Användardefinierade regler"
