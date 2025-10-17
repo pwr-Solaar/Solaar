@@ -817,6 +817,11 @@ class DpiSlidingXY(settings.RawXYProcessing):
 
 
 class MouseGesturesXY(settings.RawXYProcessing):
+    """Process mouse gestures with support for staggering (repeated triggering during movement)."""
+
+    # Rate limiting for incremental notifications (50 Hz = 20ms minimum interval)
+    MIN_NOTIFICATION_INTERVAL_MS = 20
+
     def activate_action(self):
         self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
         self.fsmState = State.IDLE
@@ -826,6 +831,9 @@ class MouseGesturesXY(settings.RawXYProcessing):
         self.dx = 0.0
         self.dy = 0.0
         self.lastEv = None
+        self.last_incremental_notification = None
+        self.dx_raw = 0.0
+        self.dy_raw = 0.0
         self.data = []
 
     def press_action(self, key):
@@ -837,14 +845,25 @@ class MouseGesturesXY(settings.RawXYProcessing):
 
     def release_action(self):
         if self.fsmState == State.PRESSED:
-            # emit mouse gesture notification
+            # emit mouse gesture notification when the button is released
             self.push_mouse_event()
             if logger.isEnabledFor(logging.INFO):
                 logger.info("mouse gesture notification %s", self.data)
             payload = struct.pack("!" + (len(self.data) * "h"), *self.data)
             notification = base.HIDPPNotification(0, 0, 0, 0, payload)
             diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
+
+            # Clear stagger accumulators for this device on button release
+            self._clear_stagger_accumulators()
+
             self.fsmState = State.IDLE
+
+    def _clear_stagger_accumulators(self):
+        """Clear all stagger accumulators for this device"""
+        device_id = id(self.device)
+        keys_to_remove = [key for key in diversion._stagger_accumulators.keys() if key[0] == device_id]
+        for key in keys_to_remove:
+            del diversion._stagger_accumulators[key]
 
     def move_action(self, dx, dy):
         if self.fsmState == State.PRESSED:
@@ -855,11 +874,44 @@ class MouseGesturesXY(settings.RawXYProcessing):
             if self.lastEv is not None and now - self.lastEv > 200.0:
                 self.push_mouse_event()
             dpi = self.dpiSetting.read() if self.dpiSetting else 1000
-            dx = float(dx) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
-            self.dx += dx
-            dy = float(dy) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
-            self.dy += dy
+            dx_norm = float(dx) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+            self.dx += dx_norm
+            dy_norm = float(dy) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+            self.dy += dy_norm
             self.lastEv = now
+
+            # Send incremental notification for staggering rules using RAW pixel counts
+            # Accumulate raw pixel values to preserve sub-pixel precision for slow movements
+            # Rate limit to 50 Hz using class constant
+            self.dx_raw = getattr(self, "dx_raw", 0.0) + dx  # Accumulate as float to preserve fractional pixels
+            self.dy_raw = getattr(self, "dy_raw", 0.0) + dy
+
+            # Only send notification if we have at least 1 pixel of movement (after integer conversion)
+            # and rate limit allows
+            dx_to_send = int(self.dx_raw)
+            dy_to_send = int(self.dy_raw)
+
+            if (dx_to_send != 0 or dy_to_send != 0) and (
+                self.last_incremental_notification is None
+                or (now - self.last_incremental_notification) >= self.MIN_NOTIFICATION_INTERVAL_MS
+            ):
+                for chunk_dx, chunk_dy in self._split_movement(dx_to_send, dy_to_send):
+                    incremental_data = [self.data[0], -1, chunk_dx, chunk_dy]
+                    incremental_payload = struct.pack("!" + (len(incremental_data) * "h"), *incremental_data)
+                    incremental_notification = base.HIDPPNotification(0, 0, 0, 0, incremental_payload)
+                    diversion.process_notification(self.device, incremental_notification, _F.MOUSE_GESTURE)
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug(
+                            "incremental gesture chunk: key=%s dx=%d dy=%d",
+                            self.data[0],
+                            chunk_dx,
+                            chunk_dy,
+                        )
+                self.last_incremental_notification = now
+
+                # Remove the integer portion that was just sent, keeping sub-pixel remainders
+                self.dx_raw -= dx_to_send
+                self.dy_raw -= dy_to_send
 
     def key_action(self, key):
         self.push_mouse_event()
@@ -868,6 +920,8 @@ class MouseGesturesXY(settings.RawXYProcessing):
         self.lastEv = time() * 1000  # time_ns() / 1e6
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("mouse gesture key event %d %s", key, self.data)
+        if self.fsmState == State.PRESSED:
+            self._send_progress_snapshot()
 
     def push_mouse_event(self):
         x = int(self.dx)
@@ -881,6 +935,46 @@ class MouseGesturesXY(settings.RawXYProcessing):
         self.dy = 0.0
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("mouse gesture move event %d %d %s", x, y, self.data)
+        if self.fsmState == State.PRESSED:
+            self._send_progress_snapshot()
+
+    @staticmethod
+    def _split_movement(dx, dy, max_step=16):
+        """Split large deltas into smaller chunks to trigger staggering repeatedly."""
+        chunks = []
+        remaining_dx = dx
+        remaining_dy = dy
+
+        while remaining_dx != 0 or remaining_dy != 0:
+            step_dx = MouseGesturesXY._clamp_step(remaining_dx, max_step)
+            step_dy = MouseGesturesXY._clamp_step(remaining_dy, max_step)
+
+            if step_dx == 0 and remaining_dx != 0:
+                step_dx = 1 if remaining_dx > 0 else -1
+            if step_dy == 0 and remaining_dy != 0:
+                step_dy = 1 if remaining_dy > 0 else -1
+
+            chunks.append((step_dx, step_dy))
+            remaining_dx -= step_dx
+            remaining_dy -= step_dy
+
+        return chunks
+
+    @staticmethod
+    def _clamp_step(value, max_step):
+        if value > 0:
+            return min(value, max_step)
+        if value < 0:
+            return max(value, -max_step)
+        return 0
+
+    def _send_progress_snapshot(self):
+        if len(self.data) <= 1:
+            return
+        snapshot = [self.data[0], -2] + self.data[1:]
+        payload = struct.pack("!" + (len(snapshot) * "h"), *snapshot)
+        notification = base.HIDPPNotification(0, 0, 0, 0, payload)
+        diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
 
 
 class DivertKeys(settings.Settings):
