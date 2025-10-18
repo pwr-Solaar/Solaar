@@ -1048,6 +1048,22 @@ msgstr  "Luku/kirjoitus operaatio epäonnistui."
 msgid   "Built-in rules"
 msgstr  ""
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Ota porrastus käyttöön (laukaise toistuvasti joka N pikselin välein)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Porrastusväli:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Kuollut alue:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pikseliä"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid   "User-defined rules"
 msgstr  ""

@@ -1216,6 +1216,22 @@ msgstr  "Operasi baca/tulis gagal."
 msgid   "Built-in rules"
 msgstr  "Aturan bawaan"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Aktifkan penahapan (pemicu berulang tiap N piksel)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Jarak penahapan:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Zona mati:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "piksel"
+
 #: lib/solaar/ui/diversion_rules.py:66
 msgid   "User-defined rules"
 msgstr  "Aturan yang ditentukan pengguna"

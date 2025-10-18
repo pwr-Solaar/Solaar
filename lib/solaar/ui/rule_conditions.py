@@ -18,6 +18,7 @@ from enum import Enum
 
 from gi.repository import Gtk
 from logitech_receiver import diversion
+from logitech_receiver.diversion import DEFAULT_STAGGER_DISTANCE
 from logitech_receiver.diversion import Key
 from logitech_receiver.hidpp20 import SupportedFeature
 from logitech_receiver.special_keys import CONTROL
@@ -531,16 +532,51 @@ class MouseGestureUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.fields = []
+        self.field_rows = []
         self.label = Gtk.Label(
             label=_("Mouse gesture with optional initiating button followed by zero or more mouse movements."),
             halign=Gtk.Align.CENTER,
             justify=Gtk.Justification.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
-        self.del_btns = []
-        self.add_btn = Gtk.Button(label=_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn = Gtk.Button(label=_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=False)
         self.add_btn.connect(GtkSignal.CLICKED.value, self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
+
+        # Staggering widgets container
+        self.options_grid = Gtk.Grid(row_spacing=6, column_spacing=6, halign=Gtk.Align.START)
+
+        self.staggering_checkbox = Gtk.CheckButton(
+            label=_("Enable staggering (trigger repeatedly every N pixels)"),
+            halign=Gtk.Align.START,
+            valign=Gtk.Align.CENTER,
+        )
+        self.staggering_checkbox.connect(GtkSignal.TOGGLED.value, self._on_staggering_toggled)
+        self.options_grid.attach(self.staggering_checkbox, 0, 0, 3, 1)
+
+        self.stagger_distance_label = Gtk.Label(label=_("Stagger distance:"), halign=Gtk.Align.END)
+        self.stagger_distance_field = Gtk.SpinButton.new_with_range(1, 1000, 1)
+        self.stagger_distance_field.set_value(DEFAULT_STAGGER_DISTANCE)
+        self.stagger_distance_field.set_digits(0)
+        self.stagger_distance_field.set_hexpand(False)
+        self.stagger_distance_field.connect(GtkSignal.VALUE_CHANGED.value, self._on_update)
+        self.stagger_distance_units = Gtk.Label(label=_("pixels"), halign=Gtk.Align.START)
+
+        self.options_grid.attach(self.stagger_distance_label, 0, 1, 1, 1)
+        self.options_grid.attach(self.stagger_distance_field, 1, 1, 1, 1)
+        self.options_grid.attach(self.stagger_distance_units, 2, 1, 1, 1)
+
+        self.dead_zone_label = Gtk.Label(label=_("Dead zone:"), halign=Gtk.Align.END)
+        self.dead_zone_field = Gtk.SpinButton.new_with_range(0, 1000, 1)
+        self.dead_zone_field.set_value(0)
+        self.dead_zone_field.set_digits(0)
+        self.dead_zone_field.set_hexpand(False)
+        self.dead_zone_field.connect(GtkSignal.VALUE_CHANGED.value, self._on_update)
+        self.dead_zone_units = Gtk.Label(label=_("pixels"), halign=Gtk.Align.START)
+
+        self.options_grid.attach(self.dead_zone_label, 0, 2, 1, 1)
+        self.options_grid.attach(self.dead_zone_field, 1, 2, 1, 1)
+        self.options_grid.attach(self.dead_zone_units, 2, 2, 1, 1)
 
     def _create_field(self):
         field = Gtk.ComboBoxText.new_with_entry()
@@ -548,25 +584,48 @@ class MouseGestureUI(ConditionUI):
             field.append(g, g)
         CompletionEntry.add_completion_to_entry(field.get_child(), self.MOVE_NAMES)
         field.connect(GtkSignal.CHANGED.value, self._on_update)
+        field.set_hexpand(True)
+        entry = field.get_child()
+        if entry is not None:
+            entry.set_hexpand(True)
+        field.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED)
+
+        delete_btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.FILL)
+        delete_btn.set_focus_on_click(False)
+        delete_btn.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED)
+
+        row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        row_box.set_hexpand(True)
+        row_box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED)
+        row_box.pack_start(field, True, True, 0)
+        row_box.pack_start(delete_btn, False, False, 0)
+
+        index = len(self.fields)
+        delete_btn.connect(GtkSignal.CLICKED.value, self._clicked_del, index)
+
         self.fields.append(field)
-        self.widgets[field] = (len(self.fields) - 1, 1, 1, 1)
+        self.field_rows.append(row_box)
+        self.widgets[row_box] = (index, 1, 1, 1)
         return field
 
-    def _create_del_btn(self):
-        btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
-        self.del_btns.append(btn)
-        self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect(GtkSignal.CLICKED.value, self._clicked_del, len(self.del_btns) - 1)
-        return btn
-
     def _clicked_add(self, _btn):
-        self.component.__init__(self.collect_value() + [""], warn=False)
+        value = self.collect_value()
+        # Handle both dict and list formats
+        if isinstance(value, dict):
+            value["movements"].append("")
+        else:
+            value = value + [""]
+        self.component.__init__(value, warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.movements) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
-        v.pop(pos)
+        # Handle both dict and list formats
+        if isinstance(v, dict):
+            v["movements"].pop(pos)
+        else:
+            v.pop(pos)
         self.component.__init__(v, warn=False)
         self.show(self.component, editable=True)
         self._on_update_callback()
@@ -574,7 +633,7 @@ class MouseGestureUI(ConditionUI):
     def _on_update(self, *args):
         super()._on_update(*args)
         for i, f in enumerate(self.fields):
-            if f.get_visible():
+            if i < len(self.field_rows) and self.field_rows[i].get_visible():
                 icon = (
                     "dialog-warning"
                     if i < len(self.component.movements) and self.component.movements[i] not in self.MOVE_NAMES
@@ -586,22 +645,61 @@ class MouseGestureUI(ConditionUI):
         n = len(component.movements)
         while len(self.fields) < n:
             self._create_field()
-            self._create_del_btn()
-        self.widgets[self.add_btn] = (n + 1, 1, 1, 1)
+
+        add_column = n
+        self.widgets[self.add_btn] = (add_column, 1, 1, 1)
+
+        if n:
+            last_row_box = self.field_rows[n - 1]
+            start_column = self.widgets[last_row_box][0]
+            span = 2
+        else:
+            start_column = 0
+            span = 1
+        self.widgets[self.options_grid] = (start_column, 2, span, 1)
+
         super().show(component, editable)
+        if n:
+            self.options_grid.show_all()
+        else:
+            self.options_grid.hide()
+
+        # Show movement fields
         for i in range(n):
             field = self.fields[i]
+            row_box = self.field_rows[i]
             with self.ignore_changes():
                 field.get_child().set_text(component.movements[i])
-            field.show_all()
-            self.del_btns[i].show()
+            row_box.show_all()
         for i in range(n, len(self.fields)):
-            self.fields[i].hide()
-            self.del_btns[i].hide()
-        self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
+            self.field_rows[i].hide()
+        self.add_btn.set_valign(Gtk.Align.CENTER)
+
+        # Load staggering parameters from component
+        with self.ignore_changes():
+            self.staggering_checkbox.set_active(component.staggering)
+            self.stagger_distance_field.set_value(component.stagger_distance if component.stagger_distance else 50)
+            self.dead_zone_field.set_value(component.dead_zone if component.dead_zone else 0)
+        self._update_option_sensitivity()
 
     def collect_value(self):
-        return [f.get_active_text().strip() for f in self.fields if f.get_visible()]
+        movements = []
+        for row_box, field in zip(self.field_rows, self.fields):
+            if row_box.get_visible():
+                text = field.get_active_text() or field.get_child().get_text()
+                movements.append(text.strip())
+
+        # Return dict format when staggering is enabled
+        if self.staggering_checkbox.get_active():
+            return {
+                "movements": movements,
+                "staggering": True,
+                "distance": int(self.stagger_distance_field.get_value()),
+                "dead_zone": int(self.dead_zone_field.get_value()),
+            }
+
+        # Return list format for non-staggering (legacy compatibility)
+        return movements
 
     @classmethod
     def left_label(cls, component):
@@ -612,4 +710,28 @@ class MouseGestureUI(ConditionUI):
         if len(component.movements) == 0:
             return "No-op"
         else:
-            return " -> ".join(component.movements)
+            label = " -> ".join(component.movements)
+            if component.staggering:
+                label += f" (staggering: {component.stagger_distance}px"
+                if component.dead_zone:
+                    label += f", dead zone: {component.dead_zone}px"
+                label += ")"
+            return label
+
+    def _on_staggering_toggled(self, checkbox):
+        """Handle staggering checkbox toggle"""
+        self._update_option_sensitivity()
+        self._on_update()
+
+    def _update_option_sensitivity(self):
+        is_active = self.staggering_checkbox.get_active()
+        targets = [
+            self.stagger_distance_label,
+            self.stagger_distance_field,
+            self.stagger_distance_units,
+            self.dead_zone_label,
+            self.dead_zone_field,
+            self.dead_zone_units,
+        ]
+        for widget in targets:
+            widget.set_sensitive(is_active)
