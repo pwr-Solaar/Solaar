@@ -27,6 +27,24 @@ from typing import Callable
 from typing import Optional
 from typing import Protocol
 
+# For evdev-based keyboard monitoring
+try:
+    import evdev
+    import select
+    EVDEV_AVAILABLE = True
+except ImportError:
+    evdev = None
+    select = None
+    EVDEV_AVAILABLE = False
+
+# For timer-based monitoring
+try:
+    from gi.repository import GLib
+    GLIB_AVAILABLE = True
+except ImportError:
+    GLib = None
+    GLIB_AVAILABLE = False
+
 from solaar import configuration
 
 from . import descriptors
@@ -155,6 +173,14 @@ class Device:
         self._persister_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
+        
+        # RGB refresh workaround for keyboards that reset RGB after sleep (e.g., G515)
+        self._last_keyboard_activity = None
+        self._rgb_refresh_enabled = False
+        self._evdev_monitor_thread = None
+        self._evdev_monitor_active = False
+        self._timer_monitor_id = None
+        self._timer_monitor_active = False
 
         if not self.path:
             self.path = self.low_level.find_paired_node(receiver.path, number, 1) if receiver else None
@@ -206,6 +232,21 @@ class Device:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
 
         Device.instances.append(self)
+        
+        # Set up RGB refresh workaround for keyboards with RGB_EFFECTS feature
+        # Note: For USB devices, protocol detection happens later, so we check for keyboard kind and features
+        if self.kind == "keyboard":
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Device initialized: %s", self)
+                logger.debug("RGB refresh workaround: Device kind: %s, protocol: %s", self.kind, self._protocol)
+                logger.debug("RGB refresh workaround: Device name: %s, codename: %s", 
+                           getattr(self, '_name', 'None'), getattr(self, '_codename', 'None'))
+                logger.debug("RGB refresh workaround: Device USB ID: %s", getattr(self, 'product_id', 'None'))
+                logger.debug("RGB refresh workaround: Keyboard detected, attempting RGB refresh workaround setup")
+            self._setup_rgb_refresh_workaround()
+        else:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: NOT called - kind=%s, protocol=%s", self.kind, self._protocol)
 
     def find(self, id):  # find a device by serial number or unit ID or name or codename
         assert id, "need id to find a device"
@@ -391,13 +432,19 @@ class Device:
             battery_feature = self.persister.get("_battery", None) if self.persister else None
             if battery_feature != 0:
                 result = _hidpp20.get_battery(self, battery_feature)
+                if result == 0:
+                    # No battery feature available or responding
+                    if self.persister and battery_feature is None:
+                        self.persister["_battery"] = 0
+                    return None
                 try:
                     feature, battery = result
                     if self.persister and battery_feature is None:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None and result is not None:
+                    # Handle case where result is not a tuple (shouldn't happen with proper 0 check above)
+                    if self.persister and battery_feature is None and hasattr(result, 'value'):
                         self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
@@ -560,6 +607,25 @@ class Device:
         handle, self.handle = self.handle, None
         if self in Device.instances:
             Device.instances.remove(self)
+        
+        # Clean up RGB refresh workaround
+        if hasattr(self, '_rgb_refresh_enabled') and self._rgb_refresh_enabled:
+            self.remove_notification_handler("rgb_refresh_monitor")
+            self._rgb_refresh_enabled = False
+            
+            # Stop evdev monitoring thread
+            if hasattr(self, '_evdev_monitor_active') and self._evdev_monitor_active:
+                self._evdev_monitor_active = False
+                if hasattr(self, '_evdev_monitor_thread') and self._evdev_monitor_thread:
+                    self._evdev_monitor_thread.join(timeout=2.0)  # Wait up to 2 seconds for thread to stop
+                    
+            # Stop timer monitoring
+            if hasattr(self, '_timer_monitor_active') and self._timer_monitor_active:
+                self._timer_monitor_active = False
+                if hasattr(self, '_timer_monitor_id') and self._timer_monitor_id and GLIB_AVAILABLE:
+                    GLib.source_remove(self._timer_monitor_id)
+                    self._timer_monitor_id = None
+        
         if hasattr(self, "cleanups"):
             for cleanup in self.cleanups:
                 cleanup(self)
@@ -586,6 +652,350 @@ class Device:
 
     def status_string(self):
         return self.battery_info.to_str() if self.battery_info is not None else ""
+    
+    def _setup_rgb_refresh_workaround(self):
+        """Set up RGB refresh workaround for keyboards that reset RGB after sleep."""
+        try:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Checking for %s", self)
+                logger.debug("RGB refresh workaround: Features available: %s", 
+                           list(self.features) if self.features else 'None')
+                logger.debug("RGB refresh workaround: evdev available: %s", EVDEV_AVAILABLE)
+            
+            # Check if device has RGB_EFFECTS feature
+            has_rgb_effects = False
+            if self.features:
+                has_rgb_effects = SupportedFeature.RGB_EFFECTS in self.features
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: RGB_EFFECTS feature present: %s", has_rgb_effects)
+                
+            if has_rgb_effects or not self.features:  # Enable if RGB_EFFECTS present or features pending
+                self._rgb_refresh_enabled = True
+                self._last_keyboard_activity = time.time()
+                
+                # Try evdev-based monitoring first
+                if EVDEV_AVAILABLE and self._setup_evdev_monitoring():
+                    logger.info("RGB refresh workaround enabled with evdev monitoring for %s", self)
+                    # Also start timer monitoring as backup until we confirm evdev is working
+                    self._setup_timer_monitoring()
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("RGB refresh workaround: Timer monitoring also enabled as backup until evdev is confirmed working")
+                else:
+                    # Fallback to timer-based polling approach only
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("RGB refresh workaround: evdev monitoring failed, falling back to timer-based approach")
+                    self._setup_timer_monitoring()
+                    logger.info("RGB refresh workaround enabled with timer-based monitoring for %s", self)
+            else:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: NOT enabled - no RGB_EFFECTS feature")
+                    
+        except Exception as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("Failed to setup RGB refresh workaround for %s: %s", self, e)
+    
+    def _setup_evdev_monitoring(self):
+        """Set up evdev-based keyboard activity monitoring."""
+        if not EVDEV_AVAILABLE:
+            return False
+            
+        try:
+            # Find keyboard input devices
+            keyboard_devices = []
+            for device_path in evdev.list_devices():
+                try:
+                    device = evdev.InputDevice(device_path)
+                    # Check if device has keyboard capabilities
+                    if evdev.ecodes.EV_KEY in device.capabilities():
+                        # Look for devices that might be our G515 TKL
+                        if ("G515" in device.name or "Logitech" in device.name):
+                            keyboard_devices.append(device)
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Found keyboard device: %s at %s", 
+                                           device.name, device_path)
+                        # Also check for devices with standard keyboard keys
+                        elif any(key in range(evdev.ecodes.KEY_A, evdev.ecodes.KEY_Z + 1) 
+                                for key in device.capabilities().get(evdev.ecodes.EV_KEY, [])):
+                            keyboard_devices.append(device)
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Found keyboard device: %s at %s", 
+                                           device.name, device_path)
+                except Exception as e:
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("RGB refresh workaround: Error checking device %s: %s", device_path, e)
+                    continue
+            
+            if not keyboard_devices:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: No suitable keyboard devices found for evdev monitoring")
+                return False
+            
+            # Start monitoring thread
+            self._evdev_monitor_active = True
+            self._evdev_monitor_thread = threading.Thread(
+                target=self._evdev_monitor_loop,
+                args=(keyboard_devices,),
+                daemon=True
+            )
+            self._evdev_monitor_thread.start()
+            
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: evdev monitoring started for %d devices", len(keyboard_devices))
+            return True
+            
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Failed to setup evdev monitoring: %s", e)
+            return False
+    
+    def _evdev_monitor_loop(self, keyboard_devices):
+        """Monitor keyboard devices for activity."""
+        try:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: evdev monitor loop started for %d devices", len(keyboard_devices))
+            
+            while self._evdev_monitor_active:
+                # Use select to wait for input events on device file descriptors
+                device_fds = [device.fd for device in keyboard_devices]
+                readable_fds, _, _ = select.select(device_fds, [], [], 1.0)  # 1 second timeout
+                
+                # Map back to device objects
+                for device in keyboard_devices:
+                    if device.fd in readable_fds:
+                        try:
+                            # Read events from device
+                            events = device.read()
+                            for event in events:
+                                # Check for key press events
+                                if event.type == evdev.ecodes.EV_KEY and event.value in (0, 1):  # Key press/release
+                                    current_time = time.time()
+                                    time_since_last = current_time - self._last_keyboard_activity if self._last_keyboard_activity else 0
+                                    
+                                    if logger.isEnabledFor(logging.DEBUG):
+                                        key_name = evdev.ecodes.KEY.get(event.code, f"KEY_{event.code}")
+                                        logger.debug("RGB refresh workaround: Key event detected: %s = %d, time since last: %.1fs", 
+                                                   key_name, event.value, time_since_last)
+                                    
+                                    # If this is the first successful key event detection, stop timer monitoring
+                                    if self._timer_monitor_active:
+                                        logger.info("RGB refresh workaround: First key event detected, disabling timer monitoring to prevent LED flashing")
+                                        self._stop_timer_monitoring()
+                                    
+                                    # Check if we need to refresh RGB settings
+                                    if (self._last_keyboard_activity and 
+                                        current_time - self._last_keyboard_activity > 55):
+                                        
+                                        logger.info("RGB refresh workaround: 55+ seconds passed (%.1fs), refreshing RGB settings!", time_since_last)
+                                        self._refresh_rgb_settings()
+                                    else:
+                                        if logger.isEnabledFor(logging.DEBUG):
+                                            logger.debug("RGB refresh workaround: Not refreshing RGB (only %.1fs since last activity)", time_since_last)
+                                    
+                                    self._last_keyboard_activity = current_time
+                                    
+                        except OSError as e:
+                            # Device disconnected or other error
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Device error in evdev monitor: %s", e)
+                            continue
+                        except Exception as e:
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Error reading from device: %s", e)
+                            continue
+                        
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: evdev monitor loop error: %s", e)
+        finally:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: evdev monitor loop ended")
+            # Clean up devices
+            for device in keyboard_devices:
+                try:
+                    device.close()
+                except:
+                    pass
+    
+    def _setup_timer_monitoring(self):
+        """Set up timer-based RGB refresh monitoring."""
+        if not GLIB_AVAILABLE:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: GLib not available for timer monitoring")
+            return False
+            
+        try:
+            # Refresh RGB settings every 50 seconds as a preventive measure
+            self._timer_monitor_active = True
+            self._timer_monitor_id = GLib.timeout_add(50000, self._timer_monitor_callback)  # 50 seconds
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Timer-based monitoring started (refreshing every 50 seconds)")
+            return True
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Failed to setup timer monitoring: %s", e)
+            return False
+    
+    def _stop_timer_monitoring(self):
+        """Stop timer-based RGB refresh monitoring."""
+        if self._timer_monitor_active and self._timer_monitor_id is not None:
+            try:
+                GLib.source_remove(self._timer_monitor_id)
+                self._timer_monitor_active = False
+                self._timer_monitor_id = None
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: Timer monitoring stopped (evdev monitoring is working)")
+            except Exception as e:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: Error stopping timer monitoring: %s", e)
+    
+    def _timer_monitor_callback(self):
+        """Timer callback to periodically refresh RGB settings."""
+        if not self._timer_monitor_active or not self._rgb_refresh_enabled:
+            return False  # Stop the timer
+            
+        try:
+            current_time = time.time()
+            logger.info("RGB refresh workaround: Timer callback - refreshing RGB settings as preventive measure")
+            self._refresh_rgb_settings()
+            self._last_keyboard_activity = current_time  # Update activity time
+            
+            return True  # Continue the timer
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Timer callback error: %s", e)
+            return False  # Stop the timer
+    
+    def _rgb_refresh_notification_handler(self, device, notification):
+        """Handle keyboard notifications to detect activity and refresh RGB if needed."""
+        if not self._rgb_refresh_enabled or not notification:
+            return None
+        
+        # Log all notifications for this device
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("RGB refresh workaround: Notification received for %s: sub_id=%s, address=%s",
+                        self, getattr(notification, 'sub_id', 'None'), getattr(notification, 'address', 'None'))
+        
+        # Check if this is a keyboard event that indicates activity
+        if self._is_keyboard_activity_notification(notification):
+            current_time = time.time()
+            time_since_last = current_time - self._last_keyboard_activity if self._last_keyboard_activity else 0
+            
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Keyboard activity detected! Time since last activity: %.1fs", time_since_last)
+            
+            # If more than 55 seconds have passed since last activity, refresh RGB settings
+            if (self._last_keyboard_activity and 
+                current_time - self._last_keyboard_activity > 55):
+                
+                logger.info("RGB refresh workaround: 55+ seconds passed (%.1fs), refreshing RGB settings!", time_since_last)
+                self._refresh_rgb_settings()
+            else:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: Not refreshing RGB (only %.1fs since last activity)", time_since_last)
+            
+            self._last_keyboard_activity = current_time
+        else:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Notification not recognized as keyboard activity")
+        
+        return None  # Let other handlers process the notification
+    
+    def _is_keyboard_activity_notification(self, notification):
+        """Check if the notification represents keyboard activity."""
+        # Check for reprogrammable controls (regular keys)
+        if hasattr(notification, 'sub_id') and notification.sub_id == 0x00:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Keyboard activity: sub_id == 0x00")
+            return True
+        
+        # Check for other keyboard-related notifications
+        if hasattr(notification, 'address'):
+            # Address 0x00 typically indicates key press/release events
+            if notification.address == 0x00:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: Keyboard activity: address == 0x00")
+                return True
+        
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("RGB refresh workaround: Not keyboard activity: sub_id=%s, address=%s",
+                        getattr(notification, 'sub_id', 'None'), getattr(notification, 'address', 'None'))
+        return False
+    
+    def _refresh_rgb_settings(self):
+        """Refresh RGB settings by reapplying them."""
+        try:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Starting RGB settings refresh for %s", self)
+            
+            # Find RGB-related settings and reapply them
+            settings_to_refresh = []
+            
+            # Look for RGB_EFFECTS related settings
+            if hasattr(self, '_settings') and self._settings:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: Found %d total settings", len(self._settings))
+                    # List all settings for debugging
+                    for setting in self._settings:
+                        if hasattr(setting, 'name'):
+                            logger.debug("RGB refresh workaround: Available setting: %s", setting.name)
+                
+                # Now find RGB-related settings
+                for setting in self._settings:
+                    if hasattr(setting, 'name') and hasattr(setting, 'feature'):
+                        # Check for RGB-related settings (more comprehensive)
+                        if ('rgb' in setting.name.lower() or 
+                            'led' in setting.name.lower() or
+                            'per-key-lighting' in setting.name.lower() or
+                            'brightness' in setting.name.lower() or
+                            (hasattr(setting, 'feature') and setting.feature == SupportedFeature.RGB_EFFECTS)):
+                            settings_to_refresh.append(setting)
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Found RGB setting: %s", setting.name)
+                    elif hasattr(setting, 'name'):
+                        # Also check settings that might be RGB zones without explicit feature
+                        if ('rgb_zone' in setting.name.lower() or 
+                            'led_zone' in setting.name.lower() or
+                            'rgb' in setting.name.lower() or
+                            'per-key-lighting' in setting.name.lower() or
+                            'brightness' in setting.name.lower()):
+                            settings_to_refresh.append(setting)
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logger.debug("RGB refresh workaround: Found RGB setting (by name): %s", setting.name)
+            else:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("RGB refresh workaround: No _settings available or _settings is empty")
+            
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: Found %d RGB settings to refresh", len(settings_to_refresh))
+            
+            # Apply RGB control setting first to ensure Solaar has control
+            for setting in settings_to_refresh:
+                if hasattr(setting, 'name') and 'rgb_control' in setting.name.lower():
+                    try:
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug("RGB refresh workaround: Applying RGB control setting: %s", setting.name)
+                        setting.apply()
+                    except Exception as e:
+                        if logger.isEnabledFor(logging.WARNING):
+                            logger.warning("RGB refresh workaround: Failed to apply RGB control setting %s: %s", setting.name, e)
+                    break
+            
+            # Then apply other RGB settings
+            for setting in settings_to_refresh:
+                if hasattr(setting, 'name') and 'rgb_control' not in setting.name.lower():
+                    try:
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug("RGB refresh workaround: Applying RGB setting: %s", setting.name)
+                        setting.apply()
+                    except Exception as e:
+                        if logger.isEnabledFor(logging.WARNING):
+                            logger.warning("RGB refresh workaround: Failed to apply RGB setting %s: %s", setting.name, e)
+                            
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("RGB refresh workaround: RGB settings refresh completed for %s", self)
+        except Exception as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("RGB refresh workaround: Failed to refresh RGB settings for %s: %s", self, e)
 
     def __str__(self):
         try:
