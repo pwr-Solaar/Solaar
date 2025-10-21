@@ -1,5 +1,8 @@
-# 1.1.15rc1
+# 1.1.15
 
+* Correctly re-raise permissions exception
+* Add several new special keys and tasks
+* Update several translations
 * Center labels and remove buggy entry resizing logic
 * Add shape keys from Key POP Icon
 * Device and Action rule conditions match on codename and name
