@@ -397,7 +397,7 @@ class Device:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None and result is not None:
+                    if self.persister and battery_feature is None and result is not None and result != 0:
                         self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
