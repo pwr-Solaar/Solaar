@@ -79,6 +79,9 @@ class Device(Protocol):
         ...
 
 
+# pfps: Consider adding a class method that sanitizes inputs by removing unknown bits.
+
+
 class KeyFlag(Flag):
     """Capabilities and desired software handling for a control.
 
@@ -86,6 +89,11 @@ class KeyFlag(Flag):
     We treat bytes 4 and 8 of `getCidInfo` as a single bitfield.
     """
 
+    UNUSED_8000 = 0x8000
+    UNUSED_4000 = 0x4000
+    UNUSED_2000 = 0x2000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x800
     ANALYTICS_KEY_EVENTS = 0x400
     FORCE_RAW_XY = 0x200
     RAW_XY = 0x100
@@ -105,6 +113,9 @@ class MappingFlag(Flag):
     We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
     """
 
+    UNUSED_4000 = 0x4000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x400
     ANALYTICS_KEY_EVENTS_REPORTING = 0x100
     FORCE_RAW_XY_DIVERTED = 0x40
     RAW_XY_DIVERTED = 0x10
