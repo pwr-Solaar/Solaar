@@ -10,7 +10,8 @@ that are otherwise ignored by the Linux input system.
 <a href="https://pwr-solaar.github.io/Solaar/usage">Usage</a> -
 <a href="https://pwr-solaar.github.io/Solaar/capabilities">Capabilities</a> -
 <a href="https://pwr-solaar.github.io/Solaar/rules">Rules</a> -
-<a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a>
+<a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a> -
+<a href="https://pwr-solaar.github.io/Solaar/issues">Known Issues</a>
 
 
 [![codecov](https://codecov.io/gh/pwr-Solaar/Solaar/graph/badge.svg?token=D7YWFEWID6)](https://codecov.io/gh/pwr-Solaar/Solaar)
