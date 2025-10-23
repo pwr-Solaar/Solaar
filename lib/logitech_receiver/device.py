@@ -140,7 +140,7 @@ class Device:
         self._modelId = None  # model id (contains identifiers for the transports of the device)
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
-        self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
+        self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = self._force_buttons = None
         self._profiles = self._backlight = self._settings = None
         self.registers = []
         self.notification_flags = None
@@ -345,6 +345,12 @@ class Device:
             if self.online and self.protocol >= 2.0:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
+
+    def force_buttons(self):
+        if self._force_buttons is None:
+            if self.online and self.protocol >= 2.0:
+                self._force_buttons = _hidpp20.get_force_buttons(self) or ()
+        return self._force_buttons
 
     def set_configuration(self, configuration_, no_reply=False):
         if self.online and self.protocol >= 2.0:
