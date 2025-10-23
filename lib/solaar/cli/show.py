@@ -260,7 +260,8 @@ def _print_device(dev, num=None):
                         v = setting.val_to_string(setting._device.persister.get(setting.name))
                         print(f"            {setting.label} (saved): {v}")
                     try:
-                        v = setting.val_to_string(setting.read(False))
+                        v = setting.read(False)
+                        v = setting.val_to_string(v)
                     except exceptions.FeatureCallError as e:
                         v = "HID++ error " + str(e)
                     except AssertionError as e:

@@ -35,6 +35,7 @@ SENSITIVITY_IGNORE = "ignore"
 
 
 class Kind(IntEnum):
+    NONE = 0
     TOGGLE = 0x01
     CHOICE = 0x02
     RANGE = 0x04
@@ -43,6 +44,7 @@ class Kind(IntEnum):
     PACKED_RANGE = 0x20
     MULTIPLE_RANGE = 0x40
     HETERO = 0x80
+    MAP_RANGE = 0x102
 
 
 class Setting:
