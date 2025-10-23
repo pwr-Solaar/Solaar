@@ -214,7 +214,9 @@ class MouseClickUI(ActionUI):
         )
         self.widgets[self.label] = (0, 0, 4, 1)
         self.label_b = Gtk.Label(label=_("Button"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
-        self.label_c = Gtk.Label(label=_("Count and Action"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.label_c = Gtk.Label(
+            label=_("Action (and Count, if click)"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True
+        )
         self.field_b = CompletionEntry(self.BUTTONS)
         self.field_c = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field_d = CompletionEntry(self.ACTIONS)
@@ -227,8 +229,8 @@ class MouseClickUI(ActionUI):
         self.widgets[self.label_b] = (0, 1, 1, 1)
         self.widgets[self.field_b] = (1, 1, 1, 1)
         self.widgets[self.label_c] = (2, 1, 1, 1)
-        self.widgets[self.field_c] = (3, 1, 1, 1)
-        self.widgets[self.field_d] = (4, 1, 1, 1)
+        self.widgets[self.field_c] = (4, 1, 1, 1)
+        self.widgets[self.field_d] = (3, 1, 1, 1)
 
     def show(self, component, editable=True):
         super().show(component, editable)
