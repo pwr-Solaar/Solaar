@@ -1,3 +1,8 @@
+# 1.1.16
+
+* Add new flags for reprogrammable keys feature
+* Correctly handle missing battery feature
+
 # 1.1.15
 
 * Correctly re-raise permissions exception
