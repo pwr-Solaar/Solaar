@@ -1,7 +1,12 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.16
+
+* Two bugs that were affecting users in 1.1.15 are fixed.
+
 ## Version 1.1.15
 
+* Some key names have been changed to match Logitech names.  Rules that use removed names will no longer work and will end up with a key of 0.
 * Device and Action rule conditions match on device codename and name
 * Solaar supports configuration of Bluetooth devices on macOS.
 
