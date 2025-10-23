@@ -278,6 +278,8 @@ def set(dev, setting: SettingsProtocol, args, save):
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, NamedInts) else to_int(key)
+        print("S", args.extra2, key, type(all_keys), ikey)
+        print("SS", args)
         if args.extra2 is None or to_int(args.extra2) is None:
             raise Exception(f"{setting.name}: setting needs an integer value, not {args.extra2}")
         if not setting._value:  # ensure that there are values to look through
@@ -295,7 +297,19 @@ def set(dev, setting: SettingsProtocol, args, save):
         result = setting.write_key_value(int(k), item, save=save)
         value = item
 
+    elif setting.kind == settings.Kind.MAP_RANGE:
+        if args.extra_subkey is None:
+            _print_setting_keyed(setting, args.value_key)
+            return None, None, None
+        key = int(args.value_key)
+        value = int(args.extra_subkey)
+        if key not in setting._device_object:
+            raise Exception(f"{setting.name}: key '{key}' not in setting")
+        message = f"Setting {setting.name} of {dev.name} key {key} to {value}"
+        result = setting.write_key_value(key, value, save=save)
+
     else:
+        print("KIND", setting.kind)
         raise Exception("NotImplemented")
 
     return result, message, value

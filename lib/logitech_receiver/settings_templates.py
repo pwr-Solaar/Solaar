@@ -36,6 +36,7 @@ from . import exceptions
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
+from . import settings_new
 from . import settings_validator
 from . import special_keys
 from .hidpp10_constants import Registers
@@ -1779,6 +1780,20 @@ class PerKeyLighting(settings.Settings):
             return result
 
 
+# Allow changes to force sensing buttons
+class ForceSensing(settings_new.Settings):
+    name = "force-sensing"
+    label = _("Force Sensing Buttons")
+    description = _("Change the force required to activate button.")
+    feature = _F.FORCE_SENSING_BUTTON
+    setup = "force_buttons"
+    get = "get_current"
+    set = "set_current"
+    acceptable = "acceptable_current"
+    choices_universe = list(range(0, 256))
+    kind = settings.Kind.MAP_RANGE
+
+
 SETTINGS: list[settings.Setting] = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1824,6 +1839,7 @@ SETTINGS: list[settings.Setting] = [
     PersistentRemappableAction,
     DivertKeys,  # working
     DisableKeyboardKeys,  # working
+    ForceSensing,
     CrownSmooth,  # working
     DivertCrown,  # working
     DivertGkeys,  # working
