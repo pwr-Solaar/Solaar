@@ -280,7 +280,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             result = hidpp20.decipher_adc_measurement(notification.data)
             if result:  # if good data and  the device was not present then a push is needed
                 device.set_battery_info(result[1])
-                device.changed(active=True, alert=Alert.ALL, reason=_("ADC measurement notification"), push=not old_present)
+                device.changed(active=True, alert=Alert.NONE, reason=_("ADC measurement notification"), push=not old_present)
             else:  # this feature is also used to signal device becoming inactive
                 device.present = False  # exception to device presence
                 device.changed(active=False)
