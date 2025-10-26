@@ -4,7 +4,7 @@ set -euo pipefail
 
 APP_ROOT=${1:-/Applications/Solaar.app}
 SOLAR_PATH=${SOLAR_PATH:-/opt/homebrew/bin/solaar}
-ICON_SOURCE=${ICON_SOURCE:-share/solaar/icons/solaar-light_100.png}
+ICON_SOURCE=${ICON_SOURCE:-share/solaar/icons/solaar.svg}
 
 if [[ ! -x "${SOLAR_PATH}" ]]; then
     echo "Error: Unable to execute ${SOLAR_PATH}. Set SOLAR_PATH to the solaar binary." >&2
@@ -37,8 +37,10 @@ chmod +x "${WRAPPER}"
 
 HAVE_ICON=0
 if command -v sips >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1 && [[ -f "${ICON_SOURCE}" ]]; then
-    TMP_ICONSET=$(mktemp -d /tmp/solaar-iconset.XXXXXX)
-    trap 'rm -rf "${TMP_ICONSET}"' EXIT
+    TMP_DIR=$(mktemp -d /tmp/solaar-icon.XXXXXX)
+    TMP_ICONSET="${TMP_DIR}/solaar.iconset"
+    mkdir -p "${TMP_ICONSET}"
+    trap 'rm -rf "${TMP_DIR}"' EXIT
     for SIZE in 16 32 64 128 256 512; do
         sips -s format png -z "${SIZE}" "${SIZE}" "${ICON_SOURCE}" --out "${TMP_ICONSET}/icon_${SIZE}x${SIZE}.png" >/dev/null
         DOUBLE=$((SIZE * 2))
@@ -50,7 +52,7 @@ if command -v sips >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1 && [[ 
     else
         echo "Warning: Failed to create solaar.icns – continuing without custom icon" >&2
     fi
-    rm -rf "${TMP_ICONSET}"
+    rm -rf "${TMP_DIR}"
     trap - EXIT
 else
     echo "Skipping icon generation (requires sips, iconutil, and ${ICON_SOURCE})"
