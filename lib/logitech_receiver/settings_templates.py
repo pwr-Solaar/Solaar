@@ -1898,6 +1898,8 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
         return
+    if device.features.get_hidden(settings_class.feature):
+        return
     try:
         detected = settings_class.build(device)
         if logger.isEnabledFor(logging.DEBUG):
