@@ -3,13 +3,8 @@
 set -euo pipefail
 
 APP_ROOT=${1:-/Applications/Solaar.app}
-SOLAR_PATH=${SOLAR_PATH:-/opt/homebrew/bin/solaar}
+SOLAR_PATH=${SOLAR_PATH:-solaar}
 ICON_SOURCE=${ICON_SOURCE:-share/solaar/icons/solaar.svg}
-
-if [[ ! -x "${SOLAR_PATH}" ]]; then
-    echo "Error: Unable to execute ${SOLAR_PATH}. Set SOLAR_PATH to the solaar binary." >&2
-    exit 1
-fi
 
 case "${APP_ROOT}" in
     ""|"/"|".")
