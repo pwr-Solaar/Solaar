@@ -31,7 +31,20 @@ WRAPPER="${MACOS_DIR}/solaar-wrapper"
 cat > "${WRAPPER}" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec "${SOLAAR_RESOLVED_PATH}"  "\$@"
+
+# When launched via 'Solaar.app', macOS applies .app bundle restrictions
+# that may prevent GTK from creating a tray icon properly.
+# Workaround: Launch solaar in a detached background process
+
+if [[ "\${SOLAAR_RELAUNCHED:-}" != "1" ]]; then
+    # First invocation from .app bundle - relaunch detached
+    export SOLAAR_RELAUNCHED=1
+    nohup "\$0" "\$@" >/dev/null 2>&1 &
+    exit 0
+fi
+
+# Second invocation - now detached, exec solaar normally
+exec "${SOLAAR_RESOLVED_PATH}" "\$@"
 EOF
 chmod +x "${WRAPPER}"
 
@@ -78,6 +91,8 @@ cat <<EOF
     <string>11.0</string>
     <key>NSInputMonitoringUsageDescription</key>
     <string>Solaar needs to access input devices to configure and monitor your Logitech keyboards, mice, and other peripherals.</string>
+    <key>LSUIElement</key>
+    <false/>
 EOF
 if [[ ${HAVE_ICON} -eq 1 ]]; then
 cat <<'EOF'
