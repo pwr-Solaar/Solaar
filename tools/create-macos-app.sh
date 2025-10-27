@@ -36,6 +36,10 @@ set -euo pipefail
 # that may prevent GTK from creating a tray icon properly.
 # Workaround: Launch solaar in a detached background process
 
+# NOTE: macOS Python always uses Python.app which shows a Dock icon
+# LSUIElement=true in Info.plist would have hidden it, but Python.app has its own Info.plist
+# that overrides ours. This is a limitation of Python on macOS.
+
 if [[ "\${SOLAAR_RELAUNCHED:-}" != "1" ]]; then
     # First invocation from .app bundle - relaunch detached
     export SOLAAR_RELAUNCHED=1
