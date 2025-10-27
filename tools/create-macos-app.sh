@@ -3,7 +3,12 @@
 set -euo pipefail
 
 APP_ROOT=${1:-/Applications/Solaar.app}
-SOLAR_PATH=${SOLAR_PATH:-solaar}
+SOLAAR_PATH=${SOLAAR_PATH:-solaar}
+SOLAAR_RESOLVED_PATH=$(command -v "${SOLAAR_PATH}" 2>/dev/null || echo "")
+if [ -z "${SOLAAR_RESOLVED_PATH}" ]; then
+    echo "Error: '${SOLAAR_PATH}' not found" >&2
+    exit 1
+fi
 ICON_SOURCE=${ICON_SOURCE:-share/solaar/icons/solaar.svg}
 
 case "${APP_ROOT}" in
@@ -26,7 +31,7 @@ WRAPPER="${MACOS_DIR}/solaar-wrapper"
 cat > "${WRAPPER}" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec "${SOLAR_PATH}" --window=hide "\$@"
+exec "${SOLAAR_RESOLVED_PATH}"  "\$@"
 EOF
 chmod +x "${WRAPPER}"
 

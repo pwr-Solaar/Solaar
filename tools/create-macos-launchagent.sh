@@ -5,8 +5,8 @@ set -euo pipefail
 SOLAAR_PATH=${SOLAAR_PATH:-solaar}
 SOLAAR_RESOLVED_PATH=$(command -v "${SOLAAR_PATH}" 2>/dev/null || echo "")
 if [ -z "${SOLAAR_RESOLVED_PATH}" ]; then
-    echo "Warning: '${SOLAAR_PATH}' not found" >&2
-    SOLAAR_RESOLVED_PATH="${SOLAAR_PATH}"
+    echo "Error: '${SOLAAR_PATH}' not found" >&2
+    exit 1
 fi
 
 LAUNCH_AGENT_DIR="${HOME}/Library/LaunchAgents"
