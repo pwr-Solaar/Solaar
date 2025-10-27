@@ -28,7 +28,7 @@ cat > "${LAUNCH_AGENT_PLIST}" <<EOF
     <string>io.github.pwr-solaar.solaar</string>
     <key>ProgramArguments</key>
     <array>
-        <string>${SOLAAR_PATH}</string>
+        <string>${SOLAAR_RESOLVED_PATH}</string>
         <string>--window=hide</string>
     </array>
     <key>RunAtLoad</key>
