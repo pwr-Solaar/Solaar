@@ -1397,6 +1397,22 @@ msgstr  ""
 msgid   "Add movement"
 msgstr  ""
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid   "Enable staggering (trigger repeatedly every N pixels)"
+msgstr  "スタッガーを有効にする（Nピクセルごとに繰り返しトリガー）"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid   "Stagger distance:"
+msgstr  "スタッガー距離："
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid   "Dead zone:"
+msgstr  "デッドゾーン："
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid   "pixels"
+msgstr  "ピクセル"
+
 #: lib/solaar/ui/diversion_rules.py:1764
 msgid   "Simulate a chorded key click or depress or release.\n"
         "On Wayland requires write access to /dev/uinput."
