@@ -47,6 +47,7 @@ from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
 from .hidpp20_constants import ErrorCode
+from .hidpp20_constants import FeatureFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
@@ -137,6 +138,7 @@ class FeaturesArray(dict):
         self.device = device
         self.inverse = {}
         self.version = {}
+        self.flags = {}
         self.count = 0
 
     def _check(self) -> bool:
@@ -183,6 +185,7 @@ class FeaturesArray(dict):
                     feature = f"unknown:{data:04X}"
                 self[feature] = index
                 self.version[feature] = response[3]
+                self.flags[feature] = response[2]
                 return feature
 
     def enumerate(self):  # return all features and their index, ordered by index
@@ -194,6 +197,15 @@ class FeaturesArray(dict):
     def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
             return self.version.get(feature, 0)
+
+    def get_flags(self, feature: NamedInt) -> Optional[int]:
+        if self[feature]:
+            return self.flags.get(feature, 0)
+
+    def get_hidden(self, feature: NamedInt) -> Optional[bool]:
+        if self[feature]:
+            return self.flags.get(feature, 0) & FeatureFlag.INTERNAL
+        return True
 
     def __contains__(self, feature: NamedInt) -> bool:
         try:
@@ -215,6 +227,7 @@ class FeaturesArray(dict):
                 index = response[0]
                 self[feature] = index if index else False
                 self.version[feature] = response[2]
+                self.flags[feature] = response[1]
                 return index if index else False
 
     def __setitem__(self, feature, index):
