@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 set -e
 
@@ -9,8 +9,8 @@ while read po_file; do
 	language="$(basename "$po_file")"
 	language="${language%.po}"
 	target="$PWD/share/locale/$language/LC_MESSAGES/solaar.mo"
-	/bin/mkdir --parents "$(dirname "$target")"
-	/usr/bin/msgfmt \
+	mkdir --parents "$(dirname "$target")"
+	msgfmt \
 		--check \
 		--output-file="$target" \
 		"$po_file"

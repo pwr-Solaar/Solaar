@@ -342,7 +342,7 @@ def _process_add(device_info: DeviceInfo, retry):
     except OSError as e:
         if e.errno == errno.EACCES:
             try:
-                output = subprocess.check_output(["/usr/bin/getfacl", "-p", device_info.path], text=True)
+                output = subprocess.check_output(["getfacl", "-p", device_info.path], text=True)
                 logger.warning("Missing permissions on %s\n%s.", device_info.path, output)
             except Exception:
                 pass
