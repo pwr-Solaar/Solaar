@@ -697,6 +697,36 @@ class ScrollRatchetEnhanced(ScrollRatchet):
     feature = _F.SMART_SHIFT_ENHANCED
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
+class ScrollingForce(settings.Setting):
+    name = "scrolling-force"
+    label = _("Scroll Wheel Ratchet Force")
+    description = _(
+        "Scrolling force"
+    )
+    feature = _F.SMART_SHIFT_ENHANCED
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+    class rw_class(settings.FeatureRW):
+        MIN_VALUE = 1
+        MAX_VALUE = 100
+
+        def __init__(self, feature, read_fnid, write_fnid):
+            super().__init__(feature, read_fnid, write_fnid)
+
+        def read(self, device):
+            value = super().read(device)
+            force = min(common.bytes2int(value[2:3]), self.MAX_VALUE)
+            return common.int2bytes(force, count=1)
+
+        def write(self, device, data_bytes):
+            data = super().read(device)
+            force = common.bytes2int(data_bytes)
+
+            return super().write(device, data[0:2]+common.int2bytes(force, count=1))
+
+    min_value = rw_class.MIN_VALUE
+    max_value = rw_class.MAX_VALUE
+    validator_class = settings_validator.RangeValidator
 
 # the keys for the choice map are Logitech controls (from special_keys)
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
@@ -1759,6 +1789,7 @@ SETTINGS: list[settings.Setting] = [
     SmartShift,  # working
     ScrollRatchetEnhanced,
     SmartShiftEnhanced,  # simple
+    ScrollingForce,
     ThumbInvert,  # working
     ThumbMode,  # working
     OnboardProfiles,
