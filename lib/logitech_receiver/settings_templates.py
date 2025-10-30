@@ -99,8 +99,11 @@ class State(enum.Enum):
 #   mask is used to keep only some bits from a sequence of bits, this can be an integer or a byte string,
 #   read_skip_byte_count is the number of bytes to ignore at the beginning of the read value (default 0),
 #   write_prefix_bytes is a byte string to write before the value (default empty).
+
 # RangeValidator is for an integer in a range.  It takes
 #   byte_count is number of bytes that the value is stored in (defaults to size of max_value).
+#   read_skip_byte_count is as for BooleanV
+#   write_prefix_bytes is as for BooleanV
 # RangeValidator uses min_value and max_value from the setting class as minimum and maximum.
 
 # ChoicesValidator is for symbolic choices.  It takes one positional and three keyword arguments:
@@ -696,6 +699,38 @@ class SmartShiftEnhanced(SmartShift):
 class ScrollRatchetEnhanced(ScrollRatchet):
     feature = _F.SMART_SHIFT_ENHANCED
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+
+class ScrollRatchetTorque(settings.Setting):
+    name = "scroll-ratchet-torque"
+    label = _("Scroll Wheel Ratchet Torque")
+    description = _("Change the torque needed to overcome the ratchet.")
+    feature = _F.SMART_SHIFT_ENHANCED
+    min_value = 1
+    max_value = 100
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+    class rw_class(settings.FeatureRW):
+        def write(self, device, data_bytes):
+            ratchetSetting = next(filter(lambda s: s.name == "scroll-ratchet", device.settings), None)
+            if ratchetSetting:  # for MX Master 4, the ratchet setting needs to be written for changes to take effect
+                ratchet_value = ratchetSetting.read(True)
+                data_bytes = ratchet_value.to_bytes(1, "big") + data_bytes[1:]
+            result = super().write(device, data_bytes)
+            return result
+
+    class validator_class(settings_validator.RangeValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(_F.SMART_SHIFT_ENHANCED, 0x00)
+            if reply[0] & 0x01:  # device supports tunable torque
+                return cls(
+                    min_value=setting_class.min_value,
+                    max_value=setting_class.max_value,
+                    byte_count=1,
+                    write_prefix_bytes=b"\x00\x00",  # don't change mode or disengage, but see above
+                    read_skip_byte_count=2,
+                )
 
 
 # the keys for the choice map are Logitech controls (from special_keys)
@@ -1756,6 +1791,7 @@ SETTINGS: list[settings.Setting] = [
     HiresSmoothResolution,  # working
     HiresMode,  # simple
     ScrollRatchet,  # simple
+    ScrollRatchetTorque,
     SmartShift,  # working
     ScrollRatchetEnhanced,
     SmartShiftEnhanced,  # simple
