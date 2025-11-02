@@ -44,6 +44,18 @@ class Setting:
     _device_object = None  # The object that interacts with the feature for the device
     _value = None  # Stored value as maintained by Solaar, used for persistence
 
+    def __init__(self, device, device_object):
+        self._device = device
+        self._device_object = device_object
+
+    @classmethod
+    def build(cls, device):
+        cls.check_properties(cls)
+        device_object = getattr(device, cls.setup)()
+        if device_object:
+            setting = cls(device, device_object)
+            return setting
+
     @classmethod
     def check_properties(cl, cls):
         assert cls.name and cls.label and cls.description, "New settings require a name, label, and description"
@@ -51,10 +63,20 @@ class Setting:
         assert cls.setup, "New settings require a setup device method"
         assert cls.get and cls.set and cls.acceptable, "New settings require get, set, and acceptable methods"
 
-    @classmethod
-    def build(cls, device):
-        """Create the setting."""
-        pass
+    def setup_from_class(self, clss):
+        """Copy settings methods for a new setting from a settting class"""
+        self.name = clss.name
+        self.label = clss.label
+        self.description = clss.description
+        self.feature = clss.feature
+        self.min_version = clss.min_version
+        self.setup = clss.setup
+        self.get = clss.get
+        self.set = clss.set
+        self.acceptable = clss.acceptable
+        self.choices_universe = clss.choices_universe
+        self.kind = clss.kind
+        self.persist = clss.persist
 
     def _pre_read(self, cached):
         """Get information from and save information to the persister"""
@@ -68,11 +90,21 @@ class Setting:
 
     def read(self, cached=True):
         """Get all the data for the setting.  If cached is True the data in the _value can be used."""
-        pass
+        self._pre_read(cached)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: setting read %r from %s", self.name, self._value, self._device)
+        if cached and self._value is not None:
+            return self._value
+        if cached:
+            self._value = getattr(self._device_object, self.get)()
+            return self._value
+        if self._device.online:
+            self._value = getattr(self._device_object.query(), self.get)()
+            return self._value
 
     def write(self, value, save=True):
         """Write the value to the device.  If saved is True also save in the persister"""
-        pass
+        pass  ## fill out
 
     def apply(self):
         """Write saved data to the device, using persisted data if available"""
@@ -87,6 +119,11 @@ class Setting:
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning("%s: error applying %s so ignore it (%s): %s", self.name, value, self._device, repr(e))
 
+    @property
+    def range(self):
+        if self.kind == Kind.RANGE:
+            return self.min_value, self.max_value
+
     def val_to_string(self, value):
         return str(value)
 
@@ -100,18 +137,12 @@ class Settings(Setting):
     Picks out a field from the mapped device feature objects."""
 
     # setup creates a dictionary with entries for all the keys
-    # get, set, and acceptable are methods of dict value objects, not of the device object itself
+    # _value is a map from keys to values
+    # get, set, and acceptable are methods of dict value objects, not of the device object itself  #### FIX THIS! MAYBE??
 
-    @classmethod
-    def build(cls, device):
-        cls.check_properties(cls)
-        _device_object = getattr(device, cls.setup)()
-        if _device_object:
-            setting = cls()
-            setting._device = device
-            setting._device_object = _device_object
-            setting._value = {}
-            return setting
+    def __init__(self, device, device_object):
+        super().__init__(device, device_object)
+        self._value = {}
 
     def read(self, cached=True):
         self._pre_read(cached)
@@ -122,7 +153,7 @@ class Settings(Setting):
         return self._value
 
     def read_key(self, key, cached=True):
-        """Get the data for the key.  If cached is True the data in the _device_object can be used."""
+        """Get the data for the key.  If cached is True the data in the device_object can be used."""
         self._pre_read(cached)
         if key not in self._device_object:
             logger.error("%s: settings illegal read key %r for %s", self.name, key, self._device)
@@ -143,8 +174,13 @@ class Settings(Setting):
     def write(self, value, save=True):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: settings read %r from %s", self.name, self._value, self._device)
-        for key, val in value.items():
-            self.write_key_value(key, val, save)
+        if isinstance(value, dict):
+            for key, val in value.items():
+                self.write_key_value(key, val, save)
+        else:  # to mimic interface for non-dict setting
+            key = next(iter(self._device_object))
+            self.write_key_value(key, value, save)
+        return value
 
     def write_key_value(self, key, value, save=True):
         """Write the data for the key.  If saved is True also save in the persister"""
