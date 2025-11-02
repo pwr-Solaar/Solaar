@@ -2100,5 +2100,22 @@ class ForceSensingButtonArray(UserDict):
             self[index] = button
             return button
 
-    def acceptable(self, index: int, value: int) -> bool:
+    def query(self):
+        for index in self:
+            button = ForceSensingButton.create(self.device, index)
+            if button:
+                self[index] = button
+        return self
+
+    # interface for single force button
+    def get_current(self):
+        return self[0].get_current()
+
+    def set_current(self, current: int) -> None:
+        self[0].set_current(current)
+
+    def acceptable(self, value: int) -> bool:
+        return self[0].acceptable(value)
+
+    def acceptable_current_key(self, index: int, value: int) -> bool:
         return self[index].acceptable(value)

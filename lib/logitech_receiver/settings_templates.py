@@ -1789,9 +1789,24 @@ class ForceSensing(settings_new.Settings):
     setup = "force_buttons"
     get = "get_current"
     set = "set_current"
-    acceptable = "acceptable_current"
+    acceptable = "acceptable_current_key"
     choices_universe = list(range(0, 256))
     kind = settings.Kind.MAP_RANGE
+
+    @classmethod
+    def build(cls, device):
+        cls.check_properties(cls)
+        device_object = getattr(device, cls.setup)()
+        if device_object:
+            setting = cls(device, device_object)
+            if setting and len(device_object) == 1:
+                ## If there is only one force button a simpler interface can be used
+                setting.label = _("Force Sensing Button")
+                setting.acceptable = "acceptable_current"
+                setting.min_value = device_object[0].min_value
+                setting.max_value = device_object[0].max_value
+                setting.kind = settings.Kind.RANGE
+            return setting
 
 
 SETTINGS: list[settings.Setting] = [

@@ -147,6 +147,11 @@ class SliderControl(Gtk.Scale, Control):
         self.set_increments(1, 5)
         self.connect(GtkSignal.VALUE_CHANGED.value, self.changed)
 
+    def set_value(self, value):
+        if isinstance(value, dict):
+            value = next(iter(value.values()))
+        return super().set_value(value)
+
     def get_value(self):
         return int(super().get_value())
 
