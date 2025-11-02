@@ -1499,7 +1499,7 @@ def key_is_down(key: NamedInt) -> bool:
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("evaluating rules on %s", notification)
+        logger.debug("evaluating rules on %s %s", feature, notification)
     rules.evaluate(feature, notification, device, True)
 
 
