@@ -27,6 +27,18 @@ brew update
 brew install hidapi gtk+3 pygobject3
 ```
 
+### Optional: Set up macOS launcher
+* Option A (recommended): Configure a LaunchAgent to automatically start Solaar and keep it running in the background.
+It will also automatically restart Solaar if it crashed or closed.
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/pwr-Solaar/Solaar/refs/heads/master/tools/create-macos-app.sh)
+```
+* Option B: Create Solaar.app launcher in /Applications.
+It can be added to Login Items to start on login, but it will not automatically recover on crashes.
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/pwr-Solaar/Solaar/refs/heads/master/tools/create-macos-launchagent.sh)
+```
+
 # Installating from GitHub
 
 ## Downloading

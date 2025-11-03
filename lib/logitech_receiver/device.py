@@ -87,10 +87,10 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
     except OSError as e:
         logger.exception("open %s", device_info)
         if e.errno == errno.EACCES:
-            raise
-    except Exception:
+            raise e
+    except Exception as e:
         logger.exception("open %s", device_info)
-        raise
+        raise e
 
 
 class Device:
@@ -207,10 +207,10 @@ class Device:
 
         Device.instances.append(self)
 
-    def find(self, id):  # find a device by serial number or unit ID
-        assert id, "need serial number or unit ID to find a device"
+    def find(self, id):  # find a device by serial number or unit ID or name or codename
+        assert id, "need id to find a device"
         for device in Device.instances:
-            if device.online and (device.unitId == id or device.serial == id):
+            if device.online and (device.unitId == id or device.serial == id or device.name == id or device.codename == id):
                 return device
 
     @property
@@ -397,7 +397,7 @@ class Device:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None and result is not None:
+                    if self.persister and battery_feature is None and result is not None and result != 0:
                         self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
@@ -522,7 +522,7 @@ class Device:
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
             return self.low_level.request(
-                self.handle or self.receiver.handle,
+                self.handle or (self.receiver.handle if self.receiver else None),
                 self.number,
                 request_id,
                 *params,

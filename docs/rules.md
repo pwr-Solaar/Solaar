@@ -133,8 +133,9 @@ or the window's Window manager class or instance name starts with their string a
 `Device` conditions are true if a particular device originated the notification.
 `Active` conditions are true if a particular device is active.
 `Device` and `Active` conditions take one argument, which is the serial number or unit ID of a device,
-as shown in Solaar's detail pane.
-Some older devices do not have a useful serial number or unit ID and so cannot be tested for by these conditions.
+as shown in Solaar's detail pane, or either of its names, as shown by Solaar.
+Some older devices do not have a useful serial number or unit ID and so cannot
+distinguished from other devices with the same names.
 
 ### Host
 `Host` conditions are true if the computers hostname starts with the condition's argument.
@@ -244,7 +245,8 @@ If the previous condition in the parent rule returns a number the scroll amounts
 ### Mouse click
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.
 The action simulates that number of clicks of the specified button or just one click, depress, or release of the button.
-A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
+
+### Execute
 An `Execute` action takes a program and arguments and executes it asynchronously.
 
 ### Set setting

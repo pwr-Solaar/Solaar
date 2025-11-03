@@ -29,19 +29,22 @@ from .common import UnsortedNamedInts
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
 _keys_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
 
+
+# Original set done as
 # <controls.xml awk -F\" '/<Control /{sub(/^LD_FINFO_(CTRLID_)?/, "", $2);printf("\t%s=0x%04X,\n", $2, $4)}' | sort -t= -k2
+# Keys added afterwards based on information from Logitech and users
 CONTROL = NamedInts(
     {
-        "Volume_Up": 0x0001,
-        "Volume_Down": 0x0002,
+        "Volume_Up_old": 0x0001,
+        "Volume_Down_old": 0x0002,
         "Mute": 0x0003,
-        "Play__Pause": 0x0004,
+        "Play__Pause_old": 0x0004,
         "Next": 0x0005,
         "Previous": 0x0006,
         "Stop": 0x0007,
         "Application_Switcher": 0x0008,
         "Burn": 0x0009,
-        "Calculator": 0x000A,  # Craft Keyboard top 4th from right
+        "Calculator": 0x000A,  # Craft Keyboard top 4th from right; Logitech
         "Calendar": 0x000B,
         "Close": 0x000C,
         "Eject": 0x000D,
@@ -55,7 +58,7 @@ CONTROL = NamedInts(
         "Undo_As_HID": 0x0015,
         "Redo_As_Ctrl_Y": 0x0016,
         "Redo_As_HID": 0x0017,
-        "Print_As_Ctrl_P": 0x0018,
+        "Print_As_Ctrl_P": 0x0018,  # Logitech, modified
         "Print_As_HID": 0x0019,
         "Save_As_Ctrl_S": 0x001A,
         "Save_As_HID": 0x001B,
@@ -110,13 +113,13 @@ CONTROL = NamedInts(
         "Pause_Break": 0x004D,
         "Scroll_Lock": 0x004E,
         "Contextual_Menu": 0x004F,
-        "Left_Button": 0x0050,  # LEFT_CLICK
-        "Right_Button": 0x0051,  # RIGHT_CLICK
-        "Middle_Button": 0x0052,  # MIDDLE_BUTTON
-        "Back_Button": 0x0053,  # from M510v2 was BACK_AS_BUTTON_4
+        "Left_Button": 0x0050,  # LEFT_CLICK; Logitech
+        "Right_Button": 0x0051,  # RIGHT_CLICK; Logitech
+        "Middle_Button": 0x0052,  # MIDDLE_BUTTON; Logitech
+        "Back_Button": 0x0053,  # from M510v2 was BACK_AS_BUTTON_4; Logitech
         "Back": 0x0054,  # BACK_AS_HID
         "Back_As_Alt_Win_Arrow": 0x0055,
-        "Forward_Button": 0x0056,  # from M510v2 was FORWARD_AS_BUTTON_5
+        "Forward_Button": 0x0056,  # from M510v2 was FORWARD_AS_BUTTON_5; Logitech
         "Forward_As_HID": 0x0057,
         "Forward_As_Alt_Win_Arrow": 0x0058,
         "Button_6": 0x0059,
@@ -140,8 +143,8 @@ CONTROL = NamedInts(
         "Button_22": 0x006B,
         "Button_23": 0x006C,
         "Button_24": 0x006D,
-        "Show_Desktop": 0x006E,  # Craft Keyboard Fn F5
-        "Lock_PC": 0x006F,  # Craft Keyboard top 1st from right
+        "Show_Desktop": 0x006E,  # Craft Keyboard Fn F5; Logitch
+        "Screen_Lock": 0x006F,  # Craft Keyboard top 1st from right; Logitech
         "Fn_F1": 0x0070,
         "Fn_F2": 0x0071,
         "Fn_F3": 0x0072,
@@ -189,7 +192,7 @@ CONTROL = NamedInts(
         "Metro_Search": 0x00A3,
         "Combo_Sleep": 0x00A4,
         "Metro_Share": 0x00A5,
-        "Metro_Settings": 0x00A6,
+        "OS_Settings": 0x00A6,  # Logitech
         "Metro_Devices": 0x00A7,
         "Metro_Start_Screen": 0x00A9,
         "Zoomin": 0x00AA,
@@ -212,23 +215,23 @@ CONTROL = NamedInts(
         "Fn_Down": 0x00C0,
         "Fn_Up": 0x00C1,
         "Multiplatform_Lock": 0x00C2,
-        "Mouse_Gesture_Button": 0x00C3,  # Thumb_Button on MX Master - Logitech name App_Switch_Gesture
-        "Smart_Shift": 0x00C4,  # Top_Button on MX Master
+        "Mouse_Gesture_Button": 0x00C3,  # Thumb_Button on MX Master - Logitech name App_Switch_Gesture; Logitech
+        "Smart_Shift": 0x00C4,  # Top_Button on MX Master; Logitech
         "Microphone": 0x00C5,
         "Wifi": 0x00C6,
-        "Brightness_Down": 0x00C7,  # Craft Keyboard Fn F1
-        "Brightness_Up": 0x00C8,  # Craft Keyboard Fn F2
+        "Brightness_Down": 0x00C7,  # Craft Keyboard Fn F1, Logitech
+        "Brightness_Up": 0x00C8,  # Craft Keyboard Fn F2, Logitech
         "Display_Out__Project_Screen_": 0x00C9,
         "View_Open_Apps": 0x00CA,
         "View_All_Apps": 0x00CB,
         "Switch_App": 0x00CC,
         "Fn_Inversion_Change": 0x00CD,
-        "MultiPlatform_Back": 0x00CE,
+        "MultiPlatform_Back": 0x00CE,  # Logitech
         "MultiPlatform_Forward": 0x00CF,
         "MultiPlatform_Gesture_Button": 0x00D0,
-        "Host_Switch_Channel_1": 0x00D1,  # Craft Keyboard
-        "Host_Switch_Channel_2": 0x00D2,  # Craft Keyboard
-        "Host_Switch_Channel_3": 0x00D3,  # Craft Keyboard
+        "Host_Switch_Channel_1": 0x00D1,  # Craft Keyboard; Logitech
+        "Host_Switch_Channel_2": 0x00D2,  # Craft Keyboard; Logitech
+        "Host_Switch_Channel_3": 0x00D3,  # Craft Keyboard; Logitech
         "MultiPlatform_Search": 0x00D4,
         "MultiPlatform_Home__Mission_Control": 0x00D5,
         "MultiPlatform_Menu__Show__Hide_Virtual_Keyboard__Launchpad": 0x00D6,
@@ -241,21 +244,21 @@ CONTROL = NamedInts(
         "Multi_Platform_Language_Switch": 0x00DD,
         "F_Lock": 0x00DE,
         "Switch_Highlight": 0x00DF,
-        "Mission_Control__Task_View": 0x00E0,  # Craft Keyboard Fn F3 Switch_Workspace
+        "Mission_Control__Task_View": 0x00E0,  # Craft Keyboard Fn F3 Switch_Workspace; Logitech
         "Dashboard_Launchpad__Action_Center": 0x00E1,  # Craft Keyboard Fn F4 Application_Launcher
-        "Backlight_Down": 0x00E2,  # Craft Keyboard Fn F6
-        "Backlight_Up": 0x00E3,  # Craft Keyboard Fn F7
-        "Previous_Fn": 0x00E4,  # Craft Keyboard Fn F8 Previous_Track
-        "Play__Pause_Fn": 0x00E5,  # Craft Keyboard Fn F9 Play__Pause
-        "Next_Fn": 0x00E6,  # Craft Keyboard Fn F10 Next_Track
-        "Mute_Fn": 0x00E7,  # Craft Keyboard Fn F11 Mute
-        "Volume_Down_Fn": 0x00E8,  # Craft Keyboard Fn F12 Volume_Down
-        "Volume_Up_Fn": 0x00E9,  # Craft Keyboard next to F12 Volume_Down
+        "Backlight_Down": 0x00E2,  # Craft Keyboard Fn F6, Logitech
+        "Backlight_Up": 0x00E3,  # Craft Keyboard Fn F7, Logitech
+        "Previous_Track": 0x00E4,  # Craft Keyboard Fn F8 Previous_Track; Logitech
+        "Play__Pause": 0x00E5,  # Craft Keyboard Fn F9 Play__Pause; Logitech
+        "Next_Track": 0x00E6,  # Craft Keyboard Fn F10 Next_Track; Logitech
+        "Mute_Sound": 0x00E7,  # Craft Keyboard Fn F11 Mute; Logitech
+        "Volume_Down": 0x00E8,  # Craft Keyboard Fn F12 Volume_Down; Logitech
+        "Volume_Up": 0x00E9,  # Craft Keyboard next to F12 Volume_Down; Logitech
         "App_Contextual_Menu__Right_Click": 0x00EA,  # Craft Keyboard top 2nd from right
         "Right_Arrow": 0x00EB,
         "Left_Arrow": 0x00EC,
         "DPI_Change": 0x00ED,
-        "New_Tab": 0x00EE,
+        "Open_New_Tab": 0x00EE,  # Logitech
         "F2": 0x00EF,
         "F3": 0x00F0,
         "F4": 0x00F1,
@@ -271,20 +274,20 @@ CONTROL = NamedInts(
         "Laser_Button_Short_Press": 0x00FB,
         "Laser_Button_Long_Press": 0x00FC,
         "DPI_Switch": 0x00FD,
-        "Multiplatform_Home__Show_Desktop": 0x00FE,
+        "Multiplatform_Home__Show_Desktop": 0x00FE,  # Logitech
         "Multiplatform_App_Switch__Show_Dashboard": 0x00FF,
         "Multiplatform_App_Switch_2": 0x0100,  # Multiplatform_App_Switch
         "Fn_Inversion__Hot_Key": 0x0101,
         "LeftAndRightClick": 0x0102,
-        "Voice_Dictation": 0x0103,  # MX Keys for Business Fn F5 ; MX Mini Fn F6 Dictation
-        "Emoji_Smiley_Heart_Eyes": 0x0104,
-        "Emoji_Crying_Face": 0x0105,
-        "Emoji_Smiley": 0x0106,
-        "Emoji_Smilie_With_Tears": 0x0107,
-        "Open_Emoji_Panel": 0x0108,  # MX Keys for Business Fn F6 ; MX Mini Fn F7 Emoji
-        "Multiplatform_App_Switch__Launchpad": 0x0109,
-        "Snipping_Tool": 0x010A,  # MX Keys for Business top 3rd from right; MX Mini Fn F8 Screenshot
-        "Grave_Accent": 0x010B,
+        "Dictation": 0x0103,  # MX Keys for Business Fn F5 ; MX Mini Fn F6 Dictation; Logitech
+        "Emoji_Smiley_Heart_Eyes": 0x0104,  # Logitech
+        "Emoji_Crying_Face": 0x0105,  # Logitech
+        "Emoji_Smiley": 0x0106,  # Logitech
+        "Emoji_Smilie_With_Tears": 0x0107,  # Logitech
+        "Emoji": 0x0108,  # MX Keys for Business Fn F6 ; MX Mini Fn F7 Emoji, Logitech
+        "Multiplatform_App_Switch__Launchpad": 0x0109,  # Logitech
+        "Screen_Capture": 0x010A,  # MX Keys for Business top 3rd from right; MX Mini Fn F8 Screenshot; Logitech
+        "Grave_Accent": 0x010B,  # Logitech
         "Tab_Key": 0x010C,
         "Caps_Lock": 0x010D,
         "Left_Shift": 0x010E,
@@ -297,21 +300,31 @@ CONTROL = NamedInts(
         "Right_Shift": 0x0115,
         "Insert": 0x0116,
         "Delete": 0x0117,  # MX Mini Lock (on delete key in function row)
-        "Home": 0x118,
-        "End": 0x119,
+        "Home": 0x118,  # Logitech
+        "End": 0x119,  # Logitech
         "Page_Up": 0x11A,
         "Page_Down": 0x11B,
-        "Mute_Microphone": 0x11C,  # MX Keys for Business Fn F7 ; MX Mini Fn F9 Microphone Mute
-        "Do_Not_Disturb": 0x11D,
+        "Mute_Microphone": 0x11C,  # MX Keys for Business Fn F7 ; MX Mini Fn F9 Microphone Mute; Logitech
+        "Do_Not_Disturb": 0x11D,  # Logitech
         "Backslash": 0x11E,
-        "Refresh": 0x11F,
+        "Refresh": 0x11F,  # Logitech
         "Close_Tab": 0x120,
-        "Lang_Switch": 0x121,
+        "Lang_Switch": 0x121,  # Logitech
         "Standard_Key_A": 0x122,
         "Standard_Key_B": 0x123,
         "Standard_Key_C": 0x124,  # There are lots more of these
         "Right_Option__Start__2": 0x013C,  # On MX Mechanical Mini
-        "Play_Pause": 0x0141,  # On MX Mechanical Mini
+        "Play__Pause_mini": 0x0141,  # On MX Mechanical Mini
+        "Haptic": 0x01A0,  # Logitech
+        "Circle": 0x01A3,
+        "Triangle": 0x01A4,
+        "Diamond": 0x01A5,
+        "Star": 0x01A6,
+        "Cut": 0x1A9,  # Logitech
+        "Copy": 0x1AA,  # Logitech
+        "Paste": 0x1AB,  # Logitech
+        "Video_On_Off": 0x01AC,  # Logitech
+        "AI": 0x1B4,  # Logitech
     }
 )
 

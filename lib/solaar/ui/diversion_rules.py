@@ -869,7 +869,7 @@ class SmartComboBox(Gtk.ComboBox):
         self._all_values = []
         self._blank = blank
         self._model = None
-        self._commpletion = completion
+        self._completion = completion
         self._case_insensitive = case_insensitive
         self._norm = lambda s: None if s is None else s if not case_insensitive else str(s).upper()
         self._replace_with_default_name = replace_with_default_name
@@ -921,7 +921,7 @@ class SmartComboBox(Gtk.ComboBox):
             if visible:
                 to_complete += names if names else [str(value).strip()]
         self.set_model(filtered_model)
-        if self.get_has_entry() and self._commpletion:
+        if self.get_has_entry() and self._completion:
             CompletionEntry.add_completion_to_entry(self.get_child(), to_complete)
         if self._find_idx(old_value) is not None:
             self.set_value(old_value)

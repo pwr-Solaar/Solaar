@@ -47,6 +47,7 @@ from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
 from .hidpp20_constants import ErrorCode
+from .hidpp20_constants import FeatureFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
@@ -79,6 +80,9 @@ class Device(Protocol):
         ...
 
 
+# pfps: Consider adding a class method that sanitizes inputs by removing unknown bits.
+
+
 class KeyFlag(Flag):
     """Capabilities and desired software handling for a control.
 
@@ -86,6 +90,11 @@ class KeyFlag(Flag):
     We treat bytes 4 and 8 of `getCidInfo` as a single bitfield.
     """
 
+    UNUSED_8000 = 0x8000
+    UNUSED_4000 = 0x4000
+    UNUSED_2000 = 0x2000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x800
     ANALYTICS_KEY_EVENTS = 0x400
     FORCE_RAW_XY = 0x200
     RAW_XY = 0x100
@@ -105,6 +114,9 @@ class MappingFlag(Flag):
     We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
     """
 
+    UNUSED_4000 = 0x4000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x400
     ANALYTICS_KEY_EVENTS_REPORTING = 0x100
     FORCE_RAW_XY_DIVERTED = 0x40
     RAW_XY_DIVERTED = 0x10
@@ -126,6 +138,7 @@ class FeaturesArray(dict):
         self.device = device
         self.inverse = {}
         self.version = {}
+        self.flags = {}
         self.count = 0
 
     def _check(self) -> bool:
@@ -172,6 +185,7 @@ class FeaturesArray(dict):
                     feature = f"unknown:{data:04X}"
                 self[feature] = index
                 self.version[feature] = response[3]
+                self.flags[feature] = response[2]
                 return feature
 
     def enumerate(self):  # return all features and their index, ordered by index
@@ -183,6 +197,15 @@ class FeaturesArray(dict):
     def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
             return self.version.get(feature, 0)
+
+    def get_flags(self, feature: NamedInt) -> Optional[int]:
+        if self[feature]:
+            return self.flags.get(feature, 0)
+
+    def get_hidden(self, feature: NamedInt) -> Optional[bool]:
+        if self[feature]:
+            return self.flags.get(feature, 0) & FeatureFlag.INTERNAL
+        return True
 
     def __contains__(self, feature: NamedInt) -> bool:
         try:
@@ -204,6 +227,7 @@ class FeaturesArray(dict):
                 index = response[0]
                 self[feature] = index if index else False
                 self.version[feature] = response[2]
+                self.flags[feature] = response[1]
                 return index if index else False
 
     def __setitem__(self, feature, index):
@@ -296,7 +320,10 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self._mapped_to is None:
             self._getCidReporting()
         self._device.keys._ensure_all_keys_queried()
-        task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
+        try:
+            task = str(special_keys.Task(self._device.keys.cid_to_tid[self._mapped_to]))
+        except ValueError:
+            task = f"Unknown_{self._mapped_to:x}"
         return NamedInt(self._mapped_to, task)
 
     @property
