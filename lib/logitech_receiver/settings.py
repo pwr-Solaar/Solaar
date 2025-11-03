@@ -57,6 +57,7 @@ class Setting:
     rw_options = {}
     validator_class = None
     validator_options = {}
+    display = True  # display setting in UI
 
     def __init__(self, device, rw, validator):
         self._device = device

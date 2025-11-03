@@ -16,7 +16,6 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-import traceback
 
 from enum import Enum
 from threading import Timer
@@ -70,7 +69,6 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
                 v = setting.write_key_value(key, v)
                 v = {key: v}
         except Exception:
-            traceback.print_exc()
             v = None
         if sb:
             GLib.idle_add(_update_setting_item, sb, v, True, sensitive, priority=99)
@@ -660,6 +658,8 @@ def _change_icon(allowed, icon):
 
 
 def _create_sbox(s, _device):
+    if not s.display:
+        return
     sbox = Gtk.HBox(homogeneous=False, spacing=6)
     sbox.setting = s
     sbox.kind = s.kind

@@ -40,6 +40,7 @@ class Setting:
     choices_universe = None  # All possible acceptable keys, for settings with keys
     kind = Kind.NONE  # What GUI interface to use
     persist = True  # Whether to remember the setting
+    display = True  # display setting in UI
     _device = None  # The device that this setting is for
     _device_object = None  # The object that interacts with the feature for the device
     _value = None  # Stored value as maintained by Solaar, used for persistence

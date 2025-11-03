@@ -1809,6 +1809,72 @@ class ForceSensing(settings_new.Settings):
             return setting
 
 
+class HapticLevel(settings.Setting):
+    name = "haptic-level"
+    label = _("Haptic Feeback Level")
+    description = _("Change power of haptic feedback.  (Zero to turn off.)")
+    feature = _F.HAPTIC
+    choices_universe = common.NamedInts(Off=0, Low=25, Medium=50, High=75, Maximum=100)
+    min_value = 0
+    max_value = 100
+
+    class rw_class(settings.FeatureRW):
+        def __init__(self, feature):
+            super().__init__(feature, read_fnid=0x10, write_fnid=0x20)
+
+        def read(self, device, data_bytes=b""):
+            result = device.feature_request(self.feature, 0x10)
+            if result[0] & 0x01 == 0:  # disabled, return 0
+                return b"\x00"
+            else:  # enabled, return second byte
+                return result[1:2]
+
+        def write(self, device, data_bytes):
+            if data_bytes == b"\x00":
+                write_bytes = b"\x00\x32"  # disable, at 50 percent
+            else:
+                write_bytes = b"\x01" + data_bytes
+            reply = device.feature_request(self.feature, 0x20, write_bytes)
+            return reply
+
+    @classmethod
+    def build(cls, device):
+        response = device.feature_request(cls.feature, 0x10)
+        if response:
+            rw = cls.rw_class(cls.feature)
+            levels = response[2] & 0x01
+            if levels:  # device only has four levels
+                validator = settings_validator.ChoicesValidator(choices=cls.choices_universe)
+            else:  # device has all levels
+                validator = settings_validator.RangeValidator(min_value=cls.min_value, max_value=cls.max_value)
+            return cls(device, rw, validator)
+
+
+# This setting is not displayed in the UI
+# Use `solaar config <device> haptic-play <form>` to play a haptic form
+class PlayHapticWaveForm(settings.Setting):
+    name = "haptic-play"
+    label = _("Play Haptic Waveform")
+    description = _("Tell device to play a haptic waveform.")
+    feature = _F.HAPTIC
+    choices_universe = hidpp20_constants.HapticWaveForms
+    rw_options = {"read_fnid": None, "write_fnid": 0x40}  # nothing to read
+    persist = False  # persisting this setting is useless
+    display = False  # don't display in UI, interact using `solaar config ...`
+
+    class validator_class(settings_validator.ChoicesValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            response = device.feature_request(_F.HAPTIC, 0x00)
+            if response:
+                waves = common.NamedInts()
+                waveforms = int.from_bytes(response[4:8])
+                for waveform in hidpp20_constants.HapticWaveForms:
+                    if (1 << int(waveform)) & waveforms:
+                        waves[int(waveform)] = str(waveform)
+            return cls(choices=waves, byte_count=1)
+
+
 SETTINGS: list[settings.Setting] = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1866,6 +1932,8 @@ SETTINGS: list[settings.Setting] = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
+    HapticLevel,
+    PlayHapticWaveForm,
     Sidetone,
     Equalizer,
     ADCPower,
