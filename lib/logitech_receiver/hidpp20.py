@@ -1046,7 +1046,7 @@ LEDParamSize = {
 # WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
 LEDEffects = {
     0x00: [NamedInt(0x00, _("Disabled")), {}],
-    0x01: [NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
+    0x01: [NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3, LEDParam.intensity: 4}],
     0x02: [NamedInt(0x02, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
     0x03: [NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
     0x08: [NamedInt(0x08, _("Boot")), {}],

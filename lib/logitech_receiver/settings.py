@@ -45,6 +45,7 @@ class Kind(IntEnum):
     MULTIPLE_RANGE = 0x40
     HETERO = 0x80
     MAP_RANGE = 0x102
+    COLOR = 0x200
 
 
 class Setting:
