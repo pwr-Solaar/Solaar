@@ -46,6 +46,7 @@ class GtkSignal(Enum):
     NOTIFY_ACTIVE = "notify::active"
     TOGGLED = "toggled"
     VALUE_CHANGED = "value-changed"
+    COLOR_SET = "color-set"
 
 
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
@@ -565,6 +566,10 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_box.set_active(0)
                 item_box.connect(GtkSignal.CHANGED.value, self.changed)
                 self.pack_start(item_box, False, False, 0)
+            elif item["kind"] == settings.Kind.COLOR:
+                item_box = Gtk.ColorButton()
+                item_box.connect(GtkSignal.COLOR_SET.value, self.changed)
+                self.pack_start(item_box, False, False, 0)
             elif item["kind"] == settings.Kind.RANGE:
                 item_box = Scale()
                 item_box.set_range(item["min"], item["max"])
@@ -579,7 +584,14 @@ class HeteroKeyControl(Gtk.HBox, Control):
     def get_value(self):
         result = {}
         for k, (_lblbox, box) in self._items.items():
-            result[str(k)] = box.get_value()
+            if isinstance(box, Gtk.ColorButton):
+                rgba = box.get_rgba()
+                r = int(rgba.red * 255)
+                g = int(rgba.green * 255)
+                b = int(rgba.blue * 255)
+                result[str(k)] = (r << 16) | (g << 8) | b
+            else:
+                result[str(k)] = box.get_value()
         result = hidpp20.LEDEffectSetting(**result)
         return result
 
@@ -589,7 +601,13 @@ class HeteroKeyControl(Gtk.HBox, Control):
             for k, v in value.__dict__.items():
                 if k in self._items:
                     (lblbox, box) = self._items[k]
-                    box.set_value(v)
+                    if isinstance(box, Gtk.ColorButton):
+                        rgba = Gdk.RGBA()
+                        color_string = f"#{v:06X}"  # e.g. "#FF0000"
+                        rgba.parse(color_string)
+                        box.set_rgba(rgba)
+                    else:
+                        box.set_value(v)
         else:
             self.sbox._failed.set_visible(True)
         self.setup_visibles(value.ID if value is not None else 0)

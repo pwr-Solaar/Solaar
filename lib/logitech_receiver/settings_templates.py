@@ -1644,7 +1644,7 @@ class LEDZoneSetting(settings.Setting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.COLOR_LED_EFFECTS
-    color_field = {"name": _LEDP.color, "kind": settings.Kind.CHOICE, "label": None, "choices": colors}
+    color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
     period_field = {"name": _LEDP.period, "kind": settings.Kind.RANGE, "label": _("Period"), "min": 100, "max": 5000}
     intensity_field = {"name": _LEDP.intensity, "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100}
