@@ -2038,7 +2038,7 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
     try:
         detected = settings_class.build(device)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("check_feature %s [%s] detected %s", settings_class.name, settings_class.feature, detected)
+            logger.debug("check_feature %s [%s] detected", settings_class.name, settings_class.feature)
         return detected
     except Exception as e:
         logger.error(
