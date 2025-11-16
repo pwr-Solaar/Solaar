@@ -381,7 +381,7 @@ _D(
     ),
 )
 _D("Couch Mouse M515", codename="M515", protocol=2.0, wpid="4007")
-_D("Wireless Mouse M175", codename="M175", protocol=2.0, wpid="4008")
+# _D("Wireless Mouse M175", codename="M175", protocol=2.0, wpid="4008")
 _D("Wireless Mouse M325", codename="M325", protocol=2.0, wpid="400A")
 _D("Wireless Mouse M525", codename="M525", protocol=2.0, wpid="4013")
 _D("Wireless Mouse M345", codename="M345", protocol=2.0, wpid="4017")
