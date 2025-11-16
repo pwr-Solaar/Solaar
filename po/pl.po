@@ -1327,6 +1327,22 @@ msgstr "nieokreślony powód"
 msgid "Built-in rules"
 msgstr "Wbudowane reguły"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Włącz sekwencyjne wyzwalanie (powtarzaj co N pikseli)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Odstęp sekwencji:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Martwa strefa:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "piksele"
+
 #: lib/solaar/ui/diversion_rules.py:103
 msgid "User-defined rules"
 msgstr "Reguły zdefiniowane przez użytkownika"

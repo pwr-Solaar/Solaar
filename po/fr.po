@@ -1318,6 +1318,22 @@ msgstr "Les opérations de lecture/écriture ont échouée."
 msgid "Built-in rules"
 msgstr "Règles pré-définies"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Activer le déclenchement étagé (déclencher à répétition tous les N pixels)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Distance d'étagement :"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Zone morte :"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pixels"
+
 #: lib/solaar/ui/diversion_rules.py:64
 msgid "User-defined rules"
 msgstr "Règles définies par l'utilisateur"

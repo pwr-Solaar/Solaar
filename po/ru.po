@@ -1284,6 +1284,22 @@ msgstr  "неустановленная причина"
 msgid   "Built-in rules"
 msgstr  "Встроенные правила"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Включить ступенчатый режим (повторно срабатывать каждые N пикселей)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Шаг срабатывания:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Мёртвая зона:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "пикселей"
+
 #: lib/solaar/ui/diversion_rules.py:103
 msgid   "User-defined rules"
 msgstr  "Пользовательские правила"

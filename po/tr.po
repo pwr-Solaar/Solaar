@@ -1308,6 +1308,22 @@ msgstr "Okuma/yazma işlemi yapılamadı."
 msgid "Built-in rules"
 msgstr "Varolan kurallar"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Kademeli tetiklemeyi etkinleştir (her N pikselde tekrar tetikle)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Kademe mesafesi:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Ölü bölge:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "piksel"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid "User-defined rules"
 msgstr "Kullanıcı tanımlı kurallar"
