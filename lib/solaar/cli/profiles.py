@@ -38,8 +38,10 @@ def run(receivers, args, find_receiver, find_device):
     if not dev:
         raise Exception(f"no online device found matching '{device_name}'")
 
-    if not (dev.online and dev.profiles):
-        print(f"Device {dev.name} is either offline or has no onboard profiles")
+    if not dev.online:
+        print(f"Device {dev.name} is offline.")
+    elif not dev.profiles:
+        print(f"Device {dev.name} has no onboard profiles that Solaar supports.")
     elif not profiles_file:
         print(f"#Dumping profiles from {dev.name}")
         print(yaml.dump(dev.profiles))
