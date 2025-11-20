@@ -1111,6 +1111,22 @@ msgstr "Operación de lectura/escritura fallida."
 msgid "Built-in rules"
 msgstr "Reglas integradas"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Habilitar escalonado (activar repetidamente cada N píxeles)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Distancia de escalonado:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Zona muerta:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "píxeles"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid "User-defined rules"
 msgstr "Reglas definidas por el usuario"
