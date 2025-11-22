@@ -191,7 +191,7 @@ class Hidpp10:
     def get_notification_flags(self, device: Device):
         return self._get_register(device, Registers.NOTIFICATIONS)
 
-    def set_notification_flags(self, device: Device, *flag_bits: NotificationFlag):
+    def set_notification_flags(self, device: Device, *flag_bits: NotificationFlag) -> None:
         assert device is not None
 
         # Avoid a call if the device is not online,
