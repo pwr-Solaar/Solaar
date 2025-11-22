@@ -77,6 +77,7 @@ setup(
         'dbus-python ; platform_system=="Linux"',
         "PyGObject",
         "typing_extensions",
+        "xkbgroup",
     ],
     extras_require={
         "report-descriptor": ["hid-parser"],

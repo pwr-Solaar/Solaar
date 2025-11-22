@@ -90,7 +90,6 @@ def process_receiver_notification(receiver: Receiver, notification: HIDPPNotific
         Notification.RAW_INPUT,
         Notification.POWER,
     ]
-
     logger.warning(f"{receiver}: unhandled notification {notification}")
 
 
