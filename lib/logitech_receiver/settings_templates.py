@@ -1016,7 +1016,7 @@ def produce_dpi_list(feature, function, ignore, device, direction):
 class AdjustableDpi(settings.Setting):
     name = "dpi"
     label = _("Sensitivity (DPI)")
-    description = _("Mouse movement sensitivity")
+    description = _("Mouse movement sensitivity") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     feature = _F.ADJUSTABLE_DPI
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = common.NamedInts.range(100, 4000, str, 50)
