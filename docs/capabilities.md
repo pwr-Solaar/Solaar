@@ -178,7 +178,7 @@ For more information on Mouse Gestures rule conditions see
 
 Solaar uses the standard Logitech names for keyboard keys.  Some Logitech keyboards have different icons on some of their keys and have different functionality than suggested by these names.
 
-Solaar is uses the standard US keyboard layout.  This currently only matters for the `Per-key Lighting` setting.  Users who want to have the key names for this setting reflect the keyboard layout that they use can create and edit `~/.config/solaar/keys.yaml` which contains a YAML dictionary of key names and locations.  For example, switching the `Y` and `Z` keys can be done  as:
+Solaar uses the standard US keyboard layout.  This currently only matters for the `Per-key Lighting` setting.  Users who want to have the key names for this setting reflect the keyboard layout that they use can create and edit `~/.config/solaar/keys.yaml` which contains a YAML dictionary of key names and locations.  For example, switching the `Y` and `Z` keys can be done  as:
 
 	Z: 25
 	Y: 26
