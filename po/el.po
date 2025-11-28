@@ -1274,6 +1274,22 @@ msgstr "Αποτυχία λειτουργίας ανάγνωσης/εγγραφ�
 msgid "Built-in rules"
 msgstr "Ενσωματωμένοι κανόνες"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Ενεργοποίηση διαδοχικής ενεργοποίησης (εκτέλεση επανειλημμένα κάθε N εικονοστοιχεία)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Απόσταση διαδοχής:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Νεκρή ζώνη:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "εικονοστοιχεία"
+
 #: lib/solaar/ui/diversion_rules.py:66
 msgid "User-defined rules"
 msgstr "Κανόνες που ορίζονται από το χρήστη"

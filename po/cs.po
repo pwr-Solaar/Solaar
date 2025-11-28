@@ -1054,6 +1054,22 @@ msgstr  "Operace čtení/zápisu selhala."
 msgid   "Built-in rules"
 msgstr  "Zabudovaná pravidla"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Povolit stupňování (spouštět opakovaně každých N pixelů)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Interval stupňování:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Mrtvá zóna:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pixely"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid   "User-defined rules"
 msgstr  "Uživatelem definované pravidla"

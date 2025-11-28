@@ -1068,6 +1068,22 @@ msgstr  "Radnja čitanja/pisanja neuspjela."
 msgid   "Built-in rules"
 msgstr  "Ugrađena pravila"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Omogući stupnjevanje (pokreni više puta svakih N piksela)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Razmak stupnjevanja:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Mrtva zona:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "piksela"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid   "User-defined rules"
 msgstr  "Korisnički određena pravila"

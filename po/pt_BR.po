@@ -916,6 +916,22 @@ msgstr[1] "%d valores"
 msgid "Built-in rules"
 msgstr "Regras predefinidas"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Ativar escalonamento (acionar repetidamente a cada N pixels)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Distância do escalonamento:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Zona morta:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pixels"
+
 #: lib/solaar/ui/diversion_rules.py:57
 msgid "User-defined rules"
 msgstr "Regras do usuário"
