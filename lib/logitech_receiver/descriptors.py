@@ -225,6 +225,7 @@ _D("Craft Advanced Keyboard", codename="Craft", protocol=4.5, wpid="4066", btid=
 _D("Wireless Illuminated Keyboard K800 new", codename="K800 new", protocol=4.5, wpid="406E")
 _D("Wireless Keyboard K470", codename="K470", protocol=4.5, wpid="4075")
 _D("MX Keys Keyboard", codename="MX Keys", protocol=4.5, wpid="408A", btid=0xB35B)
+_D("MX Keys S Keyboard", codename="MX Keys S", protocol=4.5, btid=0xB378)
 _D(
     "G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard",
     codename="G915 TKL",
