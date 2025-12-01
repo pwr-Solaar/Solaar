@@ -1,5 +1,10 @@
 # 1.1.17
 
+* Add onboard profiles warning to sensitivity tooltip
+* Better error messages for solaar profile
+* Remove Solaar name for mice with WPID 4008
+* Prevent lock failure when showing debug messages
+* Replace color picker (#3028)
 * Add setting for HAPTIC feature
 * Add setting to adjust force needed for force-sensing buttons
 * Expand new settings type
