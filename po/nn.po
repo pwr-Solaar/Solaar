@@ -1311,6 +1311,22 @@ msgstr "uspesifisert årsak"
 msgid "Built-in rules"
 msgstr "Faste reglar"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Aktiver trinnvis utløysing (utløs på nytt for kvar N piksel)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Trinnavstand:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Dødsonen:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "pikslar"
+
 #: lib/solaar/ui/diversion_rules.py:69
 msgid "User-defined rules"
 msgstr "Brukardefinerte reglar"

@@ -1057,6 +1057,22 @@ msgstr  "Ha fallat l'operació de lectura/escriptura."
 msgid   "Built-in rules"
 msgstr  "Regles integrades"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "Habilita l'esglaonat (activa repetidament cada N píxels)"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "Distància d'esglaonat:"
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "Zona morta:"
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "píxels"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid   "User-defined rules"
 msgstr  "Regles definides per l'usuari"

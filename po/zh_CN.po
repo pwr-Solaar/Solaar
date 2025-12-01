@@ -1273,6 +1273,22 @@ msgstr "读写操作失败。"
 msgid "Built-in rules"
 msgstr "内置规则"
 
+#: lib/solaar/ui/rule_conditions.py:549
+msgid "Enable staggering (trigger repeatedly every N pixels)"
+msgstr "启用分段触发（每 N 像素重复触发）"
+
+#: lib/solaar/ui/rule_conditions.py:556
+msgid "Stagger distance:"
+msgstr "分段距离："
+
+#: lib/solaar/ui/rule_conditions.py:568
+msgid "Dead zone:"
+msgstr "死区："
+
+#: lib/solaar/ui/rule_conditions.py:562 lib/solaar/ui/rule_conditions.py:574
+msgid "pixels"
+msgstr "像素"
+
 #: lib/solaar/ui/diversion_rules.py:65
 msgid "User-defined rules"
 msgstr "自定义规则"
