@@ -1,4 +1,4 @@
-# 1.1.17
+# 1.1.17rc3
 
 * Add onboard profiles warning to sensitivity tooltip
 * Better error messages for solaar profile
