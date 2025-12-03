@@ -1450,7 +1450,7 @@ class OnboardProfiles:
             device.ping()
         response = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x00)
         memory, profile, _macro = struct.unpack("!BBB", response[0:3])
-        if memory != 0x01 or profile > 0x04:
+        if memory != 0x01 or profile > 0x05:
             return
         count, oob, buttons, sectors, size, shift = struct.unpack("!BBBBHB", response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
