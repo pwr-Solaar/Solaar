@@ -1,5 +1,8 @@
-# 1.1.17rc3
+# 1.1.17
 
+* Add dark icons
+* Permit onboard profiles version 5
+* Update Russian and Polish translations
 * Add onboard profiles warning to sensitivity tooltip
 * Better error messages for solaar profile
 * Remove Solaar name for mice with WPID 4008
