@@ -1,12 +1,12 @@
 # Notes on Major Changes in Releases
 
-## Since 1.1.16
+## Version 1.1.17
 
 * Several new features have been added related to the MX Master 4
-** The scroll ratchet force can be adjusted
-** The force required to click the button under your thumb can be adjusted
-** The haptic force can be adjusted
-** Haptic feeback can be triggered by commands like `solaar config 'mx master 4' haptic-play 'HAPPY ALER'`
+  * The scroll ratchet force can be adjusted
+  * The force required to click the button under your thumb can be adjusted
+  * The haptic force can be adjusted
+  * Haptic feeback can be triggered by commands like `solaar config 'mx master 4' haptic-play 'HAPPY ALER'`
 
 ## Version 1.1.16
 
