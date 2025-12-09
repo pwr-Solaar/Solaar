@@ -38,7 +38,7 @@ def run(receivers, args, find_receiver, _ignore):
     assert receiver
 
     # check if it's necessary to set the notification flags
-    old_notification_flags = _hidpp10.get_notification_flags(receiver) or 0
+    old_notification_flags = _hidpp10.get_notification_flags(receiver)
     if not (old_notification_flags & hidpp10_constants.NotificationFlag.WIRELESS):
         _hidpp10.set_notification_flags(receiver, old_notification_flags | hidpp10_constants.NotificationFlag.WIRELESS)
 
