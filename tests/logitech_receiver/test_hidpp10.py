@@ -247,7 +247,7 @@ def test_set_3leds_missing(device, mocker):
 def test_get_notification_flags(device):
     result = _hidpp10.get_notification_flags(device)
 
-    assert result == int("000900", 16)
+    assert result == hidpp10_constants.NotificationFlag(int("000900", 16))
 
 
 def test_set_notification_flags(mocker):
