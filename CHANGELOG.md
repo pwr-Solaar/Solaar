@@ -1,3 +1,29 @@
+# 1.1.17
+
+* Add dark icons
+* Permit onboard profiles version 5
+* Update Russian and Polish translations
+* Add onboard profiles warning to sensitivity tooltip
+* Better error messages for solaar profile
+* Remove Solaar name for mice with WPID 4008
+* Prevent lock failure when showing debug messages
+* Replace color picker (#3028)
+* Add setting for HAPTIC feature
+* Add setting to adjust force needed for force-sensing buttons
+* Expand new settings type
+* Add new settings type for structure-backed setting
+* Use PATH instead of hardcoded absolute paths (#3014)
+* Add scroll ratchet force setting
+* Fix debug messages for MouseClick rule
+* Improve debug message for rule evaluation
+* App wrapper and launch agent scripts for MacOS
+* Ignore hidden features
+* Don't pop up window in response to ADC changes
+* Update bug report template
+* Fixed malformed doc file by adding closing tag
+* Fix error in low-level request for device with no recevier
+* Update documentation files
+
 # 1.1.16
 
 * Add new flags for reprogrammable keys feature

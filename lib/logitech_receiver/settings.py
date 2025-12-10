@@ -35,6 +35,7 @@ SENSITIVITY_IGNORE = "ignore"
 
 
 class Kind(IntEnum):
+    NONE = 0
     TOGGLE = 0x01
     CHOICE = 0x02
     RANGE = 0x04
@@ -43,6 +44,8 @@ class Kind(IntEnum):
     PACKED_RANGE = 0x20
     MULTIPLE_RANGE = 0x40
     HETERO = 0x80
+    MAP_RANGE = 0x102
+    COLOR = 0x200
 
 
 class Setting:
@@ -55,6 +58,7 @@ class Setting:
     rw_options = {}
     validator_class = None
     validator_options = {}
+    display = True  # display setting in UI
 
     def __init__(self, device, rw, validator):
         self._device = device
