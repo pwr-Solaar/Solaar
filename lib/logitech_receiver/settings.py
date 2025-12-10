@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import struct
 import time
+import threading
 
 from enum import IntEnum
 from typing import Any
@@ -856,14 +857,107 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
+    """Apply all saved settings for a device.
+
+    Historically this tried to avoid a race with the Linux HID++ driver by
+    sleeping a small amount when HIRES_WHEEL is present.  Some users still
+    report the HIRES wheel resolution (and middle-click behaviour) being
+    reverted after reconnect/resume.  To improve reliability we:
+      - keep the small sleep for HIRES_WHEEL devices to reduce races, and
+      - after applying settings, schedule a short delayed verification that
+        re-reads a few critical settings (HIRES-related and middle-click
+        remapping/diversion settings) and re-applies them if they don't match
+        the stored/persisted value.
+    """
+    # original short delay to try to get out of race condition with Linux HID++ driver
     if device.features and hidpp20_constants.SupportedFeature.HIRES_WHEEL in device.features:
-        time.sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
+        time.sleep(0.25)  # slightly increased from 0.2 to reduce a transient race
+
     persister = getattr(device, "persister", None)
     sensitives = persister.get("_sensitive", {}) if persister else {}
     for s in device.settings:
         ignore = sensitives.get(s.name, False)
         if ignore != SENSITIVITY_IGNORE:
             s.apply()
+
+    # Schedule a delayed verification for known-sensitive settings.
+    # If the device/kernel/driver or another process modified settings after
+    # Solaar wrote them, attempt to detect and re-apply.
+    def _verify_and_reapply():
+        try:
+            # Only verify if the device is still present and online
+            if not getattr(device, "online", False):
+                logger.debug("%s: verify skipped, device offline", device)
+                return
+
+            # List of sensitive setting names to verify.  Keep short to avoid
+            # extra traffic. 'hires-smooth-resolution' is the main one for HIRES
+            # wheel; add middle-click/diversion relevant settings that have
+            # previously been observed to revert.
+            sensitive_setting_names = {
+                "hires-smooth-resolution",
+                "hires-scroll-mode",
+                "hires-smooth-invert",
+                "divert-keys",  # middle-click/diversion mapping
+                # add other names here if more are observed to be lost
+            }
+
+            for s in device.settings:
+                if s.name not in sensitive_setting_names:
+                    continue
+
+                try:
+                    # Read the live value from device (don't trust cache)
+                    live = None
+                    try:
+                        # Many Setting.read implementations accept cached=True/False.
+                        live = s.read(cached=False)
+                    except TypeError:
+                        # Fallback if implementation signature differs
+                        live = s.read()
+
+                    # Determine the desired/stored value: prefer persisted value if available
+                    desired = None
+                    try:
+                        desired = s.read(cached=True)
+                    except Exception:
+                        # If read(cached=True) fails, try to pull internal stored value
+                        desired = getattr(s, "_value", None)
+
+                    # If either is None we can't reliably compare; skip it.
+                    if live is None or desired is None:
+                        logger.debug("%s: verification: %s live=%r desired=%r (skipping)", device, s.name, live, desired)
+                        continue
+
+                    if live != desired:
+                        logger.info(
+                            "%s: verification: setting %s mismatch, live=%r desired=%r - re-applying",
+                            device,
+                            s.name,
+                            live,
+                            desired,
+                        )
+                        try:
+                            # Re-write desired value to the device but don't persist again
+                            # (persisted value is already stored).
+                            s.write(desired, save=False)
+                        except Exception:
+                            logger.exception("%s: failed to re-apply setting %s", device, s.name)
+                    else:
+                        logger.debug("%s: verification: %s OK (%r)", device, s.name, live)
+                except Exception:
+                    logger.exception("%s: error verifying setting %s", device, s.name)
+
+        except Exception:
+            logger.exception("%s: verify_and_reapply unexpected error", device)
+
+    # run the verifier after a short delay to let any other hotplug/driver work finish
+    try:
+        t = threading.Timer(0.6, _verify_and_reapply)
+        t.daemon = True
+        t.start()
+    except Exception:
+        logger.exception("%s: failed to schedule settings verification", device)
 
 
 Setting.validator_class = settings_validator.BooleanValidator
