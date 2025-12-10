@@ -323,7 +323,7 @@ def open_path(device_path):
             if e.errno == errno.EACCES:
                 sleep(0.1)
             else:
-                raise
+                raise e
 
 
 def close(device_handle) -> None:

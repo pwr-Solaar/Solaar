@@ -531,12 +531,13 @@ class RangeValidator(Validator):
         kwargs["max_value"] = setting_class.max_value
         return cls(**kwargs)
 
-    def __init__(self, min_value=0, max_value=255, byte_count=1):
+    def __init__(self, min_value=0, max_value=255, byte_count=1, read_skip_byte_count=0, write_prefix_bytes=b""):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
+        self.read_skip_byte_count = read_skip_byte_count
+        self.write_prefix_bytes = write_prefix_bytes
         self.needs_current_value = True  # read and check before write (needed for ADC power and probably a good idea anyway)
-
         self._byte_count = math.ceil(math.log(max_value + 1, 256))
         if byte_count:
             assert self._byte_count <= byte_count
@@ -544,7 +545,7 @@ class RangeValidator(Validator):
         assert self._byte_count < 8
 
     def validate_read(self, reply_bytes):
-        reply_value = common.bytes2int(reply_bytes[: self._byte_count])
+        reply_value = common.bytes2int(reply_bytes[self.read_skip_byte_count : self.read_skip_byte_count + self._byte_count])
         assert reply_value >= self.min_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         assert reply_value <= self.max_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         return reply_value
@@ -553,7 +554,7 @@ class RangeValidator(Validator):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError(f"invalid choice {new_value!r}")
         current_value = self.validate_read(current_value) if current_value is not None else None
-        to_write = common.int2bytes(new_value, self._byte_count)
+        to_write = self.write_prefix_bytes + common.int2bytes(new_value, self._byte_count)
         # current value is known and same as value to be written return None to signal not to write it
         return None if current_value is not None and current_value == new_value else to_write
 

@@ -245,7 +245,8 @@ If the previous condition in the parent rule returns a number the scroll amounts
 ### Mouse click
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.
 The action simulates that number of clicks of the specified button or just one click, depress, or release of the button.
-A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
+
+### Execute
 An `Execute` action takes a program and arguments and executes it asynchronously.
 
 ### Set setting

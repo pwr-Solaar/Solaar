@@ -21,6 +21,7 @@ import socket
 import struct
 import threading
 
+from collections import UserDict
 from enum import Flag
 from enum import IntEnum
 from typing import Any
@@ -47,6 +48,7 @@ from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
 from .hidpp20_constants import ErrorCode
+from .hidpp20_constants import FeatureFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
@@ -79,6 +81,9 @@ class Device(Protocol):
         ...
 
 
+# pfps: Consider adding a class method that sanitizes inputs by removing unknown bits.
+
+
 class KeyFlag(Flag):
     """Capabilities and desired software handling for a control.
 
@@ -86,6 +91,11 @@ class KeyFlag(Flag):
     We treat bytes 4 and 8 of `getCidInfo` as a single bitfield.
     """
 
+    UNUSED_8000 = 0x8000
+    UNUSED_4000 = 0x4000
+    UNUSED_2000 = 0x2000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x800
     ANALYTICS_KEY_EVENTS = 0x400
     FORCE_RAW_XY = 0x200
     RAW_XY = 0x100
@@ -105,6 +115,9 @@ class MappingFlag(Flag):
     We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
     """
 
+    UNUSED_4000 = 0x4000
+    UNUSED_1000 = 0x1000
+    RAW_WHEEL = 0x400
     ANALYTICS_KEY_EVENTS_REPORTING = 0x100
     FORCE_RAW_XY_DIVERTED = 0x40
     RAW_XY_DIVERTED = 0x10
@@ -126,6 +139,7 @@ class FeaturesArray(dict):
         self.device = device
         self.inverse = {}
         self.version = {}
+        self.flags = {}
         self.count = 0
 
     def _check(self) -> bool:
@@ -172,6 +186,7 @@ class FeaturesArray(dict):
                     feature = f"unknown:{data:04X}"
                 self[feature] = index
                 self.version[feature] = response[3]
+                self.flags[feature] = response[2]
                 return feature
 
     def enumerate(self):  # return all features and their index, ordered by index
@@ -183,6 +198,15 @@ class FeaturesArray(dict):
     def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
             return self.version.get(feature, 0)
+
+    def get_flags(self, feature: NamedInt) -> Optional[int]:
+        if self[feature]:
+            return self.flags.get(feature, 0)
+
+    def get_hidden(self, feature: NamedInt) -> Optional[bool]:
+        if self[feature]:
+            return self.flags.get(feature, 0) & FeatureFlag.INTERNAL
+        return True
 
     def __contains__(self, feature: NamedInt) -> bool:
         try:
@@ -204,6 +228,7 @@ class FeaturesArray(dict):
                 index = response[0]
                 self[feature] = index if index else False
                 self.version[feature] = response[2]
+                self.flags[feature] = response[1]
                 return index if index else False
 
     def __setitem__(self, feature, index):
@@ -1425,7 +1450,7 @@ class OnboardProfiles:
             device.ping()
         response = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x00)
         memory, profile, _macro = struct.unpack("!BBB", response[0:3])
-        if memory != 0x01 or profile > 0x04:
+        if memory != 0x01 or profile > 0x05:
             return
         count, oob, buttons, sectors, size, shift = struct.unpack("!BBBBHB", response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
@@ -1688,6 +1713,12 @@ class Hidpp20:
             return device._backlight
         if SupportedFeature.BACKLIGHT2 in device.features:
             return Backlight(device)
+
+    def get_force_buttons(self, device: Device):
+        if getattr(device, "_force_buttons", None) is not None:
+            return device._force_buttons
+        if SupportedFeature.FORCE_SENSING_BUTTON in device.features:
+            return ForceSensingButtonArray(device)
 
     def get_profiles(self, device: Device):
         if getattr(device, "_profiles", None) is not None:
@@ -1997,3 +2028,94 @@ def estimate_battery_level_percentage(value_millivolt: int) -> int | None:
             percent = p_low + (p_high - p_low) * (value_millivolt - v_low) / (v_high - v_low)
             return round(percent)
     return 0
+
+
+class ForceSensingButton:
+    """A button that has a force value at which to trigger the button"""
+
+    @classmethod
+    def create(cls, device, number: int):
+        buttondata = device.feature_request(SupportedFeature.FORCE_SENSING_BUTTON, 0x10, number)
+        buttoncurrent = device.feature_request(SupportedFeature.FORCE_SENSING_BUTTON, 0x20, number)
+        if buttondata is not None and buttoncurrent is not None:
+            changeable, default, max_value, min_value = struct.unpack("!HHHH", buttondata[:8])
+            changeable = changeable & 0x01
+            current = struct.unpack("!H", buttoncurrent[:2])[0]
+            return cls(device, number, changeable, default, max_value, min_value, current)
+
+    def __init__(self, device, number: int, changeable: bool, default: int, max_value: int, min_value: int, current: int):
+        self._device = device
+        self.number = number
+        self.changeable = changeable
+        self.default = default
+        self.min_value = min_value
+        self.max_value = max_value
+        self._current = current
+
+    def get_current(self) -> int:
+        return self._current
+
+    def set_current(self, current: int) -> None:
+        if not self.changeable:
+            logger.warning(f"FORCE_SENSING_BUTTON on device {self._device} does not allow changing force.")
+        if self.min_value <= current <= self.max_value:
+            ret = self._device.feature_request(
+                SupportedFeature.FORCE_SENSING_BUTTON, 0x30, struct.pack("!BH", self.number, current)
+            )
+        if ret is None and logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"FORCE_SENSING_BUTTON setButtonConfig on device {self._device} didn't respond.")
+
+    def acceptable_current(self, value: int) -> bool:
+        return self.min_value <= value <= self.max_value
+
+
+class ForceSensingButtonArray(UserDict):
+    """A map of buttons supporting force sensing"""
+
+    def __new__(cls, device: Device):
+        assert device is not None
+        count = device.feature_request(SupportedFeature.FORCE_SENSING_BUTTON, 0x00)
+        if count:
+            instance = super().__new__(cls)
+            instance._count = ord(count[:1])
+            return instance
+
+    def __init__(self, device: Device):
+        super().__init__(self)
+        self.device = device
+        for index in range(0, self._count):
+            self[index] = None
+
+    def __getitem__(self, index: int):
+        item = super().__getitem__(index)
+        if item is None:
+            self.query_key(index)
+        return super().__getitem__(index)
+
+    def query_key(self, index):
+        if index not in self:
+            raise IndexError(index)
+        button = ForceSensingButton.create(self.device, index)
+        if button:
+            self[index] = button
+            return button
+
+    def query(self):
+        for index in self:
+            button = ForceSensingButton.create(self.device, index)
+            if button:
+                self[index] = button
+        return self
+
+    # interface for single force button
+    def get_current(self):
+        return self[0].get_current()
+
+    def set_current(self, current: int) -> None:
+        self[0].set_current(current)
+
+    def acceptable(self, value: int) -> bool:
+        return self[0].acceptable(value)
+
+    def acceptable_current_key(self, index: int, value: int) -> bool:
+        return self[index].acceptable(value)

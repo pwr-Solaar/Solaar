@@ -36,6 +36,7 @@ from . import exceptions
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
+from . import settings_new
 from . import settings_validator
 from . import special_keys
 from .hidpp10_constants import Registers
@@ -99,8 +100,11 @@ class State(enum.Enum):
 #   mask is used to keep only some bits from a sequence of bits, this can be an integer or a byte string,
 #   read_skip_byte_count is the number of bytes to ignore at the beginning of the read value (default 0),
 #   write_prefix_bytes is a byte string to write before the value (default empty).
+
 # RangeValidator is for an integer in a range.  It takes
 #   byte_count is number of bytes that the value is stored in (defaults to size of max_value).
+#   read_skip_byte_count is as for BooleanV
+#   write_prefix_bytes is as for BooleanV
 # RangeValidator uses min_value and max_value from the setting class as minimum and maximum.
 
 # ChoicesValidator is for symbolic choices.  It takes one positional and three keyword arguments:
@@ -698,6 +702,38 @@ class ScrollRatchetEnhanced(ScrollRatchet):
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
+class ScrollRatchetTorque(settings.Setting):
+    name = "scroll-ratchet-torque"
+    label = _("Scroll Wheel Ratchet Torque")
+    description = _("Change the torque needed to overcome the ratchet.")
+    feature = _F.SMART_SHIFT_ENHANCED
+    min_value = 1
+    max_value = 100
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+
+    class rw_class(settings.FeatureRW):
+        def write(self, device, data_bytes):
+            ratchetSetting = next(filter(lambda s: s.name == "scroll-ratchet", device.settings), None)
+            if ratchetSetting:  # for MX Master 4, the ratchet setting needs to be written for changes to take effect
+                ratchet_value = ratchetSetting.read(True)
+                data_bytes = ratchet_value.to_bytes(1, "big") + data_bytes[1:]
+            result = super().write(device, data_bytes)
+            return result
+
+    class validator_class(settings_validator.RangeValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(_F.SMART_SHIFT_ENHANCED, 0x00)
+            if reply[0] & 0x01:  # device supports tunable torque
+                return cls(
+                    min_value=setting_class.min_value,
+                    max_value=setting_class.max_value,
+                    byte_count=1,
+                    write_prefix_bytes=b"\x00\x00",  # don't change mode or disengage, but see above
+                    read_skip_byte_count=2,
+                )
+
+
 # the keys for the choice map are Logitech controls (from special_keys)
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
 # and the integer being the control number for that task (to be written to the device)
@@ -980,7 +1016,7 @@ def produce_dpi_list(feature, function, ignore, device, direction):
 class AdjustableDpi(settings.Setting):
     name = "dpi"
     label = _("Sensitivity (DPI)")
-    description = _("Mouse movement sensitivity")
+    description = _("Mouse movement sensitivity") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     feature = _F.ADJUSTABLE_DPI
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = common.NamedInts.range(100, 4000, str, 50)
@@ -1608,7 +1644,7 @@ class LEDZoneSetting(settings.Setting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.COLOR_LED_EFFECTS
-    color_field = {"name": _LEDP.color, "kind": settings.Kind.CHOICE, "label": None, "choices": colors}
+    color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
     period_field = {"name": _LEDP.period, "kind": settings.Kind.RANGE, "label": _("Period"), "min": 100, "max": 5000}
     intensity_field = {"name": _LEDP.intensity, "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100}
@@ -1744,6 +1780,101 @@ class PerKeyLighting(settings.Settings):
             return result
 
 
+# Allow changes to force sensing buttons
+class ForceSensing(settings_new.Settings):
+    name = "force-sensing"
+    label = _("Force Sensing Buttons")
+    description = _("Change the force required to activate button.")
+    feature = _F.FORCE_SENSING_BUTTON
+    setup = "force_buttons"
+    get = "get_current"
+    set = "set_current"
+    acceptable = "acceptable_current_key"
+    choices_universe = list(range(0, 256))
+    kind = settings.Kind.MAP_RANGE
+
+    @classmethod
+    def build(cls, device):
+        cls.check_properties(cls)
+        device_object = getattr(device, cls.setup)()
+        if device_object:
+            setting = cls(device, device_object)
+            if setting and len(device_object) == 1:
+                ## If there is only one force button a simpler interface can be used
+                setting.label = _("Force Sensing Button")
+                setting.acceptable = "acceptable_current"
+                setting.min_value = device_object[0].min_value
+                setting.max_value = device_object[0].max_value
+                setting.kind = settings.Kind.RANGE
+            return setting
+
+
+class HapticLevel(settings.Setting):
+    name = "haptic-level"
+    label = _("Haptic Feeback Level")
+    description = _("Change power of haptic feedback.  (Zero to turn off.)")
+    feature = _F.HAPTIC
+    choices_universe = common.NamedInts(Off=0, Low=25, Medium=50, High=75, Maximum=100)
+    min_value = 0
+    max_value = 100
+
+    class rw_class(settings.FeatureRW):
+        def __init__(self, feature):
+            super().__init__(feature, read_fnid=0x10, write_fnid=0x20)
+
+        def read(self, device, data_bytes=b""):
+            result = device.feature_request(self.feature, 0x10)
+            if result[0] & 0x01 == 0:  # disabled, return 0
+                return b"\x00"
+            else:  # enabled, return second byte
+                return result[1:2]
+
+        def write(self, device, data_bytes):
+            if data_bytes == b"\x00":
+                write_bytes = b"\x00\x32"  # disable, at 50 percent
+            else:
+                write_bytes = b"\x01" + data_bytes
+            reply = device.feature_request(self.feature, 0x20, write_bytes)
+            return reply
+
+    @classmethod
+    def build(cls, device):
+        response = device.feature_request(cls.feature, 0x10)
+        if response:
+            rw = cls.rw_class(cls.feature)
+            levels = response[2] & 0x01
+            if levels:  # device only has four levels
+                validator = settings_validator.ChoicesValidator(choices=cls.choices_universe)
+            else:  # device has all levels
+                validator = settings_validator.RangeValidator(min_value=cls.min_value, max_value=cls.max_value)
+            return cls(device, rw, validator)
+
+
+# This setting is not displayed in the UI
+# Use `solaar config <device> haptic-play <form>` to play a haptic form
+class PlayHapticWaveForm(settings.Setting):
+    name = "haptic-play"
+    label = _("Play Haptic Waveform")
+    description = _("Tell device to play a haptic waveform.")
+    feature = _F.HAPTIC
+    choices_universe = hidpp20_constants.HapticWaveForms
+    rw_options = {"read_fnid": None, "write_fnid": 0x40}  # nothing to read
+    persist = False  # persisting this setting is useless
+    display = False  # don't display in UI, interact using `solaar config ...`
+
+    class validator_class(settings_validator.ChoicesValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            response = device.feature_request(_F.HAPTIC, 0x00)
+            if response:
+                waves = common.NamedInts()
+                waveforms = int.from_bytes(response[4:8])
+                for waveform in hidpp20_constants.HapticWaveForms:
+                    if (1 << int(waveform)) & waveforms:
+                        waves[int(waveform)] = str(waveform)
+            return cls(choices=waves, byte_count=1)
+
+
 SETTINGS: list[settings.Setting] = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1756,6 +1887,7 @@ SETTINGS: list[settings.Setting] = [
     HiresSmoothResolution,  # working
     HiresMode,  # simple
     ScrollRatchet,  # simple
+    ScrollRatchetTorque,
     SmartShift,  # working
     ScrollRatchetEnhanced,
     SmartShiftEnhanced,  # simple
@@ -1788,6 +1920,7 @@ SETTINGS: list[settings.Setting] = [
     PersistentRemappableAction,
     DivertKeys,  # working
     DisableKeyboardKeys,  # working
+    ForceSensing,
     CrownSmooth,  # working
     DivertCrown,  # working
     DivertGkeys,  # working
@@ -1799,6 +1932,8 @@ SETTINGS: list[settings.Setting] = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
+    HapticLevel,
+    PlayHapticWaveForm,
     Sidetone,
     Equalizer,
     ADCPower,
@@ -1898,10 +2033,12 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
         return
+    if device.features.get_hidden(settings_class.feature):
+        return
     try:
         detected = settings_class.build(device)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("check_feature %s [%s] detected %s", settings_class.name, settings_class.feature, detected)
+            logger.debug("check_feature %s [%s] detected", settings_class.name, settings_class.feature)
         return detected
     except Exception as e:
         logger.error(

@@ -87,10 +87,10 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
     except OSError as e:
         logger.exception("open %s", device_info)
         if e.errno == errno.EACCES:
-            raise
-    except Exception:
+            raise e
+    except Exception as e:
         logger.exception("open %s", device_info)
-        raise
+        raise e
 
 
 class Device:
@@ -140,7 +140,7 @@ class Device:
         self._modelId = None  # model id (contains identifiers for the transports of the device)
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
-        self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
+        self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = self._force_buttons = None
         self._profiles = self._backlight = self._settings = None
         self.registers = []
         self.notification_flags = None
@@ -346,6 +346,12 @@ class Device:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
 
+    def force_buttons(self):
+        if self._force_buttons is None:
+            if self.online and self.protocol >= 2.0:
+                self._force_buttons = _hidpp20.get_force_buttons(self) or ()
+        return self._force_buttons
+
     def set_configuration(self, configuration_, no_reply=False):
         if self.online and self.protocol >= 2.0:
             _hidpp20.config_change(self, configuration_, no_reply=no_reply)
@@ -397,7 +403,7 @@ class Device:
                         self.persister["_battery"] = feature.value
                     return battery
                 except Exception:
-                    if self.persister and battery_feature is None and result is not None:
+                    if self.persister and battery_feature is None and result is not None and result != 0:
                         self.persister["_battery"] = result.value
 
     def set_battery_info(self, info):
@@ -522,7 +528,7 @@ class Device:
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
             return self.low_level.request(
-                self.handle or self.receiver.handle,
+                self.handle or (self.receiver.handle if self.receiver else None),
                 self.number,
                 request_id,
                 *params,
