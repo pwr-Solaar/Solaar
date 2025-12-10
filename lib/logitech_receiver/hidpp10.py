@@ -189,7 +189,7 @@ class Hidpp10:
         write_register(device, Registers.THREE_LEDS, v1, v2)
 
     def get_notification_flags(self, device: Device):
-        return self._get_register(device, Registers.NOTIFICATIONS)
+        return NotificationFlag(self._get_register(device, Registers.NOTIFICATIONS))
 
     def set_notification_flags(self, device: Device, *flag_bits: NotificationFlag) -> None:
         assert device is not None

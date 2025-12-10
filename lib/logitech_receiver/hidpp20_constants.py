@@ -65,6 +65,8 @@ class SupportedFeature(IntEnum):
     BACKLIGHT2 = 0x1982
     BACKLIGHT3 = 0x1983
     ILLUMINATION = 0x1990
+    FORCE_SENSING_BUTTON = 0x19C0
+    HAPTIC = 0x19B0
     PRESENTER_CONTROL = 0x1A00
     SENSOR_3D = 0x1A01
     REPROG_CONTROLS = 0x1B00
@@ -276,3 +278,23 @@ class ParamId(IntEnum):
     PIXEL_ZONE = 2  # 4 2-byte integers, left, bottom, width, height; pixels
     RATIO_ZONE = 3  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
     SCALE_FACTOR = 4  # 2-byte integer, with 256 as normal scale
+
+
+HapticWaveForms = NamedInts(
+    SHARP_STATE_CHANGE=0x00,
+    DAMP_STATE_CHANGE=0x01,
+    SHARP_COLLISION=0x02,
+    DAMP_COLLISION=0x03,
+    SUBTLE_COLLISION=0x04,
+    HAPPY_ALERT=0x05,
+    ANGRY_ALERT=0x06,
+    COMPLETED=0x07,
+    SQUARE=0x08,
+    WAVE=0x09,
+    FIREWORK=0x0A,
+    MAD=0x0B,
+    KNOCK=0x0C,
+    JINGLE=0x0D,
+    RINGING=0xE,
+    WHISPER_COLLISION=0x1B,
+)

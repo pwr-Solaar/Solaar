@@ -413,7 +413,7 @@ def test_KeysArrayV4__getitem(device, count, index, cid, task_id, flags, pos, gr
 
 
 @pytest.mark.parametrize(
-    "key, index", [(special_keys.CONTROL.Volume_Up, 2), (special_keys.CONTROL.Mute, 4), (special_keys.CONTROL.Next, None)]
+    "key, index", [(special_keys.CONTROL.Volume_Up_old, 2), (special_keys.CONTROL.Mute, 4), (special_keys.CONTROL.Next, None)]
 )
 def test_KeysArrayV4_index(key, index):
     keysarray = hidpp20.KeysArrayV4(device_standard, 7)

@@ -11,7 +11,7 @@ def test_read_register(device_hidpp10):
         register=Registers.BATTERY_STATUS,
     )
 
-    assert result == bytes.fromhex("666666")
+    assert result == hidpp10_constants.NotificationFlag(int("000900", 16))
 
 
 def test_set_notification_flags(mocker, device_hidpp10):

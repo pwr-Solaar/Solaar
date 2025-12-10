@@ -54,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.8, 3.13]
       fail-fast: false
 
     steps:
@@ -69,12 +69,15 @@ jobs:
     - name: Set up macOS dependencies
       run: |
         make install_brew
+    - name: Add Homebrew's library directory to dyld search path
+      run: |
+        echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$DYLD_FALLBACK_LIBRARY_PATH" >> $GITHUB_ENV
     - name: Install Python dependencies
       run: |
         make install_pip PIP_ARGS='.["test"]'
     - name: Run tests on macOS
       run: |
-        export DYLD_LIBRARY_PATH=$(brew --prefix hidapi)/lib:$DYLD_LIBRARY_PATH && pytest --cov --cov-report=xml
+        pytest --cov --cov-report=xml
     - name: Upload coverage to Codecov
       if: github.ref == 'refs/heads/master'
       uses: codecov/codecov-action@v4.5.0

@@ -1118,7 +1118,12 @@ class Device(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        return device.unitId == self.devID or device.serial == self.devID
+        return (
+            device.unitId == self.devID
+            or device.serial == self.devID
+            or device.codename == self.devID
+            or device.name == self.devID
+        )
 
     def data(self):
         return {"Device": self.devID}
@@ -1316,17 +1321,17 @@ class MouseClick(Action):
                 self.count = count
             elif warn:
                 logger.warning(
-                    "rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE",
+                    "rule MouseClick action: argument %s should be an integer or click, depress, or release",
                     count,
                 )
                 self.count = 1
 
     def __str__(self):
-        return f"MouseClick: {self.button} ({int(self.count)})"
+        return f"MouseClick: {self.button} ({str(self.count)})"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
-            logger.info(f"MouseClick action: {int(self.count)} {self.button}")
+            logger.info(f"MouseClick action: {str(self.count)} {self.button}")
         if self.button and self.count:
             click(buttons[self.button], self.count)
         time.sleep(0.01)
@@ -1494,7 +1499,7 @@ def key_is_down(key: NamedInt) -> bool:
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("evaluating rules on %s", notification)
+        logger.debug("evaluating rules on %s %s", feature, notification)
     rules.evaluate(feature, notification, device, True)
 
 

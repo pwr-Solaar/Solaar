@@ -1,3 +1,109 @@
+# 1.1.17
+
+* Add dark icons
+* Permit onboard profiles version 5
+* Update Russian and Polish translations
+* Add onboard profiles warning to sensitivity tooltip
+* Better error messages for solaar profile
+* Remove Solaar name for mice with WPID 4008
+* Prevent lock failure when showing debug messages
+* Replace color picker (#3028)
+* Add setting for HAPTIC feature
+* Add setting to adjust force needed for force-sensing buttons
+* Expand new settings type
+* Add new settings type for structure-backed setting
+* Use PATH instead of hardcoded absolute paths (#3014)
+* Add scroll ratchet force setting
+* Fix debug messages for MouseClick rule
+* Improve debug message for rule evaluation
+* App wrapper and launch agent scripts for MacOS
+* Ignore hidden features
+* Don't pop up window in response to ADC changes
+* Update bug report template
+* Fixed malformed doc file by adding closing tag
+* Fix error in low-level request for device with no recevier
+* Update documentation files
+
+# 1.1.16
+
+* Add new flags for reprogrammable keys feature
+* Correctly handle missing battery feature
+
+# 1.1.15
+
+* Correctly re-raise permissions exception
+* Add several new special keys and tasks
+* Update several translations
+* Center labels and remove buggy entry resizing logic
+* Add shape keys from Key POP Icon
+* Device and Action rule conditions match on codename and name
+* Fix listing hidpp10 devices - bytes vs string concatenation (#2856)
+* Add present flag, unset when internal error occurs, set when notification appears
+* Pause setting up features when error occurs; use ADC message to signal connection and disconnection
+* Fix listing of hidpp10 peripherals
+* Complete DEVICE_FEATURES to DeviceFeature transition for hidpp10 devices
+* Fix NOTIFICATION_FLAG to NotificationFlag transition leftovers
+* Fix github workflow stopping all matrix jobs when one of them fails
+* Fix ubuntu github CI
+* Update index.md
+* Python documentation appears to be broken so don't set it up
+* Improve documentation on onboard profiles
+* Use correct LOD values for extended adjustable dpi
+* Better support RGB Effects - not readable
+* Fix crash when asking for help about config
+* Fix error when updating ChoiceControlBig box
+* Add uninstallation docs
+* Handle unknown power switch locations again
+* Correctly handle selection of [empty] in rule editor
+* Handle `HIDError` in `hidapi.hidapi_impl._match()` (#2804)
+* Give ghost devices a path
+* Guard against typeerror when setting the value of a control box
+* Recover from errors in ping
+* Replace spaces by underscores when looking up features
+* Rewrote string concatenation/format with f strings
+* Fix logo not showing in about dialog box
+* Make typing-extensions dependency mandatory
+* Properly ignore unsupported locale
+* hidapi: skip unsupported devices and handle exception on open
+* Ignore macOS junk files and pipenv config
+* Fix ui desktop notifications test
+* hidpp20: Remove dependency to NamedInts
+* Estimate accurate battery level for some rechargable devices (#2745)
+* Upgrade desktop notifications tests to take notifications availability into account
+* Update tests to run on Python 3.13
+* Remove outdated logger enabled checks
+* Introduce GTK signal types
+* Introduce error types
+* Remove alias for SupportedFeature
+* Refactor process_device_notification
+* Refactor process_receiver_notification
+* Refactor receiver event handling
+* Introduce custom logger
+* Refactor notifications
+* Rename variable to full name notification
+* Test notifications
+* Test extraction of serial and max. devices
+* Refactor extraction of serial and max. devices
+* macOS: Fix int.from_bytes, int.to_bytes for show.py
+* macOS: Remove udev rule warning
+* macOS: Add support for Bluetooth devices
+* Add back and forward mouseclick actions
+* Speedup lookup of known receivers
+* Refactor device filtering
+* Reorder private functions and variable definitions
+* Turn filter_products_of_interest into a public function
+* Improve tests of known receivers
+* Refactor: Remove NamedInts and move enums where used
+* Add docstrings and type hints
+* Enforce rules on RuleComponentUI subclasses
+* Simplify settings UI class
+* Remove diversion alias
+* Refactor: Convert Kind to IntEnum
+* Split up huge settings module
+* Remove Python 2 specific path handling
+* Delete logging temp file on exit
+* Update Swedish translation
+
 # 1.1.14
 
 * Handle fake feature enums in show
