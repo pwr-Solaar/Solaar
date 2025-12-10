@@ -56,12 +56,12 @@ Bluetooth product ID.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
 
-For Unifying receivers, pairing adds a new paired device, but
+For Unifying and Bolt receivers, pairing adds a new paired device, but
 only if there is an open slot on the receiver. So these receivers need to
 be able to unpair devices that they have been paired with or else they will
-not have any open slots for pairing. Some other receivers, like the
-Nano receiver with USB ID `046d:c534`, can only pair with particular kinds of
-devices and pairing a new device replaces whatever device of that kind was
+not have any open slots for pairing. Some Nano and Lightspeed receivers, like the
+Nano receiver with USB ID `046d:c534`, can only pair with one keyboard and one mouse
+and pairing a new device replaces whatever device of that kind was
 previously paired to the receiver. These receivers cannot unpair. Further,
 some receivers can pair an unlimited number of times but others can only
 pair a limited number of times.
@@ -69,13 +69,15 @@ pair a limited number of times.
 Bolt receivers add an authentication phase to pairing,
 where the user has type a passcode or click some buttons to authenticate the device.
 
-Only some connections between receivers and devices are possible. In should
+Only some connections between receivers and devices are possible. It should
 be possible to connect any device with a Unifying logo on it to any receiver
-with a Unifying logo on it. Receivers without the Unifying logo probably
-can connect only to the kind of devices they were bought with and devices
-without the Unifying logo can probably only connect to the kind of receiver
-that they were bought with.
+with a Unifying logo on it and any device with a Bolt logo on it to any receiver
+with a Bolt logo on it.
 
+Many receivers without the Unifying or Bolt logo
+can connect only to the model of devices they were bought with and many devices
+without the Unifying or Bolt logo can only connect to a receiver
+that matches the one they were bought with.
 
 ## Device Settings
 
