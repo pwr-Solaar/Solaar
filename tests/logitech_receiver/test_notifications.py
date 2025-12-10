@@ -58,7 +58,7 @@ def test_process_receiver_notification(sub_id, notification_data, expected_error
     result = notifications.process_receiver_notification(receiver, notification)
 
     assert result
-    assert receiver.pairing.error == (None if expected_error is None else expected_error.name)
+    assert receiver.pairing.error == (None if expected_error is None else expected_error.label)
     assert receiver.pairing.new_device is expected_new_device
 
 

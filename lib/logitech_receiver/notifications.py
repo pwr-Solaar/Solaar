@@ -454,7 +454,7 @@ def handle_discovery_status(receiver: Receiver, notification: HIDPPNotification)
         receiver.pairing.device_passkey = None
         discover_error = ord(notification.data[:1])
         if discover_error:
-            receiver.pairing.error = discover_string = hidpp10_constants.BoltPairingError(discover_error).name
+            receiver.pairing.error = discover_string = hidpp10_constants.BoltPairingError(discover_error).label
             logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
         receiver.changed(reason=reason)
         return True
@@ -496,7 +496,7 @@ def handle_pairing_status(receiver: Receiver, notification: HIDPPNotification) -
         elif notification.address == 0x02 and not pair_error:
             receiver.pairing.new_device = receiver.register_new_device(notification.data[7])
         if pair_error:
-            receiver.pairing.error = error_string = hidpp10_constants.BoltPairingError(pair_error).name
+            receiver.pairing.error = error_string = hidpp10_constants.BoltPairingError(pair_error).label
             receiver.pairing.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         receiver.changed(reason=reason)
