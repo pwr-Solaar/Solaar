@@ -156,10 +156,18 @@ class PairingError(IntEnum):
     TOO_MANY_DEVICES = 0x03
     SEQUENCE_TIMEOUT = 0x06
 
+    @property
+    def label(self) -> str:
+        return self.name.lower().replace("_", " ")
+
 
 class BoltPairingError(IntEnum):
     DEVICE_TIMEOUT = 0x01
     FAILED = 0x02
+
+    @property
+    def label(self) -> str:
+        return self.name.lower().replace("_", " ")
 
 
 class Registers(IntEnum):
