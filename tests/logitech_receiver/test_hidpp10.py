@@ -279,17 +279,19 @@ def test_set_notification_flags_bad(mocker):
     "flag_bits, expected_names",
     [
         (None, ""),
-        (0x0, "none"),
-        (0x009020, "multi touch\n               unknown:008020"),
-        (0x080000, "mouse extra buttons"),
+        (hidpp10_constants.NotificationFlag(0x0), "none"),
+        (hidpp10_constants.NotificationFlag(0x001000), "multi touch"),
+        (hidpp10_constants.NotificationFlag(0x080000), "mouse extra buttons"),
         (
-            0x080000 + 0x000400,
+            hidpp10_constants.NotificationFlag(0x080400),
             ("link quality\n               mouse extra buttons"),
         ),
     ],
 )
 def test_notification_flag_str(flag_bits, expected_names):
-    flag_names = hidpp10_constants.flags_to_str(flag_bits, fallback="none")
+    flag_names = hidpp10_constants.flags_to_str(
+        hidpp10_constants.NotificationFlag(flag_bits) if flag_bits is not None else None, fallback="none"
+    )
 
     assert flag_names == expected_names
 
