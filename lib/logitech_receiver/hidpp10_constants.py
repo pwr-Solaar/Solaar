@@ -89,23 +89,9 @@ class NotificationFlag(Flag):
     """
 
     @classmethod
-    def flag_names(cls, flag_bits: int) -> List[str]:
+    def flag_names(cls, flags) -> List[str]:
         """Extract the names of the flags from the integer."""
-        indexed = {item.value: item.name for item in cls}
-
-        flag_names = []
-        unknown_bits = flag_bits
-        for k in indexed:
-            # Ensure that the key (flag value) is a power of 2 (a single bit flag)
-            assert bin(k).count("1") == 1
-            if k & flag_bits == k:
-                unknown_bits &= ~k
-                flag_names.append(indexed[k].replace("_", " ").lower())
-
-        # Yield any remaining unknown bits
-        if unknown_bits != 0:
-            flag_names.append(f"unknown:{unknown_bits:06X}")
-        return flag_names
+        return flags.name.replace("_", " ").lower().split("|")
 
     NUMPAD_NUMERICAL_KEYS = 0x800000
     F_LOCK_STATUS = 0x400000
@@ -125,13 +111,13 @@ class NotificationFlag(Flag):
     THREED_GESTURE = 0x000001
 
 
-def flags_to_str(flag_bits: int | None, fallback: str) -> str:
+def flags_to_str(flags, fallback: str) -> str:
     flag_names = []
-    if flag_bits is not None:
-        if flag_bits == 0:
+    if flags is not None:
+        if flags.value == 0:
             flag_names = (fallback,)
         else:
-            flag_names = NotificationFlag.flag_names(flag_bits)
+            flag_names = NotificationFlag.flag_names(flags)
     return f"\n{' ':15}".join(sorted(flag_names))
 
 

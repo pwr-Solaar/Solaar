@@ -77,7 +77,7 @@ class SolaarListener(listener.EventsListener):
     def has_started(self):
         logger.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
         nfs = self.receiver.enable_connection_notifications()
-        if not self.receiver.isDevice and not ((nfs if nfs else 0) & hidpp10_constants.NotificationFlag.WIRELESS.value):
+        if not self.receiver.isDevice and (not nfs or not (nfs & hidpp10_constants.NotificationFlag.WIRELESS)):
             logger.warning(
                 "Receiver on %s might not support connection notifications, GUI might not show its devices",
                 self.receiver.path,
