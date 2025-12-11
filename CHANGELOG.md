@@ -1,3 +1,7 @@
+# 1.1.18
+
+* Fix crash when showing notification flags
+
 # 1.1.17
 
 * Add dark icons
