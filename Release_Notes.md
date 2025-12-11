@@ -1,5 +1,9 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.18
+
+* Solaar is only guaranteed to work in Python 3.13 or later.
+
 ## Version 1.1.17
 
 * Several new features have been added related to the MX Master 4
