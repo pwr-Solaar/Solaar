@@ -210,7 +210,8 @@ def run(receivers, args, _find_receiver, find_device):
     if remote:
         argl = ["config", dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
-        application.run(yaml.safe_dump(argl))
+        args = yaml.dump(argl)
+        application.run(args)
     else:
         if dev.persister and setting.persist:
             dev.persister[setting.name] = setting._value
@@ -278,8 +279,6 @@ def set(dev, setting: SettingsProtocol, args, save):
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, NamedInts) else to_int(key)
-        print("S", args.extra2, key, type(all_keys), ikey)
-        print("SS", args)
         if args.extra2 is None or to_int(args.extra2) is None:
             raise Exception(f"{setting.name}: setting needs an integer value, not {args.extra2}")
         if not setting._value:  # ensure that there are values to look through
@@ -308,8 +307,14 @@ def set(dev, setting: SettingsProtocol, args, save):
         message = f"Setting {setting.name} of {dev.name} key {key} to {value}"
         result = setting.write_key_value(key, value, save=save)
 
+    elif setting.kind == settings.Kind.HETERO:
+        value = yaml.safe_load(args.value_key)
+        args.value_key = value
+        message = f"Setting {setting.name} of {dev.name} to {value}"
+        result = setting.write(value, save=save)
+
     else:
-        print("KIND", setting.kind)
+        print(f"Setting {setting.name}, with kind {setting.kind.name}, not implemented")
         raise Exception("NotImplemented")
 
     return result, message, value

@@ -124,6 +124,7 @@ def _lightspeed_receiver(product_id: int) -> dict:
         "receiver_kind": "lightspeed",
         "name": _("Lightspeed Receiver"),
         "may_unpair": False,
+        "re_pairs": True,
     }
 
 

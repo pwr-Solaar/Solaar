@@ -1640,7 +1640,7 @@ _LEDP = hidpp20.LEDParam
 
 # an LED Zone has an index, a set of possible LED effects, and an LED effect setting
 class LEDZoneSetting(settings.Setting):
-    name = "led_zone_"
+    name = "led_zone_"  # the trailing underscore signals that this setting creates other settings
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.COLOR_LED_EFFECTS
@@ -1688,7 +1688,7 @@ class RGBControl(settings.Setting):
 
 
 class RGBEffectSetting(LEDZoneSetting):
-    name = "rgb_zone_"
+    name = "rgb_zone_"  # the trailing underscore signals that this setting creates other settings
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.RGB_EFFECTS
@@ -2100,10 +2100,18 @@ def check_feature_settings(device, already_known) -> bool:
 
 def check_feature_setting(device, setting_name: str) -> settings.Setting | None:
     for sclass in SETTINGS:
-        if sclass.feature and sclass.name == setting_name and device.features:
+        if (
+            sclass.feature
+            and device.features
+            and (sclass.name == setting_name or sclass.name.endswith("_") and setting_name.startswith(sclass.name))
+        ):
             try:
                 setting = check_feature(device, sclass)
             except Exception:
                 return None
-            if setting:
+            if isinstance(setting, list):
+                for s in setting:
+                    if s.name == setting_name:
+                        return s
+            elif setting:
                 return setting
