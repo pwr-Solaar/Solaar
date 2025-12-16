@@ -124,6 +124,7 @@ def _lightspeed_receiver(product_id: int) -> dict:
         "receiver_kind": "lightspeed",
         "name": _("Lightspeed Receiver"),
         "may_unpair": False,
+        "re_pairs": True,
     }
 
 
@@ -174,6 +175,7 @@ LIGHTSPEED_RECEIVER_C53F = _lightspeed_receiver(0xC53F)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xC541)
 LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xC545)
 LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xC547)
+LIGHTSPEED_RECEIVER_C54D = _lightspeed_receiver(0xC54D)
 
 # EX100 old style receiver pre-unifying protocol
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xC517)
@@ -202,6 +204,7 @@ KNOWN_RECEIVERS = {
     0xC541: LIGHTSPEED_RECEIVER_C541,
     0xC545: LIGHTSPEED_RECEIVER_C545,
     0xC547: LIGHTSPEED_RECEIVER_C547,
+    0xC54D: LIGHTSPEED_RECEIVER_C54D,
     0xC517: EX100_27MHZ_RECEIVER_C517,
 }
 
