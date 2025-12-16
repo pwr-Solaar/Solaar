@@ -231,8 +231,16 @@ yaml.add_representer(NamedInt, named_int_representer)
 # So new entries are not created for unseen off-line receiver-connected devices
 def persister(device):
     def match(wpid, serial, modelId, unitId, c):
-        return (wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL)) or (
-            modelId and modelId == c.get(_KEY_MODEL_ID) and unitId and unitId == c.get(_KEY_UNIT_ID)
+        return (
+            (wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL))
+            or (modelId and modelId == c.get(_KEY_MODEL_ID) and unitId and unitId == c.get(_KEY_UNIT_ID))
+            or (
+                c.get(_KEY_WPID) is None
+                and c.get(_KEY_SERIAL) is None
+                and c.get(_KEY_UNIT_ID) is None
+                and modelId
+                and modelId == c.get(_KEY_MODEL_ID)
+            )
         )
 
     with configuration_lock:
@@ -240,8 +248,8 @@ def persister(device):
             _load()
         entry = None
         # some devices report modelId and unitId as zero so use name and serial for them
-        modelId = device.modelId if device.modelId != "000000000000" else device._name if device.modelId else None
-        unitId = device.unitId if device.modelId != "000000000000" else device._serial if device.unitId else None
+        modelId = device.modelId if device.modelId != "000000000000" else device._name if device._name else None
+        unitId = device.unitId if device.unitId != "00000000" else device._serial if device._serial else None
         for c in _config:
             if isinstance(c, _DeviceEntry) and match(device.wpid, device._serial, modelId, unitId, c):
                 entry = c
