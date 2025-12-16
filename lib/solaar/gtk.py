@@ -58,7 +58,10 @@ temp = tempfile.NamedTemporaryFile(prefix="Solaar_", mode="w", delete=True)
 
 def create_parser():
     arg_parser = argparse.ArgumentParser(
-        prog=NAME.lower(), epilog="For more information see https://pwr-solaar.github.io/Solaar"
+        prog=NAME.lower(),
+        description="Solaar is a program to manage many Logitech devices, "
+        "changing how they operate and maintaining the changes whenever the device connects.",
+        epilog="For more information see https://pwr-solaar.github.io/Solaar",
     )
     arg_parser.add_argument(
         "-d",
@@ -73,7 +76,7 @@ def create_parser():
         action="store",
         dest="hidraw_path",
         metavar="PATH",
-        help="unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2",
+        help="device or receiver path to use if needed. Example: /dev/hidraw2",
     )
     arg_parser.add_argument(
         "--restart-on-wake-up",

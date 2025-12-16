@@ -39,7 +39,7 @@ def _create_parser():
     )
     subparsers = parser.add_subparsers(title="actions", help="command-line action to perform")
 
-    sp = subparsers.add_parser("show", help="show information about devices")
+    sp = subparsers.add_parser("show", description="Show information about device or all devices.")
     sp.add_argument(
         "device",
         nargs="?",
@@ -49,7 +49,7 @@ def _create_parser():
     )
     sp.set_defaults(action="show")
 
-    sp = subparsers.add_parser("probe", help="probe a receiver (debugging use only)")
+    sp = subparsers.add_parser("probe", description="Probe a receiver (debugging use only).")
     sp.add_argument(
         "receiver", nargs="?", help="select receiver by name substring or serial number when more than one is present"
     )
@@ -57,25 +57,26 @@ def _create_parser():
 
     sp = subparsers.add_parser(
         "profiles",
-        help="read or write onboard profiles",
+        description="Print or load YAML dump of profiles.",
         epilog="Only works on active devices.",
     )
     sp.add_argument(
         "device",
-        help="device to read or write profiles of; may be a device number (1..6), a serial number, "
-        "a substring of a device's name",
+        help="device to read or load profiles; may be a device number (1..6), a serial number, "
+        "or a substring of a device's name",
     )
-    sp.add_argument("profiles", nargs="?", help="file containing YAML dump of profiles")
+    sp.add_argument("profiles", nargs="?", help="file containing YAML dump of profiles to load")
     sp.set_defaults(action="profiles")
 
     sp = subparsers.add_parser(
         "config",
-        help="read/write device-specific settings",
+        description="Print or load device-specific settings.  Only some settings can be loaded.  "
+        "Loading complex settings uses the same syntax as in ~/.config/solaar/config.yaml",
         epilog="Please note that configuration only works on active devices.",
     )
     sp.add_argument(
         "device",
-        help="device to configure; may be a device number (1..6), a serial number, " "or a substring of a device's name",
+        help="device to configure; may be a device number (1..6), a serial number, or a substring of a device's name",
     )
     sp.add_argument("setting", nargs="?", help="device-specific setting; leave empty to list available settings")
     sp.add_argument("value_key", nargs="?", help="new value for the setting or key for keyed settings")
@@ -85,7 +86,7 @@ def _create_parser():
 
     sp = subparsers.add_parser(
         "pair",
-        help="pair a new device",
+        description="Pair a new device with a receiver.  The device has to be compatible with the receiver.",
         epilog="The Logitech Unifying Receiver supports up to 6 paired devices at the same time.",
     )
     sp.add_argument(
@@ -93,7 +94,7 @@ def _create_parser():
     )
     sp.set_defaults(action="pair")
 
-    sp = subparsers.add_parser("unpair", help="unpair a device")
+    sp = subparsers.add_parser("unpair", description="Unpair a device from its receiver.  Not all receivers allow unpairing.")
     sp.add_argument(
         "device",
         help="device to unpair; may be a device number (1..6), a serial number, " "or a substring of a device's name.",
