@@ -135,10 +135,10 @@ def _open(args):
         if vid == LOGITECH_VENDOR_ID:
             return {"vid": vid}
 
-    device = args.device
-    if args.hidpp and not device:
+    device = args.path
+    if not device:
         for d in hidapi.enumerate(matchfn):
-            if d.driver == "logitech-djreceiver":
+            if (d.hidpp_short or d.hidpp_long) and (args.usb is None or args.usb.lower() == d.product_id.lower()):
                 device = d.path
                 break
         if not device:
@@ -146,13 +146,12 @@ def _open(args):
     if not device:
         sys.exit("!! Device path required.")
 
-    print(".. Opening device", device)
     handle = hidapi.open_path(device)
     if not handle:
         sys.exit(f"!! Failed to open {device}, aborting.")
     print(
-        ".. Opened handle %r, vendor %r product %r serial %r."
-        % (handle, hidapi.get_manufacturer(handle), hidapi.get_product(handle), hidapi.get_serial(handle))
+        ".. Opened device %r, vendor %r product %r serial %r."
+        % (device, hidapi.get_manufacturer(handle), hidapi.get_product(handle), hidapi.get_serial(handle))
     )
     if args.hidpp:
         if hidapi.get_manufacturer(handle) is not None and hidapi.get_manufacturer(handle) != b"Logitech":
@@ -170,18 +169,27 @@ def _parse_arguments():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--history", help="history file (default ~/.hidconsole-history)")
     arg_parser.add_argument("--hidpp", action="store_true", help="ensure input data is a valid HID++ request")
-    arg_parser.add_argument(
-        "device",
-        nargs="?",
-        help="linux device to connect to (/dev/hidrawX); "
-        "may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver",
-    )
+    arg_parser.add_argument("command", nargs="?", help="command to send (otherwise get commands from input)")
+    group = arg_parser.add_mutually_exclusive_group()
+    group.add_argument("-p", "--path", help="HID raw device to connect to (/dev/hidrawX); ")
+    group.add_argument("-u", "--usb", help="USB model of device to connect to (XXXX)")
     return arg_parser.parse_args()
 
 
 def main():
     args = _parse_arguments()
     handle = _open(args)
+
+    if args.command:  # send a command
+        data = _validate_input(args.command, args.hidpp)
+        if data:
+            hidapi.write(handle, data)
+            reply = hidapi.read(handle, 128, 1)
+            if reply:
+                hexs = strhex(reply)
+                s = "[%s %s %s %s] %s" % (hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
+                print(s)
+        exit()
 
     if interactive:
         print(".. Press ^C/^D to exit, or type hex bytes to write to the device.")
@@ -232,7 +240,6 @@ def main():
             time.sleep(1)
 
     finally:
-        print(f".. Closing handle {handle!r}")
         hidapi.close(handle)
         if interactive:
             readline.write_history_file(args.history)
