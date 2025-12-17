@@ -1134,7 +1134,7 @@ msgstr "Stäng av på några minuter (0 för aldrig)."
 
 #: lib/logitech_receiver/settings_templates.py:1584
 msgid "Brightness Control"
-msgstr "Ljusstyrka"
+msgstr "Ljusstyrkekontroll"
 
 #: lib/logitech_receiver/settings_templates.py:1585
 msgid "Control overall brightness"
