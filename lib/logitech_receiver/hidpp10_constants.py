@@ -112,7 +112,6 @@ class NotificationFlag(Flag):
 
 
 def flags_to_str(flags, fallback: str) -> str:
-    print("FLAGS", type(flags), flags, fallback)
     flag_names = []
     if flags is not None and flags is not False:
         if flags.value == 0:
