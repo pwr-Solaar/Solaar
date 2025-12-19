@@ -136,9 +136,10 @@ def _open(args):
             return {"vid": vid}
 
     device = args.path
+    d = None
     if not device:
         for d in hidapi.enumerate(matchfn):
-            if (d.hidpp_short or d.hidpp_long) and (args.usb is None or args.usb.lower() == d.product_id.lower()):
+            if (d.hidpp_short or d.hidpp_long) and (args.id is None or args.id.lower() == d.product_id.lower()):
                 device = d.path
                 break
         if not device:
@@ -151,7 +152,12 @@ def _open(args):
         sys.exit(f"!! Failed to open {device}, aborting.")
     print(
         ".. Opened device %r, vendor %r product %r serial %r."
-        % (device, hidapi.get_manufacturer(handle), hidapi.get_product(handle), hidapi.get_serial(handle))
+        % (
+            device,
+            hidapi.get_manufacturer(handle) or d.vendor_id if d else None,
+            hidapi.get_product(handle) or d.product_id if d else None,
+            hidapi.get_serial(handle),
+        )
     )
     if args.hidpp:
         if hidapi.get_manufacturer(handle) is not None and hidapi.get_manufacturer(handle) != b"Logitech":
@@ -172,7 +178,7 @@ def _parse_arguments():
     arg_parser.add_argument("command", nargs="?", help="command to send (otherwise get commands from input)")
     group = arg_parser.add_mutually_exclusive_group()
     group.add_argument("-p", "--path", help="HID raw device to connect to (/dev/hidrawX); ")
-    group.add_argument("-u", "--usb", help="USB model of device to connect to (XXXX)")
+    group.add_argument("-i", "--id", help="product ID of device to connect to (XXXX)")
     return arg_parser.parse_args()
 
 
