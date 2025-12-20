@@ -25,8 +25,8 @@ install_apt_python3.13:
 	sudo apt install libdbus-1-dev libglib2.0-dev libgtk-3-dev libgirepository-2.0-dev gobject-introspection
 
 install_dnf:
-	@echo "Installing Solaar dependencies via dn"
-	sudo dnf install gtk3 python3-gobject python3-dbus python3-pyudev python3-psutil python3-xlib python3-yaml
+	@echo "Installing Solaar dependencies via dnf"
+	sudo dnf install gtk3 python3-devel python3-gobject python3-dbus python3-pyudev python3-psutil python3-xlib python3-yaml
 
 install_brew:
 	@echo "Installing Solaar dependencies via brew"
