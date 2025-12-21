@@ -23,6 +23,8 @@ assignees: ''
 - Distribution:
 - Kernel version (ex. `uname -srmo`):
 - Output of `solaar show`:
+<!-- To run `solaar show` in 1.1.18 you have to clone Solaar from this repository
+  and `run bin/solaar show` from the download directory. -->
 
 <details>
 
