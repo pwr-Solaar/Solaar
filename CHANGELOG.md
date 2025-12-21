@@ -1,3 +1,16 @@
+# 1.1.19rc1
+
+* Remove test that doesn't work in older Pythons
+* Update help messages for CLI commands
+* Allow solaar config  to change LED settings
+* Add python3-devel to install-dnf in Makefile
+* hidconsole can send an HID command non-interactively
+* Add info about new lightspeed receiver
+* Update Swedish and zh_TW translation
+* Fix bug when showing details about direct-connected device
+* Drop testing of Python before 3.13
+* Fix crash in solaar show when showing notification flags. (#3070)
+
 # 1.1.18
 
 * Fix crash when showing notification flags
