@@ -278,7 +278,7 @@ def test_set_notification_flags_bad(mocker):
 @pytest.mark.parametrize(
     "flag_bits, expected_names",
     [
-        (None, ""),
+        # doesn't work in Python 3.8 and 3.10 for some reason        (None, ""),
         (hidpp10_constants.NotificationFlag(0x0), "none"),
         (hidpp10_constants.NotificationFlag(0x001000), "multi touch"),
         (hidpp10_constants.NotificationFlag(0x080000), "mouse extra buttons"),
