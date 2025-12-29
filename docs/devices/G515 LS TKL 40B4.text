@@ -1,0 +1,71 @@
+solaar version 1.1.13+dfsg-1
+
+  1: G515 LS TKL
+     Device path  : None
+     WPID         : 40B4
+     Codename     : G515 LS TKL
+     Kind         : keyboard
+     Protocol     : HID++ 4.2
+     Report Rate : 8ms
+     Serial number: 54FEF928
+     Model ID:      B38940B4C355
+     Unit ID:       54FEF928
+                 1: BL2 19.01.B0011
+                 3:
+                 0: MPK 25.01.B0011
+                 3:
+     The power switch is located on the top right corner.
+     Supports 34 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V6
+            Firmware: Bootloader BL2 19.01.B0011 ABD580558692
+            Firmware: Other
+            Firmware: Firmware MPK 25.01.B0011 40B480558692
+            Firmware: Other
+            Unit ID: 54FEF928  Model ID: B38940B4C355  Transport IDs: {'btleid': 'B389', 'wpid': '40B4', 'usbid': 'C355'}
+         3: DEVICE NAME            {0005} V3
+            Name: G515 LS TKL
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+            Configuration: 11000000000000000000000000000000
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: G515 LS TKL
+         7: unknown:0011           {0011} V0
+         8: UNIFIED BATTERY        {1004} V5
+            Battery: 82%, discharging.
+         9: RGB EFFECTS            {8071} V4
+            LED Control (saved): Solaar
+            LED Control        : Solaar
+            LEDs Primary (saved): !LEDEffectSetting {ID: 1, color: 16776960, intensity: 26, period: 2167, ramp: 1, speed: 0}
+            LEDs Primary        : HID++ error {'number': 1, 'request': 2537, 'error': 7, 'params': b'\x00'}
+        10: PER KEY LIGHTING V2    {8081} V0
+            Per-key Lighting (saved): {A:indian red, B:indian red, C:indian red, D:indian red, E:indian red, F:indian red, G:indian red, H:indian red, I:indian red, J:indian red, K:indian red, L:indian red, M:indian red, N:indian red, O:indian red, P:indian red, Q:indian red, R:indian red, S:indian red, T:indian red, U:indian red, V:indian red, W:indian red, X:indian red, Y:indian red, Z:indian red, 1:orange, 2:orange, 3:orange, 4:orange, 5:orange, 6:orange, 7:orange, 8:orange, 9:orange, 0:yellow, ENTER:green, ESC:green, BACKSPACE:red, TAB:yellow, SPACE:yellow, -:indian red, =:indian red, [:indian red, \:indian red, KEY 46:white, ~:indian red, ;:indian red, ':indian red, `:indian red, ,:indian red, .:indian red, /:indian red, CAPS LOCK:red, F1:indian red, F2:indian red, F3:indian red, F4:indian red, F5:indian red, F6:indian red, F7:indian red, F8:indian red, F9:indian red, F10:indian red, F11:indian red, F12:indian red, PRINT:red, SCROLL LOCK:orange, PASTE:indian red, INSERT:green, HOME:indian red, PAGE UP:yellow, DELETE:red, END:indian red, PAGE DOWN:yellow, RIGHT:indian red, LEFT:indian red, DOWN:indian red, UP:indian red, KEY 97:indian red, COMPOSE:white, POWER:white, KEY 100:indian red, KEY 101:red, KEY 102:red, KEY 103:red, LEFT CTRL:indian red, LEFT SHIFT:yellow, LEFT ALT:indian red, LEFT WINDOWS:blue, RIGHT CTRL:indian red, RIGHT SHIFT:yellow, RIGHT ALTGR:blue, RIGHT WINDOWS:indian red, KEY 254:white}
+            Per-key Lighting        : {A:No change, B:No change, C:No change, D:No change, E:No change, F:No change, G:No change, H:No change, I:No change, J:No change, K:No change, L:No change, M:No change, N:No change, O:No change, P:No change, Q:No change, R:No change, S:No change, T:No change, U:No change, V:No change, W:No change, X:No change, Y:No change, Z:No change, 1:No change, 2:No change, 3:No change, 4:No change, 5:No change, 6:No change, 7:No change, 8:No change, 9:No change, 0:No change, ENTER:No change, ESC:No change, BACKSPACE:No change, TAB:No change, SPACE:No change, -:No change, =:No change, [:No change, \:No change, KEY 46:No change, ~:No change, ;:No change, ':No change, `:No change, ,:No change, .:No change, /:No change, CAPS LOCK:No change, F1:No change, F2:No change, F3:No change, F4:No change, F5:No change, F6:No change, F7:No change, F8:No change, F9:No change, F10:No change, F11:No change, F12:No change, PRINT:No change, SCROLL LOCK:No change, PASTE:No change, INSERT:No change, HOME:No change, PAGE UP:No change, DELETE:No change, END:No change, PAGE DOWN:No change, RIGHT:No change, LEFT:No change, DOWN:No change, UP:No change, KEY 97:No change, COMPOSE:No change, POWER:No change, KEY 100:No change, KEY 101:No change, KEY 102:No change, KEY 103:No change, LEFT CTRL:No change, LEFT SHIFT:No change, LEFT ALT:No change, LEFT WINDOWS:No change, RIGHT CTRL:No change, RIGHT SHIFT:No change, RIGHT ALTGR:No change, RIGHT WINDOWS:No change, KEY 254:No change}
+        11: unknown:1B10           {1B10} V0
+        12: unknown:4523           {4523} V1
+        13: KEYBOARD LAYOUT 2      {4540} V1
+        14: BRIGHTNESS CONTROL     {8040} V0
+            Brightness Control (saved): 40
+            Brightness Control        : 40
+        15: unknown:8101           {8101} V0
+        16: unknown:1B05           {1B05} V0
+        17: unknown:8051           {8051} V0
+        18: DFU                    {00D0} V3
+        19: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        20: unknown:1803           {1803} V1    internal, hidden, unknown:000010
+        21: unknown:1807           {1807} V3    internal, hidden, unknown:000010
+        22: unknown:1817           {1817} V0    internal, hidden, unknown:000010
+        23: OOBSTATE               {1805} V0    internal, hidden
+        24: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        25: unknown:1890           {1890} V9    internal, hidden, unknown:000008
+        26: unknown:1891           {1891} V9    internal, hidden, unknown:000008
+        27: unknown:1E00           {1E00} V0    hidden
+        28: unknown:1E02           {1E02} V0    internal, hidden
+        29: unknown:1602           {1602} V0
+        30: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        31: unknown:1861           {1861} V1    internal, hidden, unknown:000010
+        32: unknown:18B0           {18B0} V1    internal, hidden, unknown:000010
+        33: unknown:1801           {1801} V0    internal, hidden, unknown:000010
+     Battery: 82%, discharging.
