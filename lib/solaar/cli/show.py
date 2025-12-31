@@ -153,7 +153,11 @@ def _print_device(dev, num=None):
             else:
                 feature_bytes = feature.to_bytes(2, byteorder="little")
             feature_int = int.from_bytes(feature_bytes, byteorder="little")
-            flags = dev.request(0x0000, feature_bytes)
+            try:
+                flags = dev.request(0x0000, feature_bytes)
+            except Exception:
+                print("        %2d: %-22s {%04X} - can't retrieve" % (index, feature, feature_int))
+                continue
             flags = 0 if flags is None else ord(flags[1:2])
             flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
             version = dev.features.get_feature_version(feature_int)
