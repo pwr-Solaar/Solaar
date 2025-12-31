@@ -216,7 +216,10 @@ class Device:
     @property
     def protocol(self):
         if not self._protocol:
-            self.ping()
+            try:
+                self.ping()
+            except exceptions.NoSuchDevice:
+                logger.warning("device %s inaccessible - no protocol set", self)
         return self._protocol or 0
 
     @property
