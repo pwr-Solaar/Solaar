@@ -5,9 +5,9 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: solaar 1.1.17rc3\n"
+msgstr  "Project-Id-Version: solaar 1.1.19\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2025-12-01 21:43+0300\n"
+        "POT-Creation-Date: 2026-01-08 19:21+0100\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr  ""
 msgid   "Lightspeed Receiver"
 msgstr  ""
 
-#: lib/logitech_receiver/base_usb.py:135
+#: lib/logitech_receiver/base_usb.py:136
 msgid   "EX100 Receiver 27 Mhz"
 msgstr  ""
 
@@ -354,20 +354,20 @@ msgid   "ADC measurement notification"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:428
-#: lib/logitech_receiver/notifications.py:483
+#: lib/logitech_receiver/notifications.py:484
 msgid   "pairing lock is closed"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:428
-#: lib/logitech_receiver/notifications.py:483
+#: lib/logitech_receiver/notifications.py:484
 msgid   "pairing lock is open"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:446
+#: lib/logitech_receiver/notifications.py:447
 msgid   "discovery lock is closed"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:446
+#: lib/logitech_receiver/notifications.py:447
 msgid   "discovery lock is open"
 msgstr  ""
 
