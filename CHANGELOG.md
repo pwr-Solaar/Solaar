@@ -1,5 +1,6 @@
-# 1.1.19rc1
+# 1.1.19
 
+* New Georgian translation
 * Remove test that doesn't work in older Pythons
 * Update help messages for CLI commands
 * Allow solaar config  to change LED settings
