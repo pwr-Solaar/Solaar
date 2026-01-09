@@ -1,0 +1,79 @@
+solaar version 1.1.19
+
+  1: Signature M550
+     Device path  : None
+     WPID         : B02B
+     Codename     : Logi M550
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Serial number: D074434E
+     Model ID:      B02B00000000
+     Unit ID:       D074434E
+                 1: BL1 39.01.B0013
+                 0: RBM 17.01.B0013
+                 3:
+     The power switch is located on the (unknown).
+     Supports 30 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: 1 BL1 39.01.B0013 B02BB0706FCD
+            Firmware: 0 RBM 17.01.B0013 B02BB0706FCD
+            Firmware: 3
+            Unit ID: D074434E  Model ID: B02B00000000  Transport IDs: {'btleid': 'B02B'}
+         3: DEVICE NAME            {0005} V0
+            Name: Signature M550
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+            Configuration: 11000000000000000000000000000000
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: Logi M550
+         7: UNIFIED BATTERY        {1004} V3
+            Battery: 35%, BatteryStatus.DISCHARGING.
+         8: REPROG CONTROLS V4     {1B04} V5
+            Key/Button Actions (saved): {Middle Button:Mouse Middle Button}
+            Key/Button Actions        : {Middle Button:Mouse Middle Button}
+            Key/Button Diversion (saved): {Middle Button:Regular}
+            Key/Button Diversion        : {Middle Button:Regular}
+         9: HOSTS INFO             {1815} V2
+            Host 0 (paired): mst
+        10: XY STATS               {2250} V1
+        11: LOWRES WHEEL           {2130} V0
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        12: ADJUSTABLE DPI         {2201} V2
+            Sensitivity (DPI) (saved): 1000
+            Sensitivity (DPI)        : 1000
+        13: DFUCONTROL             {00C3} V0
+        14: DEVICE RESET           {1802} V0
+        15: unknown:1803           {0318} V0    internal, hidden, unknown:000010
+        16: CONFIG DEVICE PROPS    {1806} V8
+        17: unknown:1816           {1618} V0    internal, hidden, unknown:000010
+        18: OOBSTATE               {1805} V0
+        19: unknown:1830           {3018} V0    internal, hidden, unknown:000010
+        20: unknown:1891           {9118} V0    internal, hidden, unknown:000008
+        21: unknown:18A1           {A118} V0    internal, hidden, unknown:000010
+        22: unknown:1E00           {001E} V0    hidden
+        23: unknown:1E02           {021E} V0    internal, hidden
+        24: unknown:1E22           {221E} V0    internal, hidden, unknown:000010
+        25: unknown:1602           {0216} V0
+        26: unknown:1EB0           {B01E} V0    internal, hidden, unknown:000010
+        27: unknown:1861           {6118} V0    internal, hidden, unknown:000010
+        28: unknown:18B1           {B118} V0    internal, hidden, unknown:000010
+        29: unknown:920A           {0A92} V0    internal, hidden, unknown:000010
+     Has 4 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             analytics_key_events, mse, pos:0, group:1, group mask:empty
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             analytics_key_events, mse, pos:0, group:1, group mask:empty
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             analytics_key_events, raw_xy, divertable, reprogrammable, mse, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             force_raw_xy, raw_xy, virtual, divertable, pos:0, group:3, group mask:empty
+             reporting: default
+     Battery: 35%, BatteryStatus.DISCHARGING.

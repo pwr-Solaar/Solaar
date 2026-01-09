@@ -79,33 +79,36 @@ def run(receivers, args, find_receiver, _ignore):
         name = receiver.pairing.device_name
         authentication = receiver.pairing.device_authentication
         kind = receiver.pairing.device_kind
-        print(f"Bolt Pairing: discovered {name}")
-        receiver.pair_device(
-            address=address,
-            authentication=authentication,
-            entropy=20 if kind == hidpp10_constants.DEVICE_KIND.keyboard else 10,
-        )
-        pairing_start = time()
-        patience = 5  # the discovering notification may come slightly later, so be patient
-        while receiver.pairing.lock_open or time() - pairing_start < patience:
-            if receiver.pairing.device_passkey:
-                break
-            n = base.read(receiver.handle)
-            n = base.make_notification(*n) if n else None
-            if n:
-                receiver.handle.notifications_hook(n)
-        if authentication & 0x01:
-            print(f"Bolt Pairing: type passkey {receiver.pairing.device_passkey} and then press the enter key")
+        if authentication is None:  # no compatible device stepped forward
+            print("No Bolt-compatible device requested pairing.")
         else:
-            passkey = f"{int(receiver.pairing.device_passkey):010b}"
-            passkey = ", ".join(["right" if bit == "1" else "left" for bit in passkey])
-            print(f"Bolt Pairing: press {passkey}")
-            print("and then press left and right buttons simultaneously")
-        while receiver.pairing.lock_open:
-            n = base.read(receiver.handle)
-            n = base.make_notification(*n) if n else None
-            if n:
-                receiver.handle.notifications_hook(n)
+            print(f"Bolt Pairing: discovered {name}")
+            receiver.pair_device(
+                address=address,
+                authentication=authentication,
+                entropy=20 if kind == hidpp10_constants.DEVICE_KIND.keyboard else 10,
+            )
+            pairing_start = time()
+            patience = 5  # the discovering notification may come slightly later, so be patient
+            while receiver.pairing.lock_open or time() - pairing_start < patience:
+                if receiver.pairing.device_passkey:
+                    break
+                n = base.read(receiver.handle)
+                n = base.make_notification(*n) if n else None
+                if n:
+                    receiver.handle.notifications_hook(n)
+            if authentication & 0x01:
+                print(f"Bolt Pairing: type passkey {receiver.pairing.device_passkey} and then press the enter key")
+            else:
+                passkey = f"{int(receiver.pairing.device_passkey):010b}"
+                passkey = ", ".join(["right" if bit == "1" else "left" for bit in passkey])
+                print(f"Bolt Pairing: press {passkey}")
+                print("and then press left and right buttons simultaneously")
+            while receiver.pairing.lock_open:
+                n = base.read(receiver.handle)
+                n = base.make_notification(*n) if n else None
+                if n:
+                    receiver.handle.notifications_hook(n)
 
     else:
         receiver.set_lock(False, timeout=timeout)
