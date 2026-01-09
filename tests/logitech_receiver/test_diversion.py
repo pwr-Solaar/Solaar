@@ -125,3 +125,113 @@ def test_process_notification(feature, data):
     )
 
     diversion.process_notification(device_mock, notification, feature)
+
+
+def test_update_active_window():
+    """Test that update_active_window caches the window information."""
+    # Clear any cached value
+    diversion._cached_active_window = None
+
+    # Update the cached active window
+    test_wm_class = "test_application"
+    diversion.update_active_window(test_wm_class)
+
+    # Verify it was cached
+    assert diversion._cached_active_window == test_wm_class
+
+
+def test_update_pointer_over_window():
+    """Test that update_pointer_over_window caches the window information."""
+    # Clear any cached value
+    diversion._cached_pointer_over_window = None
+
+    # Update the cached pointer-over window
+    test_wm_class = "test_pointer_application"
+    diversion.update_pointer_over_window(test_wm_class)
+
+    # Verify it was cached
+    assert diversion._cached_pointer_over_window == test_wm_class
+
+
+def test_get_active_window_info_with_cache():
+    """Test that get_active_window_info returns cached value when available."""
+    # Set a cached value
+    test_wm_class = "cached_app"
+    diversion._cached_active_window = test_wm_class
+
+    # Get window info
+    result = diversion.get_active_window_info()
+
+    # Should return the cached value as a tuple
+    assert result == (test_wm_class,)
+
+    # Clean up
+    diversion._cached_active_window = None
+
+
+def test_get_pointer_window_info_with_cache():
+    """Test that get_pointer_window_info returns cached value when available."""
+    # Set a cached value
+    test_wm_class = "cached_pointer_app"
+    diversion._cached_pointer_over_window = test_wm_class
+
+    # Get window info
+    result = diversion.get_pointer_window_info()
+
+    # Should return the cached value as a tuple
+    assert result == (test_wm_class,)
+
+    # Clean up
+    diversion._cached_pointer_over_window = None
+
+
+def test_process_condition_with_cached_window():
+    """Test that Process condition works with cached window information."""
+    # Set up cached window
+    test_wm_class = "firefox"
+    diversion._cached_active_window = test_wm_class
+
+    # Create Process condition
+    process_condition = diversion.Process("fire", warn=False)
+
+    # Create mock notification and device
+    notification = mock.Mock()
+    device = mock.Mock()
+
+    # Evaluate - should match because "firefox" starts with "fire"
+    result = process_condition.evaluate(None, notification, device, None)
+    assert result is True
+
+    # Test non-matching case
+    process_condition2 = diversion.Process("chrome", warn=False)
+    result2 = process_condition2.evaluate(None, notification, device, None)
+    assert result2 is False
+
+    # Clean up
+    diversion._cached_active_window = None
+
+
+def test_mouse_process_condition_with_cached_window():
+    """Test that MouseProcess condition works with cached window information."""
+    # Set up cached window
+    test_wm_class = "konsole"
+    diversion._cached_pointer_over_window = test_wm_class
+
+    # Create MouseProcess condition
+    mouse_process_condition = diversion.MouseProcess("kon", warn=False)
+
+    # Create mock notification and device
+    notification = mock.Mock()
+    device = mock.Mock()
+
+    # Evaluate - should match because "konsole" starts with "kon"
+    result = mouse_process_condition.evaluate(None, notification, device, None)
+    assert result is True
+
+    # Test non-matching case
+    mouse_process_condition2 = diversion.MouseProcess("term", warn=False)
+    result2 = mouse_process_condition2.evaluate(None, notification, device, None)
+    assert result2 is False
+
+    # Clean up
+    diversion._cached_pointer_over_window = None
