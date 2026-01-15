@@ -3,1815 +3,1905 @@
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2021.
 #
-msgid   ""
-msgstr  "Project-Id-Version: solaar 1.0.6\n"
-        "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2023-12-28 17:40+0100\n"
-        "PO-Revision-Date: 2021-08-24 09:07+0200\n"
-        "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
-        "Language-Team: none\n"
-        "Language: sk\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : "
-        "2;\n"
-        "X-Generator: Poedit 3.0\n"
+# SPDX-FileCopyrightText: 2026 Miroslav Ďurian <aasami@gmail.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar 1.0.6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-28 17:40+0100\n"
+"PO-Revision-Date: 2026-01-15 13:17+0100\n"
+"Last-Translator: Miroslav Ďurian <aasami@gmail.com>\n"
+"Language-Team: Slovak <kde-i18n-doc@kde.org>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Lokalize 25.12.0\n"
 
 #: lib/logitech_receiver/base_usb.py:46
-msgid   "Bolt Receiver"
-msgstr  ""
+msgid "Bolt Receiver"
+msgstr "Prijímač Bolt"
 
 #: lib/logitech_receiver/base_usb.py:57
-msgid   "Unifying Receiver"
-msgstr  "Prijímač Unifying"
+msgid "Unifying Receiver"
+msgstr "Prijímač Unifying"
 
 #: lib/logitech_receiver/base_usb.py:67 lib/logitech_receiver/base_usb.py:78
 #: lib/logitech_receiver/base_usb.py:90 lib/logitech_receiver/base_usb.py:102
 #: lib/logitech_receiver/base_usb.py:114
-msgid   "Nano Receiver"
-msgstr  "Prijímač Nano"
+msgid "Nano Receiver"
+msgstr "Prijímač Nano"
 
 #: lib/logitech_receiver/base_usb.py:124
-msgid   "Lightspeed Receiver"
-msgstr  "Prijímač Lightspeed"
+msgid "Lightspeed Receiver"
+msgstr "Prijímač Lightspeed"
 
 #: lib/logitech_receiver/base_usb.py:133
-msgid   "EX100 Receiver 27 Mhz"
-msgstr  "Prijímač EX100 27 Mhz"
+msgid "EX100 Receiver 27 Mhz"
+msgstr "Prijímač EX100 27 Mhz"
 
 #: lib/logitech_receiver/i18n.py:30
-msgid   "empty"
-msgstr  "prázdna"
+msgid "empty"
+msgstr "prázdna"
 
 #: lib/logitech_receiver/i18n.py:31
-msgid   "critical"
-msgstr  "kritická"
+msgid "critical"
+msgstr "kritická"
 
 #: lib/logitech_receiver/i18n.py:32
-msgid   "low"
-msgstr  "nízka"
+msgid "low"
+msgstr "nízka"
 
 #: lib/logitech_receiver/i18n.py:33
-msgid   "average"
-msgstr  "priemerná"
+msgid "average"
+msgstr "priemerná"
 
 #: lib/logitech_receiver/i18n.py:34
-msgid   "good"
-msgstr  "dobrá"
+msgid "good"
+msgstr "dobrá"
 
 #: lib/logitech_receiver/i18n.py:35
-msgid   "full"
-msgstr  "plná"
+msgid "full"
+msgstr "plná"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "discharging"
-msgstr  "vybíja sa"
+msgid "discharging"
+msgstr "vybíja sa"
 
 #: lib/logitech_receiver/i18n.py:39
-msgid   "recharging"
-msgstr  "nabíja sa"
+msgid "recharging"
+msgstr "nabíja sa"
 
 #: lib/logitech_receiver/i18n.py:40 lib/solaar/ui/window.py:711
-msgid   "charging"
-msgstr  "nabíja sa"
+msgid "charging"
+msgstr "nabíja sa"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid   "not charging"
-msgstr  "nenabíja sa"
+msgid "not charging"
+msgstr "nenabíja sa"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid   "almost full"
-msgstr  "takmer nabitá"
+msgid "almost full"
+msgstr "takmer nabitá"
 
 #: lib/logitech_receiver/i18n.py:43
-msgid   "charged"
-msgstr  "nabitá"
+msgid "charged"
+msgstr "nabitá"
 
 #: lib/logitech_receiver/i18n.py:44
-msgid   "slow recharge"
-msgstr  "pomalé nabíjanie"
+msgid "slow recharge"
+msgstr "pomalé nabíjanie"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "invalid battery"
-msgstr  "chybná batéria"
+msgid "invalid battery"
+msgstr "chybná batéria"
 
 #: lib/logitech_receiver/i18n.py:46
-msgid   "thermal error"
-msgstr  "teplotná chyba"
+msgid "thermal error"
+msgstr "teplotná chyba"
 
 #: lib/logitech_receiver/i18n.py:47
-msgid   "error"
-msgstr  "chyba"
+msgid "error"
+msgstr "chyba"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid   "standard"
-msgstr  "štandardné"
+msgid "standard"
+msgstr "štandardné"
 
 #: lib/logitech_receiver/i18n.py:49
-msgid   "fast"
-msgstr  "rýchle"
+msgid "fast"
+msgstr "rýchle"
 
 #: lib/logitech_receiver/i18n.py:50
-msgid   "slow"
-msgstr  "pomalé"
+msgid "slow"
+msgstr "pomalé"
 
 #: lib/logitech_receiver/i18n.py:53
-msgid   "device timeout"
-msgstr  "vypršal časový limit zariadenia"
+msgid "device timeout"
+msgstr "vypršal časový limit zariadenia"
 
 #: lib/logitech_receiver/i18n.py:54
-msgid   "device not supported"
-msgstr  "nepodporované zariadenie"
+msgid "device not supported"
+msgstr "nepodporované zariadenie"
 
 #: lib/logitech_receiver/i18n.py:55
-msgid   "too many devices"
-msgstr  "príliš veľa zariadení"
+msgid "too many devices"
+msgstr "príliš veľa zariadení"
 
 #: lib/logitech_receiver/i18n.py:56
-msgid   "sequence timeout"
-msgstr  "vypršal časový limit sekvencie"
+msgid "sequence timeout"
+msgstr "vypršal časový limit sekvencie"
 
 #: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:572
-msgid   "Firmware"
-msgstr  "Firmvér"
+msgid "Firmware"
+msgstr "Firmvér"
 
 #: lib/logitech_receiver/i18n.py:60
-msgid   "Bootloader"
-msgstr  "Bootloader"
+msgid "Bootloader"
+msgstr "Bootloader"
 
 #: lib/logitech_receiver/i18n.py:61
-msgid   "Hardware"
-msgstr  "Hardvér"
+msgid "Hardware"
+msgstr "Hardvér"
 
 #: lib/logitech_receiver/i18n.py:62
-msgid   "Other"
-msgstr  "Ďalší"
+msgid "Other"
+msgstr "Ďalší"
 
 #: lib/logitech_receiver/i18n.py:65
-msgid   "Left Button"
-msgstr  ""
+msgid "Left Button"
+msgstr "Ľavé tlačidlo"
 
 #: lib/logitech_receiver/i18n.py:66
-msgid   "Right Button"
-msgstr  ""
+msgid "Right Button"
+msgstr "Pravé tlačidlo"
 
 #: lib/logitech_receiver/i18n.py:67
-msgid   "Middle Button"
-msgstr  ""
+msgid "Middle Button"
+msgstr "Stredné tlačidlo"
 
 #: lib/logitech_receiver/i18n.py:68
-msgid   "Back Button"
-msgstr  ""
+msgid "Back Button"
+msgstr "Tlačidlo Späť"
 
 #: lib/logitech_receiver/i18n.py:69
-msgid   "Forward Button"
-msgstr  ""
+msgid "Forward Button"
+msgstr "Tlačidlo Dopredu"
 
 #: lib/logitech_receiver/i18n.py:70
-msgid   "Mouse Gesture Button"
-msgstr  "Tlačidlo gesta myši"
+msgid "Mouse Gesture Button"
+msgstr "Tlačidlo gesta myši"
 
 #: lib/logitech_receiver/i18n.py:71
-msgid   "Smart Shift"
-msgstr  ""
+msgid "Smart Shift"
+msgstr "Inteligentné Prepínanie"
 
 #: lib/logitech_receiver/i18n.py:72
-msgid   "DPI Switch"
-msgstr  ""
+msgid "DPI Switch"
+msgstr "Prepínač DPI"
 
 #: lib/logitech_receiver/i18n.py:73
-msgid   "Left Tilt"
-msgstr  ""
+msgid "Left Tilt"
+msgstr "Náklon Vľavo"
 
 #: lib/logitech_receiver/i18n.py:74
-msgid   "Right Tilt"
-msgstr  ""
+msgid "Right Tilt"
+msgstr "Náklon Vpravo"
 
 #: lib/logitech_receiver/i18n.py:75
-msgid   "Left Click"
-msgstr  ""
+msgid "Left Click"
+msgstr "Ľavý klik"
 
 #: lib/logitech_receiver/i18n.py:76
-msgid   "Right Click"
-msgstr  ""
+msgid "Right Click"
+msgstr "Pravý klik"
 
 #: lib/logitech_receiver/i18n.py:77
-msgid   "Mouse Middle Button"
-msgstr  ""
+msgid "Mouse Middle Button"
+msgstr "Stredné tlačidlo myši"
 
 #: lib/logitech_receiver/i18n.py:78
-msgid   "Mouse Back Button"
-msgstr  ""
+msgid "Mouse Back Button"
+msgstr "Tlačidlo Späť na myši"
 
 #: lib/logitech_receiver/i18n.py:79
-msgid   "Mouse Forward Button"
-msgstr  ""
+msgid "Mouse Forward Button"
+msgstr "Tlačidlo Dopredu na myši"
 
 #: lib/logitech_receiver/i18n.py:80
-msgid   "Gesture Button Navigation"
-msgstr  ""
+msgid "Gesture Button Navigation"
+msgstr "Tlačidlo navigácie gestami"
 
 #: lib/logitech_receiver/i18n.py:81
-msgid   "Mouse Scroll Left Button"
-msgstr  ""
+msgid "Mouse Scroll Left Button"
+msgstr "Ľavé tlačidlo rolovania na myši"
 
 #: lib/logitech_receiver/i18n.py:82
-msgid   "Mouse Scroll Right Button"
-msgstr  ""
+msgid "Mouse Scroll Right Button"
+msgstr "Pravé tlačidlo rolovania na myši"
 
 #: lib/logitech_receiver/i18n.py:85
-msgid   "pressed"
-msgstr  ""
+msgid "pressed"
+msgstr "stlačnené"
 
 #: lib/logitech_receiver/i18n.py:86
-msgid   "released"
-msgstr  ""
+msgid "released"
+msgstr "uvoľnené"
 
 #: lib/logitech_receiver/notifications.py:75
 #: lib/logitech_receiver/notifications.py:126
-msgid   "pairing lock is closed"
-msgstr  "zámok párovania bol uzatvorený"
+msgid "pairing lock is closed"
+msgstr "zámok párovania bol uzatvorený"
 
 #: lib/logitech_receiver/notifications.py:75
 #: lib/logitech_receiver/notifications.py:126
-msgid   "pairing lock is open"
-msgstr  "zámok párovania bol otvorený"
+msgid "pairing lock is open"
+msgstr "zámok párovania bol otvorený"
 
 #: lib/logitech_receiver/notifications.py:92
-msgid   "discovery lock is closed"
-msgstr  ""
+msgid "discovery lock is closed"
+msgstr "zámok objavovania je uzatvorený"
 
 #: lib/logitech_receiver/notifications.py:92
-msgid   "discovery lock is open"
-msgstr  ""
+msgid "discovery lock is open"
+msgstr "zámok objavovania je otvorený"
 
 #: lib/logitech_receiver/notifications.py:224 lib/solaar/ui/notify.py:122
-msgid   "connected"
-msgstr  "pripojené"
+msgid "connected"
+msgstr "pripojené"
 
 #: lib/logitech_receiver/notifications.py:224
-msgid   "disconnected"
-msgstr  "odpojené"
+msgid "disconnected"
+msgstr "odpojené"
 
 #: lib/logitech_receiver/notifications.py:262 lib/solaar/ui/notify.py:120
-msgid   "unpaired"
-msgstr  "nespárované"
+msgid "unpaired"
+msgstr "nespárované"
 
 #: lib/logitech_receiver/notifications.py:304
-msgid   "powered on"
-msgstr  "zapnuté"
+msgid "powered on"
+msgstr "zapnuté"
 
 #: lib/logitech_receiver/settings.py:750
-msgid   "register"
-msgstr  "prihlásiť"
+msgid "register"
+msgstr "prihlásiť"
 
 #: lib/logitech_receiver/settings.py:764 lib/logitech_receiver/settings.py:791
-msgid   "feature"
-msgstr  "vlastnosť"
+msgid "feature"
+msgstr "vlastnosť"
 
 #: lib/logitech_receiver/settings_templates.py:139
-msgid   "Swap Fx function"
-msgstr  "Prepnúť funkciu Fx"
+msgid "Swap Fx function"
+msgstr "Prepnúť funkciu Fx"
 
 #: lib/logitech_receiver/settings_templates.py:140
-msgid   "When set, the F1..F12 keys will activate their special function,\n"
-        "and you must hold the FN key to activate their standard function."
-msgstr  "Ak je nastavené, budú klávesy F1..F12 zapínať ich špeciálne "
-        "funkcie.\n"
-        "Pre aktiváciu ich štandardnej funkcie budete musieť súčasne stlačiť "
-        "Fn."
+msgid ""
+"When set, the F1..F12 keys will activate their special function,\n"
+"and you must hold the FN key to activate their standard function."
+msgstr ""
+"Ak je nastavené, budú klávesy F1..F12 zapínať ich špeciálne "
+"funkcie.\n"
+"Pre aktiváciu ich štandardnej funkcie budete musieť súčasne stlačiť "
+"Fn."
 
 #: lib/logitech_receiver/settings_templates.py:142
-msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
-        "and you must hold the FN key to activate their special function."
-msgstr  "Ak nie je nastavené, budú klávesy F1..F12 zapínať ich štandardné "
-        "funkcie.\n"
-        "Pre aktiváciu špeciálnych funkcií budete musieť súčasne stlačiť Fn."
+msgid ""
+"When unset, the F1..F12 keys will activate their standard function,\n"
+"and you must hold the FN key to activate their special function."
+msgstr ""
+"Ak nie je nastavené, budú klávesy F1..F12 zapínať ich štandardné "
+"funkcie.\n"
+"Pre aktiváciu špeciálnych funkcií budete musieť súčasne stlačiť Fn."
 
 #: lib/logitech_receiver/settings_templates.py:149
-msgid   "Hand Detection"
-msgstr  "Detekcia rúk"
+msgid "Hand Detection"
+msgstr "Detekcia rúk"
 
 #: lib/logitech_receiver/settings_templates.py:150
-msgid   "Turn on illumination when the hands hover over the keyboard."
-msgstr  "Zapne podsvietenie, keď sa nad klávesnicou objavia ruky."
+msgid "Turn on illumination when the hands hover over the keyboard."
+msgstr "Zapne podsvietenie, keď sa nad klávesnicou objavia ruky."
 
 #: lib/logitech_receiver/settings_templates.py:157
-msgid   "Scroll Wheel Smooth Scrolling"
-msgstr  "Plynulé skrolovanie"
+msgid "Scroll Wheel Smooth Scrolling"
+msgstr "Plynulé skrolovanie"
 
 #: lib/logitech_receiver/settings_templates.py:158
 #: lib/logitech_receiver/settings_templates.py:239
 #: lib/logitech_receiver/settings_templates.py:267
-msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  "Vysokocitlivý režim zvislého posunu kolieska myši."
+msgid "High-sensitivity mode for vertical scroll with the wheel."
+msgstr "Vysokocitlivý režim zvislého posunu kolieska myši."
 
 #: lib/logitech_receiver/settings_templates.py:165
-msgid   "Side Scrolling"
-msgstr  "Bočné skrolovanie"
+msgid "Side Scrolling"
+msgstr "Bočné skrolovanie"
 
 #: lib/logitech_receiver/settings_templates.py:167
-msgid   "When disabled, pushing the wheel sideways sends custom button "
-        "events\n"
-        "instead of the standard side-scrolling events."
-msgstr  "Ak je vypnuté, bočné stlačenie kolieska vygeneruje vlastné udalosti "
-        "tlačidiel\n"
-        "namiesto štandardných udalostí skrolovania do strán."
+msgid ""
+"When disabled, pushing the wheel sideways sends custom button "
+"events\n"
+"instead of the standard side-scrolling events."
+msgstr ""
+"Ak je vypnuté, bočné stlačenie kolieska vygeneruje vlastné udalosti "
+"tlačidiel\n"
+"namiesto štandardných udalostí skrolovania do strán."
 
 #: lib/logitech_receiver/settings_templates.py:177
-msgid   "Sensitivity (DPI - older mice)"
-msgstr  ""
+msgid "Sensitivity (DPI - older mice)"
+msgstr "Citlivosť (DPI - staršie myši)"
 
 #: lib/logitech_receiver/settings_templates.py:178
 #: lib/logitech_receiver/settings_templates.py:712
-msgid   "Mouse movement sensitivity"
-msgstr  "Citlivosť kurzora myši"
+msgid "Mouse movement sensitivity"
+msgstr "Citlivosť kurzora myši"
 
 #: lib/logitech_receiver/settings_templates.py:208
 #: lib/logitech_receiver/settings_templates.py:218
 #: lib/logitech_receiver/settings_templates.py:225
-msgid   "Backlight"
-msgstr  "Podsvietenie"
+msgid "Backlight"
+msgstr "Podsvietenie"
 
 #: lib/logitech_receiver/settings_templates.py:209
 #: lib/logitech_receiver/settings_templates.py:226
-msgid   "Set illumination time for keyboard."
-msgstr  ""
+msgid "Set illumination time for keyboard."
+msgstr "Nastaviť čas podsvietenia klávesnice"
 
 #: lib/logitech_receiver/settings_templates.py:219
-msgid   "Turn illumination on or off on keyboard."
-msgstr  "Vypne/zapne podsvietenie klávesnice."
+msgid "Turn illumination on or off on keyboard."
+msgstr "Vypne/zapne podsvietenie klávesnice."
 
 #: lib/logitech_receiver/settings_templates.py:237
-msgid   "Scroll Wheel High Resolution"
-msgstr  "Vysoké rozlíšenie skrolovania myši"
+msgid "Scroll Wheel High Resolution"
+msgstr "Vysoké rozlíšenie skrolovania myši"
 
 #: lib/logitech_receiver/settings_templates.py:240
 #: lib/logitech_receiver/settings_templates.py:268
-msgid   "Set to ignore if scrolling is abnormally fast or slow"
-msgstr  ""
+msgid "Set to ignore if scrolling is abnormally fast or slow"
+msgstr ""
+"Nastavte na ignorovanie ak je rolovanie neprimerane rýchle alebo pomalé"
 
 #: lib/logitech_receiver/settings_templates.py:247
 #: lib/logitech_receiver/settings_templates.py:277
-msgid   "Scroll Wheel Diversion"
-msgstr  ""
+msgid "Scroll Wheel Diversion"
+msgstr "Odklonenie rolovacieho kolieska"
 
 #: lib/logitech_receiver/settings_templates.py:249
-msgid   "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
-        "trigger Solaar rules but are otherwise ignored)."
-msgstr  ""
+msgid ""
+"Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
+"trigger Solaar rules but are otherwise ignored)."
+msgstr ""
+"Nech rolovacie koliesko posiela LOWRES_WHEEL HID++ notifikácie (ktoré spúšťajú"
+" pravidlá v Solaare ale inak sú ignorované)."
 
 #: lib/logitech_receiver/settings_templates.py:256
-msgid   "Scroll Wheel Direction"
-msgstr  "Smer skrolovania"
+msgid "Scroll Wheel Direction"
+msgstr "Smer skrolovania"
 
 #: lib/logitech_receiver/settings_templates.py:257
-msgid   "Invert direction for vertical scroll with wheel."
-msgstr  "Zmeniť zmer zvislého skrolovania myši."
+msgid "Invert direction for vertical scroll with wheel."
+msgstr "Zmeniť zmer zvislého skrolovania myši."
 
 #: lib/logitech_receiver/settings_templates.py:265
-msgid   "Scroll Wheel Resolution"
-msgstr  "Rozlíšenie skrolovania myši"
+msgid "Scroll Wheel Resolution"
+msgstr "Rozlíšenie skrolovania myši"
 
 #: lib/logitech_receiver/settings_templates.py:279
-msgid   "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
-        "trigger Solaar rules but are otherwise ignored)."
-msgstr  ""
+msgid ""
+"Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
+"trigger Solaar rules but are otherwise ignored)."
+msgstr ""
+"Nech rolovacie koliesko posiela HIRES_WHEEL HID++ notifikácie (ktoré spúšťajú "
+"pravidlá v Solaare ale inak sú ignorované)."
 
 #: lib/logitech_receiver/settings_templates.py:288
-msgid   "Sensitivity (Pointer Speed)"
-msgstr  "Citlivosť (rýchlosť kurzora)"
+msgid "Sensitivity (Pointer Speed)"
+msgstr "Citlivosť (rýchlosť kurzora)"
 
 #: lib/logitech_receiver/settings_templates.py:289
-msgid   "Speed multiplier for mouse (256 is normal multiplier)."
-msgstr  "Násobič rýchlosti myši (256 je bežný násobič)."
+msgid "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr "Násobič rýchlosti myši (256 je bežný násobič)."
 
 #: lib/logitech_receiver/settings_templates.py:299
-msgid   "Thumb Wheel Diversion"
-msgstr  ""
+msgid "Thumb Wheel Diversion"
+msgstr "Odchylka palcového kolieska"
 
 #: lib/logitech_receiver/settings_templates.py:301
-msgid   "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
-        "Solaar rules but are otherwise ignored)."
-msgstr  ""
+msgid ""
+"Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
+"Solaar rules but are otherwise ignored)."
+msgstr ""
+"Nech rolovacie koliesko posiela THUMB_WHEEL HID++ notifikácie (ktoré spúšťajú "
+"pravidlá v Solaare ale inak sú ignorované)."
 
 #: lib/logitech_receiver/settings_templates.py:310
-msgid   "Thumb Wheel Direction"
-msgstr  "Smer posuvného kolieska"
+msgid "Thumb Wheel Direction"
+msgstr "Smer posuvného kolieska"
 
 #: lib/logitech_receiver/settings_templates.py:311
-msgid   "Invert thumb wheel scroll direction."
-msgstr  "Zmeniť smer otáčania kolieska."
+msgid "Invert thumb wheel scroll direction."
+msgstr "Zmeniť smer otáčania kolieska."
 
 #: lib/logitech_receiver/settings_templates.py:319
-msgid   "Onboard Profiles"
-msgstr  ""
+msgid "Onboard Profiles"
+msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:320
-msgid   "Enable onboard profiles, which often control report rate and "
-        "keyboard lighting"
-msgstr  ""
+msgid ""
+"Enable onboard profiles, which often control report rate and "
+"keyboard lighting"
+msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:330
-msgid   "Polling Rate (ms)"
-msgstr  "Intenzita dopytovania (ms)"
+msgid "Polling Rate (ms)"
+msgstr "Intenzita dopytovania (ms)"
 
 #: lib/logitech_receiver/settings_templates.py:332
-msgid   "Frequency of device polling, in milliseconds"
-msgstr  "Frekvencia dopytov na zariadenie, v ms"
+msgid "Frequency of device polling, in milliseconds"
+msgstr "Frekvencia dopytov na zariadenie, v ms"
 
 #: lib/logitech_receiver/settings_templates.py:333
 #: lib/logitech_receiver/settings_templates.py:1046
 #: lib/logitech_receiver/settings_templates.py:1076
-msgid   "May need Onboard Profiles set to Disable to be effective."
-msgstr  ""
+msgid "May need Onboard Profiles set to Disable to be effective."
+msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:365
-msgid   "Divert crown events"
-msgstr  "Odklonenie udalostí korunky"
+msgid "Divert crown events"
+msgstr "Odklonenie udalostí korunky"
 
 #: lib/logitech_receiver/settings_templates.py:366
-msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
-        "rules but are otherwise ignored)."
-msgstr  "Korunka bude zasielať CROWN HID++ notifikácie (tie aktivujú Solaar "
-        "pravidlá, ale inak budú ignorované)."
+msgid ""
+"Make crown send CROWN HID++ notifications (which trigger Solaar "
+"rules but are otherwise ignored)."
+msgstr ""
+"Korunka bude zasielať CROWN HID++ notifikácie (tie aktivujú Solaar "
+"pravidlá, ale inak budú ignorované)."
 
 #: lib/logitech_receiver/settings_templates.py:374
-msgid   "Crown smooth scroll"
-msgstr  ""
+msgid "Crown smooth scroll"
+msgstr "Hladké rolovanie korunky"
 
 #: lib/logitech_receiver/settings_templates.py:375
-msgid   "Set crown smooth scroll"
-msgstr  ""
+msgid "Set crown smooth scroll"
+msgstr "Nastavuje hladké rolovanie korunky"
 
 #: lib/logitech_receiver/settings_templates.py:383
-msgid   "Divert G Keys"
-msgstr  "Odkloniť G klávesy"
+msgid "Divert G Keys"
+msgstr "Odkloniť G klávesy"
 
 #: lib/logitech_receiver/settings_templates.py:385
-msgid   "Make G keys send GKEY HID++ notifications (which trigger Solaar "
-        "rules but are otherwise ignored)."
-msgstr  "G klávesy budú zasielať GKEY HID++ notifikácie (tie aktivujú Solaar "
-        "pravidlá, ale inak budú ignorované)."
+msgid ""
+"Make G keys send GKEY HID++ notifications (which trigger Solaar "
+"rules but are otherwise ignored)."
+msgstr ""
+"G klávesy budú zasielať GKEY HID++ notifikácie (tie aktivujú Solaar "
+"pravidlá, ale inak budú ignorované)."
 
 #: lib/logitech_receiver/settings_templates.py:386
-msgid   "May also make M keys and MR key send HID++ notifications"
-msgstr  ""
+msgid "May also make M keys and MR key send HID++ notifications"
+msgstr "Umožniť aj klávesom M a MR posielať HID++ upozornenia"
 
 #: lib/logitech_receiver/settings_templates.py:402
-msgid   "Scroll Wheel Ratcheted"
-msgstr  ""
+msgid "Scroll Wheel Ratcheted"
+msgstr "Rapkavé rolovacie koliesko"
 
 #: lib/logitech_receiver/settings_templates.py:403
-msgid   "Switch the mouse wheel between speed-controlled ratcheting and "
-        "always freespin."
-msgstr  ""
+msgid ""
+"Switch the mouse wheel between speed-controlled ratcheting and "
+"always freespin."
+msgstr ""
+"Prepína koliesko myši medzi rapkaním v závislosti od rýchlosti a voľnobehom."
 
 #: lib/logitech_receiver/settings_templates.py:405
-msgid   "Freespinning"
-msgstr  ""
+msgid "Freespinning"
+msgstr "Voľnobeh"
 
 #: lib/logitech_receiver/settings_templates.py:405
-msgid   "Ratcheted"
-msgstr  ""
+msgid "Ratcheted"
+msgstr "Rapkanie"
 
 #: lib/logitech_receiver/settings_templates.py:412
-msgid   "Scroll Wheel Ratchet Speed"
-msgstr  ""
+msgid "Scroll Wheel Ratchet Speed"
+msgstr "Rýchlosť rapkania rolovacieho kolieska"
 
 #: lib/logitech_receiver/settings_templates.py:414
-msgid   "Use the mouse wheel speed to switch between ratcheted and "
-        "freespinning.\n"
-        "The mouse wheel is always ratcheted at 50."
-msgstr  ""
+msgid ""
+"Use the mouse wheel speed to switch between ratcheted and "
+"freespinning.\n"
+"The mouse wheel is always ratcheted at 50."
+msgstr ""
+"Použiť rýchlosť kolieska myši na prepínanie medzi rapkaním a voľnobehom."
 
 #: lib/logitech_receiver/settings_templates.py:463
-msgid   "Key/Button Actions"
-msgstr  "Akcie klávesu/tlačidla"
+msgid "Key/Button Actions"
+msgstr "Akcie klávesu/tlačidla"
 
 #: lib/logitech_receiver/settings_templates.py:465
-msgid   "Change the action for the key or button."
-msgstr  "Zmeniť akciu klávesy alebo tlačidla."
+msgid "Change the action for the key or button."
+msgstr "Zmeniť akciu klávesy alebo tlačidla."
 
 #: lib/logitech_receiver/settings_templates.py:465
-msgid   "Overridden by diversion."
-msgstr  ""
+msgid "Overridden by diversion."
+msgstr "Obídené nastavením odklonenia"
 
 #: lib/logitech_receiver/settings_templates.py:466
-msgid   "Changing important actions (such as for the left mouse button) can "
-        "result in an unusable system."
-msgstr  "Zmenou dôležitej akcie (napríklad pre ľavé tlačidlo myši) môžete "
-        "systém uviesť do stavu, kedy sa nebude dať používať."
+msgid ""
+"Changing important actions (such as for the left mouse button) can "
+"result in an unusable system."
+msgstr ""
+"Zmenou dôležitej akcie (napríklad pre ľavé tlačidlo myši) môžete "
+"systém uviesť do stavu, kedy sa nebude dať používať."
 
 #: lib/logitech_receiver/settings_templates.py:639
-msgid   "Key/Button Diversion"
-msgstr  "Odklonenie klávesu/tlačidla"
+msgid "Key/Button Diversion"
+msgstr "Odklonenie klávesu/tlačidla"
 
 #: lib/logitech_receiver/settings_templates.py:640
-msgid   "Make the key or button send HID++ notifications (Diverted) or "
-        "initiate Mouse Gestures or Sliding DPI"
-msgstr  ""
+msgid ""
+"Make the key or button send HID++ notifications (Diverted) or "
+"initiate Mouse Gestures or Sliding DPI"
+msgstr ""
+"Nech kláves alebo tlačidlo posiela HID++ upozornenia (Odklonené) alebo spustí "
+"gestá myši alebo posunie DPI"
 
 #: lib/logitech_receiver/settings_templates.py:643
 #: lib/logitech_receiver/settings_templates.py:644
 #: lib/logitech_receiver/settings_templates.py:645
-msgid   "Diverted"
-msgstr  "Odklonené"
+msgid "Diverted"
+msgstr "Odklonené"
 
 #: lib/logitech_receiver/settings_templates.py:643
 #: lib/logitech_receiver/settings_templates.py:644
-msgid   "Mouse Gestures"
-msgstr  "Gestá myši"
+msgid "Mouse Gestures"
+msgstr "Gestá myši"
 
 #: lib/logitech_receiver/settings_templates.py:643
 #: lib/logitech_receiver/settings_templates.py:644
 #: lib/logitech_receiver/settings_templates.py:645
-msgid   "Regular"
-msgstr  "Normálne"
+msgid "Regular"
+msgstr "Normálne"
 
 #: lib/logitech_receiver/settings_templates.py:643
-msgid   "Sliding DPI"
-msgstr  ""
+msgid "Sliding DPI"
+msgstr "Posun DPI"
 
 #: lib/logitech_receiver/settings_templates.py:711
-msgid   "Sensitivity (DPI)"
-msgstr  "Citlivosť (DPI)"
+msgid "Sensitivity (DPI)"
+msgstr "Citlivosť (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:752
-msgid   "Sensitivity Switching"
-msgstr  ""
+msgid "Sensitivity Switching"
+msgstr "Prepínanie citlivosti"
 
 #: lib/logitech_receiver/settings_templates.py:754
-msgid   "Switch the current sensitivity and the remembered sensitivity when "
-        "the key or button is pressed.\n"
-        "If there is no remembered sensitivity, just remember the current "
-        "sensitivity"
-msgstr  ""
+msgid ""
+"Switch the current sensitivity and the remembered sensitivity when "
+"the key or button is pressed.\n"
+"If there is no remembered sensitivity, just remember the current "
+"sensitivity"
+msgstr ""
+"Stlačením klávesu alebo tlačidla, prepínať súčasnú citlivosť a zapamätanú citl"
+"ivosť.\n"
+"Ak nie je zapamätaná citlivosť, tak si len zapamätá súčasnú citlivosť."
 
 #: lib/logitech_receiver/settings_templates.py:758
-msgid   "Off"
-msgstr  "Vyp"
+msgid "Off"
+msgstr "Vyp"
 
 #: lib/logitech_receiver/settings_templates.py:791
-msgid   "Disable keys"
-msgstr  "Zakázať klávesy"
+msgid "Disable keys"
+msgstr "Zakázať klávesy"
 
 #: lib/logitech_receiver/settings_templates.py:792
-msgid   "Disable specific keyboard keys."
-msgstr  "Zakázať špecifické klávesy."
+msgid "Disable specific keyboard keys."
+msgstr "Zakázať špecifické klávesy."
 
 #: lib/logitech_receiver/settings_templates.py:795
 #, python-format
-msgid   "Disables the %s key."
-msgstr  "Zakáže %s kláves."
+msgid "Disables the %s key."
+msgstr "Zakáže %s kláves."
 
 #: lib/logitech_receiver/settings_templates.py:809
 #: lib/logitech_receiver/settings_templates.py:860
-msgid   "Set OS"
-msgstr  "Nastaviť OS"
+msgid "Set OS"
+msgstr "Nastaviť OS"
 
 #: lib/logitech_receiver/settings_templates.py:810
 #: lib/logitech_receiver/settings_templates.py:861
-msgid   "Change keys to match OS."
-msgstr  "Zmeniť klávesy podľa operačného systému."
+msgid "Change keys to match OS."
+msgstr "Zmeniť klávesy podľa operačného systému."
 
 #: lib/logitech_receiver/settings_templates.py:873
-msgid   "Change Host"
-msgstr  "Zmeniť hostiteľa"
+msgid "Change Host"
+msgstr "Zmeniť hostiteľa"
 
 #: lib/logitech_receiver/settings_templates.py:874
-msgid   "Switch connection to a different host"
-msgstr  "Prepnúť spojenie na iného hostiteľa"
+msgid "Switch connection to a different host"
+msgstr "Prepnúť spojenie na iného hostiteľa"
 
 #: lib/logitech_receiver/settings_templates.py:900
-msgid   "Performs a left click."
-msgstr  "Vykoná kliknutie ľavým tlačidlom."
+msgid "Performs a left click."
+msgstr "Vykoná kliknutie ľavým tlačidlom."
 
 #: lib/logitech_receiver/settings_templates.py:900
-msgid   "Single tap"
-msgstr  "Dotyk"
+msgid "Single tap"
+msgstr "Dotyk"
 
 #: lib/logitech_receiver/settings_templates.py:901
-msgid   "Performs a right click."
-msgstr  "Vykoná kliknutie pravým tlačidlom."
+msgid "Performs a right click."
+msgstr "Vykoná kliknutie pravým tlačidlom."
 
 #: lib/logitech_receiver/settings_templates.py:901
-msgid   "Single tap with two fingers"
-msgstr  "Dotyk dvoma prstami"
+msgid "Single tap with two fingers"
+msgstr "Dotyk dvoma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:902
-msgid   "Single tap with three fingers"
-msgstr  "Dotyk tromi prstami"
+msgid "Single tap with three fingers"
+msgstr "Dotyk tromi prstami"
 
 #: lib/logitech_receiver/settings_templates.py:906
-msgid   "Double tap"
-msgstr  "Dvojdotyk"
+msgid "Double tap"
+msgstr "Dvojdotyk"
 
 #: lib/logitech_receiver/settings_templates.py:906
-msgid   "Performs a double click."
-msgstr  "Vykoná dvojité kliknutie."
+msgid "Performs a double click."
+msgstr "Vykoná dvojité kliknutie."
 
 #: lib/logitech_receiver/settings_templates.py:907
-msgid   "Double tap with two fingers"
-msgstr  "Dvojdotyk dvoma prstami"
+msgid "Double tap with two fingers"
+msgstr "Dvojdotyk dvoma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:908
-msgid   "Double tap with three fingers"
-msgstr  "Dvojdotyk troma prstami"
+msgid "Double tap with three fingers"
+msgstr "Dvojdotyk troma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:911
-msgid   "Drags items by dragging the finger after double tapping."
-msgstr  "Presúvanie položiek ťahaním prstu po dvojdotyku."
+msgid "Drags items by dragging the finger after double tapping."
+msgstr "Presúvanie položiek ťahaním prstu po dvojdotyku."
 
 #: lib/logitech_receiver/settings_templates.py:911
-msgid   "Tap and drag"
-msgstr  "Ťahaj a pusti"
+msgid "Tap and drag"
+msgstr "Ťahaj a pusti"
 
 #: lib/logitech_receiver/settings_templates.py:913
-msgid   "Drags items by dragging the fingers after double tapping."
-msgstr  "Presúvanie položiek ťahaním prstov po dvojdotyku."
+msgid "Drags items by dragging the fingers after double tapping."
+msgstr "Presúvanie položiek ťahaním prstov po dvojdotyku."
 
 #: lib/logitech_receiver/settings_templates.py:913
-msgid   "Tap and drag with two fingers"
-msgstr  "Dotyk a ťahanie dvomi prstami"
+msgid "Tap and drag with two fingers"
+msgstr "Dotyk a ťahanie dvomi prstami"
 
 #: lib/logitech_receiver/settings_templates.py:914
-msgid   "Tap and drag with three fingers"
-msgstr  "Dotyk a ťahanie tromi prstami"
+msgid "Tap and drag with three fingers"
+msgstr "Dotyk a ťahanie tromi prstami"
 
 #: lib/logitech_receiver/settings_templates.py:917
-msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
-msgstr  "Vypnúť gestá dotyku a hrany (ekvivalent stlačenia Fn + ľavý klik)."
+msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr "Vypnúť gestá dotyku a hrany (ekvivalent stlačenia Fn + ľavý klik)."
 
 #: lib/logitech_receiver/settings_templates.py:917
-msgid   "Suppress tap and edge gestures"
-msgstr  "Potlačiť gestá dotyku a hrany"
+msgid "Suppress tap and edge gestures"
+msgstr "Potlačiť gestá dotyku a hrany"
 
 #: lib/logitech_receiver/settings_templates.py:918
-msgid   "Scroll with one finger"
-msgstr  "Skrolovanie jedným prstom"
+msgid "Scroll with one finger"
+msgstr "Skrolovanie jedným prstom"
 
 #: lib/logitech_receiver/settings_templates.py:918
 #: lib/logitech_receiver/settings_templates.py:919
 #: lib/logitech_receiver/settings_templates.py:922
-msgid   "Scrolls."
-msgstr  "Skrolovania."
+msgid "Scrolls."
+msgstr "Skrolovania."
 
 #: lib/logitech_receiver/settings_templates.py:919
 #: lib/logitech_receiver/settings_templates.py:922
-msgid   "Scroll with two fingers"
-msgstr  "Skrolovanie dvoma prstami"
+msgid "Scroll with two fingers"
+msgstr "Skrolovanie dvoma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:920
-msgid   "Scroll horizontally with two fingers"
-msgstr  "Vodorovné skrolovanie dvoma prstami"
+msgid "Scroll horizontally with two fingers"
+msgstr "Vodorovné skrolovanie dvoma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:920
-msgid   "Scrolls horizontally."
-msgstr  "Vodorovné skrolovanie."
+msgid "Scrolls horizontally."
+msgstr "Vodorovné skrolovanie."
 
 #: lib/logitech_receiver/settings_templates.py:921
-msgid   "Scroll vertically with two fingers"
-msgstr  "Zvislé skrolovanie dvoma prstami"
+msgid "Scroll vertically with two fingers"
+msgstr "Zvislé skrolovanie dvoma prstami"
 
 #: lib/logitech_receiver/settings_templates.py:921
-msgid   "Scrolls vertically."
-msgstr  "Zvislé skrolovanie."
+msgid "Scrolls vertically."
+msgstr "Zvislé skrolovanie."
 
 #: lib/logitech_receiver/settings_templates.py:923
-msgid   "Inverts the scrolling direction."
-msgstr  "Zmeniť smer otáčania."
+msgid "Inverts the scrolling direction."
+msgstr "Zmeniť smer otáčania."
 
 #: lib/logitech_receiver/settings_templates.py:923
-msgid   "Natural scrolling"
-msgstr  "Prirodzené skrolovanie"
+msgid "Natural scrolling"
+msgstr "Prirodzené skrolovanie"
 
 #: lib/logitech_receiver/settings_templates.py:924
-msgid   "Enables the thumbwheel."
-msgstr  "Povoliť koliesko."
+msgid "Enables the thumbwheel."
+msgstr "Povoliť koliesko."
 
 #: lib/logitech_receiver/settings_templates.py:924
-msgid   "Thumbwheel"
-msgstr  "Koliesko"
+msgid "Thumbwheel"
+msgstr "Koliesko"
 
 #: lib/logitech_receiver/settings_templates.py:935
 #: lib/logitech_receiver/settings_templates.py:939
-msgid   "Swipe from the top edge"
-msgstr  "Ťahanie z hornej hrany"
+msgid "Swipe from the top edge"
+msgstr "Ťahanie z hornej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:936
-msgid   "Swipe from the left edge"
-msgstr  "Ťahanie z ľavej hrany"
+msgid "Swipe from the left edge"
+msgstr "Ťahanie z ľavej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:937
-msgid   "Swipe from the right edge"
-msgstr  "Ťahanie z pravej hrany"
+msgid "Swipe from the right edge"
+msgstr "Ťahanie z pravej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:938
-msgid   "Swipe from the bottom edge"
-msgstr  "Ťahanie zo spodnej hrany"
+msgid "Swipe from the bottom edge"
+msgstr "Ťahanie zo spodnej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:940
-msgid   "Swipe two fingers from the left edge"
-msgstr  "Ťahanie dvoma prstami z ľavej hrany"
+msgid "Swipe two fingers from the left edge"
+msgstr "Ťahanie dvoma prstami z ľavej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:941
-msgid   "Swipe two fingers from the right edge"
-msgstr  "Ťahanie dvoma prstami z pravej hrany"
+msgid "Swipe two fingers from the right edge"
+msgstr "Ťahanie dvoma prstami z pravej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:942
-msgid   "Swipe two fingers from the bottom edge"
-msgstr  "Ťahanie dvoma prstami zo spodnej hrany"
+msgid "Swipe two fingers from the bottom edge"
+msgstr "Ťahanie dvoma prstami zo spodnej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:943
-msgid   "Swipe two fingers from the top edge"
-msgstr  "Ťahanie dvoma prstami z hornej hrany"
+msgid "Swipe two fingers from the top edge"
+msgstr "Ťahanie dvoma prstami z hornej hrany"
 
 #: lib/logitech_receiver/settings_templates.py:944
 #: lib/logitech_receiver/settings_templates.py:948
-msgid   "Pinch to zoom out; spread to zoom in."
-msgstr  "Zovrieť pre priblíženie; rozovrieť pre oddialenie."
+msgid "Pinch to zoom out; spread to zoom in."
+msgstr "Zovrieť pre priblíženie; rozovrieť pre oddialenie."
 
 #: lib/logitech_receiver/settings_templates.py:944
-msgid   "Zoom with two fingers."
-msgstr  "Priblíženie dvoma prstami."
+msgid "Zoom with two fingers."
+msgstr "Priblíženie dvoma prstami."
 
 #: lib/logitech_receiver/settings_templates.py:945
-msgid   "Pinch to zoom out."
-msgstr  "Zovrieť pre priblíženie."
+msgid "Pinch to zoom out."
+msgstr "Zovrieť pre priblíženie."
 
 #: lib/logitech_receiver/settings_templates.py:946
-msgid   "Spread to zoom in."
-msgstr  "Rozovrieť pre oddialenie."
+msgid "Spread to zoom in."
+msgstr "Rozovrieť pre oddialenie."
 
 #: lib/logitech_receiver/settings_templates.py:947
-msgid   "Zoom with three fingers."
-msgstr  "Priblíženie troma prstami."
+msgid "Zoom with three fingers."
+msgstr "Priblíženie troma prstami."
 
 #: lib/logitech_receiver/settings_templates.py:948
-msgid   "Zoom with two fingers"
-msgstr  "Priblíženie dvoma pstami"
+msgid "Zoom with two fingers"
+msgstr "Priblíženie dvoma pstami"
 
 #: lib/logitech_receiver/settings_templates.py:966
-msgid   "Pixel zone"
-msgstr  ""
+msgid "Pixel zone"
+msgstr "Pixlová oblasť"
 
 #: lib/logitech_receiver/settings_templates.py:967
-msgid   "Ratio zone"
-msgstr  ""
+msgid "Ratio zone"
+msgstr "Pomerná oblasť"
 
 #: lib/logitech_receiver/settings_templates.py:968
-msgid   "Scale factor"
-msgstr  "Faktor mierky"
+msgid "Scale factor"
+msgstr "Faktor mierky"
 
 #: lib/logitech_receiver/settings_templates.py:968
-msgid   "Sets the cursor speed."
-msgstr  ""
+msgid "Sets the cursor speed."
+msgstr "Nastavuje rýchlosť kurzora."
 
 #: lib/logitech_receiver/settings_templates.py:972
-msgid   "Left"
-msgstr  "Vľavo"
+msgid "Left"
+msgstr "Vľavo"
 
 #: lib/logitech_receiver/settings_templates.py:972
-msgid   "Left-most coordinate."
-msgstr  "Súradnica najviac vľavo."
+msgid "Left-most coordinate."
+msgstr "Súradnica najviac vľavo."
 
 #: lib/logitech_receiver/settings_templates.py:973
-msgid   "Bottom"
-msgstr  ""
+msgid "Bottom"
+msgstr "Spodok"
 
 #: lib/logitech_receiver/settings_templates.py:973
-msgid   "Bottom coordinate."
-msgstr  ""
+msgid "Bottom coordinate."
+msgstr "Úplne spodná súradnica."
 
 #: lib/logitech_receiver/settings_templates.py:974
-msgid   "Width"
-msgstr  "Šírka"
+msgid "Width"
+msgstr "Šírka"
 
 #: lib/logitech_receiver/settings_templates.py:974
-msgid   "Width."
-msgstr  "Šírka."
+msgid "Width."
+msgstr "Šírka."
 
 #: lib/logitech_receiver/settings_templates.py:975
-msgid   "Height"
-msgstr  "Výška"
+msgid "Height"
+msgstr "Výška"
 
 #: lib/logitech_receiver/settings_templates.py:975
-msgid   "Height."
-msgstr  "Výška."
+msgid "Height."
+msgstr "Výška."
 
 #: lib/logitech_receiver/settings_templates.py:976
-msgid   "Cursor speed."
-msgstr  "Rýchlosť kurzora."
+msgid "Cursor speed."
+msgstr "Rýchlosť kurzora."
 
 #: lib/logitech_receiver/settings_templates.py:976
-msgid   "Scale"
-msgstr  "Mierka"
+msgid "Scale"
+msgstr "Mierka"
 
 #: lib/logitech_receiver/settings_templates.py:982
-msgid   "Gestures"
-msgstr  "Gestá"
+msgid "Gestures"
+msgstr "Gestá"
 
 #: lib/logitech_receiver/settings_templates.py:983
-msgid   "Tweak the mouse/touchpad behaviour."
-msgstr  "Upraviť správanie myši/touchpadu."
+msgid "Tweak the mouse/touchpad behaviour."
+msgstr "Upraviť správanie myši/touchpadu."
 
 #: lib/logitech_receiver/settings_templates.py:1000
-msgid   "Gestures Diversion"
-msgstr  ""
+msgid "Gestures Diversion"
+msgstr "Odklon gest"
 
 #: lib/logitech_receiver/settings_templates.py:1001
-msgid   "Divert mouse/touchpad gestures."
-msgstr  ""
+msgid "Divert mouse/touchpad gestures."
+msgstr "Odkloniť gestá myši/touchpadu."
 
 #: lib/logitech_receiver/settings_templates.py:1018
-msgid   "Gesture params"
-msgstr  "Parametre gesta"
+msgid "Gesture params"
+msgstr "Parametre gesta"
 
 #: lib/logitech_receiver/settings_templates.py:1019
-msgid   "Change numerical parameters of a mouse/touchpad."
-msgstr  "Zmeňte číselné parametre myši/touchpadu."
+msgid "Change numerical parameters of a mouse/touchpad."
+msgstr "Zmeňte číselné parametre myši/touchpadu."
 
 #: lib/logitech_receiver/settings_templates.py:1044
-msgid   "M-Key LEDs"
-msgstr  ""
+msgid "M-Key LEDs"
+msgstr "LEDky M-Key"
 
 #: lib/logitech_receiver/settings_templates.py:1046
-msgid   "Control the M-Key LEDs."
-msgstr  ""
+msgid "Control the M-Key LEDs."
+msgstr "Ovládanie LED svetla klávesu M-Key"
 
 #: lib/logitech_receiver/settings_templates.py:1047
 #: lib/logitech_receiver/settings_templates.py:1077
-msgid   "May need G Keys diverted to be effective."
-msgstr  ""
+msgid "May need G Keys diverted to be effective."
+msgstr "Môže vyžadovať odklon G Klávesov aby to fungovalo."
 
 #: lib/logitech_receiver/settings_templates.py:1053
 #, python-format
-msgid   "Lights up the %s key."
-msgstr  ""
+msgid "Lights up the %s key."
+msgstr "Rozsvieti kláves %s."
 
 #: lib/logitech_receiver/settings_templates.py:1074
-msgid   "MR-Key LED"
-msgstr  ""
+msgid "MR-Key LED"
+msgstr "MR-Key LED"
 
 #: lib/logitech_receiver/settings_templates.py:1076
-msgid   "Control the MR-Key LED."
-msgstr  ""
+msgid "Control the MR-Key LED."
+msgstr "Ovláda LEDky klávesu MR-Key."
 
 #: lib/logitech_receiver/settings_templates.py:1095
-msgid   "Persistent Key/Button Mapping"
-msgstr  ""
+msgid "Persistent Key/Button Mapping"
+msgstr "Trvalé mapovanie Klávesov/Tlačidiel"
 
 #: lib/logitech_receiver/settings_templates.py:1097
-msgid   "Permanently change the mapping for the key or button."
-msgstr  ""
+msgid "Permanently change the mapping for the key or button."
+msgstr "Natrvalo zmeniť mapovanie pre kláves alebo tlačidlo."
 
 #: lib/logitech_receiver/settings_templates.py:1098
-msgid   "Changing important keys or buttons (such as for the left mouse "
-        "button) can result in an unusable system."
-msgstr  ""
+msgid ""
+"Changing important keys or buttons (such as for the left mouse "
+"button) can result in an unusable system."
+msgstr ""
+"Zmena dôležitých klávesov alebo tlačidiel (ako je Ľavé tlačidlo myši) môže sko"
+"nčiť nepoužiteľným systémom."
 
 #: lib/logitech_receiver/settings_templates.py:1157
-msgid   "Sidetone"
-msgstr  ""
+msgid "Sidetone"
+msgstr "Bočný odtieň"
 
 #: lib/logitech_receiver/settings_templates.py:1158
-msgid   "Set sidetone level."
-msgstr  ""
+msgid "Set sidetone level."
+msgstr "Nastavenie bočného odtieňa."
 
 #: lib/logitech_receiver/settings_templates.py:1167
-msgid   "Equalizer"
-msgstr  ""
+msgid "Equalizer"
+msgstr "Ekvalizér"
 
 #: lib/logitech_receiver/settings_templates.py:1168
-msgid   "Set equalizer levels."
-msgstr  ""
+msgid "Set equalizer levels."
+msgstr "Nastavenie úrovne ekvalizéru."
 
 #: lib/logitech_receiver/settings_templates.py:1191
-msgid   "Hz"
-msgstr  ""
+msgid "Hz"
+msgstr "Hz"
 
 #: lib/logitech_receiver/settings_templates.py:1197
-msgid   "Power Management"
-msgstr  ""
+msgid "Power Management"
+msgstr "Správa napájania"
 
 #: lib/logitech_receiver/settings_templates.py:1198
-msgid   "Power off in minutes (0 for never)."
-msgstr  ""
+msgid "Power off in minutes (0 for never)."
+msgstr "Minúty do vypnutia (0 znamená nikdy)"
 
 #: lib/logitech_receiver/status.py:114
-msgid   "No paired devices."
-msgstr  "Žiadne spárované zariadenia."
+msgid "No paired devices."
+msgstr "Žiadne spárované zariadenia."
 
 #: lib/logitech_receiver/status.py:115 lib/solaar/ui/window.py:622
 #, python-format
-msgid   "%(count)s paired device."
-msgid_plural    "%(count)s paired devices."
-msgstr[0]       "%(count)s spárované zariadenie."
-msgstr[1]       "%(count)s spárované zariadenia."
-msgstr[2]       "%(count)s spárovaných zariadení."
+msgid "%(count)s paired device."
+msgid_plural "%(count)s paired devices."
+msgstr[0] "%(count)s spárované zariadenie."
+msgstr[1] "%(count)s spárované zariadenia."
+msgstr[2] "%(count)s spárovaných zariadení."
 
 #: lib/logitech_receiver/status.py:170
 #, python-format
-msgid   "Battery: %(level)s"
-msgstr  "Batéria: %(level)s"
+msgid "Battery: %(level)s"
+msgstr "Batéria: %(level)s"
 
 #: lib/logitech_receiver/status.py:172
 #, python-format
-msgid   "Battery: %(percent)d%%"
-msgstr  "Batéria: %(percent)d%%"
+msgid "Battery: %(percent)d%%"
+msgstr "Batéria: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:184
 #, python-format
-msgid   "Lighting: %(level)s lux"
-msgstr  "Osvetlenie: %(level)s lux"
+msgid "Lighting: %(level)s lux"
+msgstr "Osvetlenie: %(level)s lux"
 
 #: lib/logitech_receiver/status.py:239
 #, python-format
-msgid   "Battery: %(level)s (%(status)s)"
-msgstr  "Batéria: %(level)s (%(status)s)"
+msgid "Battery: %(level)s (%(status)s)"
+msgstr "Batéria: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:241
 #, python-format
-msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  "Batéria: %(percent)d%% (%(status)s)"
+msgid "Battery: %(percent)d%% (%(status)s)"
+msgstr "Batéria: %(percent)d%% (%(status)s)"
 
 #: lib/solaar/ui/__init__.py:52
-msgid   "Permissions error"
-msgstr  "Chyba oprávnenia"
+msgid "Permissions error"
+msgstr "Chyba oprávnenia"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-format
-msgid   "Found a Logitech receiver or device (%s), but did not have "
-        "permission to open it."
-msgstr  ""
+msgid ""
+"Found a Logitech receiver or device (%s), but did not have "
+"permission to open it."
+msgstr ""
+"Našiel sa prijímač alebo zariadenie Logitech (%s), ale nemal oprávnenie na jeh"
+"o otvorenie."
 
 #: lib/solaar/ui/__init__.py:55
-msgid   "If you've just installed Solaar, try disconnecting the receiver or "
-        "device and then reconnecting it."
-msgstr  ""
+msgid ""
+"If you've just installed Solaar, try disconnecting the receiver or "
+"device and then reconnecting it."
+msgstr ""
+"Ak ste práve nainštalovali Solaar, skúste odpojiť prijímač alebo zariadenie a "
+"znova ho pripojiť."
 
 #: lib/solaar/ui/__init__.py:58
-msgid   "Cannot connect to device error"
-msgstr  "Chyba počas pripájania k zariadeniu"
+msgid "Cannot connect to device error"
+msgstr "Chyba počas pripájania k zariadeniu"
 
 #: lib/solaar/ui/__init__.py:60
 #, python-format
-msgid   "Found a Logitech receiver or device at %s, but encountered an error "
-        "connecting to it."
-msgstr  "Našiel sa Logitech prijímač alebo zariadenie na %s, ale pri pokuse o "
-        "pripojenie nastala chyba."
+msgid ""
+"Found a Logitech receiver or device at %s, but encountered an error "
+"connecting to it."
+msgstr ""
+"Našiel sa Logitech prijímač alebo zariadenie na %s, ale pri pokuse o "
+"pripojenie nastala chyba."
 
 #: lib/solaar/ui/__init__.py:61
-msgid   "Try disconnecting the device and then reconnecting it or turning it "
-        "off and then on."
-msgstr  ""
+msgid ""
+"Try disconnecting the device and then reconnecting it or turning it "
+"off and then on."
+msgstr ""
+"Skúste odpojiť zariadenie a potom ho opätovne pripojiť alebo ho skúste vypnúť "
+"a zase zapnúť."
 
 #: lib/solaar/ui/__init__.py:64
-msgid   "Unpairing failed"
-msgstr  "Rušenie spárovania skončilo s chybou"
+msgid "Unpairing failed"
+msgstr "Rušenie spárovania skončilo s chybou"
 
 #: lib/solaar/ui/__init__.py:66
 #, python-brace-format
-msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "Zlyhalo zrušenie spárovania zariadenia %{device} k %{receiver}."
+msgid "Failed to unpair %{device} from %{receiver}."
+msgstr "Zlyhalo zrušenie spárovania zariadenia %{device} k %{receiver}."
 
 #: lib/solaar/ui/__init__.py:67
-msgid   "The receiver returned an error, with no further details."
-msgstr  "Prijímač vrátil chybu, ale nie sú dostupné žiadne podrobnosti o nej."
+msgid "The receiver returned an error, with no further details."
+msgstr "Prijímač vrátil chybu, ale nie sú dostupné žiadne podrobnosti o nej."
 
 #: lib/solaar/ui/__init__.py:177
-msgid   "Another Solaar process is already running so just expose its window"
-msgstr  ""
+msgid "Another Solaar process is already running so just expose its window"
+msgstr "Iný proces Solaaru uz beží, takže len odkryte jeho okno"
 
 #: lib/solaar/ui/about.py:36
-msgid   "Manages Logitech receivers,\n"
-        "keyboards, mice, and tablets."
-msgstr  "Správa prijímačov Logitech,\n"
-        "klávesníc, myší a tabletov."
+msgid ""
+"Manages Logitech receivers,\n"
+"keyboards, mice, and tablets."
+msgstr ""
+"Správa prijímačov Logitech,\n"
+"klávesníc, myší a tabletov."
 
 #: lib/solaar/ui/about.py:44
-msgid   "Additional Programming"
-msgstr  "Dodatočné programovanie"
+msgid "Additional Programming"
+msgstr "Dodatočné programovanie"
 
 #: lib/solaar/ui/about.py:45
-msgid   "GUI design"
-msgstr  "Návrh GUI"
+msgid "GUI design"
+msgstr "Návrh GUI"
 
 #: lib/solaar/ui/about.py:47
-msgid   "Testing"
-msgstr  "Testovanie"
+msgid "Testing"
+msgstr "Testovanie"
 
 #: lib/solaar/ui/about.py:54
-msgid   "Logitech documentation"
-msgstr  "Dokumentácia Logitechu"
+msgid "Logitech documentation"
+msgstr "Dokumentácia Logitechu"
 
 #: lib/solaar/ui/action.py:85 lib/solaar/ui/action.py:89
 #: lib/solaar/ui/window.py:197
-msgid   "Unpair"
-msgstr  "Zrušiť párovanie"
+msgid "Unpair"
+msgstr "Zrušiť párovanie"
 
 #: lib/solaar/ui/action.py:88 lib/solaar/ui/diversion_rules.py:150
-msgid   "Cancel"
-msgstr  "Zrušiť"
+msgid "Cancel"
+msgstr "Zrušiť"
 
 #: lib/solaar/ui/config_panel.py:212
-msgid   "Complete - ENTER to change"
-msgstr  ""
+msgid "Complete - ENTER to change"
+msgstr ""
 
 #: lib/solaar/ui/config_panel.py:212
-msgid   "Incomplete"
-msgstr  ""
+msgid "Incomplete"
+msgstr ""
 
 #: lib/solaar/ui/config_panel.py:455 lib/solaar/ui/config_panel.py:507
 #, python-format
-msgid   "%d value"
-msgid_plural    "%d values"
-msgstr[0]       "%d hodnota"
-msgstr[1]       "%d hodnoty"
-msgstr[2]       "%d hodnôt"
+msgid "%d value"
+msgid_plural "%d values"
+msgstr[0] "%d hodnota"
+msgstr[1] "%d hodnoty"
+msgstr[2] "%d hodnôt"
 
 #: lib/solaar/ui/config_panel.py:518
-msgid   "Changes allowed"
-msgstr  "Zmeny sú povolené"
+msgid "Changes allowed"
+msgstr "Zmeny sú povolené"
 
 #: lib/solaar/ui/config_panel.py:519
-msgid   "No changes allowed"
-msgstr  "Zmeny nie sú povolené"
+msgid "No changes allowed"
+msgstr "Zmeny nie sú povolené"
 
 #: lib/solaar/ui/config_panel.py:520
-msgid   "Ignore this setting"
-msgstr  "Ignorovať toto nastavenie"
+msgid "Ignore this setting"
+msgstr "Ignorovať toto nastavenie"
 
 #: lib/solaar/ui/config_panel.py:565
-msgid   "Working"
-msgstr  "Pracujem"
+msgid "Working"
+msgstr "Pracujem"
 
 #: lib/solaar/ui/config_panel.py:568
-msgid   "Read/write operation failed."
-msgstr  "Operácia čítania/zápisu zlyhala."
+msgid "Read/write operation failed."
+msgstr "Operácia čítania/zápisu zlyhala."
 
 #: lib/solaar/ui/diversion_rules.py:65
-msgid   "Built-in rules"
-msgstr  "Zabudované pravidlá"
+msgid "Built-in rules"
+msgstr "Zabudované pravidlá"
 
 #: lib/solaar/ui/diversion_rules.py:65
-msgid   "User-defined rules"
-msgstr  "Používateľom definované pravidlá"
+msgid "User-defined rules"
+msgstr "Používateľom definované pravidlá"
 
 #: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1083
-msgid   "Rule"
-msgstr  "Pravidlo"
+msgid "Rule"
+msgstr "Pravidlo"
 
 #: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:509
 #: lib/solaar/ui/diversion_rules.py:636
-msgid   "Sub-rule"
-msgstr  "Podpravidlo"
+msgid "Sub-rule"
+msgstr "Podpravidlo"
 
 #: lib/solaar/ui/diversion_rules.py:70
-msgid   "[empty]"
-msgstr  "[prázdne]"
+msgid "[empty]"
+msgstr "[prázdne]"
 
 #: lib/solaar/ui/diversion_rules.py:94
-msgid   "Solaar Rule Editor"
-msgstr  "Editor pravidiel Solaar"
+msgid "Solaar Rule Editor"
+msgstr "Editor pravidiel Solaar"
 
 #: lib/solaar/ui/diversion_rules.py:141
-msgid   "Make changes permanent?"
-msgstr  "Označiť zmeny ako trvalé?"
+msgid "Make changes permanent?"
+msgstr "Označiť zmeny ako trvalé?"
 
 #: lib/solaar/ui/diversion_rules.py:146
-msgid   "Yes"
-msgstr  "Áno"
+msgid "Yes"
+msgstr "Áno"
 
 #: lib/solaar/ui/diversion_rules.py:148
-msgid   "No"
-msgstr  "Nie"
+msgid "No"
+msgstr "Nie"
 
 #: lib/solaar/ui/diversion_rules.py:153
-msgid   "If you choose No, changes will be lost when Solaar is closed."
-msgstr  "Ak vyberiete Nie, zmeny, ktoré ste vykonali sa po ukončení "
-        "aplikácie, stratia."
+msgid "If you choose No, changes will be lost when Solaar is closed."
+msgstr ""
+"Ak vyberiete Nie, zmeny, ktoré ste vykonali sa po ukončení "
+"aplikácie, stratia."
 
 #: lib/solaar/ui/diversion_rules.py:201
-msgid   "Save changes"
-msgstr  "Uložiť zmeny"
+msgid "Save changes"
+msgstr "Uložiť zmeny"
 
 #: lib/solaar/ui/diversion_rules.py:206
-msgid   "Discard changes"
-msgstr  "Zahodiť zmeny"
+msgid "Discard changes"
+msgstr "Zahodiť zmeny"
 
 #: lib/solaar/ui/diversion_rules.py:372
-msgid   "Insert here"
-msgstr  "Vložiť sem"
+msgid "Insert here"
+msgstr "Vložiť sem"
 
 #: lib/solaar/ui/diversion_rules.py:374
-msgid   "Insert above"
-msgstr  "Vložiť nad"
+msgid "Insert above"
+msgstr "Vložiť nad"
 
 #: lib/solaar/ui/diversion_rules.py:376
-msgid   "Insert below"
-msgstr  "Vložiť pod"
+msgid "Insert below"
+msgstr "Vložiť pod"
 
 #: lib/solaar/ui/diversion_rules.py:382
-msgid   "Insert new rule here"
-msgstr  "Vložiť nové pravidlo sem"
+msgid "Insert new rule here"
+msgstr "Vložiť nové pravidlo sem"
 
 #: lib/solaar/ui/diversion_rules.py:384
-msgid   "Insert new rule above"
-msgstr  "Vložiť nové pravidlo nad"
+msgid "Insert new rule above"
+msgstr "Vložiť nové pravidlo nad"
 
 #: lib/solaar/ui/diversion_rules.py:386
-msgid   "Insert new rule below"
-msgstr  "Vložiť nové pravidlo pod"
+msgid "Insert new rule below"
+msgstr "Vložiť nové pravidlo pod"
 
 #: lib/solaar/ui/diversion_rules.py:427
-msgid   "Paste here"
-msgstr  "Vložiť sem"
+msgid "Paste here"
+msgstr "Vložiť sem"
 
 #: lib/solaar/ui/diversion_rules.py:429
-msgid   "Paste above"
-msgstr  "Vložiť nad"
+msgid "Paste above"
+msgstr "Vložiť nad"
 
 #: lib/solaar/ui/diversion_rules.py:431
-msgid   "Paste below"
-msgstr  "Vložiť pod"
+msgid "Paste below"
+msgstr "Vložiť pod"
 
 #: lib/solaar/ui/diversion_rules.py:437
-msgid   "Paste rule here"
-msgstr  "Vložiť pravidlo sem"
+msgid "Paste rule here"
+msgstr "Vložiť pravidlo sem"
 
 #: lib/solaar/ui/diversion_rules.py:439
-msgid   "Paste rule above"
-msgstr  "Vložiť pravidlo nad"
+msgid "Paste rule above"
+msgstr "Vložiť pravidlo nad"
 
 #: lib/solaar/ui/diversion_rules.py:441
-msgid   "Paste rule below"
-msgstr  "Vložiť pravidlo pod"
+msgid "Paste rule below"
+msgstr "Vložiť pravidlo pod"
 
 #: lib/solaar/ui/diversion_rules.py:445
-msgid   "Paste rule"
-msgstr  "Vložiť pravidlo"
+msgid "Paste rule"
+msgstr "Vložiť pravidlo"
 
 #: lib/solaar/ui/diversion_rules.py:474
-msgid   "Flatten"
-msgstr  "Sploštiť"
+msgid "Flatten"
+msgstr "Sploštiť"
 
 #: lib/solaar/ui/diversion_rules.py:507
-msgid   "Insert"
-msgstr  "Vložiť"
+msgid "Insert"
+msgstr "Vložiť"
 
 #: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:638
 #: lib/solaar/ui/diversion_rules.py:1126
-msgid   "Or"
-msgstr  "Alebo"
+msgid "Or"
+msgstr "Alebo"
 
 #: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:637
 #: lib/solaar/ui/diversion_rules.py:1111
-msgid   "And"
-msgstr  "A"
+msgid "And"
+msgstr "A"
 
 #: lib/solaar/ui/diversion_rules.py:513
-msgid   "Condition"
-msgstr  "Podmienka"
+msgid "Condition"
+msgstr "Podmienka"
 
 #: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1292
-msgid   "Feature"
-msgstr  "Vlastnosť"
+msgid "Feature"
+msgstr "Vlastnosť"
 
 #: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1328
-msgid   "Report"
-msgstr  "Hlásenie"
+msgid "Report"
+msgstr "Hlásenie"
 
 #: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1204
-msgid   "Process"
-msgstr  "Proces"
+msgid "Process"
+msgstr "Proces"
 
 #: lib/solaar/ui/diversion_rules.py:518
-msgid   "Mouse process"
-msgstr  ""
+msgid "Mouse process"
+msgstr "Proces myši"
 
 #: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1366
-msgid   "Modifiers"
-msgstr  "Modifikátory"
+msgid "Modifiers"
+msgstr "Modifikátory"
 
 #: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1419
-msgid   "Key"
-msgstr  "Kláves"
+msgid "Key"
+msgstr "Kláves"
 
 #: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1461
-msgid   "KeyIsDown"
-msgstr  ""
+msgid "KeyIsDown"
+msgstr "KlávesJeStlačený"
 
 #: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2260
-msgid   "Active"
-msgstr  "Aktívne"
+msgid "Active"
+msgstr "Aktívne"
 
 #: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:2218
 #: lib/solaar/ui/diversion_rules.py:2270 lib/solaar/ui/diversion_rules.py:2323
-msgid   "Device"
-msgstr  ""
+msgid "Device"
+msgstr "Zariadenie"
 
 #: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:2297
-msgid   "Host"
-msgstr  ""
+msgid "Host"
+msgstr "Hostiteľ"
 
 #: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:2339
-msgid   "Setting"
-msgstr  ""
+msgid "Setting"
+msgstr "Nastavenie"
 
 #: lib/solaar/ui/diversion_rules.py:526 lib/solaar/ui/diversion_rules.py:1477
 #: lib/solaar/ui/diversion_rules.py:1526
-msgid   "Test"
-msgstr  "Test"
+msgid "Test"
+msgstr "Test"
 
 #: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1643
-msgid   "Test bytes"
-msgstr  ""
+msgid "Test bytes"
+msgstr "Test bajtov"
 
 #: lib/solaar/ui/diversion_rules.py:528 lib/solaar/ui/diversion_rules.py:1736
-msgid   "Mouse Gesture"
-msgstr  "Gesto myši"
+msgid "Mouse Gesture"
+msgstr "Gesto myši"
 
 #: lib/solaar/ui/diversion_rules.py:532
-msgid   "Action"
-msgstr  "Akcia"
+msgid "Action"
+msgstr "Akcia"
 
 #: lib/solaar/ui/diversion_rules.py:534 lib/solaar/ui/diversion_rules.py:1845
-msgid   "Key press"
-msgstr  "Stlačenie klávesu"
+msgid "Key press"
+msgstr "Stlačenie klávesu"
 
 #: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1897
-msgid   "Mouse scroll"
-msgstr  "Skrolovanie kolieskom"
+msgid "Mouse scroll"
+msgstr "Skrolovanie kolieskom"
 
 #: lib/solaar/ui/diversion_rules.py:536 lib/solaar/ui/diversion_rules.py:1959
-msgid   "Mouse click"
-msgstr  "Kliknutie myšou"
+msgid "Mouse click"
+msgstr "Kliknutie myšou"
 
 #: lib/solaar/ui/diversion_rules.py:537
-msgid   "Set"
-msgstr  ""
+msgid "Set"
+msgstr "Nastaviť"
 
 #: lib/solaar/ui/diversion_rules.py:538 lib/solaar/ui/diversion_rules.py:2030
-msgid   "Execute"
-msgstr  "Spustiť program"
+msgid "Execute"
+msgstr "Spustiť program"
 
 #: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:1158
-msgid   "Later"
-msgstr  ""
+msgid "Later"
+msgstr "Neskôr"
 
 #: lib/solaar/ui/diversion_rules.py:568
-msgid   "Insert new rule"
-msgstr  "Vložiť nové pravidlo"
+msgid "Insert new rule"
+msgstr "Vložiť nové pravidlo"
 
 #: lib/solaar/ui/diversion_rules.py:588 lib/solaar/ui/diversion_rules.py:1686
 #: lib/solaar/ui/diversion_rules.py:1790 lib/solaar/ui/diversion_rules.py:1989
-msgid   "Delete"
-msgstr  "Odstrániť"
+msgid "Delete"
+msgstr "Odstrániť"
 
 #: lib/solaar/ui/diversion_rules.py:610
-msgid   "Negate"
-msgstr  "Negovať"
+msgid "Negate"
+msgstr "Negovať"
 
 #: lib/solaar/ui/diversion_rules.py:634
-msgid   "Wrap with"
-msgstr  "Obaliť čím"
+msgid "Wrap with"
+msgstr "Obaliť čím"
 
 #: lib/solaar/ui/diversion_rules.py:656
-msgid   "Cut"
-msgstr  "Vystrihnúť"
+msgid "Cut"
+msgstr "Vystrihnúť"
 
 #: lib/solaar/ui/diversion_rules.py:671
-msgid   "Paste"
-msgstr  "Vložiť"
+msgid "Paste"
+msgstr "Vložiť"
 
 #: lib/solaar/ui/diversion_rules.py:683
-msgid   "Copy"
-msgstr  "Kopírovať"
+msgid "Copy"
+msgstr "Kopírovať"
 
 #: lib/solaar/ui/diversion_rules.py:1063
-msgid   "This editor does not support the selected rule component yet."
-msgstr  "Vybraný komponent nie je editorom ešte podporovaný."
+msgid "This editor does not support the selected rule component yet."
+msgstr "Vybraný komponent nie je editorom ešte podporovaný."
 
 #: lib/solaar/ui/diversion_rules.py:1138
-msgid   "Number of seconds to delay."
-msgstr  ""
+msgid "Number of seconds to delay."
+msgstr "Počet sekúnd oneskorenia."
 
 #: lib/solaar/ui/diversion_rules.py:1177
-msgid   "Not"
-msgstr  "Opak"
+msgid "Not"
+msgstr "Opak"
 
 #: lib/solaar/ui/diversion_rules.py:1187
-msgid   "X11 active process. For use in X11 only."
-msgstr  ""
+msgid "X11 active process. For use in X11 only."
+msgstr "Aktývny proces X11. Len pre použitie v X11."
 
 #: lib/solaar/ui/diversion_rules.py:1218
-msgid   "X11 mouse process. For use in X11 only."
-msgstr  ""
+msgid "X11 mouse process. For use in X11 only."
+msgstr "Proces myši X11. Len pre použitie v X11."
 
 #: lib/solaar/ui/diversion_rules.py:1235
-msgid   "MouseProcess"
-msgstr  "ProcesMyši"
+msgid "MouseProcess"
+msgstr "ProcesMyši"
 
 #: lib/solaar/ui/diversion_rules.py:1260
-msgid   "Feature name of notification triggering rule processing."
-msgstr  ""
+msgid "Feature name of notification triggering rule processing."
+msgstr "Názov funkcie upozornenia, ktorá spúšťa spracovanie pravidla."
 
 #: lib/solaar/ui/diversion_rules.py:1308
-msgid   "Report number of notification triggering rule processing."
-msgstr  ""
+msgid "Report number of notification triggering rule processing."
+msgstr "Počet upozornení, ktoré spúšťajú spracovanie pravidla."
 
 #: lib/solaar/ui/diversion_rules.py:1342
-msgid   "Active keyboard modifiers. Not always available in Wayland."
-msgstr  ""
+msgid "Active keyboard modifiers. Not always available in Wayland."
+msgstr "Aktívne modifikátory klávesnice. Vo Waylande nie sú vždy dostupné."
 
 #: lib/solaar/ui/diversion_rules.py:1383
-msgid   "Diverted key or button depressed or released.\n"
-        "Use the Key/Button Diversion and Divert G Keys settings to divert "
-        "keys and buttons."
-msgstr  ""
+msgid ""
+"Diverted key or button depressed or released.\n"
+"Use the Key/Button Diversion and Divert G Keys settings to divert "
+"keys and buttons."
+msgstr ""
+"Odklonený kláves alebo tlačidlo stlačené alebo uvoľnené.\n"
+"Použiť Odklonenie Klávesu/Tlačidla a Odkloniť nastavenie G Klávesov pre odklon"
+"enie klávesov a tlačidiel."
 
 #: lib/solaar/ui/diversion_rules.py:1392
-msgid   "Key down"
-msgstr  ""
+msgid "Key down"
+msgstr "Kláves stlačený"
 
 #: lib/solaar/ui/diversion_rules.py:1395
-msgid   "Key up"
-msgstr  ""
+msgid "Key up"
+msgstr "Kláves uvoľnený"
 
 #: lib/solaar/ui/diversion_rules.py:1436
-msgid   "Diverted key or button is currently down.\n"
-        "Use the Key/Button Diversion and Divert G Keys settings to divert "
-        "keys and buttons."
-msgstr  ""
+msgid ""
+"Diverted key or button is currently down.\n"
+"Use the Key/Button Diversion and Divert G Keys settings to divert "
+"keys and buttons."
+msgstr ""
+"Odklonený kláves alebo tlačidlo je práve stlačené.\n"
+"Použiť Odklon Klávesov/Tlačidiel a Odkloniť nastavenie G Klávesov na odkloneni"
+"e klávesov a tlačidiel."
 
 #: lib/solaar/ui/diversion_rules.py:1475
-msgid   "Test condition on notification triggering rule processing."
-msgstr  ""
+msgid "Test condition on notification triggering rule processing."
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1479
-msgid   "Parameter"
-msgstr  ""
+msgid "Parameter"
+msgstr "Parameter"
 
 #: lib/solaar/ui/diversion_rules.py:1542
-msgid   "begin (inclusive)"
-msgstr  ""
+msgid "begin (inclusive)"
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1543
-msgid   "end (exclusive)"
-msgstr  ""
+msgid "end (exclusive)"
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1552
-msgid   "range"
-msgstr  ""
+msgid "range"
+msgstr "rozsah"
 
 #: lib/solaar/ui/diversion_rules.py:1554
-msgid   "minimum"
-msgstr  ""
+msgid "minimum"
+msgstr "minimum"
 
 #: lib/solaar/ui/diversion_rules.py:1555
-msgid   "maximum"
-msgstr  ""
+msgid "maximum"
+msgstr "maximum"
 
 #: lib/solaar/ui/diversion_rules.py:1557
 #, python-format
-msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
-msgstr  ""
+msgid "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1562
-msgid   "mask"
-msgstr  ""
+msgid "mask"
+msgstr "maska"
 
 #: lib/solaar/ui/diversion_rules.py:1563
 #, python-format
-msgid   "bytes %(0)d to %(1)d, mask %(2)d"
-msgstr  ""
+msgid "bytes %(0)d to %(1)d, mask %(2)d"
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1573
-msgid   "Bit or range test on bytes in notification message triggering rule "
-        "processing."
-msgstr  ""
+msgid ""
+"Bit or range test on bytes in notification message triggering rule "
+"processing."
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1583
-msgid   "type"
-msgstr  ""
+msgid "type"
+msgstr "typ"
 
 #: lib/solaar/ui/diversion_rules.py:1666
-msgid   "Mouse gesture with optional initiating button followed by zero or "
-        "more mouse movements."
-msgstr  ""
+msgid ""
+"Mouse gesture with optional initiating button followed by zero or "
+"more mouse movements."
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1671
-msgid   "Add movement"
-msgstr  ""
+msgid "Add movement"
+msgstr "Pridať pohyb"
 
 #: lib/solaar/ui/diversion_rules.py:1764
-msgid   "Simulate a chorded key click or depress or release.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  ""
+msgid ""
+"Simulate a chorded key click or depress or release.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:1769
-msgid   "Add key"
-msgstr  "Pridať kláves"
+msgid "Add key"
+msgstr "Pridať kláves"
 
 #: lib/solaar/ui/diversion_rules.py:1772
-msgid   "Click"
-msgstr  ""
+msgid "Click"
+msgstr "Kliknutie"
 
 #: lib/solaar/ui/diversion_rules.py:1775
-msgid   "Depress"
-msgstr  ""
+msgid "Depress"
+msgstr "Stlačiť"
 
 #: lib/solaar/ui/diversion_rules.py:1778
-msgid   "Release"
-msgstr  ""
+msgid "Release"
+msgstr "Uvoľniť"
 
 #: lib/solaar/ui/diversion_rules.py:1861
-msgid   "Simulate a mouse scroll.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  ""
+msgid ""
+"Simulate a mouse scroll.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
+"Simulovať rolovanie myši.\n"
+"Vo Waylande vyžaduje právo na zápis do /dev/uinput."
 
 #: lib/solaar/ui/diversion_rules.py:1918
-msgid   "Simulate a mouse click.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  ""
+msgid ""
+"Simulate a mouse click.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
+"Simulovať kliknutie myši.\n"
+"Vo Waylande vyžaduje právo na zápis do /dev/uinput."
 
 #: lib/solaar/ui/diversion_rules.py:1921
-msgid   "Button"
-msgstr  "Tlačidlo"
+msgid "Button"
+msgstr "Tlačidlo"
 
 #: lib/solaar/ui/diversion_rules.py:1922
-msgid   "Count and Action"
-msgstr  ""
+msgid "Count and Action"
+msgstr "Počet a Akcia"
 
 #: lib/solaar/ui/diversion_rules.py:1972
-msgid   "Execute a command with arguments."
-msgstr  ""
+msgid "Execute a command with arguments."
+msgstr "Vykonať príkaz s argumentami."
 
 #: lib/solaar/ui/diversion_rules.py:1975
-msgid   "Add argument"
-msgstr  "Pridať argument"
+msgid "Add argument"
+msgstr "Pridať argument"
 
 #: lib/solaar/ui/diversion_rules.py:2050
-msgid   "Toggle"
-msgstr  ""
+msgid "Toggle"
+msgstr "Prepínač"
 
 #: lib/solaar/ui/diversion_rules.py:2050
-msgid   "True"
-msgstr  ""
+msgid "True"
+msgstr "Pravda"
 
 #: lib/solaar/ui/diversion_rules.py:2051
-msgid   "False"
-msgstr  ""
+msgid "False"
+msgstr "Nepravda"
 
 #: lib/solaar/ui/diversion_rules.py:2065
-msgid   "Unsupported setting"
-msgstr  ""
+msgid "Unsupported setting"
+msgstr "Nepodporované nastavenie"
 
 #: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2242
 #: lib/solaar/ui/diversion_rules.py:2328 lib/solaar/ui/diversion_rules.py:2570
 #: lib/solaar/ui/diversion_rules.py:2588
-msgid   "Originating device"
-msgstr  ""
+msgid "Originating device"
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:2256
-msgid   "Device is active and its settings can be changed."
-msgstr  ""
+msgid "Device is active and its settings can be changed."
+msgstr "Zariadenie je aktívne a jeho nastavenia možno meniť."
 
 #: lib/solaar/ui/diversion_rules.py:2266
-msgid   "Device that originated the current notification."
-msgstr  ""
+msgid "Device that originated the current notification."
+msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:2280
-msgid   "Name of host computer."
-msgstr  ""
+msgid "Name of host computer."
+msgstr "Názov hostiteľského počítača."
 
 #: lib/solaar/ui/diversion_rules.py:2347
-msgid   "Value"
-msgstr  "Hodnota"
+msgid "Value"
+msgstr "Hodnota"
 
 #: lib/solaar/ui/diversion_rules.py:2355
-msgid   "Item"
-msgstr  ""
+msgid "Item"
+msgstr "Položka"
 
 #: lib/solaar/ui/diversion_rules.py:2630
-msgid   "Change setting on device"
-msgstr  ""
+msgid "Change setting on device"
+msgstr "Zmeniť nastavenie na zariadení"
 
 #: lib/solaar/ui/diversion_rules.py:2647
-msgid   "Setting on device"
-msgstr  ""
+msgid "Setting on device"
+msgstr "Nastavenie na zariadení"
 
 #: lib/solaar/ui/notify.py:124 lib/solaar/ui/tray.py:318
 #: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:739
-msgid   "offline"
-msgstr  "offline"
+msgid "offline"
+msgstr "offline"
 
 #: lib/solaar/ui/pair_window.py:122 lib/solaar/ui/pair_window.py:256
 #: lib/solaar/ui/pair_window.py:288
 #, python-format
-msgid   "%(receiver_name)s: pair new device"
-msgstr  "%(receiver_name)s: spárovať nové zariadenie"
+msgid "%(receiver_name)s: pair new device"
+msgstr "%(receiver_name)s: spárovať nové zariadenie"
 
 #: lib/solaar/ui/pair_window.py:123
 #, python-format
-msgid   "Enter passcode on %(name)s."
-msgstr  ""
+msgid "Enter passcode on %(name)s."
+msgstr "Vložte tajný kód na %(name)s."
 
 #: lib/solaar/ui/pair_window.py:126
 #, python-format
-msgid   "Type %(passcode)s and then press the enter key."
-msgstr  ""
+msgid "Type %(passcode)s and then press the enter key."
+msgstr "Napíšte %(passcode) a potom stlačte kláves Enter."
 
 #: lib/solaar/ui/pair_window.py:129
-msgid   "left"
-msgstr  ""
+msgid "left"
+msgstr "vľavo"
 
 #: lib/solaar/ui/pair_window.py:129
-msgid   "right"
-msgstr  ""
+msgid "right"
+msgstr "vpravo"
 
 #: lib/solaar/ui/pair_window.py:131
 #, python-format
-msgid   "Press %(code)s\n"
-        "and then press left and right buttons simultaneously."
-msgstr  ""
+msgid ""
+"Press %(code)s\n"
+"and then press left and right buttons simultaneously."
+msgstr ""
+"Stlačte %(code)y\n"
+"a potom stlačte ľavé a pravé tlačidlo súčasne."
 
 #: lib/solaar/ui/pair_window.py:188
-msgid   "Pairing failed"
-msgstr  "Párovanie skončilo s chybou"
+msgid "Pairing failed"
+msgstr "Párovanie skončilo s chybou"
 
 #: lib/solaar/ui/pair_window.py:190
-msgid   "Make sure your device is within range, and has a decent battery "
-        "charge."
-msgstr  "Uistite sa, že je zariadenie v dosahu a je dostatočne nabité."
+msgid ""
+"Make sure your device is within range, and has a decent battery "
+"charge."
+msgstr "Uistite sa, že je zariadenie v dosahu a je dostatočne nabité."
 
 #: lib/solaar/ui/pair_window.py:192
-msgid   "A new device was detected, but it is not compatible with this "
-        "receiver."
-msgstr  "Bolo zistené nové zariadenie, ale nie je kompatibilné s týmto "
-        "prijímačom."
+msgid ""
+"A new device was detected, but it is not compatible with this "
+"receiver."
+msgstr ""
+"Bolo zistené nové zariadenie, ale nie je kompatibilné s týmto "
+"prijímačom."
 
 #: lib/solaar/ui/pair_window.py:194
-msgid   "More paired devices than receiver can support."
-msgstr  "Viac pripojených zariadení ako dokáže prijímač zvládnuť."
+msgid "More paired devices than receiver can support."
+msgstr "Viac pripojených zariadení ako dokáže prijímač zvládnuť."
 
 #: lib/solaar/ui/pair_window.py:196
-msgid   "No further details are available about the error."
-msgstr  "Ďalšie podrobnosti o chybe nie sú dostupné."
+msgid "No further details are available about the error."
+msgstr "Ďalšie podrobnosti o chybe nie sú dostupné."
 
 #: lib/solaar/ui/pair_window.py:210
-msgid   "Found a new device:"
-msgstr  "Nájdené nové zariadenie:"
+msgid "Found a new device:"
+msgstr "Nájdené nové zariadenie:"
 
 #: lib/solaar/ui/pair_window.py:235
-msgid   "The wireless link is not encrypted"
-msgstr  "Bezdrôtové pripojenie nepoužíva šifrovanie"
+msgid "The wireless link is not encrypted"
+msgstr "Bezdrôtové pripojenie nepoužíva šifrovanie"
 
 #: lib/solaar/ui/pair_window.py:264
-msgid   "Unifying receivers are only compatible with Unifying devices."
-msgstr  ""
+msgid "Unifying receivers are only compatible with Unifying devices."
+msgstr "Unifying prijímače sú kompatibilné len s Unifying zariadeniami."
 
 #: lib/solaar/ui/pair_window.py:266
-msgid   "Bolt receivers are only compatible with Bolt devices."
-msgstr  ""
+msgid "Bolt receivers are only compatible with Bolt devices."
+msgstr "Bolt prijímače sú kompatibilné len s Bolt zariadeniami."
 
 #: lib/solaar/ui/pair_window.py:268
-msgid   "Other receivers are only compatible with a few devices."
-msgstr  ""
+msgid "Other receivers are only compatible with a few devices."
+msgstr "Ostatné prijímače sú kompatibilné len s máloktorými zariadeniami."
 
 #: lib/solaar/ui/pair_window.py:270
-msgid   "The device must not be paired with a nearby powered-on receiver."
-msgstr  ""
+msgid "The device must not be paired with a nearby powered-on receiver."
+msgstr "Zariadenie nesmie byť spárované s nedaľekým zapnutým prijímačom."
 
 #: lib/solaar/ui/pair_window.py:274
-msgid   "Press a pairing button or key until the pairing light flashes "
-        "quickly."
-msgstr  ""
+msgid ""
+"Press a pairing button or key until the pairing light flashes "
+"quickly."
+msgstr ""
+"Stlačte párovacie tlačidlo alebo kláves kým rýchlo nezabliká párovacie svetlo."
 
 #: lib/solaar/ui/pair_window.py:276
-msgid   "You may have to first turn the device off and on again."
-msgstr  ""
+msgid "You may have to first turn the device off and on again."
+msgstr "Možno bude treba najprv zariadenie vypnuť a znova zapnúť."
 
 #: lib/solaar/ui/pair_window.py:278
-msgid   "Turn on the device you want to pair."
-msgstr  "Zapnite zariadenie, ktoré chcete spárovať."
+msgid "Turn on the device you want to pair."
+msgstr "Zapnite zariadenie, ktoré chcete spárovať."
 
 #: lib/solaar/ui/pair_window.py:280
-msgid   "If the device is already turned on, turn it off and on again."
-msgstr  "Ak je zariadenie už zapnuté, vypnite ho a opäť zapnite."
+msgid "If the device is already turned on, turn it off and on again."
+msgstr "Ak je zariadenie už zapnuté, vypnite ho a opäť zapnite."
 
 #: lib/solaar/ui/pair_window.py:283
 #, python-format
-msgid   "\n"
-        "\n"
-        "This receiver has %d pairing remaining."
-msgid_plural    "\n"
-        "\n"
-        "This receiver has %d pairings remaining."
-msgstr[0]       "\n"
-        "\n"
-        "Tomuto prijímaču ostáva ešte %d párovanie."
-msgstr[1]       "\n"
-        "\n"
-        "Tomuto prijímaču ostáva ešte %d párovania."
-msgstr[2]       "\n"
-        "\n"
-        "Tomuto prijímaču ostáva ešte %d párovaní."
+msgid ""
+"\n"
+"\n"
+"This receiver has %d pairing remaining."
+msgid_plural ""
+"\n"
+"\n"
+"This receiver has %d pairings remaining."
+msgstr[0] ""
+"\n"
+"\n"
+"Tomuto prijímaču ostáva ešte %d párovanie."
+msgstr[1] ""
+"\n"
+"\n"
+"Tomuto prijímaču ostáva ešte %d párovania."
+msgstr[2] ""
+"\n"
+"\n"
+"Tomuto prijímaču ostáva ešte %d párovaní."
 
 #: lib/solaar/ui/pair_window.py:286
-msgid   "\n"
-        "Cancelling at this point will not use up a pairing."
-msgstr  "\n"
-        "Ak proces teraz zrušíte, spárovanie sa nespotrebuje."
+msgid ""
+"\n"
+"Cancelling at this point will not use up a pairing."
+msgstr ""
+"\n"
+"Ak proces teraz zrušíte, spárovanie sa nespotrebuje."
 
 #: lib/solaar/ui/tray.py:58
-msgid   "No supported device found"
-msgstr  ""
+msgid "No supported device found"
+msgstr "Nenašlo sa podporované zariadenie"
 
 #: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
 #, python-format
-msgid   "About %s"
-msgstr  "O programe %s"
+msgid "About %s"
+msgstr "O programe %s"
 
 #: lib/solaar/ui/tray.py:65 lib/solaar/ui/window.py:317
 #, python-format
-msgid   "Quit %s"
-msgstr  "Ukončiť %s"
+msgid "Quit %s"
+msgstr "Ukončiť %s"
 
 #: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
-msgid   "no receiver"
-msgstr  "bez prijímača"
+msgid "no receiver"
+msgstr "bez prijímača"
 
 #: lib/solaar/ui/tray.py:321
-msgid   "no status"
-msgstr  "žiaden stav"
+msgid "no status"
+msgstr "žiaden stav"
 
 #: lib/solaar/ui/window.py:96
-msgid   "Scanning"
-msgstr  "Hľadá sa"
+msgid "Scanning"
+msgstr "Hľadá sa"
 
 #: lib/solaar/ui/window.py:129
-msgid   "Battery"
-msgstr  "Batéria"
+msgid "Battery"
+msgstr "Batéria"
 
 #: lib/solaar/ui/window.py:132
-msgid   "Wireless Link"
-msgstr  "Bezdrôtové prepojenie"
+msgid "Wireless Link"
+msgstr "Bezdrôtové prepojenie"
 
 #: lib/solaar/ui/window.py:136
-msgid   "Lighting"
-msgstr  "Osvetlenie"
+msgid "Lighting"
+msgstr "Osvetlenie"
 
 #: lib/solaar/ui/window.py:170
-msgid   "Show Technical Details"
-msgstr  "Zobraziť technické podrobnosti"
+msgid "Show Technical Details"
+msgstr "Zobraziť technické podrobnosti"
 
 #: lib/solaar/ui/window.py:186
-msgid   "Pair new device"
-msgstr  "Spárovať nové zariadenie"
+msgid "Pair new device"
+msgstr "Spárovať nové zariadenie"
 
 #: lib/solaar/ui/window.py:205
-msgid   "Select a device"
-msgstr  "Vyberte zariadenie"
+msgid "Select a device"
+msgstr "Vyberte zariadenie"
 
 #: lib/solaar/ui/window.py:322
-msgid   "Rule Editor"
-msgstr  "Editor pravidiel"
+msgid "Rule Editor"
+msgstr "Editor pravidiel"
 
 #: lib/solaar/ui/window.py:533
-msgid   "Path"
-msgstr  "Cesta"
+msgid "Path"
+msgstr "Cesta"
 
 #: lib/solaar/ui/window.py:536
-msgid   "USB ID"
-msgstr  "USB ID"
+msgid "USB ID"
+msgstr "USB ID"
 
 #: lib/solaar/ui/window.py:539 lib/solaar/ui/window.py:541
 #: lib/solaar/ui/window.py:561 lib/solaar/ui/window.py:563
-msgid   "Serial"
-msgstr  "Sériové číslo"
+msgid "Serial"
+msgstr "Sériové číslo"
 
 #: lib/solaar/ui/window.py:545
-msgid   "Index"
-msgstr  "Index"
+msgid "Index"
+msgstr "Index"
 
 #: lib/solaar/ui/window.py:547
-msgid   "Wireless PID"
-msgstr  "Bezdrôt. PID"
+msgid "Wireless PID"
+msgstr "Bezdrôt. PID"
 
 #: lib/solaar/ui/window.py:549
-msgid   "Product ID"
-msgstr  "Identifikátor produktu"
+msgid "Product ID"
+msgstr "Identifikátor produktu"
 
 #: lib/solaar/ui/window.py:551
-msgid   "Protocol"
-msgstr  "Protokol"
+msgid "Protocol"
+msgstr "Protokol"
 
 #: lib/solaar/ui/window.py:551
-msgid   "Unknown"
-msgstr  "Neznámy"
+msgid "Unknown"
+msgstr "Neznámy"
 
 #: lib/solaar/ui/window.py:554
 #, python-format
-msgid   "%(rate)d ms (%(rate_hz)dHz)"
-msgstr  "%(rate)d ms (%(rate_hz)dHz)"
+msgid "%(rate)d ms (%(rate_hz)dHz)"
+msgstr "%(rate)d ms (%(rate_hz)dHz)"
 
 #: lib/solaar/ui/window.py:554
-msgid   "Polling rate"
-msgstr  "Intenzita dopytovania"
+msgid "Polling rate"
+msgstr "Intenzita dopytovania"
 
 #: lib/solaar/ui/window.py:565
-msgid   "Unit ID"
-msgstr  "Číslo (ID) jednotky"
+msgid "Unit ID"
+msgstr "Číslo (ID) jednotky"
 
 #: lib/solaar/ui/window.py:576
-msgid   "none"
-msgstr  "žiadne"
+msgid "none"
+msgstr "žiadne"
 
 #: lib/solaar/ui/window.py:577
-msgid   "Notifications"
-msgstr  "Notifikácie"
+msgid "Notifications"
+msgstr "Notifikácie"
 
 #: lib/solaar/ui/window.py:621
-msgid   "No device paired."
-msgstr  "Žiadne spárované zariadenie."
+msgid "No device paired."
+msgstr "Žiadne spárované zariadenie."
 
 #: lib/solaar/ui/window.py:628
 #, python-format
-msgid   "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0]       "K tomuto prijímaču môžete pripojiť %(max_count)s zariadenie."
-msgstr[1]       "K tomuto prijímaču môžete pripojiť až %(max_count)s "
-        "zariadenia."
-msgstr[2]       "K tomuto prijímaču môžete pripojiť až %(max_count)s "
-        "zariadení."
+msgid "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0] "K tomuto prijímaču môžete pripojiť %(max_count)s zariadenie."
+msgstr[1] ""
+"K tomuto prijímaču môžete pripojiť až %(max_count)s "
+"zariadenia."
+msgstr[2] ""
+"K tomuto prijímaču môžete pripojiť až %(max_count)s "
+"zariadení."
 
 #: lib/solaar/ui/window.py:634
-msgid   "Only one device can be paired to this receiver."
-msgstr  "K tomuto prijímaču sa dá pripojiť len jedno zariadenie."
+msgid "Only one device can be paired to this receiver."
+msgstr "K tomuto prijímaču sa dá pripojiť len jedno zariadenie."
 
 #: lib/solaar/ui/window.py:638
 #, python-format
-msgid   "This receiver has %d pairing remaining."
-msgid_plural    "This receiver has %d pairings remaining."
-msgstr[0]       "Tomuto prijímaču ostáva %d párovanie."
-msgstr[1]       "Tomuto prijímaču ostávajú %d párovania."
-msgstr[2]       "Tomuto prijímaču ostáva %d párovaní."
+msgid "This receiver has %d pairing remaining."
+msgid_plural "This receiver has %d pairings remaining."
+msgstr[0] "Tomuto prijímaču ostáva %d párovanie."
+msgstr[1] "Tomuto prijímaču ostávajú %d párovania."
+msgstr[2] "Tomuto prijímaču ostáva %d párovaní."
 
 #: lib/solaar/ui/window.py:692
-msgid   "Battery Voltage"
-msgstr  "Napätie batérie"
+msgid "Battery Voltage"
+msgstr "Napätie batérie"
 
 #: lib/solaar/ui/window.py:694
-msgid   "Voltage reported by battery"
-msgstr  "Napätie hlásené batériou"
+msgid "Voltage reported by battery"
+msgstr "Napätie hlásené batériou"
 
 #: lib/solaar/ui/window.py:696
-msgid   "Battery Level"
-msgstr  "Úroveň batérie"
+msgid "Battery Level"
+msgstr "Úroveň batérie"
 
 #: lib/solaar/ui/window.py:698
-msgid   "Approximate level reported by battery"
-msgstr  "Približná úroveň hlásená batériou"
+msgid "Approximate level reported by battery"
+msgstr "Približná úroveň hlásená batériou"
 
 #: lib/solaar/ui/window.py:705 lib/solaar/ui/window.py:707
-msgid   "next reported "
-msgstr  "ďalšie hlásené "
+msgid "next reported "
+msgstr "ďalšie hlásené "
 
 #: lib/solaar/ui/window.py:708
-msgid   " and next level to be reported."
-msgstr  " a ďalšia úroveň, ktorá bude hlásená."
+msgid " and next level to be reported."
+msgstr " a ďalšia úroveň, ktorá bude hlásená."
 
 #: lib/solaar/ui/window.py:713
-msgid   "last known"
-msgstr  "naposledy známa"
+msgid "last known"
+msgstr "naposledy známa"
 
 #: lib/solaar/ui/window.py:724
-msgid   "encrypted"
-msgstr  "šifrované"
+msgid "encrypted"
+msgstr "šifrované"
 
 #: lib/solaar/ui/window.py:726
-msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  "Bezdrôtové spojenie medzi zariadením a prijímačom je šifrované."
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr "Bezdrôtové spojenie medzi zariadením a prijímačom je šifrované."
 
 #: lib/solaar/ui/window.py:728
-msgid   "not encrypted"
-msgstr  "bez šifrovania"
+msgid "not encrypted"
+msgstr "bez šifrovania"
 
 #: lib/solaar/ui/window.py:732
-msgid   "The wireless link between this device and its receiver is not "
-        "encrypted.\n"
-        "This is a security issue for pointing devices, and a major security "
-        "issue for text-input devices."
-msgstr  ""
+msgid ""
+"The wireless link between this device and its receiver is not "
+"encrypted.\n"
+"This is a security issue for pointing devices, and a major security "
+"issue for text-input devices."
+msgstr ""
+"Bezdrôtové prepojenie tohto zariadenia s jeho prijímačom nie je šifrované.\n"
+"To je bezpečnostný problém pre ukazovacie zariadenia a závažný bezpečnostný pr"
+"oblém pre textové vstupné zariadenia."
 
 #: lib/solaar/ui/window.py:748
 #, python-format
-msgid   "%(light_level)d lux"
-msgstr  "%(light_level)d lux"
+msgid "%(light_level)d lux"
+msgstr "%(light_level)d lux"
 
 #~ msgid        "About"
 #~ msgstr       "O programe"
