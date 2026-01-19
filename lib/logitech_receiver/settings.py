@@ -682,7 +682,6 @@ class FeatureRWMap(FeatureRW):
         reply = device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
-
 class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
 
