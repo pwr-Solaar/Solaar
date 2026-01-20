@@ -1592,7 +1592,7 @@ msgstr "Vložte tajný kód na %(name)s."
 #: lib/solaar/ui/pair_window.py:126
 #, python-format
 msgid "Type %(passcode)s and then press the enter key."
-msgstr "Napíšte %(passcode) a potom stlačte kláves Enter."
+msgstr "Napíšte %(passcode)s a potom stlačte kláves Enter."
 
 #: lib/solaar/ui/pair_window.py:129
 msgid "left"
@@ -1608,7 +1608,7 @@ msgid ""
 "Press %(code)s\n"
 "and then press left and right buttons simultaneously."
 msgstr ""
-"Stlačte %(code)y\n"
+"Stlačte %(code)s\n"
 "a potom stlačte ľavé a pravé tlačidlo súčasne."
 
 #: lib/solaar/ui/pair_window.py:188
