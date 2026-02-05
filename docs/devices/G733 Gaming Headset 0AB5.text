@@ -1,7 +1,7 @@
-Solaar version 1.1.5
+Solaar version 1.1.19
 
- 2: G733 Gaming Headset
-     Device path  : /dev/hidraw2
+G733 Gaming Headset
+     Device path  : /dev/hidraw0
      USB id       : 046d:0AB5
      Codename     : G733 Headset
      Kind         : headset
@@ -9,24 +9,34 @@ Solaar version 1.1.5
      Serial number:
      Model ID:      0AB500000000
      Unit ID:       FFFFFFFF
-          Firmware: U1  37.00.B0131
+                 0: U1  37.00.B0131
      Supports 9 HID++ 2.0 features:
          0: ROOT                   {0000} V0
          1: FEATURE SET            {0001} V0
          2: DEVICE FW VERSION      {0003} V2
-            Firmware: Firmware U1  37.00.B0131 0AB5
+            Firmware: 0 U1  37.00.B0131 0AB5
             Unit ID: FFFFFFFF  Model ID: 0AB500000000  Transport IDs: {'usbid': '0AB5'}
          3: DEVICE NAME            {0005} V0
             Name: G733 Gaming Headset
             Kind: None
-         4: COLOR LED EFFECTS      {8070} V0
+         4: COLOR LED EFFECTS      {8070} V3
+            Sterowanie diodami LED (saved): Device
+            Sterowanie diodami LED        : Device
+            Diody LED None (saved): !LEDEffectSetting {ID: 0}
+            Diody LED None        : !LEDEffectSetting {ID: 0}
+            Diody LED None (saved): !LEDEffectSetting {ID: 1, color: 131072, ramp: 0}
+            Diody LED None        : !LEDEffectSetting {ID: 1, color: 66048, ramp: 0}
          5: GKEY                   {8010} V0
-            Divert G Keys (saved): True
-            Divert G Keys        : False
-         6: EQUALIZER              {8310} V0
+            Przekieruj klawisze G i M (saved): False
+            Przekieruj klawisze G i M        : False
+         6: EQUALIZER              {8310} V1
+            Korektor (saved): {0: 5, 1: 4, 2: 3, 3: 5, 4: 5, 5: 5, 6: 4, 7: 3, 8: 4, 9: 5}
+            Korektor        : {0: 5, 1: 4, 2: 3, 3: 5, 4: 5, 5: 5, 6: 4, 7: 3, 8: 4, 9: 5}
          7: SIDETONE               {8300} V0
-            Sidetone (saved): 65
-            Sidetone        : 65
-         8: ADC MEASUREMENT        {1F20} V0
-            Battery status unavailable.
-     Battery status unavailable.
+            Efekt lokalny (saved): 0
+            Efekt lokalny        : 0
+         8: ADC MEASUREMENT        {1F20} V4
+            Battery: 89% 4058mV , BatteryStatus.DISCHARGING.
+            Zarządzanie energią (saved): 30
+            Zarządzanie energią        : 30
+     Battery: 89% 4058mV , BatteryStatus.DISCHARGING.
