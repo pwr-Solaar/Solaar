@@ -28,6 +28,7 @@ import subprocess
 import sys
 import time
 import typing
+import threading
 
 from typing import Any
 from typing import Dict
@@ -46,6 +47,8 @@ if platform.system() in ("Darwin", "Windows"):
 else:
     import evdev
 
+
+from . import language_switcher as _language_switcher
 from .common import NamedInt
 from .hidpp20 import SupportedFeature
 from .special_keys import CONTROL
@@ -57,7 +60,7 @@ if typing.TYPE_CHECKING:
     from .base import HIDPPNotification
 
 logger = logging.getLogger(__name__)
-
+switcher = _language_switcher.LanguageSwitcher()
 #
 # See docs/rules.md for documentation
 #
@@ -1550,7 +1553,22 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                 thumb_wheel_displacement = 0
             thumb_wheel_displacement += signed(notification.data[0:2])
 
-    GLib.idle_add(evaluate_rules, feature, notification, device)
+    def switch_and_evaluate(feature, notification, device):
+        done_switching = threading.Event()
+
+        def switch_language():
+            switcher.evaluate()
+            done_switching.set()
+
+        def evaluate_rules():
+            done_switching.wait()  # Wait until the language has been switched
+            rules.evaluate(feature, notification, device, True)
+            switcher.set_previous_language()
+
+        GLib.idle_add(switch_language)
+        GLib.idle_add(evaluate_rules)
+
+    GLib.idle_add(switch_and_evaluate, feature, notification, device)
 
 
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
