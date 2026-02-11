@@ -74,6 +74,7 @@ class SupportedFeature(IntEnum):
     REPROG_CONTROLS_V2_2 = 0x1B02  # LogiOptions 2.10.73 features.xml
     REPROG_CONTROLS_V3 = 0x1B03
     REPROG_CONTROLS_V4 = 0x1B04
+    SUPERSTRIKE_TUNING = 0x1B0C  # PRO X 2 Superstrike HITS tuning (actuation, rapid trigger, haptics)
     REPORT_HID_USAGE = 0x1BC0
     PERSISTENT_REMAPPABLE_ACTION = 0x1C00
     WIRELESS_DEVICE_STATUS = 0x1D4B
