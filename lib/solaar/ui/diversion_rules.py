@@ -524,7 +524,7 @@ class ActionMenu:
 
         wrapped = m[it][0]
         c = wrapped.component
-        _rule_component_clipboard = diversion.RuleComponent().compile(c.data())
+        _rule_component_clipboard = diversion.compile_component(c.data())
 
     def menu_do_cut(self, _mitem, m, it):
         global _rule_component_clipboard
@@ -545,7 +545,7 @@ class ActionMenu:
         c = _rule_component_clipboard
         _rule_component_clipboard = None
         if c:
-            _rule_component_clipboard = diversion.RuleComponent().compile(c.data())
+            _rule_component_clipboard = diversion.compile_component(c.data())
             self._menu_do_insert(_mitem, m, it, new_c=c, below=below)
             self._on_update()
 
@@ -1208,7 +1208,7 @@ class NotUI(RuleComponentUI):
 
 
 class ActionUI(RuleComponentUI):
-    CLASS = diversion.Action
+    CLASS = diversion.ActionProtocol
 
     @classmethod
     def icon_name(cls):
