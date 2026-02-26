@@ -656,8 +656,8 @@ def ping(handle, devnumber, long_message: bool = False):
                             return 1.0
                         if error in [Hidpp10ErrorCode.RESOURCE_ERROR, Hidpp10ErrorCode.CONNECTION_REQUEST_FAILED]:
                             return  # device unreachable
-                        if error == Hidpp10ErrorCode.UNKNOWN_DEVICE:  # no paired device with that number
-                            logger.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
+                        if error == Hidpp10ErrorCode.UNKNOWN_DEVICE:  # no device with that number currently accessible
+                            logger.info("(%s) device %d error on ping request: unknown device", handle, devnumber)
                             raise exceptions.NoSuchDevice(number=devnumber, request=request_id)
 
                 if notifications_hook:
