@@ -12,8 +12,6 @@ First install pip, and then run
 This will not install the Solaar udev rule, which you will need to install manually by copying
 `~/.local/lib/udev/rules.d/42-logitech-unify-permissions.rules`
 to `/etc/udev/rules.d` as root.
-If you want Solaar rules to simulate input you will have to instead install Solaar's uinput udev rule
-from the GitHub repository.
 
 ## Installing in macOS
 
@@ -52,8 +50,6 @@ First, install the needed system packages by `make install_apt`
 or `make install_dnf` or `make install_brew`.
 These might not install all needed packages in older versions of your distribution.
 Next, install the Solaar rule via `make install_udev`.
-If you are using Wayland instead of X11 you may want to instead `make install_udev_uinput`
-so that Solaar rules can simulate input in Wayland.
 Finally, install Solaar via `make install_pip` or `make install_pipx`.
 
 Parts of the installation process require sudo privileges so you may be asked for your password.
@@ -129,8 +125,6 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 You can install Solaar's udev rule manually by copying the file
 `rules.d/42-logitech-unify-permissions.rules`
 as root from the Solaar repository to `/etc/udev/rules.d`.
-In Wayland you may want to instead copy
-`rules.d-uinput/42-logitech-unify-permissions.rules`.
 Let udev reload its rules by running `sudo udevadm control --reload-rules`.
 
 # Solaar in other languages
