@@ -253,7 +253,8 @@ def _match(
         logger.info(f"Skipping unlikely device {device['path']} ({bus_id}/{vid:04X}/{pid:04X})")
         return None
 
-    # Skip Logitech webcams to prevent them from locking up during hidpp checks (product IDs range for webcams from docs/usb.ids.txt)
+    # Skip Logitech webcams to prevent them from locking up during hidpp checks
+    # (product IDs range for webcams from docs/usb.ids.txt)
     if vid == LOGITECH_VENDOR_ID and 0x0800 <= pid <= 0x09ff:
         logger.info(f"Skipping Logitech webcam {device['path']} ({bus_id}/{vid:04X}/{pid:04X})")
         return None
