@@ -36,9 +36,9 @@ from time import sleep
 from typing import Any
 from typing import Callable
 
-from hidapi.common import DeviceInfo
-
 from logitech_receiver.common import LOGITECH_VENDOR_ID
+
+from hidapi.common import DeviceInfo
 
 if typing.TYPE_CHECKING:
     import gi
@@ -255,7 +255,7 @@ def _match(
 
     # Skip Logitech webcams to prevent them from locking up during hidpp checks
     # (product IDs range for webcams from docs/usb.ids.txt)
-    if vid == LOGITECH_VENDOR_ID and 0x0800 <= pid <= 0x09ff:
+    if vid == LOGITECH_VENDOR_ID and 0x0800 <= pid <= 0x09FF:
         logger.info(f"Skipping Logitech webcam {device['path']} ({bus_id}/{vid:04X}/{pid:04X})")
         return None
 
