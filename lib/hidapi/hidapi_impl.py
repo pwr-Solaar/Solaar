@@ -36,9 +36,9 @@ from time import sleep
 from typing import Any
 from typing import Callable
 
-from logitech_receiver.common import LOGITECH_VENDOR_ID
-
 from hidapi.common import DeviceInfo
+
+LOGITECH_VENDOR_ID = 0x046D
 
 if typing.TYPE_CHECKING:
     import gi
