@@ -3,6 +3,7 @@
 # Allows non-root users to have raw access to Logitech devices.
 # Allowing users to write to the device is potentially dangerous
 # because they could perform firmware updates.
+KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
 
 ACTION == "remove", GOTO="solaar_end"
 SUBSYSTEM != "hidraw", GOTO="solaar_end"
