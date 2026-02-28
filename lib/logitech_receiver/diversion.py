@@ -73,9 +73,10 @@ logger = logging.getLogger(__name__)
 # KeyPress action gets the current keyboard group using XkbGetState from libX11.so using ctypes definitions
 #   under Wayland the keyboard group is None resulting in using the first keyboard group
 # KeyPress action translates keysyms to keycodes using the GDK keymap
-# KeyPress, MouseScroll, and MouseClick actions use XTest (under X11) or uinput.
+# KeyPress, MouseScroll, and MouseClick actions use uinput.
 # For uinput to work the user must have write access for /dev/uinput.
-# To get this access run  sudo setfacl -m u:${user}:rw /dev/uinput
+# The Solaar udev rule should set this up
+# Otherwise run  sudo setfacl -m u:${user}:rw /dev/uinput
 #
 # Rule GUI keyname determination uses a local file generated
 #   from http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
@@ -85,8 +86,7 @@ logger = logging.getLogger(__name__)
 # Setting up is complex because there are several systems that each provide partial facilities:
 # GDK - always available (when running with a window system) but only provides access to keymap
 # X11 - provides access to active process and process with window under mouse and current modifier keys
-# Xtest extension to X11 - provides input simulation, partly works under Wayland
-# Wayland - provides input simulation
+# uinput and evdev - provides input simulation
 
 XK_KEYS: Dict[str, int] = keysymdef.key_symbols
 
@@ -111,14 +111,11 @@ if wayland:
     )
 
 try:
-    import Xlib
-
     _x11 = None  # X11 might be available
 except Exception:
     _x11 = False  # X11 is not available
 
 # Globals
-xtest_available = True  # Xtest might be available
 xdisplay = None
 
 
@@ -170,7 +167,7 @@ class XkbStateRec(ctypes.Structure):
 
 
 def x11_setup():
-    global _x11, xdisplay, modifier_keycodes, NET_ACTIVE_WINDOW, NET_WM_PID, WM_CLASS, xtest_available
+    global _x11, xdisplay, modifier_keycodes, NET_ACTIVE_WINDOW, NET_WM_PID, WM_CLASS
     if _x11 is not None:
         return _x11
     try:
@@ -187,7 +184,6 @@ def x11_setup():
     except Exception:
         logger.warning("X11 not available - some rule capabilities inoperable", exc_info=sys.exc_info())
         _x11 = False
-        xtest_available = False
     return _x11
 
 
@@ -272,10 +268,6 @@ def setup_uinput():
         logger.warning("cannot create uinput device: %s", e)
 
 
-if wayland:  # Wayland can't use xtest so may as well set up uinput now
-    setup_uinput()
-
-
 def kbdgroup():
     if xkb_setup():
         state = XkbStateRec()
@@ -324,31 +316,6 @@ def xy_direction(_x, _y):
         return "noop"
 
 
-def simulate_xtest(code, event):
-    global xtest_available
-    if x11_setup() and xtest_available:
-        try:
-            event = (
-                Xlib.X.KeyPress
-                if event == _KEY_PRESS
-                else Xlib.X.KeyRelease
-                if event == _KEY_RELEASE
-                else Xlib.X.ButtonPress
-                if event == _BUTTON_PRESS
-                else Xlib.X.ButtonRelease
-                if event == _BUTTON_RELEASE
-                else None
-            )
-            Xlib.ext.xtest.fake_input(xdisplay, event, code)
-            xdisplay.sync()
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("xtest simulated input %s %s %s", xdisplay, event, code)
-            return True
-        except Exception as e:
-            xtest_available = False
-            logger.warning("xtest fake input failed: %s", e)
-
-
 def simulate_uinput(what, code, arg):
     global udevice
     if setup_uinput():
@@ -364,28 +331,9 @@ def simulate_uinput(what, code, arg):
 
 
 def simulate_key(code, event):  # X11 keycode but Solaar event code
-    if not wayland and simulate_xtest(code, event):
-        return True
     if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
     logger.warning("no way to simulate key input")
-
-
-def click_xtest(button, count):
-    if isinstance(count, int):
-        for _ in range(count):
-            if not simulate_xtest(button[0], _BUTTON_PRESS):
-                return False
-            if not simulate_xtest(button[0], _BUTTON_RELEASE):
-                return False
-    else:
-        if count != RELEASE:
-            if not simulate_xtest(button[0], _BUTTON_PRESS):
-                return False
-        if count != DEPRESS:
-            if not simulate_xtest(button[0], _BUTTON_RELEASE):
-                return False
-    return True
 
 
 def click_uinput(button, count):
@@ -406,8 +354,6 @@ def click_uinput(button, count):
 
 
 def click(button, count):
-    if not wayland and click_xtest(button, count):
-        return True
     if click_uinput(button, count):
         return True
     logger.warning("no way to simulate mouse click")
@@ -415,14 +361,6 @@ def click(button, count):
 
 
 def simulate_scroll(dx, dy):
-    if not wayland and xtest_available:
-        success = True
-        if dx:
-            success = click_xtest(buttons["scroll_right" if dx > 0 else "scroll_left"], count=abs(dx))
-        if dy and success:
-            success = click_xtest(buttons["scroll_up" if dy > 0 else "scroll_down"], count=abs(dy))
-        if success:
-            return True
     if setup_uinput():
         success = True
         if dx:
