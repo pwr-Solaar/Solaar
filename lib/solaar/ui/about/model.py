@@ -56,6 +56,7 @@ class AboutModel:
             "El Jinete Sin Cabeza (Español)",
             "Ferdina Kusumah (Indonesia)",
             "John Erling Blad (Norwegian Bokmål, Norwegian Nynorsk)",
+            "Oleksandr Afanasiev (Ukrainian)",
         ]
 
     def get_credit_sections(self) -> List[Tuple[str, List[str]]]:
