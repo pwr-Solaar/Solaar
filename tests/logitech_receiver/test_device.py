@@ -60,6 +60,7 @@ class DeviceInfoStub:
     hidpp_long: bool = True
     bus_id: int = 0x0003  # USB
     serial: str = "aa:aa:aa;aa"
+    centurion: bool = False
 
 
 di_bad_handle = DeviceInfoStub(None, product_id="CCCC")
@@ -70,6 +71,7 @@ di_B530 = DeviceInfoStub("11", product_id="B350", bus_id=0x0005)
 di_C068 = DeviceInfoStub("11", product_id="C06B")
 di_C08A = DeviceInfoStub("11", product_id="C08A")
 di_DDDD = DeviceInfoStub("11", product_id="DDDD")
+di_0AF7 = DeviceInfoStub("11", product_id="0AF7", centurion=True)
 
 
 @pytest.mark.parametrize(
@@ -78,6 +80,7 @@ di_DDDD = DeviceInfoStub("11", product_id="DDDD")
         (di_bad_handle, fake_hidpp.r_empty, None),
         (di_error, fake_hidpp.r_empty, False),
         (di_CCCC, fake_hidpp.r_empty, True),
+        (di_0AF7, fake_hidpp.r_empty, True),
     ],
 )
 def test_create_device(device_info, responses, expected_success):
@@ -91,6 +94,22 @@ def test_create_device(device_info, responses, expected_success):
     else:
         test_device = device.create_device(low_level_mock, device_info)
         assert bool(test_device) == expected_success
+
+
+def test_create_centurion_device():
+    """Test that a centurion device gets hidpp_long forced to True and centurion flag set."""
+    from logitech_receiver import base
+
+    low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
+    test_device = device.create_device(low_level_mock, di_0AF7)
+
+    assert test_device is not None
+    assert test_device.centurion is True
+    assert test_device.hidpp_long is True
+    assert int(test_device.handle) in base._centurion_handles
+
+    # Clean up
+    base._centurion_handles.discard(int(test_device.handle))
 
 
 @pytest.mark.parametrize(
