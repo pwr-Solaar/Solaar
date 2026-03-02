@@ -101,10 +101,9 @@ def test_FeaturesArray_get_feature(device, expected0, expected1, expected2, expe
                 (hidpp20_constants.SupportedFeature.FEATURE_SET, 1),
                 (hidpp20_constants.SupportedFeature.CONFIG_CHANGE, 2),
                 (hidpp20_constants.SupportedFeature.DEVICE_FW_VERSION, 3),
-                (common.NamedInt(256, "unknown:0100"), 4),
+                (hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO, 4),
                 (hidpp20_constants.SupportedFeature.REPROG_CONTROLS_V4, 5),
-                (None, 6),
-                (None, 7),
+                # Indices 6 and 7 have no responses — get_feature returns None, enumerate skips them
                 (hidpp20_constants.SupportedFeature.BATTERY_STATUS, 8),
             ],
         ),
@@ -922,3 +921,210 @@ def test_onboard_profiles_device(responses, name, count, buttons, gbuttons, sect
 
     yml_dump = yaml.dump(profiles)
     assert yaml.safe_load(yml_dump).to_bytes().hex() == profiles.to_bytes().hex()
+
+
+# --- Centurion (PRO X 2 LIGHTSPEED headset) tests ---
+
+device_centurion = fake_hidpp.Device("CENTURION", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+
+
+def test_centurion_parent_feature_discovery():
+    """Parent feature enumeration discovers CentPPBridge at index 3 and stores bridge index."""
+    dev = fake_hidpp.Device("CENT_PARENT", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    featuresarray = hidpp20.FeaturesArray(dev)
+    dev.features = featuresarray
+
+    result = featuresarray._check()
+
+    assert result is True
+    assert featuresarray.count == 5
+    # Parent features registered
+    assert featuresarray[hidpp20_constants.SupportedFeature.ROOT] == 0
+    assert featuresarray[hidpp20_constants.SupportedFeature.FEATURE_SET] == 1
+    assert featuresarray[hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO] == 2
+    assert featuresarray[hidpp20_constants.SupportedFeature.CENTURION_GENERIC_DFU] == 4
+    # Feature 0x0003 = CentPPBridge on Centurion (stored as DEVICE_FW_VERSION since same ID)
+    assert featuresarray[hidpp20_constants.SupportedFeature.DEVICE_FW_VERSION] == 3
+    # Bridge index stored on device
+    assert dev._centurion_bridge_index == 3
+    assert hasattr(dev, "_centurion_sub_features")
+
+
+def test_centurion_sub_device_feature_discovery():
+    """Sub-device feature discovery routes through bridge and populates _centurion_sub_features."""
+    dev = fake_hidpp.Device("CENT_SUB", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    # Set up bridge responses for sub-device discovery:
+    # 1. CenturionRoot.GetFeature(0x0001) -> FeatureSet at sub-index 1
+    # 2. CenturionFeatureSet.GetFeatureId(index=0) -> bulk feature list
+    dev._bridge_responses = {
+        # CenturionRoot(idx=0).GetFeature(func=0) with feature_id=0x0001 -> sub_fs_index=1
+        (0x00, 0x00, "0001"): bytes([0x01, 0x00, 0x00]),
+        # CenturionFeatureSet(idx=1).GetFeatureId(func=0x10, start=0) -> 3 features
+        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
+        (0x01, 0x10, "00"): bytes(
+            [
+                0x03,  # 3 features
+                0x06,
+                0x04,
+                0x00,
+                0x00,  # HEADSET_AUDIO_SIDETONE (0x0604) at sub-idx 0
+                0x06,
+                0x01,
+                0x00,
+                0x00,  # HEADSET_MIC_MUTE (0x0601) at sub-idx 1
+                0x06,
+                0x11,
+                0x00,
+                0x00,  # HEADSET_MIC_GAIN (0x0611) at sub-idx 2
+            ]
+        ),
+    }
+    featuresarray = hidpp20.FeaturesArray(dev)
+    dev.features = featuresarray
+
+    featuresarray._check()
+
+    # Sub-device features should be discovered
+    assert hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE in dev._centurion_sub_features
+    assert hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE in dev._centurion_sub_features
+    assert hidpp20_constants.SupportedFeature.HEADSET_MIC_GAIN in dev._centurion_sub_features
+    # Sub-device features should be in features array with their sub-device indices
+    assert featuresarray[hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE] == 0
+    assert featuresarray[hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE] == 1
+    assert featuresarray[hidpp20_constants.SupportedFeature.HEADSET_MIC_GAIN] == 2
+    # _centurion_sub_indices should map ALL sub-device features to their sub-device indices
+    assert dev._centurion_sub_indices[hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE] == 0
+    assert dev._centurion_sub_indices[hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE] == 1
+    assert dev._centurion_sub_indices[hidpp20_constants.SupportedFeature.HEADSET_MIC_GAIN] == 2
+
+
+def test_centurion_feature_request_routes_sub_device():
+    """feature_request() routes sub-device features through centurion_bridge_request()."""
+    dev = fake_hidpp.Device("CENT_ROUTE", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    # Manually set up sub-device state (simulating completed discovery)
+    dev.features.count = 5  # mark discovery as complete so _check() short-circuits
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = {hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE}
+    dev.features[hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE] = 7  # sub-device index
+    # Set up bridge response for GetSidetoneLevel
+    dev._bridge_responses = {
+        (7, 0x00, ""): bytes([0x01, 0x00, 0x32]),  # mic_id=1, mute=0, level=50
+    }
+
+    result = dev.feature_request(hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE, 0x00)
+
+    assert result is not None
+    assert result == bytes([0x01, 0x00, 0x32])
+
+
+def test_centurion_feature_request_parent_not_routed():
+    """feature_request() does NOT route parent features through bridge."""
+    dev = fake_hidpp.Device("CENT_PARENT2", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = {hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE}
+
+    # FeatureSet is a parent feature — should go through normal request(), not bridge
+    featuresarray = hidpp20.FeaturesArray(dev)
+    dev.features = featuresarray
+    featuresarray._check()
+
+    # CENTURION_DEVICE_INFO is a parent feature at index 2 — requesting it should
+    # NOT go through bridge, it should go through the normal hidpp20.feature_request path
+    assert hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO not in dev._centurion_sub_features
+
+
+def test_centurion_bridge_request_write():
+    """centurion_bridge_request with no_reply=True returns None immediately."""
+    dev = fake_hidpp.Device("CENT_WRITE", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = {hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE}
+    dev.features[hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE] = 7
+    dev._bridge_responses = {}  # no responses needed for no_reply
+
+    result = dev.centurion_bridge_request(7, 0x10, 0x32, no_reply=True)
+
+    assert result is None
+
+
+def test_centurion_firmware_dedup():
+    """get_firmware_centurion() deduplicates identical firmware entries."""
+    # Simulate parent device that returns the same firmware for every entity index
+    fw_response = "00" + "00" + "0105" + "04" + "44303031" + "00" * 20  # type=0, ver=1.05, name="D001"
+    responses = fake_hidpp.r_centurion_headset + [fake_hidpp.Response(fw_response, 0x0210, f"{i:02X}") for i in range(8)]
+    dev = fake_hidpp.Device("CENT_DEDUP", True, 2.6, responses, centurion=True)
+
+    fw = _hidpp20.get_firmware_centurion(dev)
+
+    # Should only get 1 entry, not 8
+    assert fw is not None
+    assert len(fw) == 1
+    assert fw[0].name == "D001"
+
+
+def test_centurion_sub_device_firmware():
+    """get_firmware_centurion_sub() queries sub-device firmware via bridge."""
+    dev = fake_hidpp.Device("CENT_SUBFW", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = set()
+    dev._centurion_sub_indices = {hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO: 2}
+    # Sub-device firmware: type=0 (firmware), ver=3.02, name="H001"
+    dev._bridge_responses = {
+        (2, 0x10, "00"): bytes([0x00, 0x00, 0x03, 0x02, 0x04]) + b"H001",
+        (2, 0x10, "01"): bytes([0x00, 0x00, 0x03, 0x02, 0x04]) + b"H001",  # duplicate → dedup stops
+    }
+
+    fw = _hidpp20.get_firmware_centurion_sub(dev)
+
+    assert fw is not None
+    assert len(fw) == 1
+    assert fw[0].name == "H001"
+    assert fw[0].version == "3.02"
+
+
+def test_centurion_sub_device_serial():
+    """get_serial_centurion_sub() queries sub-device serial via bridge."""
+    dev = fake_hidpp.Device("CENT_SUBSER", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = set()
+    dev._centurion_sub_indices = {hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO: 2}
+    dev._bridge_responses = {
+        (2, 0x20, ""): bytes([0x0C]) + b"ABC123DEF456",
+    }
+
+    serial = _hidpp20.get_serial_centurion_sub(dev)
+
+    assert serial == "ABC123DEF456"
+
+
+def test_centurion_sub_device_hardware_info():
+    """get_hardware_info_centurion_sub() queries sub-device hardware info via bridge."""
+    dev = fake_hidpp.Device("CENT_SUBHW", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_bridge_index = 3
+    dev._centurion_sub_features = set()
+    dev._centurion_sub_indices = {hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO: 2}
+    dev._bridge_responses = {
+        (2, 0x00, ""): bytes([0x01, 0x03, 0x0A, 0xF7]),
+    }
+
+    hw_info = _hidpp20.get_hardware_info_centurion_sub(dev)
+
+    assert hw_info is not None
+    model_id, hw_rev, product_id = hw_info
+    assert model_id == 1
+    assert hw_rev == 3
+    assert product_id == 0x0AF7
+
+
+def test_centurion_kind_inference():
+    """Centurion device with 0x06xx audio features infers kind=headset."""
+    dev = fake_hidpp.Device("CENT_KIND", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
+    dev._centurion_sub_features = {
+        hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE,
+        hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE,
+    }
+
+    kind = dev._infer_kind_centurion()
+
+    from logitech_receiver import hidpp10_constants
+
+    assert kind == hidpp10_constants.DEVICE_KIND.headset

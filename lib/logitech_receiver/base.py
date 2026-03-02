@@ -98,8 +98,8 @@ DJ_MESSAGE_ID = 0x20
 
 # Centurion transport (used by PRO X 2 LIGHTSPEED headset and similar)
 # Uses report ID 0x51 on usage page 0xFFA0, 64-byte frames.
-# Wire format TX: [0x51, inner_report_id, seq=0x00, feat_idx, func_sw, params..., pad]
-# Wire format RX: [0x51, len_byte, seq=0x00, feat_idx, func_sw, data..., pad]
+# Wire format (CPL): [0x51, cpl_length, flags=0x00, feat_idx, func_sw, params..., pad]
+# cpl_length = number of bytes from flags to end of meaningful data (includes flags byte).
 # The device_index byte from standard HID++ is NOT present in Centurion framing.
 CENTURION_REPORT_ID = 0x51
 CENTURION_FRAME_SIZE = 64  # 1 byte report ID + 63 bytes payload
@@ -334,11 +334,12 @@ def write(handle, devnumber, data, long_message=False):
 
     ihandle = int(handle)
     if ihandle in _centurion_handles:
-        # Centurion framing: [0x51, inner_report_id, seq=0x00, feat_idx, func_sw, params...]
-        # The device_index is stripped — only the inner report_id + HID++ payload remain.
-        inner_report_id = ord(wdata[:1])  # 0x10 or 0x11
+        # Centurion CPL framing: [0x51, cpl_length, flags=0x00, feat_idx, func_sw, params...]
+        # cpl_length = len(meaningful_payload) + 1 (the +1 counts the flags byte)
+        # The device_index is stripped — only the HID++ payload (feat_idx + func_sw + params) remains.
         payload = wdata[2:]  # skip report_id and devnumber from standard frame
-        wdata = struct.pack("!BBB", CENTURION_REPORT_ID, inner_report_id, 0x00) + payload
+        cpl_length = len(data) + 1  # data is the unpadded payload; +1 for flags byte
+        wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, 0x00) + payload
         wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -359,21 +360,20 @@ def write(handle, devnumber, data, long_message=False):
         raise exceptions.NoReceiver(reason=reason) from reason
 
 
-def write_centurion_raw(handle, inner_payload):
-    """Write a raw Centurion command (for headset features like sidetone/inactive time).
+def write_centurion_cpl(handle, layer3_payload):
+    """Send a Centurion CPL frame with the given Layer 3+ payload.
 
-    The inner_payload is everything after [0x51, len, seq=0x00].
-    The frame is: [0x51, len, 0x00, inner_payload..., zeros to 64 bytes].
-    Length byte = len(inner_payload) + 1 (for seq byte).
+    Builds: [0x51, cpl_length, flags=0x00, layer3_payload..., zero-pad to 64 bytes]
+    where cpl_length = len(layer3_payload) + 1 (the +1 counts the flags byte).
     """
     ihandle = int(handle)
     if ihandle not in _centurion_handles:
-        raise ValueError("write_centurion_raw called on non-Centurion handle")
-    length = len(inner_payload) + 1  # +1 for seq byte
-    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, length, 0x00) + inner_payload
+        raise ValueError("write_centurion_cpl called on non-Centurion handle")
+    cpl_length = len(layer3_payload) + 1  # +1 for flags byte
+    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, 0x00) + layer3_payload
     wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("(%s) <= centurion_raw[%s]", handle, common.strhex(wdata[:length + 2]))
+        logger.debug("(%s) <= centurion_cpl[%s]", handle, common.strhex(wdata[: cpl_length + 2]))
     try:
         hidapi.write(ihandle, wdata)
     except Exception as reason:
@@ -446,12 +446,13 @@ def _read(handle, timeout) -> tuple[int, int, bytes]:
         raise exceptions.NoReceiver(reason=reason) from reason
 
     if data and is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
-        # Unwrap Centurion framing:
-        # RX: [0x51, len_byte, seq, feat_idx, func_sw, data...]
+        # Unwrap Centurion CPL framing:
+        # RX: [0x51, cpl_length, flags=0x00, feat_idx, func_sw, data...]
+        # cpl_length includes the flags byte, so meaningful payload starts at byte 3
+        # and has (cpl_length - 1) bytes.
         # Reconstruct as HID++ long message: [0x11, devnumber=0xFF, feat_idx, func_sw, data...]
-        # Use len_byte to determine actual payload size (includes feat_idx + func_sw + response data).
-        payload_len = ord(data[1:2])
-        inner_payload = data[3:3 + payload_len]  # extract exactly payload_len bytes after seq
+        cpl_length = ord(data[1:2])
+        inner_payload = data[3 : 2 + cpl_length]  # bytes 3..2+cpl_length-1 = cpl_length-1 bytes
         data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
         # Pad to a valid message size: standard long (20) or Centurion extended (63)
         if len(data) <= _LONG_MESSAGE_SIZE:
@@ -629,13 +630,17 @@ def request(
                     if reply_data[:1] == b"\xff" and reply_data[1:3] == request_data[:2]:
                         # a HID++ 2.0 feature call returned with an error
                         error = ord(reply_data[3:4])
+                        try:
+                            error_name = Hidpp20ErrorCode(error)
+                        except ValueError:
+                            error_name = f"unknown:{error:02X}"
                         logger.error(
                             "(%s) device %d error on feature request {%04X}: %d = %s",
                             handle,
                             devnumber,
                             request_id,
                             error,
-                            Hidpp20ErrorCode(error),
+                            error_name,
                         )
                         raise exceptions.FeatureCallError(
                             number=devnumber,
@@ -756,9 +761,9 @@ def _read_input_buffer(handle, ihandle, notifications_hook):
 
         if data:
             if is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
-                # Unwrap Centurion framing same as in _read()
-                payload_len = ord(data[1:2])
-                inner_payload = data[3:3 + payload_len]
+                # Unwrap Centurion CPL framing same as in _read()
+                cpl_length = ord(data[1:2])
+                inner_payload = data[3 : 2 + cpl_length]
                 data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
                 if len(data) <= _LONG_MESSAGE_SIZE:
                     data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
