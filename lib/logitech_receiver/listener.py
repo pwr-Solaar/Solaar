@@ -52,6 +52,9 @@ class _ThreadedHandle:
         else:
             # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("%r opened new handle %d", self, handle)
+            # If original handle was centurion, register new per-thread handle too
+            if any(h in base._centurion_handles for h in self._handles):
+                base._centurion_handles.add(handle)
             self._local.handle = handle
             self._handles.append(handle)
             return handle

@@ -1579,6 +1579,104 @@ class ADCPower(settings.Setting):
     validator_options = {"byte_count": 1}
 
 
+class HeadsetEcoMode(settings.Setting):
+    name = "headset-eco-mode"
+    label = _("Eco Mode")
+    description = _("Battery saver mode.")
+    feature = _F.HEADSET_BATTERY_SAVER
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetDoNotDisturb(settings.Setting):
+    name = "headset-do-not-disturb"
+    label = _("Do Not Disturb")
+    description = _("Suppress notification sounds.")
+    feature = _F.HEADSET_DO_NOT_DISTURB
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetMicMute(settings.Setting):
+    name = "headset-mic-mute"
+    label = _("Mic Mute")
+    description = _("Mute the microphone.")
+    feature = _F.HEADSET_MIC_MUTE
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetMicSNR(settings.Setting):
+    name = "headset-mic-snr"
+    label = _("Mic SNR")
+    description = _("Microphone signal-to-noise ratio enhancement.")
+    feature = _F.HEADSET_MIC_SNR
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetAINR(settings.Setting):
+    name = "headset-ai-nr"
+    label = _("AI Noise Reduction")
+    description = _("Enable AI noise reduction.")
+    feature = _F.HEADSET_AI_NOISE_REDUCTION
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetAINRLevel(settings.Setting):
+    name = "headset-ai-nr-level"
+    label = _("AI Noise Reduction Level")
+    description = _("AI noise reduction intensity.")
+    feature = _F.HEADSET_AI_NOISE_REDUCTION
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
+    validator_class = settings_validator.ChoicesValidator
+    choices_universe = common.NamedInts(Off=0, Low=1, Medium=2, High=3)
+
+
+class HeadsetSidetone(settings.Setting):
+    name = "headset-sidetone"
+    label = _("Headset Sidetone")
+    description = _("Sidetone level (0 = off, 100 = max). Write-only: value is persisted locally.")
+    feature = _F.HEADSET_AUDIO_SIDETONE
+    rw_class = settings.CenturionRawRW
+    # Inner payload: [0x03, 0x1b, 0x00, 0x05, 0x00, 0x07, 0x1b, 0x01, LEVEL]
+    # Reverse-engineered from G Hub / HeadsetControl for PRO X 2 LIGHTSPEED
+    rw_options = {
+        "command_template": bytes([0x03, 0x1b, 0x00, 0x05, 0x00, 0x07, 0x1b, 0x01, 0x00]),
+        "value_offset": 8,
+    }
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 100
+
+    @classmethod
+    def build(cls, device):
+        setting = super().build(device)
+        if setting:
+            # Write-only: skip current-value comparison so writes always go through
+            setting._validator.needs_current_value = False
+        return setting
+
+
+class HeadsetMicGain(settings.Setting):
+    name = "headset-mic-gain"
+    label = _("Mic Gain")
+    description = _("Microphone gain level.")
+    feature = _F.HEADSET_MIC_GAIN
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_class = settings_validator.RangeValidator
+    min_value = -128
+    max_value = 127
+    validator_options = {"byte_count": 1}
+
+
+class HeadsetMixBalance(settings.Setting):
+    name = "headset-mix-balance"
+    label = _("Audio Mix Balance")
+    description = _("Balance between game and chat audio.")
+    feature = _F.HEADSET_MIX
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 255
+    validator_options = {"byte_count": 1}
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -1937,6 +2035,15 @@ SETTINGS: list[settings.Setting] = [
     Sidetone,
     Equalizer,
     ADCPower,
+    HeadsetEcoMode,
+    HeadsetDoNotDisturb,
+    HeadsetMicMute,
+    HeadsetMicSNR,
+    HeadsetAINR,
+    HeadsetAINRLevel,
+    HeadsetSidetone,
+    HeadsetMicGain,
+    HeadsetMixBalance,
 ]
 
 

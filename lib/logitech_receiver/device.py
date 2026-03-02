@@ -29,6 +29,7 @@ from typing import Protocol
 
 from solaar import configuration
 
+from . import base
 from . import descriptors
 from . import exceptions
 from . import hidpp10
@@ -74,6 +75,8 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
     try:
         handle = low_level.open_path(device_info.path)
         if handle:
+            if getattr(device_info, "centurion", False):
+                base._centurion_handles.add(int(handle))
             # a direct connected device might not be online (as reported by user)
             return Device(
                 low_level,
@@ -124,6 +127,9 @@ class Device:
         self.product_id = device_info.product_id if device_info else None
         self.hidpp_short = device_info.hidpp_short if device_info else None
         self.hidpp_long = device_info.hidpp_long if device_info else None
+        self.centurion = device_info.centurion if device_info else False
+        if self.centurion:
+            self.hidpp_long = True  # Centurion devices always use long HID++ messages
         self.bluetooth = device_info.bus_id == 0x0005 if device_info else False  # Bluetooth needs long messages
         self.hid_serial = device_info.serial if device_info else None
         self.setting_callback = setting_callback  # for changes to settings
@@ -546,6 +552,19 @@ class Device:
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+
+    def centurion_raw_write(self, inner_payload):
+        """Send a raw Centurion command (for headset features not discoverable via IRoot).
+
+        inner_payload is everything after the [0x51, len, seq] header, e.g.:
+        sidetone: bytes([0x03, 0x1b, 0x00, 0x05, 0x00, 0x07, 0x1b, 0x01, level])
+        """
+        if not getattr(self, "centurion", False):
+            raise ValueError("centurion_raw_write called on non-Centurion device")
+        handle = self.handle or (self.receiver.handle if self.receiver else None)
+        if handle:
+            from . import base
+            base.write_centurion_raw(handle, inner_payload)
 
     def ping(self):
         """Checks if the device is online and present, returns True of False.
