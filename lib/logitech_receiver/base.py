@@ -96,6 +96,18 @@ HIDPP_SHORT_MESSAGE_ID = 0x10
 HIDPP_LONG_MESSAGE_ID = 0x11
 DJ_MESSAGE_ID = 0x20
 
+# Centurion transport (used by PRO X 2 LIGHTSPEED headset and similar)
+# Uses report ID 0x51 on usage page 0xFFA0, 64-byte frames.
+# Wire format TX: [0x51, inner_report_id, seq=0x00, feat_idx, func_sw, params..., pad]
+# Wire format RX: [0x51, len_byte, seq=0x00, feat_idx, func_sw, data..., pad]
+# The device_index byte from standard HID++ is NOT present in Centurion framing.
+CENTURION_REPORT_ID = 0x51
+CENTURION_FRAME_SIZE = 64  # 1 byte report ID + 63 bytes payload
+_CENTURION_MSG_SIZE = 63  # max reconstructed message size after unwrapping (2 + 61 payload bytes)
+
+# Set of handles that use Centurion framing
+_centurion_handles: set[int] = set()
+
 
 """Default timeout on read (in seconds)."""
 DEFAULT_TIMEOUT = 4
@@ -287,6 +299,7 @@ def close(handle):
     if handle:
         try:
             if isinstance(handle, int):
+                _centurion_handles.discard(handle)
                 hidapi.close(handle)
             else:
                 handle.close()
@@ -318,6 +331,16 @@ def write(handle, devnumber, data, long_message=False):
         wdata = struct.pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
         wdata = struct.pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
+
+    ihandle = int(handle)
+    if ihandle in _centurion_handles:
+        # Centurion framing: [0x51, inner_report_id, seq=0x00, feat_idx, func_sw, params...]
+        # The device_index is stripped — only the inner report_id + HID++ payload remain.
+        inner_report_id = ord(wdata[:1])  # 0x10 or 0x11
+        payload = wdata[2:]  # skip report_id and devnumber from standard frame
+        wdata = struct.pack("!BBB", CENTURION_REPORT_ID, inner_report_id, 0x00) + payload
+        wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
+
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(
             "(%s) <= w[%02X %02X %s %s]",
@@ -329,7 +352,30 @@ def write(handle, devnumber, data, long_message=False):
         )
 
     try:
-        hidapi.write(int(handle), wdata)
+        hidapi.write(ihandle, wdata)
+    except Exception as reason:
+        logger.error("write failed, assuming handle %r no longer available", handle)
+        close(handle)
+        raise exceptions.NoReceiver(reason=reason) from reason
+
+
+def write_centurion_raw(handle, inner_payload):
+    """Write a raw Centurion command (for headset features like sidetone/inactive time).
+
+    The inner_payload is everything after [0x51, len, seq=0x00].
+    The frame is: [0x51, len, 0x00, inner_payload..., zeros to 64 bytes].
+    Length byte = len(inner_payload) + 1 (for seq byte).
+    """
+    ihandle = int(handle)
+    if ihandle not in _centurion_handles:
+        raise ValueError("write_centurion_raw called on non-Centurion handle")
+    length = len(inner_payload) + 1  # +1 for seq byte
+    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, length, 0x00) + inner_payload
+    wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("(%s) <= centurion_raw[%s]", handle, common.strhex(wdata[:length + 2]))
+    try:
+        hidapi.write(ihandle, wdata)
     except Exception as reason:
         logger.error("write failed, assuming handle %r no longer available", handle)
         close(handle)
@@ -361,17 +407,17 @@ def _is_relevant_message(data: bytes) -> bool:
     """
     assert isinstance(data, bytes), (repr(data), type(data))
 
-    # mapping from report_id to message length
+    # mapping from report_id to accepted message lengths
     report_lengths = {
-        HIDPP_SHORT_MESSAGE_ID: SHORT_MESSAGE_SIZE,
-        HIDPP_LONG_MESSAGE_ID: _LONG_MESSAGE_SIZE,
-        DJ_MESSAGE_ID: _MEDIUM_MESSAGE_SIZE,
-        0x21: _MAX_READ_SIZE,
+        HIDPP_SHORT_MESSAGE_ID: (SHORT_MESSAGE_SIZE,),
+        HIDPP_LONG_MESSAGE_ID: (_LONG_MESSAGE_SIZE, _CENTURION_MSG_SIZE),
+        DJ_MESSAGE_ID: (_MEDIUM_MESSAGE_SIZE,),
+        0x21: (_MAX_READ_SIZE,),
     }
 
     report_id = ord(data[:1])
     if report_id in report_lengths:
-        if report_lengths.get(report_id) == len(data):
+        if len(data) in report_lengths[report_id]:
             return True
         else:
             logger.warning(f"unexpected message size: report_id {report_id:02X} message {common.strhex(data)}")
@@ -387,14 +433,33 @@ def _read(handle, timeout) -> tuple[int, int, bytes]:
     been physically removed from the machine, or the kernel driver has been
     unloaded. The handle will be closed automatically.
     """
+    ihandle = int(handle)
+    is_centurion = ihandle in _centurion_handles
+    read_size = CENTURION_FRAME_SIZE if is_centurion else _MAX_READ_SIZE
     try:
         # convert timeout to milliseconds, the hidapi expects it
         timeout = int(timeout * 1000)
-        data = hidapi.read(int(handle), _MAX_READ_SIZE, timeout)
+        data = hidapi.read(ihandle, read_size, timeout)
     except Exception as reason:
         logger.warning("read failed, assuming handle %r no longer available", handle)
         close(handle)
         raise exceptions.NoReceiver(reason=reason) from reason
+
+    if data and is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
+        # Unwrap Centurion framing:
+        # RX: [0x51, len_byte, seq, feat_idx, func_sw, data...]
+        # Reconstruct as HID++ long message: [0x11, devnumber=0xFF, feat_idx, func_sw, data...]
+        # Use len_byte to determine actual payload size (includes feat_idx + func_sw + response data).
+        payload_len = ord(data[1:2])
+        inner_payload = data[3:3 + payload_len]  # extract exactly payload_len bytes after seq
+        data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
+        # Pad to a valid message size: standard long (20) or Centurion extended (63)
+        if len(data) <= _LONG_MESSAGE_SIZE:
+            data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
+        elif len(data) <= _CENTURION_MSG_SIZE:
+            data = data + b"\x00" * (_CENTURION_MSG_SIZE - len(data))
+        else:
+            data = data[:_CENTURION_MSG_SIZE]
 
     if data and _is_relevant_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
@@ -641,7 +706,9 @@ def ping(handle, devnumber, long_message: bool = False):
             if reply:
                 report_id, reply_devnumber, reply_data = reply
                 if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xFF:  # BT device returning 0x00
-                    if reply_data[:2] == request_data[:2] and reply_data[4:5] == request_data[-1:]:
+                    is_centurion = int(handle) in _centurion_handles
+                    mark_ok = is_centurion or reply_data[4:5] == request_data[-1:]
+                    if reply_data[:2] == request_data[:2] and mark_ok:
                         # HID++ 2.0+ device, currently connected
                         return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
@@ -675,17 +742,30 @@ def _read_input_buffer(handle, ihandle, notifications_hook):
 
     Used by request() and ping() before their write.
     """
+    is_centurion = ihandle in _centurion_handles
+    read_size = CENTURION_FRAME_SIZE if is_centurion else _MAX_READ_SIZE
 
     while True:
         try:
             # read whatever is already in the buffer, if any
-            data = hidapi.read(ihandle, _MAX_READ_SIZE, 0)
+            data = hidapi.read(ihandle, read_size, 0)
         except Exception as reason:
             logger.error("read failed, assuming receiver %s no longer available", handle)
             close(handle)
             raise exceptions.NoReceiver(reason=reason) from reason
 
         if data:
+            if is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
+                # Unwrap Centurion framing same as in _read()
+                payload_len = ord(data[1:2])
+                inner_payload = data[3:3 + payload_len]
+                data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
+                if len(data) <= _LONG_MESSAGE_SIZE:
+                    data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
+                elif len(data) <= _CENTURION_MSG_SIZE:
+                    data = data + b"\x00" * (_CENTURION_MSG_SIZE - len(data))
+                else:
+                    data = data[:_CENTURION_MSG_SIZE]
             if _is_relevant_message(data):  # only process messages that pass check
                 # report_id = ord(data[:1])
                 if notifications_hook:

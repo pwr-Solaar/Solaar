@@ -161,13 +161,57 @@ class FeaturesArray(dict):
                     logger.warning("FEATURE_SET found, but failed to read features count")
                     return False
                 else:
-                    self.count = count[0] + 1  # ROOT feature not included in count
                     self[SupportedFeature.ROOT] = 0
                     self[SupportedFeature.FEATURE_SET] = fs_index
+                    if getattr(self.device, "centurion", False):
+                        self._check_centurion(fs_index, count)
+                    else:
+                        self.count = count[0] + 1  # ROOT feature not included in count
                     return True
             else:
                 self.supported = False
         return False
+
+    # Features accessible via raw Centurion commands on headsets.
+    # These aren't enumerated by IRoot/FeatureSet but work via hardcoded command bytes.
+    CENTURION_HEADSET_FEATURES = [
+        SupportedFeature.HEADSET_AUDIO_SIDETONE,
+    ]
+
+    def _check_centurion(self, fs_index, count_response):
+        """Enumerate features on a Centurion device.
+
+        Centurion FeatureSet.getCount() returns the total feature count INCLUDING ROOT.
+        Centurion FeatureSet.getFeatureID(index) returns [remaining_count, feat_hi, feat_lo]
+        where remaining_count decreases with each index. The feature ID is in bytes 1-2.
+        """
+        feature_count = count_response[0]  # includes ROOT, unlike standard HID++ 2.0
+        self.count = feature_count
+        for index in range(feature_count):
+            if self.inverse.get(index) is not None:
+                continue  # already registered (ROOT=0, FEATURE_SET=fs_index)
+            # Use device.request() directly to avoid recursion
+            response = self.device.request((fs_index << 8) | 0x10, index)
+            if response is None:
+                continue
+            # Response: [remaining_count, feat_hi, feat_lo, ...]
+            if len(response) < 3:
+                continue
+            feat_id = struct.unpack("!H", response[1:3])[0]
+            try:
+                feature = SupportedFeature(feat_id)
+            except ValueError:
+                feature = f"unknown:{feat_id:04X}"
+            self[feature] = index
+            self.inverse[index] = feature
+        # Register additional headset features accessible via raw Centurion commands.
+        # These aren't enumerated by IRoot but are known to work on Centurion headsets.
+        next_idx = feature_count
+        for feat in self.CENTURION_HEADSET_FEATURES:
+            self[feat] = next_idx
+            self.inverse[next_idx] = feat
+            next_idx += 1
+        self.count = next_idx
 
     def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)
@@ -177,23 +221,36 @@ class FeaturesArray(dict):
             feature = self.inverse.get(index)
             if feature is not None:
                 return feature
-            response = self.device.feature_request(SupportedFeature.FEATURE_SET, 0x10, index)
+            try:
+                response = self.device.feature_request(SupportedFeature.FEATURE_SET, 0x10, index)
+            except exceptions.FeatureCallError:
+                logger.warning("failed to retrieve feature at index %d", index)
+                return None
             if response:
-                data = struct.unpack("!H", response[:2])[0]
+                if getattr(self.device, "centurion", False):
+                    # Centurion response: [remaining_count, feat_hi, feat_lo]
+                    if len(response) >= 3:
+                        data = struct.unpack("!H", response[1:3])[0]
+                    else:
+                        return None
+                else:
+                    data = struct.unpack("!H", response[:2])[0]
                 try:
                     feature = SupportedFeature(data)
                 except ValueError:
                     feature = f"unknown:{data:04X}"
                 self[feature] = index
-                self.version[feature] = response[3]
-                self.flags[feature] = response[2]
+                if not getattr(self.device, "centurion", False):
+                    self.version[feature] = response[3]
+                    self.flags[feature] = response[2]
                 return feature
 
     def enumerate(self):  # return all features and their index, ordered by index
         if self._check():
             for index in range(self.count):
                 feature = self.get_feature(index)
-                yield feature, index
+                if feature is not None:
+                    yield feature, index
 
     def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
@@ -223,7 +280,10 @@ class FeaturesArray(dict):
             index = super().get(feature)
             if index is not None:
                 return index
-            response = self.device.request(0x0000, struct.pack("!H", feature))
+            try:
+                response = self.device.request(0x0000, struct.pack("!H", feature))
+            except exceptions.FeatureCallError:
+                return None
             if response:
                 index = response[0]
                 self[feature] = index if index else False

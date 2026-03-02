@@ -465,3 +465,11 @@ _D(
     kind=DEVICE_KIND.headset,
     usbid=0x0ABA,
 )
+_D(
+    "PRO X 2 LIGHTSPEED Gaming Headset",
+    codename="PRO X 2 Headset",
+    protocol=2.0,
+    interface=3,
+    kind=DEVICE_KIND.headset,
+    usbid=0x0AF7,
+)
