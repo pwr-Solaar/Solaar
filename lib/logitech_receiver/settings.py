@@ -650,38 +650,6 @@ class FeatureRW:
         return reply if not self.no_reply else True
 
 
-class CenturionRawRW:
-    """RW class for raw Centurion headset commands (sidetone, inactive time).
-
-    These features aren't discoverable via IRoot/FeatureSet but can be
-    controlled by sending raw Centurion frames (reverse-engineered from G Hub).
-    The read() returns None since these features are write-only; the last-set
-    value is persisted by the Setting infrastructure.
-    """
-
-    kind = NamedInt(0x02, _("feature"))
-
-    def __init__(self, feature, command_template=b"", value_offset=0, **kwargs):
-        self.feature = feature
-        self.command_template = command_template
-        self.value_offset = value_offset
-
-    def read(self, device, data_bytes=b""):
-        # Write-only: return default (0) so the UI has a valid initial value.
-        # The persisted value (if any) takes priority via Setting._pre_read().
-        return b"\x00"
-
-    def write(self, device, data_bytes):
-        if isinstance(data_bytes, int):
-            value = data_bytes
-        else:
-            value = int.from_bytes(data_bytes, "big")
-        cmd = bytearray(self.command_template)
-        cmd[self.value_offset] = value & 0xFF
-        device.centurion_raw_write(bytes(cmd))
-        return True
-
-
 class FeatureRWMap(FeatureRW):
     kind = NamedInt(0x02, _("feature"))
     default_read_fnid = 0x00

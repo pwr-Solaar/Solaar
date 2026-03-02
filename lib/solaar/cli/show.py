@@ -110,7 +110,8 @@ def _print_device(dev, num=None):
     print("     Codename     :", dev.codename)
     print("     Kind         :", dev.kind)
     if dev.protocol:
-        print(f"     Protocol     : HID++ {dev.protocol:1.1f}")
+        proto_name = "Centurion" if getattr(dev, "centurion", False) else "HID++"
+        print(f"     Protocol     : {proto_name} {dev.protocol:1.1f}")
     else:
         print("     Protocol     : unknown (device is offline)")
     if dev.polling_rate:
@@ -144,25 +145,43 @@ def _print_device(dev, num=None):
                 print("     Features: (none)")
 
     if dev.online and dev.features:
-        print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
+        is_centurion = getattr(dev, "centurion", False)
+        parent_count = dev.features.count
+        sub_count = getattr(dev.features, "_sub_feature_count", 0)
+        if is_centurion and sub_count > 0:
+            print(f"     Supports {parent_count} dongle + {sub_count} headset features:")
+        else:
+            print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
         dev_settings = []
         settings_templates.check_feature_settings(dev, dev_settings)
+        feature_num = 0
+        in_sub_device = False
         for feature, index in dev.features.enumerate():
+            if is_centurion and not in_sub_device and feature_num >= parent_count:
+                in_sub_device = True
+                print("       Headset (via CentPPBridge):")
+            feature_num += 1
             if isinstance(feature, str):
                 feature_bytes = bytes.fromhex(feature[-4:])
             else:
                 feature_bytes = feature.to_bytes(2, byteorder="little")
             feature_int = int.from_bytes(feature_bytes, byteorder="little")
+            # On Centurion, parent feature 0x0003 is CentPPBridge, not DEVICE_FW_VERSION
+            display_name = "CENTPP BRIDGE" if is_centurion and not in_sub_device and feature_int == 0x0003 else feature
             try:
                 flags = dev.request(0x0000, feature_bytes)
             except Exception:
-                print("        %2d: %-22s {%04X} - can't retrieve" % (index, feature, feature_int))
-                continue
-            flags = 0 if flags is None else ord(flags[1:2])
-            flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
-            version = dev.features.get_feature_version(feature_int)
-            version = version if version else 0
-            print("        %2d: %-22s {%04X} V%s    %s " % (index, feature, feature_int, version, ", ".join(flags)))
+                flags = None
+            if flags is not None:
+                flags = ord(flags[1:2])
+                flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
+                version = dev.features.get_feature_version(feature_int)
+                version = version if version else 0
+                print(
+                    "        %2d: %-22s {%04X} V%s    %s " % (index, display_name, feature_int, version, ", ".join(flag_names))
+                )
+            else:
+                print("        %2d: %-22s {%04X}" % (index, display_name, feature_int))
             if feature == SupportedFeature.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
@@ -230,7 +249,25 @@ def _print_device(dev, num=None):
                 print(f"            Kind: {_hidpp20.get_kind(dev)}")
             elif feature == SupportedFeature.DEVICE_FRIENDLY_NAME:
                 print(f"            Friendly Name: {_hidpp20.get_friendly_name(dev)}")
-            elif feature == SupportedFeature.DEVICE_FW_VERSION:
+            elif feature == SupportedFeature.CENTURION_DEVICE_INFO:
+                if in_sub_device:
+                    # Use cached device properties to avoid redundant bridge requests
+                    fw_list = dev.firmware
+                    serial = dev.serial
+                    hw_info = _hidpp20.get_hardware_info_centurion_sub(dev)
+                else:
+                    fw_list = _hidpp20.get_firmware_centurion(dev)
+                    serial = _hidpp20.get_serial_centurion(dev)
+                    hw_info = _hidpp20.get_hardware_info_centurion(dev)
+                if fw_list:
+                    for fw in fw_list:
+                        print(f"            Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+                if serial and serial.strip() and serial.strip().isprintable():
+                    print(f"            Serial: {serial}")
+                if hw_info:
+                    model_id, hw_rev, product_id = hw_info
+                    print(f"            Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
+            elif feature == SupportedFeature.DEVICE_FW_VERSION and not (is_centurion and not in_sub_device):
                 for fw in _hidpp20.get_firmware(dev):
                     extras = strhex(fw.extras) if fw.extras else ""
                     print(f"            Firmware: {fw.kind} {fw.name} {fw.version} {extras}")
