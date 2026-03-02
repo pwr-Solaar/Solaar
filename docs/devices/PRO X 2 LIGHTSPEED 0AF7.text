@@ -1,0 +1,38 @@
+Solaar version 1.1.19
+
+PRO X 2 LIGHTSPEED
+     Device path  : /dev/hidraw4
+     USB id       : 046d:0AF7
+     Codename     : PRO X 2 LIGHTSPEED
+     Kind         : headset
+     Protocol     : Centurion 2.6
+     Serial number: <redacted>
+     Model ID:      0508
+     Unit ID:       <redacted>
+                 1: 0.02
+     Supports 5 dongle + 10 headset features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: CENTURION DEVICE INFO  {0100} V0
+            Firmware: 1 0.02
+            Hardware: model 26  rev 255  product 0508
+         3: CENTPP BRIDGE          {0003}
+         4: CENTURION GENERIC DFU  {010A}
+       Headset (via CentPPBridge):
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: CENTURION DEVICE NAME  {0101}
+         3: CENTURION DEVICE INFO  {0100} V0
+            Firmware: 1 0.02
+            Serial: <redacted>
+            Hardware: model 26  rev 255  product 0508
+         4: CENTURION BATTERY SOC  {0104}
+            Battery: 80%, BatteryStatus.DISCHARGING.
+         5: CENTURION GENERIC DFU  {010A}
+         6: CENTURION UNKNOWN 0108 {0108}
+         7: HEADSET AUDIO SIDETONE {0604}
+            Headset Sidetone: 50
+         8: HEADSET MIC SNR        {0602}
+            Mic SNR: True
+         9: HEADSET ONBOARD EQ     {0636}
+     Battery: 80%, BatteryStatus.DISCHARGING.

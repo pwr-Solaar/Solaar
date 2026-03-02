@@ -1637,26 +1637,15 @@ class HeadsetAINRLevel(settings.Setting):
 class HeadsetSidetone(settings.Setting):
     name = "headset-sidetone"
     label = _("Headset Sidetone")
-    description = _("Sidetone level (0 = off, 100 = max). Write-only: value is persisted locally.")
+    description = _("Sidetone level (0 = off, 100 = max).")
     feature = _F.HEADSET_AUDIO_SIDETONE
-    rw_class = settings.CenturionRawRW
-    # Inner payload: [0x03, 0x1b, 0x00, 0x05, 0x00, 0x07, 0x1b, 0x01, LEVEL]
-    # Reverse-engineered from G Hub / HeadsetControl for PRO X 2 LIGHTSPEED
-    rw_options = {
-        "command_template": bytes([0x03, 0x1b, 0x00, 0x05, 0x00, 0x07, 0x1b, 0x01, 0x00]),
-        "value_offset": 8,
-    }
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
     validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 100
-
-    @classmethod
-    def build(cls, device):
-        setting = super().build(device)
-        if setting:
-            # Write-only: skip current-value comparison so writes always go through
-            setting._validator.needs_current_value = False
-        return setting
+    # GetSidetone returns [mic_id, flag, level] — skip 2 bytes to read level
+    # SetSidetone takes [mic_id, level] — prefix mic_id=1 before level
+    validator_options = {"read_skip_byte_count": 2, "write_prefix_bytes": b"\x01"}
 
 
 class HeadsetMicGain(settings.Setting):
