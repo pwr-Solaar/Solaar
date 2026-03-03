@@ -1185,7 +1185,7 @@ def test_centurion_receiver_attributes():
     assert recv.handle == 0x99
     assert recv.path == "/dev/hidraw99"
     assert recv.product_id == "0AF0"
-    assert recv.name == "PRO X 2 LIGHTSPEED"
+    assert recv.name == "Centurion Receiver"
     assert recv.serial is None
     assert recv.pairing is not None
     assert recv.pairing.lock_open is False
