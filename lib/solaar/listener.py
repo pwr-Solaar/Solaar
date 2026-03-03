@@ -280,8 +280,12 @@ class SolaarListener(listener.EventsListener):
             return
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("CenturionReceiver: unhandled notification sub_id=%d addr=0x%02X data=%s",
-                         n.sub_id, n.address, n.data[:12].hex() if n.data else "")
+            logger.debug(
+                "CenturionReceiver: unhandled notification sub_id=%d addr=0x%02X data=%s",
+                n.sub_id,
+                n.address,
+                n.data[:12].hex() if n.data else "",
+            )
 
     def __str__(self):
         return f"<SolaarListener({self.receiver.path},{self.receiver.handle})>"

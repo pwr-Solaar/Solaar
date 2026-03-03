@@ -1643,9 +1643,20 @@ class HeadsetSidetone(settings.Setting):
     validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 100
-    # GetSidetone returns [mic_id, flag, level] — skip 2 bytes to read level
-    # SetSidetone takes [mic_id, level] — prefix mic_id=1 before level
-    validator_options = {"read_skip_byte_count": 2, "write_prefix_bytes": b"\x01"}
+
+    @classmethod
+    def build(cls, device):
+        # Version <= 1: GetSidetone returns [mic_count, mic_id, level]; SetSidetone takes [mic_id, level]
+        # Version > 1: GetSidetone returns [mic_count, mic_id, reserved, level]; SetSidetone takes [mic_id, 0xFF, level]
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version > 1:
+            skip, prefix = 3, b"\x01\xff"
+        else:
+            skip, prefix = 2, b"\x01"
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = cls.validator_class.build(cls, device, read_skip_byte_count=skip, write_prefix_bytes=prefix)
+        if validator:
+            return cls(device, rw, validator)
 
 
 class HeadsetMicGain(settings.Setting):
@@ -1657,7 +1668,7 @@ class HeadsetMicGain(settings.Setting):
     validator_class = settings_validator.RangeValidator
     min_value = -128
     max_value = 127
-    validator_options = {"byte_count": 1}
+    validator_options = {"byte_count": 1, "signed": True}
 
 
 class HeadsetMixBalance(settings.Setting):
