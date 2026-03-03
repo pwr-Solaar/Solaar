@@ -1742,17 +1742,105 @@ class RGBIdleTimeout(settings.Setting):
     name = "rgb_idle_timeout"
     label = _("LED Idle Timeout")
     description = (
-        _("Time without keyboard input before LEDs dim.") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
+        _("Time without input before LED idle effect starts.")
+        + "\n"
+        + _("LED Control needs to be set to Solaar to be effective.")
     )
     feature = _F.RGB_EFFECTS
     choices_universe = common.NamedInts(
         **{
             "Disabled": 0,
+            "15 Seconds": 15,
+            "30 Seconds": 30,
             "1 Minute": 60,
+            "2 Minutes": 120,
+            "5 Minutes": 300,
+        }
+    )
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return common.int2bytes(60, 2)  # default 1 minute
+
+        def write(self, device, data_bytes):
+            timeout = int.from_bytes(data_bytes, byteorder="big")
+            mgr = _rgb_power_managers.get(id(device))
+            if mgr:
+                mgr.set_idle_timeout(timeout)
+            return True
+
+
+class RGBIdleEffect(settings.Setting):
+    name = "rgb_idle_effect"
+    label = _("LED Idle Effect")
+    description = (
+        _("What happens to LEDs when idle — dim to a percentage or play an animation.")
+        + "\n"
+        + _("LED Control needs to be set to Solaar to be effective.")
+    )
+    feature = _F.RGB_EFFECTS
+    validator_class = settings_validator.ChoicesValidator
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return common.int2bytes(50, 1)  # default Dim 50%
+
+        def write(self, device, data_bytes):
+            effect = int.from_bytes(data_bytes, byteorder="big")
+            mgr = _rgb_power_managers.get(id(device))
+            if mgr:
+                mgr.set_idle_effect(effect)
+            return True
+
+    @classmethod
+    def build(cls, device):
+        rw = cls.rw_class(cls.feature)
+        choices = common.NamedInts()
+        choices[0] = _("Disabled")
+        choices[25] = _("Dim to 25%")
+        choices[50] = _("Dim to 50%")
+        choices[75] = _("Dim to 75%")
+        try:
+            infos = device.led_effects
+            if infos and infos.zones:
+                for e in infos.zones[0].effects:
+                    if e.ID == 0x0A and 0x0A not in choices:
+                        choices[0x0A] = _("Breathe")
+                    elif e.ID == 0x0B and 0x0B not in choices:
+                        choices[0x0B] = _("Ripple")
+        except Exception:
+            pass
+        validator = settings_validator.ChoicesValidator(choices=choices)
+        return cls(device, rw, validator)
+
+
+class RGBSleepTimeout(settings.Setting):
+    name = "rgb_sleep_timeout"
+    label = _("LED Sleep Timeout")
+    description = (
+        _("Time without input before LEDs fade off completely.")
+        + "\n"
+        + _("LED Control needs to be set to Solaar to be effective.")
+    )
+    feature = _F.RGB_EFFECTS
+    choices_universe = common.NamedInts(
+        **{
+            "Disabled": 0,
             "2 Minutes": 120,
             "5 Minutes": 300,
             "10 Minutes": 600,
             "15 Minutes": 900,
+            "30 Minutes": 1800,
         }
     )
     validator_class = settings_validator.ChoicesValidator
@@ -1770,7 +1858,7 @@ class RGBIdleTimeout(settings.Setting):
             timeout = int.from_bytes(data_bytes, byteorder="big")
             mgr = _rgb_power_managers.get(id(device))
             if mgr:
-                mgr.set_timeout(timeout)
+                mgr.set_sleep_timeout(timeout)
             return True
 
 
@@ -1791,7 +1879,6 @@ def _rgb_cleanup(device):
 
 _rgb_power_managers = {}  # keyed by id(device)
 
-_RGB_IDLE_TIMEOUT = 300  # seconds before dimming LEDs
 _RGB_CHECK_INTERVAL = 5  # seconds between idle checks
 
 
@@ -1803,12 +1890,17 @@ def _rgb_power_manager_start(device):
         mgr = RGBPowerManager(device)
         _rgb_power_managers[key] = mgr
         mgr.start()
-        # Apply persisted idle timeout setting
+        # Apply persisted settings
         for s in device.settings:
             if s.name == "rgb_idle_timeout":
+                val = s._value if s._value is not None else 60
+                mgr.set_idle_timeout(int(val))
+            elif s.name == "rgb_sleep_timeout":
                 val = s._value if s._value is not None else 300
-                mgr.set_timeout(int(val))
-                break
+                mgr.set_sleep_timeout(int(val))
+            elif s.name == "rgb_idle_effect":
+                val = s._value if s._value is not None else 50
+                mgr.set_idle_effect(int(val))
 
 
 def _rgb_power_manager_stop(device):
@@ -1867,28 +1959,44 @@ def _find_hidraw_activity_node(hidpp_path, keyboard=True):
 class RGBPowerManager:
     """Manages LED idle/sleep states in software when firmware power management is disabled.
 
-    Since claiming SW control via ProfileManagement getSetMode(0x05) disables the firmware's
-    own power management timeouts, this class provides equivalent behavior: dimming LEDs after
-    an idle period and restoring them on activity.
+    Two-stage idle behavior matching LGHUB:
+      Stage 1 — Idle Effect: Smooth dim ramp or firmware animation after idle timeout.
+      Stage 2 — Sleep: Firmware fade-to-off after sleep timeout.
 
-    Activity is detected by monitoring the keyboard/mouse HID hidraw interface, which receives
-    raw HID reports immune to EVIOCGRAB — so LEDs stay lit even when a game has exclusive
-    input access.
+    Activity on hidraw instantly restores full lighting from any stage.
+
+    State machine: ACTIVE → DIMMING → IDLE → SLEEPING
     """
+
+    ACTIVE = 0
+    DIMMING = 1
+    IDLE = 2
+    SLEEPING = 3
+
+    _DIM_INTERVAL_MS = 200  # milliseconds between dim ramp steps
+    _DIM_STEPS = 25  # total steps for ~5s dim ramp
 
     def __init__(self, device):
         self._device = device
         self._last_activity = time()
-        self._dimmed = False
+        self._state = self.ACTIVE
         self._was_online = True
-        self._timeout = _RGB_IDLE_TIMEOUT
-        self._timer_id = None
+        # Settings (overridden from persisted values via _rgb_power_manager_start)
+        self._idle_timeout = 60  # seconds before idle effect
+        self._sleep_timeout = 300  # seconds before sleep (0=disabled)
+        self._idle_effect = 50  # 0=disabled, 25/50/75=dim%, 0x0A/0x0B=animation
+        # Timers
+        self._timer_id = None  # idle check timer
+        self._dim_timer_id = None  # dim ramp animation timer
+        self._dim_step = 0
+        self._dim_zones = []  # list of (zone, start_color, target_color)
+        # Activity monitoring
         self._hidraw_fd = None
         self._hidraw_watch_id = None
 
     def start(self):
         self._last_activity = time()
-        self._dimmed = False
+        self._state = self.ACTIVE
         self._was_online = True
         self._timer_id = GLib.timeout_add_seconds(_RGB_CHECK_INTERVAL, self._check_idle)
         self._start_hidraw_monitor()
@@ -1896,30 +2004,44 @@ class RGBPowerManager:
             logger.debug("%s: RGB power manager started", self._device)
 
     def stop(self):
+        self._cancel_dim_timer()
         self._stop_hidraw_monitor()
         if self._timer_id is not None:
             GLib.source_remove(self._timer_id)
             self._timer_id = None
-        if self._dimmed:
-            self._wake()
+        if self._state != self.ACTIVE:
+            try:
+                self._wake()
+            except Exception:
+                pass  # Best effort during shutdown
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: RGB power manager stopped", self._device)
 
-    def set_timeout(self, seconds):
-        """Update the idle timeout. 0 disables idle dimming."""
-        self._timeout = seconds
-        if seconds == 0:
-            if self._dimmed:
-                self._wake()
-            if self._timer_id is not None:
-                GLib.source_remove(self._timer_id)
-                self._timer_id = None
-        else:
-            if self._timer_id is None:
-                self._last_activity = time()
-                self._timer_id = GLib.timeout_add_seconds(_RGB_CHECK_INTERVAL, self._check_idle)
+    def set_idle_timeout(self, seconds):
+        """Update the idle timeout for the idle effect stage."""
+        self._idle_timeout = seconds
+        if seconds == 0 and self._state in (self.DIMMING, self.IDLE):
+            self._wake()
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s: RGB idle timeout set to %s seconds", self._device, seconds)
+            logger.debug("%s: RGB idle timeout set to %ss", self._device, seconds)
+
+    def set_sleep_timeout(self, seconds):
+        """Update the sleep timeout (stage 2). 0 disables sleep."""
+        self._sleep_timeout = seconds
+        if seconds == 0 and self._state == self.SLEEPING:
+            self._wake()
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB sleep timeout set to %ss", self._device, seconds)
+
+    def set_idle_effect(self, effect):
+        """Update the idle effect type. 0=disabled, 25/50/75=dim%, 0x0A/0x0B=animation."""
+        self._idle_effect = effect
+        if effect == 0 and self._state in (self.DIMMING, self.IDLE):
+            self._wake()
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB idle effect set to %s", self._device, effect)
+
+    # --- Activity monitoring ---
 
     def _start_hidraw_monitor(self):
         """Monitor the keyboard HID hidraw node for activity (immune to EVIOCGRAB)."""
@@ -1967,68 +2089,281 @@ class RGBPowerManager:
             # Device gone (EIO/ENODEV) — stop this watch, cleanup will handle the rest
             return False
         self._last_activity = time()
-        if self._dimmed:
+        if self._state != self.ACTIVE:
             self._wake()
         return True  # Keep the watch active
 
+    # --- State machine ---
+
     def _check_idle(self):
-        if self._timeout == 0:
-            return False  # Stop the timer if disabled
-        # Handle device online/offline transitions (e.g., wired/wireless switching)
+        """Periodic check — manage idle/sleep transitions."""
         if not self._device.online:
             self._was_online = False
             return True  # Stay dormant while device is offline
         if not self._was_online:
-            # Device just came back online — reset state to avoid errant dimming
+            # Device just came back online — reset state
             self._was_online = True
             self._last_activity = time()
-            self._dimmed = False  # apply_all_settings already restored colors
+            self._cancel_dim_timer()
+            self._state = self.ACTIVE
             self._restart_hidraw_monitor()
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: RGB power manager resumed after device came back online", self._device)
             return True
+
+        idle_enabled = self._idle_effect != 0 and self._idle_timeout > 0
+        sleep_enabled = self._sleep_timeout > 0
+        if not idle_enabled and not sleep_enabled:
+            return True  # Nothing to do
+
         idle_secs = time() - self._last_activity
+
+        if self._state == self.ACTIVE:
+            idle_trigger = self._idle_timeout if idle_enabled else float("inf")
+            sleep_trigger = max(self._sleep_timeout - 30, 0) if sleep_enabled else float("inf")
+            # Whichever fires first wins; ties go to idle
+            if idle_trigger <= sleep_trigger and idle_secs >= idle_trigger:
+                self._start_idle_effect()
+            elif sleep_trigger < float("inf") and idle_secs >= sleep_trigger:
+                self._start_sleep()
+        elif self._state == self.IDLE:
+            if sleep_enabled and idle_secs >= max(self._sleep_timeout - 30, 0):
+                self._start_sleep()
+        # DIMMING: dim timer handles progression
+        # SLEEPING: waiting for activity
+
         if logger.isEnabledFor(logging.DEBUG):
+            state_names = {self.ACTIVE: "ACTIVE", self.DIMMING: "DIMMING", self.IDLE: "IDLE", self.SLEEPING: "SLEEPING"}
+            idle_at = self._idle_timeout if idle_enabled else None
+            sleep_at = max(self._sleep_timeout - 30, 0) if sleep_enabled else None
             logger.debug(
-                "%s: RGB _check_idle: idle=%.0fs, timeout=%ds, dimmed=%s",
+                "%s: RGB _check_idle: idle=%.0fs, state=%s, effect=%s, idle_trigger=%s, sleep_trigger=%s",
                 self._device,
                 idle_secs,
-                self._timeout,
-                self._dimmed,
+                state_names.get(self._state, "?"),
+                self._idle_effect,
+                f"{idle_at}s" if idle_at is not None else "off",
+                f"{sleep_at}s" if sleep_at is not None else "off",
             )
-        if not self._dimmed and idle_secs >= self._timeout:
-            self._dim()
-        return True  # Keep the timer running
+        return True  # Keep timer running
 
-    def _dim(self):
-        try:
-            # SetRgbPowerMode(cluster=1, mode=3=idle)
-            self._device.feature_request(_F.RGB_EFFECTS, 0x80, b"\x01\x03\x00")
-            self._dimmed = True
+    # --- Idle effect ---
+
+    def _start_idle_effect(self):
+        """Begin the idle effect based on _idle_effect setting."""
+        if self._idle_effect in (25, 50, 75):
+            self._start_dim_ramp(self._idle_effect)
+        elif self._idle_effect in (0x0A, 0x0B):
+            self._apply_animation(self._idle_effect)
+
+    def _start_dim_ramp(self, dim_pct):
+        """Start a smooth ~5s dim ramp to the target brightness percentage."""
+        infos = getattr(self._device, "led_effects", None)
+        if not infos or not infos.zones:
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: RGB LEDs dimmed (idle timeout)", self._device)
+                logger.debug("%s: dim ramp skipped — no led_effects/zones", self._device)
+            self._state = self.IDLE
+            return
+        self._dim_zones = []
+        for zone in infos.zones:
+            effect_ids = [e.ID for e in zone.effects]
+            if 0x01 in effect_ids:  # Zone supports Static
+                start_color = self._get_zone_color(zone)
+                target_color = self._compute_dim_color(start_color, dim_pct)
+                self._dim_zones.append((zone, start_color, target_color))
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "%s: dim zone %s (loc %s): start=#%06x target=#%06x, effects=%s",
+                        self._device,
+                        zone.index,
+                        zone.location,
+                        start_color,
+                        target_color,
+                        effect_ids,
+                    )
+            elif logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "%s: dim zone %s skipped — no Static (0x01) in effects=%s",
+                    self._device,
+                    zone.index,
+                    effect_ids,
+                )
+        if not self._dim_zones:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: dim ramp skipped — no zones support Static", self._device)
+            self._state = self.IDLE
+            return
+        self._dim_step = 0
+        self._state = self.DIMMING
+        self._dim_timer_id = GLib.timeout_add(self._DIM_INTERVAL_MS, self._dim_ramp_step)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: starting dim ramp to %d%% brightness (%d zones)", self._device, dim_pct, len(self._dim_zones))
+
+    def _dim_ramp_step(self):
+        """GLib callback — one step of the smooth dim animation."""
+        if self._state != self.DIMMING or not self._device.online:
+            self._dim_timer_id = None
+            return False  # Cancelled or device offline
+        self._dim_step += 1
+        t = self._dim_step / self._DIM_STEPS
+        for zone, start_color, target_color in self._dim_zones:
+            color = self._interpolate_color(start_color, target_color, t)
+            try:
+                self._push_static_effect(zone, color)
+            except Exception as e:
+                if logger.isEnabledFor(logging.WARNING):
+                    logger.warning("%s: dim ramp step failed for zone %s: %s", self._device, zone.index, e)
+        if self._dim_step >= self._DIM_STEPS:
+            # Dim complete — release effect control to firmware to hold the dim level
+            try:
+                self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x03")
+            except Exception:
+                pass
+            self._state = self.IDLE
+            self._dim_timer_id = None
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: dim ramp complete, entering idle state", self._device)
+            return False  # Stop timer
+        return True  # Continue timer
+
+    def _push_static_effect(self, zone, color):
+        """Send a non-persistent Static effect with the given color to a zone."""
+        # Find the Static effect's device-reported index (not list position)
+        static_effect = None
+        for e in zone.effects:
+            if e.ID == 0x01:
+                static_effect = e
+                break
+        if static_effect is None:
+            return
+        r = (color >> 16) & 0xFF
+        g = (color >> 8) & 0xFF
+        b = color & 0xFF
+        # SetEffectByIndex: zone(1) + effect_idx(1) + params(10) + persist(1)
+        # Static params: color(3, @0) + ramp(1, @3) + pad(6)
+        params = bytes([r, g, b, 0, 0, 0, 0, 0, 0, 0])
+        payload = bytes([zone.index, static_effect.index]) + params + b"\x01"
+        self._device.feature_request(_F.RGB_EFFECTS, 0x10, payload)
+
+    def _apply_animation(self, effect_id):
+        """Switch to a firmware-handled animation (Breathe/Ripple) for idle effect."""
+        infos = getattr(self._device, "led_effects", None)
+        if not infos or not infos.zones:
+            self._state = self.IDLE
+            return
+        for zone in infos.zones:
+            color = self._get_zone_color(zone)
+            r, g, b = (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF
+            effect_info = None
+            for e in zone.effects:
+                if e.ID == effect_id:
+                    effect_info = e
+                    break
+            if effect_info is None:
+                continue
+            period = effect_info.period or 3000
+            period_hi, period_lo = (period >> 8) & 0xFF, period & 0xFF
+            if effect_id == 0x0A:  # Breathe: color(3,@0) + period(2,@3) + form(1,@5) + intensity(1,@6)
+                params = bytes([r, g, b, period_hi, period_lo, 0, 100, 0, 0, 0])
+            elif effect_id == 0x0B:  # Ripple: color(3,@0) + period(2,@4)
+                params = bytes([r, g, b, 0, period_hi, period_lo, 0, 0, 0, 0])
+            else:
+                continue
+            payload = bytes([zone.index, effect_info.index]) + params + b"\x01"
+            try:
+                self._device.feature_request(_F.RGB_EFFECTS, 0x10, payload)
+            except Exception as exc:
+                if logger.isEnabledFor(logging.WARNING):
+                    logger.warning(
+                        "%s: failed to apply animation 0x%02x to zone %d: %s",
+                        self._device,
+                        effect_id,
+                        zone.index,
+                        exc,
+                    )
+        # Release to firmware for animation playback
+        try:
+            self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x03")
+        except Exception:
+            pass
+        self._state = self.IDLE
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: applied animation idle effect 0x%02x", self._device, effect_id)
+
+    # --- Sleep ---
+
+    def _start_sleep(self):
+        """Send firmware fade-to-off command."""
+        self._cancel_dim_timer()
+        try:
+            # SetRgbPowerMode(cluster=1, mode=3=idle) triggers ~30s firmware fade
+            self._device.feature_request(_F.RGB_EFFECTS, 0x80, b"\x01\x03\x00")
+            self._state = self.SLEEPING
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: RGB entering sleep (firmware fade-to-off)", self._device)
         except Exception as e:
             if logger.isEnabledFor(logging.WARNING):
-                logger.warning("%s: failed to dim RGB LEDs: %s", self._device, e)
+                logger.warning("%s: failed to enter RGB sleep: %s", self._device, e)
+
+    # --- Wake ---
 
     def _wake(self):
-        if not self._dimmed:
+        """Restore full lighting from any non-ACTIVE state."""
+        if self._state == self.ACTIVE:
             return
+        prev_state = self._state
+        self._cancel_dim_timer()
         try:
-            self._set_power_mode_with_retry(1)
-            # Re-claim LED pipeline after power mode restore (matches LGHUB wake behavior)
+            if prev_state == self.SLEEPING:
+                self._set_power_mode_with_retry(1)
+            # Re-claim full LED pipeline control
             self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
-            self._dimmed = False
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: RGB LEDs woken from dim", self._device)
             self._restore_colors()
+            self._state = self.ACTIVE
+            if logger.isEnabledFor(logging.DEBUG):
+                state_names = {self.DIMMING: "dimming", self.IDLE: "idle", self.SLEEPING: "sleep"}
+                logger.debug("%s: RGB woken from %s", self._device, state_names.get(prev_state, "unknown"))
         except Exception as e:
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning("%s: failed to wake RGB LEDs: %s", self._device, e)
 
+    # --- Helpers ---
+
+    def _cancel_dim_timer(self):
+        """Cancel any in-progress dim ramp timer."""
+        if self._dim_timer_id is not None:
+            GLib.source_remove(self._dim_timer_id)
+            self._dim_timer_id = None
+
+    def _get_zone_color(self, zone):
+        """Get the current color for a zone from cached settings."""
+        location = int(zone.location)
+        setting_name = f"rgb_zone_{location}"
+        for s in self._device.settings:
+            if s.name == setting_name and s._value is not None:
+                return getattr(s._value, "color", 0xFFFFFF)
+        return 0xFFFFFF  # fallback to white
+
+    @staticmethod
+    def _compute_dim_color(color, dim_pct):
+        """Compute the dimmed color (dim_pct is target brightness percentage)."""
+        r = ((color >> 16) & 0xFF) * dim_pct // 100
+        g = ((color >> 8) & 0xFF) * dim_pct // 100
+        b = (color & 0xFF) * dim_pct // 100
+        return (r << 16) | (g << 8) | b
+
+    @staticmethod
+    def _interpolate_color(start, target, t):
+        """Linearly interpolate between two RGB colors. t in [0, 1]."""
+        r_s, g_s, b_s = (start >> 16) & 0xFF, (start >> 8) & 0xFF, start & 0xFF
+        r_t, g_t, b_t = (target >> 16) & 0xFF, (target >> 8) & 0xFF, target & 0xFF
+        r = int(r_s + (r_t - r_s) * t)
+        g = int(g_s + (g_t - g_s) * t)
+        b = int(b_s + (b_t - b_s) * t)
+        return (r << 16) | (g << 8) | b
+
     def _set_power_mode_with_retry(self, mode):
         """Set RGB power mode with retry — first command after wake may fail."""
-        # SetRgbPowerMode(cluster=1, mode, pad=0)
         params = bytes([0x01, mode, 0x00])
         for attempt in range(3):
             try:
@@ -2042,7 +2377,7 @@ class RGBPowerManager:
                 _time.sleep(0.1)
 
     def _restore_colors(self):
-        """Re-push cached lighting state after waking from dim."""
+        """Re-push cached lighting state after waking."""
         for s in self._device.settings:
             if (s.name == "per-key-lighting" or s.name.startswith("rgb_zone_")) and s._value is not None:
                 try:
@@ -2291,10 +2626,12 @@ SETTINGS: list[settings.Setting] = [
     LEDControl,
     LEDZoneSetting,
     RGBControl,
-    RGBIdleTimeout,
     RGBEffectSetting,
     BrightnessControl,
     PerKeyLighting,
+    RGBIdleEffect,
+    RGBIdleTimeout,
+    RGBSleepTimeout,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
