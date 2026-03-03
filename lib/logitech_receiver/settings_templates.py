@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import enum
 import logging
+import os
 import socket
 import struct
 import traceback
@@ -46,6 +47,13 @@ from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 
 logger = logging.getLogger(__name__)
+
+try:
+    from gi.repository import GLib
+
+    _has_glib = True
+except ImportError:
+    _has_glib = False
 
 _hidpp20 = hidpp20.Hidpp20()
 _F = hidpp20_constants.SupportedFeature
@@ -1686,6 +1694,365 @@ class RGBControl(settings.Setting):
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
 
+    def write(self, value, save=True):
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        assert value is not None
+        device = self._device
+        if not device.online:
+            return None
+        if self._value != value:
+            self.update(value, save)
+        claiming = int(value) == 1  # Solaar
+        if claiming:
+            self._claim_sw_control(device)
+        else:
+            self._release_sw_control(device)
+        return value
+
+    def _claim_sw_control(self, device):
+        # Disable firmware power management via profile management or onboard profiles
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x05")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
+        # Claim LED pipeline: SetSWControl(mode=3, flags=5)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
+        # Start software power management
+        _rgb_power_manager_start(device)
+        # Register cleanup for graceful release on device close
+        if _rgb_cleanup not in device.cleanups:
+            device.cleanups.append(_rgb_cleanup)
+
+    def _release_sw_control(self, device):
+        # Stop software power management
+        _rgb_power_manager_stop(device)
+        # Release LED pipeline: SetSWControl(mode=0, flags=0)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        # Restore firmware power management
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
+        if _rgb_cleanup in device.cleanups:
+            device.cleanups.remove(_rgb_cleanup)
+
+
+class RGBIdleTimeout(settings.Setting):
+    name = "rgb_idle_timeout"
+    label = _("LED Idle Timeout")
+    description = (
+        _("Time without keyboard input before LEDs dim.") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
+    )
+    feature = _F.RGB_EFFECTS
+    choices_universe = common.NamedInts(
+        **{
+            "Disabled": 0,
+            "1 Minute": 60,
+            "2 Minutes": 120,
+            "5 Minutes": 300,
+            "10 Minutes": 600,
+            "15 Minutes": 900,
+        }
+    )
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return common.int2bytes(300, 2)  # default 5 minutes
+
+        def write(self, device, data_bytes):
+            timeout = int.from_bytes(data_bytes, byteorder="big")
+            mgr = _rgb_power_managers.get(id(device))
+            if mgr:
+                mgr.set_timeout(timeout)
+            return True
+
+
+def _rgb_cleanup(device):
+    """Cleanup handler called when device is closed — restores firmware control."""
+    _rgb_power_manager_stop(device)
+    try:
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
+    except Exception:
+        pass  # Device may already be offline
+
+
+# --- RGB Software Power Management ---
+
+_rgb_power_managers = {}  # keyed by id(device)
+
+_RGB_IDLE_TIMEOUT = 300  # seconds before dimming LEDs
+_RGB_CHECK_INTERVAL = 5  # seconds between idle checks
+
+
+def _rgb_power_manager_start(device):
+    if not _has_glib:
+        return
+    key = id(device)
+    if key not in _rgb_power_managers:
+        mgr = RGBPowerManager(device)
+        _rgb_power_managers[key] = mgr
+        mgr.start()
+        # Apply persisted idle timeout setting
+        for s in device.settings:
+            if s.name == "rgb_idle_timeout":
+                val = s._value if s._value is not None else 300
+                mgr.set_timeout(int(val))
+                break
+
+
+def _rgb_power_manager_stop(device):
+    key = id(device)
+    mgr = _rgb_power_managers.pop(key, None)
+    if mgr:
+        mgr.stop()
+
+
+def _find_hidraw_activity_node(hidpp_path, keyboard=True):
+    """Find the keyboard (or mouse) HID hidraw node sibling of a HID++ hidraw device.
+
+    Logitech receivers/devices expose three USB interfaces:
+      Interface 0: Mouse HID reports    (protocol 2, boot mouse)
+      Interface 1: Keyboard HID reports (protocol 1, boot keyboard)
+      Interface 2: HID++ / vendor       (protocol 0)
+
+    The hidraw for interface 1 (or 0) receives raw HID reports that are NOT affected
+    by EVIOCGRAB on the evdev device, making it a reliable activity signal even when
+    a game has exclusive input access.
+    """
+    import pyudev
+
+    # USB HID boot interface protocol: 1=keyboard, 2=mouse
+    target_protocol = 1 if keyboard else 2
+    context = pyudev.Context()
+    try:
+        hidpp_dev = pyudev.Devices.from_device_file(context, hidpp_path)
+        usb_dev = hidpp_dev.find_parent("usb", "usb_device")
+        if not usb_dev:
+            return None
+    except Exception:
+        return None
+    usb_dev_path = usb_dev.sys_path
+    for dev in context.list_devices(subsystem="hidraw"):
+        if dev.device_node == hidpp_path:
+            continue  # Skip the HID++ node itself
+        # Check this hidraw belongs to the same USB device
+        dev_usb = dev.find_parent("usb", "usb_device")
+        if not dev_usb or dev_usb.sys_path != usb_dev_path:
+            continue
+        # Check the USB interface protocol (e.g. "3/1/1" = HID boot keyboard, "3/1/2" = HID boot mouse)
+        usb_iface = dev.find_parent("usb", "usb_interface")
+        if not usb_iface:
+            continue
+        iface_desc = usb_iface.get("INTERFACE", "")
+        parts = iface_desc.split("/")
+        try:
+            if len(parts) == 3 and int(parts[2]) == target_protocol:
+                return dev.device_node
+        except ValueError:
+            continue
+    return None
+
+
+class RGBPowerManager:
+    """Manages LED idle/sleep states in software when firmware power management is disabled.
+
+    Since claiming SW control via ProfileManagement getSetMode(0x05) disables the firmware's
+    own power management timeouts, this class provides equivalent behavior: dimming LEDs after
+    an idle period and restoring them on activity.
+
+    Activity is detected by monitoring the keyboard/mouse HID hidraw interface, which receives
+    raw HID reports immune to EVIOCGRAB — so LEDs stay lit even when a game has exclusive
+    input access.
+    """
+
+    def __init__(self, device):
+        self._device = device
+        self._last_activity = time()
+        self._dimmed = False
+        self._was_online = True
+        self._timeout = _RGB_IDLE_TIMEOUT
+        self._timer_id = None
+        self._hidraw_fd = None
+        self._hidraw_watch_id = None
+
+    def start(self):
+        self._last_activity = time()
+        self._dimmed = False
+        self._was_online = True
+        self._timer_id = GLib.timeout_add_seconds(_RGB_CHECK_INTERVAL, self._check_idle)
+        self._start_hidraw_monitor()
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB power manager started", self._device)
+
+    def stop(self):
+        self._stop_hidraw_monitor()
+        if self._timer_id is not None:
+            GLib.source_remove(self._timer_id)
+            self._timer_id = None
+        if self._dimmed:
+            self._wake()
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB power manager stopped", self._device)
+
+    def set_timeout(self, seconds):
+        """Update the idle timeout. 0 disables idle dimming."""
+        self._timeout = seconds
+        if seconds == 0:
+            if self._dimmed:
+                self._wake()
+            if self._timer_id is not None:
+                GLib.source_remove(self._timer_id)
+                self._timer_id = None
+        else:
+            if self._timer_id is None:
+                self._last_activity = time()
+                self._timer_id = GLib.timeout_add_seconds(_RGB_CHECK_INTERVAL, self._check_idle)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB idle timeout set to %s seconds", self._device, seconds)
+
+    def _start_hidraw_monitor(self):
+        """Monitor the keyboard HID hidraw node for activity (immune to EVIOCGRAB)."""
+        hidpp_path = getattr(self._device, "path", None)
+        if not hidpp_path and hasattr(self._device, "receiver") and self._device.receiver:
+            hidpp_path = self._device.receiver.path
+        if not hidpp_path:
+            return
+        is_keyboard = str(getattr(self._device, "kind", "")) == "keyboard"
+        hidraw_node = _find_hidraw_activity_node(hidpp_path, keyboard=is_keyboard)
+        if not hidraw_node:
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("%s: no hidraw activity node found, hidraw activity monitoring unavailable", self._device)
+            return
+        try:
+            self._hidraw_fd = os.open(hidraw_node, os.O_RDONLY | os.O_NONBLOCK)
+            self._hidraw_watch_id = GLib.io_add_watch(self._hidraw_fd, GLib.IO_IN, self._on_activity)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: monitoring hidraw %s for activity (grab-immune)", self._device, hidraw_node)
+        except OSError as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("%s: cannot open %s for hidraw monitoring: %s", self._device, hidraw_node, e)
+            self._hidraw_fd = None
+
+    def _stop_hidraw_monitor(self):
+        if self._hidraw_watch_id is not None:
+            GLib.source_remove(self._hidraw_watch_id)
+            self._hidraw_watch_id = None
+        if self._hidraw_fd is not None:
+            os.close(self._hidraw_fd)
+            self._hidraw_fd = None
+
+    def _restart_hidraw_monitor(self):
+        """Restart hidraw watch after a device comes back online."""
+        self._stop_hidraw_monitor()
+        self._start_hidraw_monitor()
+
+    def _on_activity(self, fd, condition):
+        """GLib callback when HID reports arrive on hidraw — reset idle timer."""
+        try:
+            os.read(fd, 4096)
+        except BlockingIOError:
+            return True  # No data ready (EAGAIN) — normal for non-blocking fd
+        except OSError:
+            # Device gone (EIO/ENODEV) — stop this watch, cleanup will handle the rest
+            return False
+        self._last_activity = time()
+        if self._dimmed:
+            self._wake()
+        return True  # Keep the watch active
+
+    def _check_idle(self):
+        if self._timeout == 0:
+            return False  # Stop the timer if disabled
+        # Handle device online/offline transitions (e.g., wired/wireless switching)
+        if not self._device.online:
+            self._was_online = False
+            return True  # Stay dormant while device is offline
+        if not self._was_online:
+            # Device just came back online — reset state to avoid errant dimming
+            self._was_online = True
+            self._last_activity = time()
+            self._dimmed = False  # apply_all_settings already restored colors
+            self._restart_hidraw_monitor()
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: RGB power manager resumed after device came back online", self._device)
+            return True
+        idle_secs = time() - self._last_activity
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "%s: RGB _check_idle: idle=%.0fs, timeout=%ds, dimmed=%s",
+                self._device,
+                idle_secs,
+                self._timeout,
+                self._dimmed,
+            )
+        if not self._dimmed and idle_secs >= self._timeout:
+            self._dim()
+        return True  # Keep the timer running
+
+    def _dim(self):
+        try:
+            # SetRgbPowerMode(cluster=1, mode=3=idle)
+            self._device.feature_request(_F.RGB_EFFECTS, 0x80, b"\x01\x03\x00")
+            self._dimmed = True
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: RGB LEDs dimmed (idle timeout)", self._device)
+        except Exception as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("%s: failed to dim RGB LEDs: %s", self._device, e)
+
+    def _wake(self):
+        if not self._dimmed:
+            return
+        try:
+            self._set_power_mode_with_retry(1)
+            # Re-claim LED pipeline after power mode restore (matches LGHUB wake behavior)
+            self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
+            self._dimmed = False
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: RGB LEDs woken from dim", self._device)
+            self._restore_colors()
+        except Exception as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("%s: failed to wake RGB LEDs: %s", self._device, e)
+
+    def _set_power_mode_with_retry(self, mode):
+        """Set RGB power mode with retry — first command after wake may fail."""
+        # SetRgbPowerMode(cluster=1, mode, pad=0)
+        params = bytes([0x01, mode, 0x00])
+        for attempt in range(3):
+            try:
+                self._device.feature_request(_F.RGB_EFFECTS, 0x80, params)
+                return
+            except Exception:
+                if attempt == 2:
+                    raise
+                import time as _time
+
+                _time.sleep(0.1)
+
+    def _restore_colors(self):
+        """Re-push cached lighting state after waking from dim."""
+        for s in self._device.settings:
+            if (s.name == "per-key-lighting" or s.name.startswith("rgb_zone_")) and s._value is not None:
+                try:
+                    s.write(s._value, save=False)
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s: restored %s after wake", self._device, s.name)
+                except Exception as e:
+                    if logger.isEnabledFor(logging.WARNING):
+                        logger.warning("%s: failed to restore %s: %s", self._device, s.name, e)
+
 
 class RGBEffectSetting(LEDZoneSetting):
     name = "rgb_zone_"  # the trailing underscore signals that this setting creates other settings
@@ -1706,6 +2073,18 @@ class PerKeyLighting(settings.Settings):
     keys_universe = special_keys.KEYCODES
     choices_universe = special_keys.COLORSPLUS
 
+    def _ensure_sw_control(self):
+        """Ensure SW control is claimed before writing per-key colors."""
+        if getattr(self, "_has_rgb_effects", None) is None:
+            self._has_rgb_effects = bool(self._device.features and _F.RGB_EFFECTS in self._device.features)
+        if not self._has_rgb_effects:
+            return  # No autonomous effect engine, no claim needed
+        for s in self._device.settings:
+            if s.name == "rgb_control":
+                if s._value != 1:  # Not already claimed by Solaar
+                    s.write(1)  # Triggers full claim sequence in RGBControl
+                return
+
     def read(self, cached=True):
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -1718,6 +2097,7 @@ class PerKeyLighting(settings.Settings):
 
     def write(self, map, save=True):
         if self._device.online:
+            self._ensure_sw_control()
             self.update(map, save)
             table = {}
             for key, value in map.items():
@@ -1750,6 +2130,7 @@ class PerKeyLighting(settings.Settings):
         return map
 
     def write_key_value(self, key, value, save=True):
+        self._ensure_sw_control()
         if value != special_keys.COLORSPLUS["No change"]:  # this signals no change
             result = super().write_key_value(int(key), value, save)
             if self._device.online:
@@ -1910,6 +2291,7 @@ SETTINGS: list[settings.Setting] = [
     LEDControl,
     LEDZoneSetting,
     RGBControl,
+    RGBIdleTimeout,
     RGBEffectSetting,
     BrightnessControl,
     PerKeyLighting,
