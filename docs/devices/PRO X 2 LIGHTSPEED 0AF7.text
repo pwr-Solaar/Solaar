@@ -1,6 +1,21 @@
-Solaar version 1.1.19
+solaar version 1.1.19-24-g693159ee
 
-PRO X 2 LIGHTSPEED
+Centurion Receiver
+  Device path  : /dev/hidraw4
+  USB id       : 046d:0AF7
+  Protocol     : Centurion
+    1          : 0.02
+  Has 1 device(s) out of a maximum of 1.
+  Supports 5 dongle features:
+       0: ROOT                   {0000}
+       1: FEATURE SET            {0001}
+       2: CENTURION DEVICE INFO  {0100}
+          Firmware: 1 0.02
+          Hardware: model 26  rev 255  product 0508
+       3: CENTPP BRIDGE          {0003}
+       4: CENTURION GENERIC DFU  {010A}
+
+  1: PRO X 2 LIGHTSPEED
      Device path  : /dev/hidraw4
      USB id       : 046d:0AF7
      Codename     : PRO X 2 LIGHTSPEED
@@ -10,29 +25,23 @@ PRO X 2 LIGHTSPEED
      Model ID:      0508
      Unit ID:       <redacted>
                  1: 0.02
-     Supports 5 dongle + 10 headset features:
+     Supports 10 HID++ 2.0 features:
          0: ROOT                   {0000} V0
          1: FEATURE SET            {0001} V0
-         2: CENTURION DEVICE INFO  {0100} V0
-            Firmware: 1 0.02
-            Hardware: model 26  rev 255  product 0508
-         3: CENTPP BRIDGE          {0003}
-         4: CENTURION GENERIC DFU  {010A}
-       Headset (via CentPPBridge):
-         0: ROOT                   {0000} V0
-         1: FEATURE SET            {0001} V0
-         2: CENTURION DEVICE NAME  {0101}
+         2: CENTURION DEVICE NAME  {0101} V0
          3: CENTURION DEVICE INFO  {0100} V0
             Firmware: 1 0.02
             Serial: <redacted>
             Hardware: model 26  rev 255  product 0508
-         4: CENTURION BATTERY SOC  {0104}
-            Battery: 80%, BatteryStatus.DISCHARGING.
-         5: CENTURION GENERIC DFU  {010A}
-         6: CENTURION UNKNOWN 0108 {0108}
-         7: HEADSET AUDIO SIDETONE {0604}
-            Headset Sidetone: 50
-         8: HEADSET MIC SNR        {0602}
+         4: CENTURION BATTERY SOC  {0104} V0
+            Battery: 97%, BatteryStatus.DISCHARGING.
+         5: CENTURION GENERIC DFU  {010A} V0
+         6: CENTURION AUTO SLEEP   {0108} V0
+            Auto Sleep Timeout: 10
+         7: HEADSET AUDIO SIDETONE {0604} V0
+            Headset Sidetone: 55
+         8: HEADSET MIC SNR        {0602} V0
             Mic SNR: True
-         9: HEADSET ONBOARD EQ     {0636}
-     Battery: 80%, BatteryStatus.DISCHARGING.
+         9: HEADSET ONBOARD EQ     {0636} V0
+            EQ: 80Hz:+0dB, 240Hz:+0dB, 750Hz:+0dB, 2200Hz:+0dB, 6600Hz:+0dB
+     Battery: 97%, BatteryStatus.DISCHARGING.
