@@ -287,6 +287,9 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, notification)
 
+    elif feature == SupportedFeature.CENTURION_BATTERY_SOC:
+        device.set_battery_info(hidpp20.decipher_battery_centurion(notification.data)[1])
+
     elif feature == SupportedFeature.SOLAR_DASHBOARD:
         if notification.data[5:9] == b"GOOD":
             charge, lux, adc = struct.unpack("!BHH", notification.data[:5])

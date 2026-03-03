@@ -22,6 +22,7 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
+from logitech_receiver.device import CenturionReceiver
 from logitech_receiver.hidpp20 import KeyFlag
 from logitech_receiver.hidpp20 import MappingFlag
 from logitech_receiver.hidpp20_constants import GestureId
@@ -1128,3 +1129,154 @@ def test_centurion_kind_inference():
     from logitech_receiver import hidpp10_constants
 
     assert kind == hidpp10_constants.DEVICE_KIND.headset
+
+
+# --- CenturionReceiver tests ---
+
+
+class FakeCenturionDeviceInfo:
+    """Minimal device_info for CenturionReceiver tests."""
+
+    def __init__(self, path="/dev/hidraw99", product_id="0AF0", product=None, centurion=True):
+        self.path = path
+        self.product_id = product_id
+        self.product = product
+        self.centurion = centurion
+        self.isDevice = True
+
+
+class FakeLowLevel:
+    """Minimal low_level for CenturionReceiver tests."""
+
+    def __init__(self, ping_protocol=2.6):
+        self.ping_protocol = ping_protocol
+        self.opened_paths = []
+        self.closed_handles = []
+
+    def open_path(self, path):
+        self.opened_paths.append(path)
+        return 0x99
+
+    def ping(self, handle, number, long_message=False):
+        return self.ping_protocol
+
+    def request(self, handle, devnumber, request_id, *params, **kwargs):
+        return None
+
+    def close(self, handle, *args, **kwargs):
+        self.closed_handles.append(handle)
+        return True
+
+    def find_paired_node(self, receiver_path, index, timeout):
+        return None
+
+
+def test_centurion_receiver_attributes():
+    """CenturionReceiver has correct receiver-like attributes."""
+    info = FakeCenturionDeviceInfo(product="PRO X 2 LIGHTSPEED")
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+
+    assert recv.kind is None
+    assert recv.isDevice is False
+    assert recv.number == 0xFF
+    assert recv.max_devices == 1
+    assert recv.may_unpair is False
+    assert recv.re_pairs is False
+    assert recv.handle == 0x99
+    assert recv.path == "/dev/hidraw99"
+    assert recv.product_id == "0AF0"
+    assert recv.name == "PRO X 2 LIGHTSPEED"
+    assert recv.serial is None
+    assert recv.pairing is not None
+    assert recv.pairing.lock_open is False
+    assert bool(recv) is True
+
+
+def test_centurion_receiver_container_empty():
+    """Empty CenturionReceiver has correct container behavior."""
+    info = FakeCenturionDeviceInfo()
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+
+    assert len(recv) == 0
+    assert recv.count() == 0
+    assert 1 not in recv
+    assert list(recv) == []
+    assert recv.status_string() == "No devices."
+
+
+def test_centurion_receiver_container_with_device():
+    """CenturionReceiver with a child device has correct container behavior."""
+    info = FakeCenturionDeviceInfo()
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+
+    # Simulate adding a child device (a simple mock)
+    class FakeChild:
+        number = 1
+
+        def close(self):
+            pass
+
+    recv._devices[1] = FakeChild()
+
+    assert len(recv) == 1
+    assert recv.count() == 1
+    assert 1 in recv
+    assert 2 not in recv
+    assert recv[1] is not None
+    assert recv.status_string() == "1 device connected."
+    with pytest.raises(IndexError):
+        recv[2]
+
+
+def test_centurion_receiver_enable_connection_notifications():
+    """CenturionReceiver.enable_connection_notifications() returns False."""
+    info = FakeCenturionDeviceInfo()
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+
+    assert recv.enable_connection_notifications() is False
+    assert recv.remaining_pairings() is None
+
+
+def test_centurion_receiver_device_codename():
+    """CenturionReceiver.device_codename() returns USB product name."""
+    info = FakeCenturionDeviceInfo(product="PRO X 2 LIGHTSPEED")
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+
+    assert recv.device_codename(1) == "PRO X 2 LIGHTSPEED"
+
+
+def test_centurion_receiver_close():
+    """CenturionReceiver.close() closes handle and clears devices."""
+    low_level = FakeLowLevel()
+    info = FakeCenturionDeviceInfo()
+    recv = CenturionReceiver(low_level, 0x99, info)
+
+    class FakeChild:
+        closed = False
+
+        def close(self):
+            self.closed = True
+
+    child = FakeChild()
+    recv._devices[1] = child
+
+    recv.close()
+
+    assert recv.handle is None
+    assert len(recv._devices) == 0
+    assert child.closed is True
+    assert 0x99 in low_level.closed_handles
+    assert bool(recv) is False
+
+
+def test_centurion_receiver_changed_callback():
+    """CenturionReceiver.changed() invokes status_callback."""
+    info = FakeCenturionDeviceInfo()
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+    calls = []
+    recv.status_callback = lambda *args, **kwargs: calls.append((args, kwargs))
+
+    recv.changed()
+
+    assert len(calls) == 1
+    assert calls[0][0][0] is recv

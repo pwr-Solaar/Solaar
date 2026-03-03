@@ -128,7 +128,14 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             if dev_info.isDevice:
-                d = device.create_device(base, dev_info)
+                if getattr(dev_info, "centurion", False):
+                    d = device.create_centurion_receiver(base, dev_info)
+                    if d is not None:
+                        d.notify_devices()
+                    else:
+                        d = device.create_device(base, dev_info)
+                else:
+                    d = device.create_device(base, dev_info)
             else:
                 d = receiver.create_receiver(base, dev_info)
 
