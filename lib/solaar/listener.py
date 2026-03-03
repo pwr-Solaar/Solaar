@@ -237,11 +237,18 @@ class SolaarListener(listener.EventsListener):
     def _handle_centurion_notification(self, n):
         """Handle notifications from a CenturionReceiver dongle.
 
-        Bridge MessageEvents (sub_id=bridge_index, sw_id=0) carry wrapped sub-device
-        notifications. Unwrap them and dispatch to the child device so that battery
-        updates and other feature events are processed.
+        Bridge events have sub_id == bridge_index. The event function number
+        is in bits 7-4 of n.address:
+          - Function 0: ConnectionStateChangedEvent — sub-device connect/disconnect
+          - Function 1: MessageEvent — wrapped sub-device HID++ notification
 
-        Bridge data layout after make_notification:
+        ConnectionStateChangedEvent payload (same format as getConnectionInfo):
+          n.data[0]: high nibble = connection type, low nibble = len_hi
+          n.data[1]: len_lo
+          n.data[2+]: sub-device descriptors (if any)
+        Empty sub-device list (length=0) means disconnected.
+
+        MessageEvent data layout:
           n.data[0:2] = dev_id<<4|len_hi, len_lo
           n.data[2]   = sub_cpl (0x00 for both responses and notifications)
           n.data[3]   = sub_feat_idx
@@ -249,23 +256,59 @@ class SolaarListener(listener.EventsListener):
           n.data[5:]  = payload
         """
         child = self.receiver._devices.get(1)
-        if not child or not child.online:
+        if not child:
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("CenturionReceiver: notification ignored (no online child): %s", n)
+                logger.debug("CenturionReceiver: notification ignored (no child device): %s", n)
             return
 
         bridge_idx = getattr(child, "_centurion_bridge_index", None)
-        if bridge_idx is not None and n.sub_id == bridge_idx:
-            # Bridge MessageEvent — unwrap sub-device notification
+        if bridge_idx is None or n.sub_id != bridge_idx:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "CenturionReceiver: non-bridge notification sub_id=%d addr=0x%02X data=%s",
+                    n.sub_id,
+                    n.address,
+                    n.data[:12].hex() if n.data else "",
+                )
+            return
+
+        event_func = (n.address >> 4) & 0x0F
+
+        if event_func == 0:
+            # ConnectionStateChangedEvent — parse sub-device list length
+            if len(n.data) < 2:
+                return
+            data_len = ((n.data[0] & 0x0F) << 8) | n.data[1]
+            if data_len > 0 and not child.online:
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("CenturionReceiver: headset connected (ConnectionStateChangedEvent, len=%d)", data_len)
+                child.changed(active=True)
+                self._status_changed(child)
+            elif data_len == 0 and child.online:
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("CenturionReceiver: headset disconnected (ConnectionStateChangedEvent, len=0)")
+                child.changed(active=False)
+                self._status_changed(child)
+            return
+
+        if event_func == 1:
+            # MessageEvent — unwrap sub-device notification
             # n.data layout: [dev_id<<4|len_hi, len_lo, sub_cpl, sub_feat_idx, sub_func_sw, payload...]
             if len(n.data) < 5:
                 return
+            # A MessageEvent from the headset proves it's online. If we missed the
+            # ConnectionStateChangedEvent (e.g. cold-start power-on), bring it online now.
+            if not child.online:
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("CenturionReceiver: headset online (MessageEvent received while offline)")
+                child.changed(active=True)
+                self._status_changed(child)
             sub_feat_idx = n.data[3]
             sub_func_sw = n.data[4]
             payload = n.data[5:]
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug(
-                    "CenturionReceiver: bridge notification sub_feat=%d func=0x%02X payload=%s -> child %s",
+                    "CenturionReceiver: bridge MessageEvent sub_feat=%d func=0x%02X payload=%s -> child %s",
                     sub_feat_idx,
                     sub_func_sw,
                     payload[:8].hex() if payload else "",
@@ -281,8 +324,8 @@ class SolaarListener(listener.EventsListener):
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(
-                "CenturionReceiver: unhandled notification sub_id=%d addr=0x%02X data=%s",
-                n.sub_id,
+                "CenturionReceiver: unhandled bridge event func=%d addr=0x%02X data=%s",
+                event_func,
                 n.address,
                 n.data[:12].hex() if n.data else "",
             )

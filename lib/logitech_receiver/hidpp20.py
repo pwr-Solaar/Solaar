@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import socket
 import struct
 import threading
@@ -2397,3 +2398,113 @@ class ForceSensingButtonArray(UserDict):
 
     def acceptable_current_key(self, index: int, value: int) -> bool:
         return self[index].acceptable(value)
+
+
+# --- OnboardEQ (0x0636) biquad coefficient math and helpers ---
+
+
+def _peaking_eq_biquad(freq_hz, gain_db, Q, sample_rate=48000.0):
+    """Compute peaking EQ biquad coefficients (Audio EQ Cookbook).
+
+    Returns (b0/a0, b1/a0, b2/a0, a1/a0, a2/a0) normalised coefficients.
+    """
+    A = 10.0 ** (gain_db / 40.0)
+    w0 = 2.0 * math.pi * freq_hz / sample_rate
+    cos_w0 = math.cos(w0)
+    alpha = math.sin(w0) / (2.0 * Q)
+    a0 = 1.0 + alpha / A
+    return (
+        (1.0 + alpha * A) / a0,
+        (-2.0 * cos_w0) / a0,
+        (1.0 - alpha * A) / a0,
+        (-2.0 * cos_w0) / a0,
+        (1.0 - alpha / A) / a0,
+    )
+
+
+def _float_to_q626(value):
+    """Convert a float to Q6.26 fixed-point unsigned 32-bit representation."""
+    scaled = max(-(1 << 31), min((1 << 31) - 1, int(round(value * (1 << 26)))))
+    return scaled & 0xFFFFFFFF
+
+
+def _build_eq_coeffs_payload(bands):
+    """Build the biquad coefficient blob for SetEQParameters.
+
+    bands: list of (freq_hz, gain_db, Q) tuples.
+    Returns bytes containing header + section + per-band coefficients + global gain.
+    """
+    num_bands = len(bands)
+    # 7-byte header
+    payload = bytes([0x03, 0x0E, 0x00, 0x01, 0x00, 0x00, 0x00])
+    # Section header: filter_type=0x01, reserved=0x00, then coeff count as uint16 LE
+    total_words = num_bands * 10 + 3  # 5 coeffs * 2 words each per band, plus 2 global gain words + 1 count
+    payload += struct.pack("<BBH", 0x01, 0x00, total_words)
+    # Per-band: 5 coefficients, each as Q6.26 split into 2 uint16 LE words
+    for freq, gain, Q in bands:
+        coeffs = _peaking_eq_biquad(freq, gain, Q)
+        for c in coeffs:
+            q626 = _float_to_q626(c)
+            payload += struct.pack("<HH", q626 & 0xFFFF, (q626 >> 16) & 0xFFFF)
+    # Global gain: Q6.26(1.0) = 0x04000000
+    unity = _float_to_q626(1.0)
+    payload += struct.pack("<HH", unity & 0xFFFF, (unity >> 16) & 0xFFFF)
+    return payload
+
+
+def _build_set_eq_payload(slot, bands):
+    """Build complete SetEQParameters payload: band params + biquad coefficients.
+
+    bands: list of (freq_hz, gain_db, Q) tuples.
+    Returns bytes ready to send as sub-device params.
+    """
+    params = bytes([slot, len(bands)])
+    for freq, gain, Q in bands:
+        params += struct.pack(">H", freq) + bytes([gain & 0xFF, Q & 0xFF])
+    params += _build_eq_coeffs_payload(bands)
+    return params
+
+
+def get_onboard_eq_info(device):
+    """Query HEADSET_ONBOARD_EQ GetEQInfos (function 0).
+
+    Returns (has_hw_eq, num_bands) or None.
+    """
+    result = device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x00)
+    if result is None or len(result) < 5:
+        return None
+    has_hw_eq = bool(result[0] & 0x80)
+    num_bands = result[4]
+    return (has_hw_eq, num_bands)
+
+
+def get_onboard_eq_params(device, slot=0x00):
+    """Query HEADSET_ONBOARD_EQ GetEQParameters (function 0x10).
+
+    Returns list of (freq_hz, gain_db, q) tuples, or None.
+    """
+    result = device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x10, slot)
+    if result is None or len(result) < 2:
+        return None
+    band_count = result[1]
+    bands = []
+    offset = 2
+    for _i in range(band_count):
+        if offset + 4 > len(result):
+            break
+        freq_hz = struct.unpack(">H", result[offset : offset + 2])[0]
+        gain_db = struct.unpack("b", bytes([result[offset + 2]]))[0]  # signed
+        q = result[offset + 3]
+        bands.append((freq_hz, gain_db, q))
+        offset += 4
+    return bands
+
+
+def set_onboard_eq_params(device, bands, slot=0x00):
+    """Send HEADSET_ONBOARD_EQ SetEQParameters (function 0x20).
+
+    bands: list of (freq_hz, gain_db, Q) tuples.
+    Returns response or None.
+    """
+    payload = _build_set_eq_payload(slot, bands)
+    return device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x20, payload)

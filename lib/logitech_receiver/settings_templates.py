@@ -1694,6 +1694,65 @@ class HeadsetAutoSleep(settings.Setting):
     validator_options = {"byte_count": 1}
 
 
+class HeadsetOnboardEQ(settings.RangeFieldSetting):
+    name = "headset-onboard-eq"
+    label = _("Headset Equalizer")
+    description = _("Set equalizer levels.")
+    feature = _F.HEADSET_ONBOARD_EQ
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "read_prefix": b"\x00"}
+    keys_universe = []
+
+    class validator_class(settings_validator.PackedRangeValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            info = hidpp20.get_onboard_eq_info(device)
+            if not info:
+                return None
+            _has_hw_eq, num_bands = info
+            bands = hidpp20.get_onboard_eq_params(device, slot=0x00)
+            if not bands or len(bands) != num_bands:
+                return None
+            keys = common.NamedInts()
+            for i, (freq, _gain, _q) in enumerate(bands):
+                keys[i] = str(freq) + _("Hz")
+            v = cls(keys, min_value=-12, max_value=12, count=num_bands, byte_count=1)
+            v._band_freqs = [freq for freq, _g, _q in bands]
+            v._band_qs = [q for _f, _g, q in bands]
+            return v
+
+        def validate_read(self, reply_bytes):
+            if reply_bytes is None or len(reply_bytes) < 2:
+                return {}
+            band_count = reply_bytes[1]
+            result = {}
+            offset = 2
+            for i in range(band_count):
+                if offset + 4 > len(reply_bytes):
+                    break
+                freq = struct.unpack(">H", reply_bytes[offset : offset + 2])[0]
+                gain = struct.unpack("b", bytes([reply_bytes[offset + 2]]))[0]
+                q = reply_bytes[offset + 3]
+                result[i] = gain
+                # Update stored freq/Q arrays if they exist
+                if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                    self._band_freqs[i] = freq
+                if hasattr(self, "_band_qs") and i < len(self._band_qs):
+                    self._band_qs[i] = q
+                offset += 4
+            return result
+
+        def prepare_write(self, new_values):
+            if not hasattr(self, "_band_freqs") or not hasattr(self, "_band_qs"):
+                return None
+            bands = []
+            for i in range(self.count):
+                freq = self._band_freqs[i] if i < len(self._band_freqs) else 1000
+                q = self._band_qs[i] if i < len(self._band_qs) else 10
+                gain = new_values.get(i, 0)
+                bands.append((freq, gain, q))
+            return hidpp20._build_set_eq_payload(0x00, bands)
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -2183,6 +2242,7 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMicGain,
     HeadsetMixBalance,
     HeadsetAutoSleep,
+    HeadsetOnboardEQ,
 ]
 
 
