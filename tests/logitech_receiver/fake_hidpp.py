@@ -387,6 +387,8 @@ class Device:
     wpid: Optional[str] = "0000"
     setting_callback: Any = None
     centurion: bool = False
+    path = None
+    cleanups = None
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
     number = "d1"
@@ -409,6 +411,7 @@ class Device:
         self.persister = configuration._DeviceEntry()
         self.features = hidpp20.FeaturesArray(self)
         self.settings = []
+        self.cleanups = []
         self.receiver = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
