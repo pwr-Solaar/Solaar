@@ -638,6 +638,24 @@ key_tests = [
         fake_hidpp.Response("E010", 0x0430, "02E010"),
         fake_hidpp.Response("E018", 0x0430, "02E018"),
     ),
+    Setup(  # HeadsetOnboardEQ: 2 bands, 128Hz/-2dB/Q10 and 256Hz/+3dB/Q10
+        FeatureTest(settings_templates.HeadsetOnboardEQ, {0: -2, 1: 3}, {1: 5}, 2),
+        [-12, 12],
+        fake_hidpp.Response("8000000002", 0x0400),  # GetEQInfos: has_hw_eq, 2 bands
+        fake_hidpp.Response("00020080FE0A0100030A", 0x0410, "00"),  # GetEQParameters
+        fake_hidpp.Response(  # SetEQParameters: write initial values back
+            "00",
+            0x0420,
+            "00020080FE0A0100030A030E0001000000010017005FCDFF03DB3502F84C46FE03DB3502F8AA13FE03"
+            "37980004E10704F8D685FC03E10704F80D1EFD0300000004",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: write updated band 1 gain=5
+            "00",
+            0x0420,
+            "00020080FE0A0100050A030E0001000000010017005FCDFF03DB3502F84C46FE03DB3502F8AA13FE03"
+            "FAFF0004C6B703F83A6EFC03C6B703F8346EFD0300000004",
+        ),
+    ),
     Setup(
         FeatureTest(settings_templates.PerKeyLighting, {1: -1, 2: -1, 9: -1, 10: -1, 113: -1}, {2: 0xFF0000}, 4, 4, 0, 1),
         {

@@ -140,7 +140,7 @@ def _print_device(dev, num=None):
     is_centurion_child = is_centurion and isinstance(getattr(dev, "receiver", None), CenturionReceiver)
     # try to ping the device to see if it actually exists and to wake it up
     try:
-        dev.ping()
+        online = dev.ping()
     except exceptions.NoSuchDevice:
         print(f"  {num}: Device not found" or dev.number)
         return
@@ -149,6 +149,10 @@ def _print_device(dev, num=None):
         print(f"  {int(num or dev.number)}: {dev.name}")
     else:
         print(f"{dev.name}")
+
+    if not online:
+        print("     Device is offline.")
+        return
     # Centurion child has no separate hidraw path — show receiver's path
     device_path = dev.path or (dev.receiver.path if is_centurion_child else None)
     print("     Device path  :", device_path)
@@ -352,6 +356,10 @@ def _print_device(dev, num=None):
                 else:
                     mode = "On-Board"
                 print(f"            Device Mode: {mode}")
+            elif feature == SupportedFeature.HEADSET_ONBOARD_EQ:
+                bands = hidpp20.get_onboard_eq_params(dev)
+                if bands:
+                    print(f"            EQ: {', '.join(f'{f}Hz:{g:+d}dB' for f, g, _q in bands)}")
             elif hidpp20.battery_functions.get(feature, None):
                 print("", end="       ")
                 _battery_line(dev)
