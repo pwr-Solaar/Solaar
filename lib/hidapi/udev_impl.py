@@ -113,9 +113,7 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             # and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages  # be more permissive
             # Centurion transport: report ID 0x51, 63-byte reports (usage page 0xFFA0)
             centurion = (
-                0x51 in rd.input_report_ids
-                and 63 * 8 == int(rd.get_input_report_size(0x51))
-                and 0x51 in rd.output_report_ids
+                0x51 in rd.input_report_ids and 63 * 8 == int(rd.get_input_report_size(0x51)) and 0x51 in rd.output_report_ids
             )
         if not hidpp_short and not hidpp_long and not centurion:
             return

@@ -163,7 +163,7 @@ class CenturionReceiver:
         if self._dongle_features is None:
             self._discover_dongle_features()
         feature_int = int(feature)
-        for _feat, feat_id, index in (self._dongle_features or []):
+        for _feat, feat_id, index in self._dongle_features or []:
             if feat_id == feature_int:
                 request_id = (index << 8) | (function & 0xFF)
                 return self.request(request_id, *params, no_reply=no_reply)
