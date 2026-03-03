@@ -145,6 +145,10 @@ thumb_wheel_displacement = 0
 
 _dbus_interface = None
 
+# Cached window information for alternative window tracking
+_cached_active_window = None
+_cached_pointer_over_window = None
+
 
 class XkbDisplay(ctypes.Structure):
     """opaque struct"""
@@ -202,12 +206,45 @@ def gnome_dbus_interface_setup():
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
     except dbus.exceptions.DBusException:
-        logger.warning(
-            "Solaar Gnome extension not installed - some rule capabilities inoperable",
-            exc_info=sys.exc_info(),
-        )
+        logger.info("Solaar Gnome extension not available - using alternative window tracking methods")
+        _dbus_interface = False
+    except Exception as e:
+        logger.warning("Failed to setup GNOME D-Bus interface: %s", e)
         _dbus_interface = False
     return _dbus_interface
+
+
+def update_active_window(wm_class):
+    """Update the cached active window information.
+
+    This method allows external services to notify Solaar about the active window
+    instead of Solaar querying the window manager. This is useful in environments
+    like KDE where merging methods into the GNOME Shell service is not possible.
+
+    Args:
+        wm_class: The WM_CLASS of the active window, typically a string.
+    """
+    global _cached_active_window
+    _cached_active_window = wm_class
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("updated cached active window: %s", wm_class)
+
+
+def update_pointer_over_window(wm_class):
+    """Update the cached pointer-over window information.
+
+    This method allows external services to notify Solaar about the window under
+    the pointer instead of Solaar querying the window manager. This is useful in
+    environments like KDE where merging methods into the GNOME Shell service is
+    not possible.
+
+    Args:
+        wm_class: The WM_CLASS of the window under the pointer, typically a string.
+    """
+    global _cached_pointer_over_window
+    _cached_pointer_over_window = wm_class
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("updated cached pointer-over window: %s", wm_class)
 
 
 def xkb_setup():
@@ -677,14 +714,60 @@ def gnome_dbus_pointer_prog():
     return (wm_class,) if wm_class else None
 
 
+def get_active_window_info():
+    """Get active window information using available methods.
+
+    This function tries multiple approaches in the following order:
+    1. Check if external service has provided cached value via UpdateActiveWindow
+    2. Use X11 if available and not in Wayland
+    3. Use GNOME Shell extension if in Wayland
+
+    Returns:
+        Tuple of window information or None if not available.
+    """
+    global _cached_active_window
+    # First, check if external service has provided cached value
+    if _cached_active_window is not None:
+        return (_cached_active_window,)
+    # Try X11 if not in Wayland
+    if not wayland:
+        return x11_focus_prog()
+    # Otherwise try GNOME Shell extension
+    return gnome_dbus_focus_prog()
+
+
+def get_pointer_window_info():
+    """Get pointer-over window information using available methods.
+
+    This function tries multiple approaches in the following order:
+    1. Check if external service has provided cached value via UpdatePointerOverWindow
+    2. Use X11 if available and not in Wayland
+    3. Use GNOME Shell extension if in Wayland
+
+    Returns:
+        Tuple of window information or None if not available.
+    """
+    global _cached_pointer_over_window
+    # First, check if external service has provided cached value
+    if _cached_pointer_over_window is not None:
+        return (_cached_pointer_over_window,)
+    # Try X11 if not in Wayland
+    if not wayland:
+        return x11_pointer_prog()
+    # Otherwise try GNOME Shell extension
+    return gnome_dbus_pointer_prog()
+
+
 class Process(Condition):
     def __init__(self, process, warn=True):
         self.process = process
+        # Only warn if neither X11 nor GNOME extension is available
+        # External services can still provide window information via UpdateActiveWindow DBus method
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
-            if warn:
-                logger.warning(
-                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome "
-                    "extension - %s",
+            if warn and logger.isEnabledFor(logging.INFO):
+                logger.info(
+                    "rules will rely on external service calling UpdateActiveWindow DBus method "
+                    "(X11 and GNOME Shell extension not available) - %s",
                     self,
                 )
         if not isinstance(process, str):
@@ -700,7 +783,7 @@ class Process(Condition):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog() if not wayland else gnome_dbus_focus_prog()
+        focus = get_active_window_info()
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
@@ -711,11 +794,13 @@ class Process(Condition):
 class MouseProcess(Condition):
     def __init__(self, process, warn=True):
         self.process = process
+        # Only warn if neither X11 nor GNOME extension is available
+        # External services can still provide window information via UpdatePointerOverWindow DBus method
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
-            if warn:
-                logger.warning(
-                    "rules cannot access active mouse process "
-                    "in X11 or in Wayland under GNOME with Solaar Extension for GNOME - %s",
+            if warn and logger.isEnabledFor(logging.INFO):
+                logger.info(
+                    "rules will rely on external service calling UpdatePointerOverWindow DBus method "
+                    "(X11 and GNOME Shell extension not available) - %s",
                     self,
                 )
         if not isinstance(process, str):
@@ -731,7 +816,7 @@ class MouseProcess(Condition):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
             return False
-        pointer_focus = x11_pointer_prog() if not wayland else gnome_dbus_pointer_prog()
+        pointer_focus = get_pointer_window_info()
         result = any(bool(s and s.startswith(self.process)) for s in pointer_focus) if pointer_focus else None
         return result
 
