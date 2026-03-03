@@ -1671,6 +1671,18 @@ class HeadsetMixBalance(settings.Setting):
     validator_options = {"byte_count": 1}
 
 
+class HeadsetAutoSleep(settings.Setting):
+    name = "headset-auto-sleep"
+    label = _("Auto Sleep Timeout")
+    description = _("Idle time in minutes before the headset enters sleep mode (0 = disabled).")
+    feature = _F.CENTURION_AUTO_SLEEP
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 255
+    validator_options = {"byte_count": 1}
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -2159,6 +2171,7 @@ SETTINGS: list[settings.Setting] = [
     HeadsetSidetone,
     HeadsetMicGain,
     HeadsetMixBalance,
+    HeadsetAutoSleep,
 ]
 
 

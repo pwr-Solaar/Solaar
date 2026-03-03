@@ -2237,15 +2237,24 @@ def decipher_battery_unified(report) -> tuple[SupportedFeature, Battery]:
 
 
 def decipher_battery_centurion(report) -> tuple[SupportedFeature, Battery]:
-    """Decipher CENTURION_BATTERY_SOC (0x0104) response."""
+    """Decipher CENTURION_BATTERY_SOC (0x0104) response.
+
+    Response format (3 bytes):
+      Byte 0: Battery Percentage (0-100)
+      Byte 1: Battery Percentage (duplicate)
+      Byte 2: Charging Status (0=discharging, 1=charging, 2=charging via USB, 3=charge complete)
+    """
     if len(report) < 1:
         return SupportedFeature.CENTURION_BATTERY_SOC, Battery(None, None, BatteryStatus.DISCHARGING, None)
-    soc = report[0]  # state of charge percentage (tentative — first byte)
+    soc = report[0]
     logger.debug("centurion battery SOC raw: %s", report[:8].hex())
-    status = BatteryStatus.DISCHARGING
-    # Check for charging indicator if available
-    if len(report) >= 2 and report[1] & 0x01:
+    charging_status = report[2] if len(report) >= 3 else 0
+    if charging_status in (1, 2):
         status = BatteryStatus.RECHARGING
+    elif charging_status == 3:
+        status = BatteryStatus.FULL
+    else:
+        status = BatteryStatus.DISCHARGING
     return SupportedFeature.CENTURION_BATTERY_SOC, Battery(soc, None, status, None)
 
 

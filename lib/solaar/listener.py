@@ -149,6 +149,12 @@ class SolaarListener(listener.EventsListener):
     def _notifications_handler(self, n):
         assert self.receiver
         if n.devnumber == 0xFF:
+            # For CenturionReceiver, intercept bridge notifications and dispatch to child device
+            from logitech_receiver.device import CenturionReceiver
+
+            if isinstance(self.receiver, CenturionReceiver):
+                self._handle_centurion_notification(n)
+                return
             # a receiver notification
             notifications.process(self.receiver, n)
             return
@@ -228,6 +234,55 @@ class SolaarListener(listener.EventsListener):
         elif dev.online is None:
             dev.ping()
 
+    def _handle_centurion_notification(self, n):
+        """Handle notifications from a CenturionReceiver dongle.
+
+        Bridge MessageEvents (sub_id=bridge_index, sw_id=0) carry wrapped sub-device
+        notifications. Unwrap them and dispatch to the child device so that battery
+        updates and other feature events are processed.
+
+        Bridge data layout after make_notification:
+          n.data[0:2] = dev_id<<4|len_hi, len_lo
+          n.data[2]   = sub_cpl (0x00 for both responses and notifications)
+          n.data[3]   = sub_feat_idx
+          n.data[4]   = sub_func_sw (sw_id=0 for unsolicited notifications)
+          n.data[5:]  = payload
+        """
+        child = self.receiver._devices.get(1)
+        if not child or not child.online:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("CenturionReceiver: notification ignored (no online child): %s", n)
+            return
+
+        bridge_idx = getattr(child, "_centurion_bridge_index", None)
+        if bridge_idx is not None and n.sub_id == bridge_idx:
+            # Bridge MessageEvent — unwrap sub-device notification
+            # n.data layout: [dev_id<<4|len_hi, len_lo, sub_cpl, sub_feat_idx, sub_func_sw, payload...]
+            if len(n.data) < 5:
+                return
+            sub_feat_idx = n.data[3]
+            sub_func_sw = n.data[4]
+            payload = n.data[5:]
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "CenturionReceiver: bridge notification sub_feat=%d func=0x%02X payload=%s -> child %s",
+                    sub_feat_idx,
+                    sub_func_sw,
+                    payload[:8].hex() if payload else "",
+                    child,
+                )
+            # Create synthetic notification and dispatch directly to feature processing.
+            # Sub-device features use 0x100 offset in FeaturesArray.inverse.
+            synthetic = base.HIDPPNotification(n.report_id, child.number, sub_feat_idx + 0x100, sub_func_sw, payload)
+            child.online = True
+            if child.features:
+                notifications._process_feature_notification(child, synthetic)
+            return
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("CenturionReceiver: unhandled notification sub_id=%d addr=0x%02X data=%s",
+                         n.sub_id, n.address, n.data[:12].hex() if n.data else "")
+
     def __str__(self):
         return f"<SolaarListener({self.receiver.path},{self.receiver.handle})>"
 
@@ -260,6 +315,13 @@ def _start(device_info: DeviceInfo):
 
     if not device_info.isDevice:
         receiver_ = logitech_receiver.receiver.create_receiver(base, device_info, _setting_callback)
+    elif getattr(device_info, "centurion", False):
+        receiver_ = logitech_receiver.device.create_centurion_receiver(base, device_info, _setting_callback)
+        if receiver_ is None:
+            # No bridge found — treat as a direct-connected centurion device (e.g., wired headset)
+            receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
+            if receiver_:
+                configuration.attach_to(receiver_)
     else:
         receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
         if receiver_:
