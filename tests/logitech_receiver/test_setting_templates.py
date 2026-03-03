@@ -295,6 +295,18 @@ simple_tests = [
         fake_hidpp.Response("0000", 0x0450),
         fake_hidpp.Response("010305", 0x0450, "010305"),
     ),
+    Setup(  # RGBIdleEffect — software-only, no feature requests for read/write
+        FeatureTest(settings_templates.RGBIdleEffect, 50, 75, 0),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
+    ),
+    Setup(  # RGBIdleTimeout — software-only, no feature requests for read/write
+        FeatureTest(settings_templates.RGBIdleTimeout, 60, 300, 0),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
+    ),
+    Setup(  # RGBSleepTimeout — software-only, no feature requests for read/write
+        FeatureTest(settings_templates.RGBSleepTimeout, 300, 600, 0),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
+    ),
     Setup(
         FeatureTest(
             settings_templates.RGBEffectSetting,
