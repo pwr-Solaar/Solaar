@@ -219,7 +219,7 @@ class CenturionReceiver:
         """Create child Device for the headset and trigger its initialization."""
         # Signal receiver to UI first — tray/window need the receiver entry
         # before a child device can be added under it.
-        self.changed()
+        self.changed(alert=Alert.NONE)
 
         # Create child Device with receiver=self, number=1
         pairing_info = {
@@ -242,14 +242,20 @@ class CenturionReceiver:
         dev.product_id = self.product_id
         dev.hidpp_long = True
         dev._centurion_usb_name = self._usb_name
+        # Pre-set bridge index from dongle features so ping can probe the headset
+        for _feat, feat_id, idx in self._dongle_features or []:
+            if feat_id == 0x0003:  # CentPPBridge
+                dev._centurion_bridge_index = idx
+                break
 
         self._devices[1] = dev
         configuration.attach_to(dev)
         dev.status_callback = self.status_callback
 
-        # Ping to determine online status
-        if dev.ping():
-            dev.changed(active=True)
+        # Ping to determine online status.
+        # Notify UI either way — offline devices show as greyed out (matching receiver behavior).
+        online = dev.ping()
+        dev.changed(active=online)
         if self.status_callback is not None:
             self.status_callback(dev)
 
@@ -814,7 +820,7 @@ class Device:
                     else:
                         self.set_configuration(0x11)  # signal end of configuration
                     self.read_battery()  # battery information may have changed so try to read it now
-            elif was_active and self.receiver:  # need to set configuration pending flag in receiver
+            elif was_active and self.receiver and not isinstance(self.receiver, CenturionReceiver):
                 hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
@@ -904,6 +910,9 @@ class Device:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
+    # Maximum sub-message bytes per bridge frame: 64 - 1 (report ID) - 2 (CPL) - 4 (bridge hdr) = 57
+    _MAX_BRIDGE_CHUNK = 57
+
     def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
         """Send a request to a Centurion sub-device via CentPPBridge.
 
@@ -912,6 +921,10 @@ class Device:
         Layer 2: [cpl_length, flags=0x00]
         Layer 3: [bridge_idx, sendFragment_func|swid, bridge_hdr...]
         Layer 4: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
+
+        When sub_msg exceeds 57 bytes, splits into multiple fragments.
+        Each fragment carries the same bridge_hdr (total sub_len).
+        The device accumulates until complete.
 
         Returns the sub-device response data (after bridge header), or None.
         """
@@ -932,21 +945,33 @@ class Device:
         sub_msg = struct.pack("BBB", 0x00, sub_feat_idx, (sub_function & 0xF0) | sw_id) + sub_params
 
         # Build bridge header: [device_id<<4 | len_hi, len_lo]
-        # device_id=0 for the headset, len is the sub-message length
+        # device_id=0 for the headset, len is the total sub-message length
         sub_len = len(sub_msg)
         bridge_hdr = struct.pack("BB", (0x00 << 4) | ((sub_len >> 8) & 0x0F), sub_len & 0xFF)
+        bridge_prefix = struct.pack("BB", bridge_idx, (0x01 << 4) | sw_id)
 
-        # Build Layer 3: [bridge_idx, sendFragment_func(1)<<4|swid, bridge_hdr, sub_msg]
-        layer3 = struct.pack("BB", bridge_idx, (0x01 << 4) | sw_id) + bridge_hdr + sub_msg
-
-        with base.acquire_timeout(base.handle_lock(handle), handle, base.DEFAULT_TIMEOUT):
-            base.write_centurion_cpl(handle, layer3)
+        timeout = base.DEFAULT_TIMEOUT
+        with base.acquire_timeout(base.handle_lock(handle), handle, timeout):
+            if sub_len <= self._MAX_BRIDGE_CHUNK:
+                # Single-frame path
+                layer3 = bridge_prefix + bridge_hdr + sub_msg
+                base.write_centurion_cpl(handle, layer3)
+            else:
+                # Multi-fragment send: split sub_msg into chunks
+                for offset in range(0, sub_len, self._MAX_BRIDGE_CHUNK):
+                    chunk = sub_msg[offset : offset + self._MAX_BRIDGE_CHUNK]
+                    layer3 = bridge_prefix + bridge_hdr + chunk
+                    base.write_centurion_cpl(handle, layer3)
+                    # Wait for ACK between fragments (not after the last one)
+                    if offset + self._MAX_BRIDGE_CHUNK < sub_len:
+                        if not self._wait_for_bridge_ack(handle, bridge_idx, sw_id, timeout):
+                            logger.warning("centurion_bridge_request: no ACK for fragment at offset %d", offset)
+                            return None
 
             if no_reply:
                 return None
 
-            # Read ACK response (immediate echo of bridge_idx + func|swid)
-            timeout = base.DEFAULT_TIMEOUT  # same timeout as standard device requests
+            # Read ACK + MessageEvent response
             request_started = time.time()
             ack_received = False
             while time.time() - request_started < timeout:
@@ -987,6 +1012,21 @@ class Device:
                         # Unsolicited notification for a different feature, skip it
             logger.warning("centurion_bridge_request: no MessageEvent received")
             return None
+
+    @staticmethod
+    def _wait_for_bridge_ack(handle, bridge_idx, sw_id, timeout):
+        """Wait for a bridge ACK response between multi-fragment sends."""
+        started = time.time()
+        while time.time() - started < timeout:
+            reply = base._read(handle, timeout)
+            if not reply:
+                continue
+            _report_id, _devnumber, reply_data = reply
+            if len(reply_data) >= 2 and reply_data[0] == bridge_idx:
+                func_sw = reply_data[1]
+                if (func_sw >> 4) == 0x01 and (func_sw & 0x0F) == sw_id:
+                    return True
+        return False
 
     @staticmethod
     def _is_bridge_response_for(reply_data, expected_sub_feat_idx):
@@ -1036,16 +1076,26 @@ class Device:
         """Checks if the device is online and present, returns True of False.
         Some devices are integral with their receiver but may not be present even if the receiver responds to ping."""
         if self.centurion and self.receiver and not self.handle:
-            # Centurion child: ping the dongle with 0xFF (CPL framing has no device number,
-            # and responses always have devnumber=0xFF)
+            # Centurion child: first check if dongle is reachable
             handle = self.receiver.handle
             try:
                 protocol = self.low_level.ping(handle, 0xFF, long_message=True)
             except exceptions.NoReceiver:
-                protocol = None
-            self.online = protocol is not None and self.present
+                self.online = False
+                return False
             if protocol:
                 self._protocol = protocol
+            # Dongle responded — now check if headset is actually on by probing through bridge.
+            # Send ROOT.GetFeature(0x0001) to the sub-device via CentPPBridge.
+            bridge_idx = getattr(self, "_centurion_bridge_index", None)
+            if bridge_idx is not None:
+                try:
+                    result = self.centurion_bridge_request(0, 0x00, 0x00, 0x01)
+                    self.online = result is not None and self.present
+                except Exception:
+                    self.online = False
+            else:
+                self.online = False
             return self.online
         long = self.hidpp_long is True or (
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
