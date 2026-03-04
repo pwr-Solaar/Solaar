@@ -115,7 +115,6 @@ class SolaarListener(listener.EventsListener):
                         reason or "",
                     )
                 else:
-                    device.ping()
                     logger.info(
                         "status_changed %r: %s %s (%X) %s",
                         device,
