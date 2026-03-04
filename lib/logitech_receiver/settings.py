@@ -42,6 +42,7 @@ class Kind(IntEnum):
     MAP_CHOICE = 0x0A
     MULTIPLE_TOGGLE = 0x10
     PACKED_RANGE = 0x20
+    GRAPHIC_EQ = 0x21
     MULTIPLE_RANGE = 0x40
     HETERO = 0x80
     MAP_RANGE = 0x102

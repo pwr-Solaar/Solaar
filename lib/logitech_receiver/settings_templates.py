@@ -1698,6 +1698,8 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
     keys_universe = []
 
     class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
         @classmethod
         def build(cls, setting_class, device):
             info = hidpp20.get_onboard_eq_info(device)
