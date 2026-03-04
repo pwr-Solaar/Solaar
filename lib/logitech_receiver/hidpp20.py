@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import logging
-import math
 import socket
 import struct
 import threading
@@ -36,6 +35,7 @@ import yaml
 from solaar.i18n import _
 from typing_extensions import Protocol
 
+from . import centurion as _centurion
 from . import common
 from . import exceptions
 from . import hidpp10_constants
@@ -1686,106 +1686,25 @@ class Hidpp20:
             return tuple(fw)
 
     def get_firmware_centurion(self, device):
-        """Reads firmware info from a Centurion device via DeviceInfo (0x0100) function 1."""
-        fw = []
-        seen = set()  # track response signatures to detect duplicates
-        for index in range(0, 8):  # try up to 8 entities
-            try:
-                report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO, 0x10, index)
-            except exceptions.FeatureCallError:
-                break
-            if not report or len(report) < 5:
-                break
-            # Dedup: parent device returns the same response for every entity index
-            sig = bytes(report[: 5 + report[4]])
-            if sig in seen:
-                break
-            seen.add(sig)
-            fw_type = report[0]
-            version = struct.unpack("!H", report[2:4])[0]
-            name_len = report[4]
-            name = report[5 : 5 + name_len].decode("ascii", errors="replace").rstrip("\x00") if name_len else ""
-            version_str = f"{version >> 8}.{version & 0xFF:02d}"
-            kind = FirmwareKind(fw_type) if fw_type <= 3 else FirmwareKind.Other
-            fw.append(common.FirmwareInfo(kind, name, version_str, None))
-        return tuple(fw) if fw else None
+        return _centurion.get_firmware_centurion(device)
 
     def get_serial_centurion(self, device):
-        """Reads the serial number from a Centurion device via DeviceInfo (0x0100) function 2."""
-        try:
-            report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO, 0x20)
-        except exceptions.FeatureCallError:
-            return None
-        if not report or len(report) < 2:
-            return None
-        str_len = report[0]
-        return report[1 : 1 + str_len].decode("ascii", errors="replace").rstrip("\x00")
+        return _centurion.get_serial_centurion(device)
 
     def get_hardware_info_centurion(self, device):
-        """Reads hardware info from a Centurion device via DeviceInfo (0x0100) function 0.
-
-        Returns (modelId, hardwareRevision, productId) or None.
-        """
-        try:
-            report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO)
-        except exceptions.FeatureCallError:
-            return None
-        if not report or len(report) < 4:
-            return None
-        model_id = report[0]
-        hw_revision = report[1]
-        product_id = struct.unpack("!H", report[2:4])[0]
-        return model_id, hw_revision, product_id
+        return _centurion.get_hardware_info_centurion(device)
 
     def _centurion_sub_device_info_request(self, device, function=0x00, *params):
-        """Send a DeviceInfo (0x0100) request to the sub-device via bridge."""
-        sub_indices = getattr(device, "_centurion_sub_indices", {})
-        sub_idx = sub_indices.get(SupportedFeature.CENTURION_DEVICE_INFO)
-        if sub_idx is None:
-            return None
-        return device.centurion_bridge_request(sub_idx, function, *params)
+        return _centurion._centurion_sub_device_info_request(device, function, *params)
 
     def get_firmware_centurion_sub(self, device):
-        """Reads firmware info from the Centurion sub-device (headset) via bridge."""
-        fw = []
-        seen = set()
-        for index in range(0, 8):
-            report = self._centurion_sub_device_info_request(device, 0x10, index)
-            if not report or len(report) < 5:
-                break
-            sig = bytes(report[: 5 + report[4]])
-            if sig in seen:
-                break
-            seen.add(sig)
-            fw_type = report[0]
-            version = struct.unpack("!H", report[2:4])[0]
-            name_len = report[4]
-            name = report[5 : 5 + name_len].decode("ascii", errors="replace").rstrip("\x00") if name_len else ""
-            version_str = f"{version >> 8}.{version & 0xFF:02d}"
-            kind = FirmwareKind(fw_type) if fw_type <= 3 else FirmwareKind.Other
-            fw.append(common.FirmwareInfo(kind, name, version_str, None))
-        return tuple(fw) if fw else None
+        return _centurion.get_firmware_centurion_sub(device)
 
     def get_serial_centurion_sub(self, device):
-        """Reads the serial number from the Centurion sub-device (headset) via bridge."""
-        report = self._centurion_sub_device_info_request(device, 0x20)
-        if not report or len(report) < 2:
-            return None
-        str_len = report[0]
-        return report[1 : 1 + str_len].decode("ascii", errors="replace").rstrip("\x00")
+        return _centurion.get_serial_centurion_sub(device)
 
     def get_hardware_info_centurion_sub(self, device):
-        """Reads hardware info from the Centurion sub-device (headset) via bridge.
-
-        Returns (modelId, hardwareRevision, productId) or None.
-        """
-        report = self._centurion_sub_device_info_request(device)
-        if not report or len(report) < 4:
-            return None
-        model_id = report[0]
-        hw_revision = report[1]
-        product_id = struct.unpack("!H", report[2:4])[0]
-        return model_id, hw_revision, product_id
+        return _centurion.get_hardware_info_centurion_sub(device)
 
     def get_ids(self, device):
         """Reads a device's ids (unit and model numbers)"""
@@ -1839,36 +1758,7 @@ class Hidpp20:
             return name.decode("utf-8")
 
     def get_name_centurion(self, device):
-        """Reads a Centurion device's name via DeviceName (0x0101).
-
-        Tries two response formats:
-        1. Inline: function 0 returns [name_len, name_bytes...] (like serial)
-        2. Chunked: function 0 returns [name_len], function 1 returns [name_bytes...] (like standard DeviceName)
-        """
-        try:
-            reply = device.feature_request(SupportedFeature.CENTURION_DEVICE_NAME)
-        except exceptions.FeatureCallError:
-            return None
-        if not reply:
-            return None
-        name_length = reply[0]
-        if name_length == 0:
-            return None
-        # If the full name is inline (length + name bytes in one response)
-        if len(reply) >= 1 + name_length:
-            return reply[1 : 1 + name_length].decode("utf-8", errors="replace").rstrip("\x00")
-        # Otherwise, fetch name in chunks via function 1 (like standard DEVICE_NAME)
-        name = b""
-        while len(name) < name_length:
-            try:
-                fragment = device.feature_request(SupportedFeature.CENTURION_DEVICE_NAME, 0x10, len(name))
-            except exceptions.FeatureCallError:
-                break
-            if fragment:
-                name += fragment[: name_length - len(name)]
-            else:
-                break
-        return name.decode("utf-8", errors="replace").rstrip("\x00") if name else None
+        return _centurion.get_name_centurion(device)
 
     def get_friendly_name(self, device: Device):
         """Reads a device's friendly name.
@@ -1915,14 +1805,7 @@ class Hidpp20:
             return SupportedFeature.ADC_MEASUREMENT if SupportedFeature.ADC_MEASUREMENT in device.features else None
 
     def get_battery_centurion(self, device: Device):
-        try:
-            report = device.feature_request(SupportedFeature.CENTURION_BATTERY_SOC)
-            if report is not None:
-                return decipher_battery_centurion(report)
-        except exceptions.FeatureCallError:
-            if SupportedFeature.CENTURION_BATTERY_SOC in device.features:
-                return SupportedFeature.CENTURION_BATTERY_SOC
-            return None
+        return _centurion.get_battery_centurion(device)
 
     def get_battery(self, device, feature):
         """Return battery information - feature, approximate level, next, charging, voltage
@@ -2236,26 +2119,7 @@ def decipher_battery_unified(report) -> tuple[SupportedFeature, Battery]:
     return SupportedFeature.UNIFIED_BATTERY, Battery(discharge if discharge else approx_level, None, status, None)
 
 
-def decipher_battery_centurion(report) -> tuple[SupportedFeature, Battery]:
-    """Decipher CENTURION_BATTERY_SOC (0x0104) response.
-
-    Response format (3 bytes):
-      Byte 0: Battery Percentage (0-100)
-      Byte 1: Battery Percentage (duplicate)
-      Byte 2: Charging Status (0=discharging, 1=charging, 2=charging via USB, 3=charge complete)
-    """
-    if len(report) < 1:
-        return SupportedFeature.CENTURION_BATTERY_SOC, Battery(None, None, BatteryStatus.DISCHARGING, None)
-    soc = report[0]
-    logger.debug("centurion battery SOC raw: %s", report[:8].hex())
-    charging_status = report[2] if len(report) >= 3 else 0
-    if charging_status in (1, 2):
-        status = BatteryStatus.RECHARGING
-    elif charging_status == 3:
-        status = BatteryStatus.FULL
-    else:
-        status = BatteryStatus.DISCHARGING
-    return SupportedFeature.CENTURION_BATTERY_SOC, Battery(soc, None, status, None)
+decipher_battery_centurion = _centurion.decipher_battery_centurion
 
 
 def decipher_adc_measurement(report) -> tuple[SupportedFeature, Battery]:
@@ -2399,162 +2263,8 @@ class ForceSensingButtonArray(UserDict):
         return self[index].acceptable(value)
 
 
-# --- OnboardEQ (0x0636) biquad coefficient math and helpers ---
-
-# Mystery bytes observed in every LGHUB pcap EQ write between band params
-# and coefficient header.  Purpose not fully understood — possibly a null-band
-# terminator for DSPs that support >5 bands (advanced 10-band mode).
-# First byte matches band_count; bytes 2-3 look like LE16 coeff blob size.
-# Hardcoded from pcap for initial bring-up; revisit once device-tested.
-_EQ_MYSTERY_BYTES = b"\x05\x5a\xe3\x00"
-
-
-def _peaking_eq_biquad(freq_hz, gain_db, Q, sample_rate=48000.0):
-    """Compute peaking EQ biquad coefficients (Audio EQ Cookbook).
-
-    Returns (b0/a0, b1/a0, b2/a0, a1/a0, a2/a0) normalised coefficients.
-    """
-    A = 10.0 ** (gain_db / 40.0)
-    w0 = 2.0 * math.pi * freq_hz / sample_rate
-    cos_w0 = math.cos(w0)
-    alpha = math.sin(w0) / (2.0 * Q)
-    a0 = 1.0 + alpha / A
-    return (
-        (1.0 + alpha * A) / a0,
-        (-2.0 * cos_w0) / a0,
-        (1.0 - alpha * A) / a0,
-        (-2.0 * cos_w0) / a0,
-        (1.0 - alpha / A) / a0,
-    )
-
-
-def _quantize_coeffs(b0, b1, b2, a1, a2):
-    """Quantize biquad coefficients to mixed Q1.31 / Q2.30 fixed-point.
-
-    b0, b2, a2 use Q1.31 (x 2^31); b1, a1 use Q2.30 (x 2^30).
-    Values are truncated to 24-bit precision (low byte zeroed) matching
-    the device DSP's internal format.
-    Returns list of 10 uint16 values (5 coefficients x 2 LE words each,
-    high word first).
-    """
-    scales = [2**31, 2**30, 2**31, 2**30, 2**31]  # b0, b1, b2, a1, a2
-    words = []
-    for val, scale in zip([b0, b1, b2, a1, a2], scales):
-        q = int(round(val * scale))
-        q = max(-(1 << 31), min((1 << 31) - 1, q))
-        q = q & 0xFFFFFF00  # 24-bit precision (low byte always zero)
-        words.append((q >> 16) & 0xFFFF)  # high word
-        words.append(q & 0xFFFF)  # low word
-    return words
-
-
-def _build_coeff_section(bands, sample_rate, section_type=1):
-    """Build one coefficient section for a DSP processing block.
-
-    Returns bytes: 4-byte section header + coefficient data as LE uint16 words.
-    Section header: [type, 0x00, count_lo, count_hi].
-
-    Coefficients are normalized by a rescale factor to prevent Q1.31 overflow.
-    Only feedforward coefficients (b0, b1, b2) are divided by rescale; feedback
-    coefficients (a1, a2) are left unchanged. The DSP multiplies the output by
-    rescale to restore correct gain.
-    """
-    _HEADROOM = 1.19  # 19% headroom margin (matches LGHUB)
-    num_bands = len(bands)
-    all_words = [num_bands]  # first uint16 = num_bands
-
-    # First pass: compute raw biquad coefficients for all bands
-    raw_coeffs = []
-    for freq, gain, Q in bands:
-        raw_coeffs.append(_peaking_eq_biquad(freq, gain, max(Q, 0.1), sample_rate))
-
-    # Compute rescale: ensure max |b0| fits in Q1.31 with headroom
-    max_b0 = max(abs(c[0]) for c in raw_coeffs)
-    rescale = max(1.0, max_b0) * _HEADROOM
-
-    # Second pass: normalize b-coefficients and quantize
-    for b0, b1, b2, a1, a2 in raw_coeffs:
-        all_words.extend(_quantize_coeffs(b0 / rescale, b1 / rescale, b2 / rescale, a1, a2))
-
-    # Rescale factor as Q6.26, 24-bit precision
-    rs = int(round(rescale * (1 << 26)))
-    rs = max(-(1 << 31), min((1 << 31) - 1, rs)) & 0xFFFFFF00
-    all_words.append((rs >> 16) & 0xFFFF)
-    all_words.append(rs & 0xFFFF)
-
-    coeff_count = num_bands * 10 + 3  # num_bands word + 10 per band + 2 rescale words
-    hdr = bytes([section_type, 0x00, coeff_count & 0xFF, (coeff_count >> 8) & 0xFF])
-    data = struct.pack(f"<{len(all_words)}H", *all_words)
-    return hdr + data
-
-
-def _build_eq_coeffs_payload(bands):
-    """Build the full EQCoeffs wire payload for SetEQParameters.
-
-    Two coefficient sections: type=1 (48 kHz playback) and type=2 (16 kHz mic).
-    Returns bytes: 7-byte header + sections (no trailing padding).
-    """
-    section_count = 2
-    header = bytes([0x03, 0x0E, 0x00, section_count, 0x00, 0x00, 0x00])
-    sections = _build_coeff_section(bands, 48000.0, section_type=1)
-    sections += _build_coeff_section(bands, 16000.0, section_type=2)
-    return header + sections
-
-
-def _build_set_eq_payload(slot, bands):
-    """Build complete SetEQParameters payload: band params + biquad coefficients.
-
-    bands: list of (freq_hz, gain_db, Q) tuples.
-    Returns bytes ready to send as sub-device params.
-    """
-    params = bytes([slot, len(bands)])
-    for freq, gain, Q in bands:
-        params += struct.pack(">H", freq) + bytes([gain & 0xFF, Q & 0xFF])
-    params += _EQ_MYSTERY_BYTES
-    params += _build_eq_coeffs_payload(bands)
-    return params
-
-
-def get_onboard_eq_info(device):
-    """Query HEADSET_ONBOARD_EQ GetEQInfos (function 0).
-
-    Returns (has_hw_eq, num_bands) or None.
-    """
-    result = device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x00)
-    if result is None or len(result) < 5:
-        return None
-    has_hw_eq = bool(result[0] & 0x80)
-    num_bands = result[4]
-    return (has_hw_eq, num_bands)
-
-
-def get_onboard_eq_params(device, slot=0x00):
-    """Query HEADSET_ONBOARD_EQ GetEQParameters (function 0x10).
-
-    Returns list of (freq_hz, gain_db, q) tuples, or None.
-    """
-    result = device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x10, slot)
-    if result is None or len(result) < 2:
-        return None
-    band_count = result[1]
-    bands = []
-    offset = 2
-    for _i in range(band_count):
-        if offset + 4 > len(result):
-            break
-        freq_hz = struct.unpack(">H", result[offset : offset + 2])[0]
-        gain_db = struct.unpack("b", bytes([result[offset + 2]]))[0]  # signed
-        q = result[offset + 3]
-        bands.append((freq_hz, gain_db, q))
-        offset += 4
-    return bands
-
-
-def set_onboard_eq_params(device, bands, slot=0x00):
-    """Send HEADSET_ONBOARD_EQ SetEQParameters (function 0x20).
-
-    bands: list of (freq_hz, gain_db, Q) tuples.
-    Returns response or None.
-    """
-    payload = _build_set_eq_payload(slot, bands)
-    return device.feature_request(SupportedFeature.HEADSET_ONBOARD_EQ, 0x20, payload)
+# --- OnboardEQ (0x0636) — re-exported from onboard_eq.py ---
+from .onboard_eq import _build_set_eq_payload  # noqa: E402, F401
+from .onboard_eq import get_onboard_eq_info  # noqa: E402, F401
+from .onboard_eq import get_onboard_eq_params  # noqa: E402, F401
+from .onboard_eq import set_onboard_eq_params  # noqa: E402, F401
