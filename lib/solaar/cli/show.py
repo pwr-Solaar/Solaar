@@ -164,7 +164,11 @@ def _print_device(dev, num=None):
     print("     Kind         :", dev.kind)
     if dev.protocol:
         proto_name = "Centurion" if is_centurion else "HID++"
-        print(f"     Protocol     : {proto_name} {dev.protocol:1.1f}")
+        cent_proto = getattr(dev, "_centurion_protocol", None)
+        if cent_proto:
+            print(f"     Protocol     : {proto_name} {cent_proto[0]}.{cent_proto[1]}")
+        else:
+            print(f"     Protocol     : {proto_name} {dev.protocol:1.1f}")
     else:
         print("     Protocol     : unknown (device is offline)")
     if not is_centurion and dev.polling_rate:
