@@ -910,21 +910,28 @@ class Device:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
-    # Maximum sub-message bytes per bridge frame: 64 - 1 (report ID) - 2 (CPL) - 4 (bridge hdr) = 57
-    _MAX_BRIDGE_CHUNK = 57
+    # Max sub-message bytes in the first bridge fragment:
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57
+    # LGHUB uses 56 for first fragment (60 byte payload - 4 bridge overhead)
+    _BRIDGE_FIRST_CHUNK = 56
+    # Continuation fragments carry raw sub_msg data (no bridge prefix/hdr):
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61, but LGHUB uses 60
+    _BRIDGE_CONT_CHUNK = 60
 
     def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
         """Send a request to a Centurion sub-device via CentPPBridge.
 
         Builds the 4-layer nested message:
         Layer 1: [0x51]
-        Layer 2: [cpl_length, flags=0x00]
+        Layer 2: [cpl_length, flags]
         Layer 3: [bridge_idx, sendFragment_func|swid, bridge_hdr...]
         Layer 4: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
 
-        When sub_msg exceeds 57 bytes, splits into multiple fragments.
-        Each fragment carries the same bridge_hdr (total sub_len).
-        The device accumulates until complete.
+        For multi-fragment sends, only the first fragment includes the bridge
+        prefix and header.  Continuation fragments carry raw sub_msg data.
+        The CPL flags byte encodes fragment index and continuation:
+          flags = (fragment_index << 1) | (1 if more_fragments else 0)
+        Single-frame messages use flags=0x00.
 
         Returns the sub-device response data (after bridge header), or None.
         """
@@ -952,21 +959,35 @@ class Device:
 
         timeout = base.DEFAULT_TIMEOUT
         with base.acquire_timeout(base.handle_lock(handle), handle, timeout):
-            if sub_len <= self._MAX_BRIDGE_CHUNK:
+            if sub_len <= self._BRIDGE_FIRST_CHUNK:
                 # Single-frame path
                 layer3 = bridge_prefix + bridge_hdr + sub_msg
                 base.write_centurion_cpl(handle, layer3)
             else:
-                # Multi-fragment send: split sub_msg into chunks
-                for offset in range(0, sub_len, self._MAX_BRIDGE_CHUNK):
-                    chunk = sub_msg[offset : offset + self._MAX_BRIDGE_CHUNK]
-                    layer3 = bridge_prefix + bridge_hdr + chunk
-                    base.write_centurion_cpl(handle, layer3)
-                    # Wait for ACK between fragments (not after the last one)
-                    if offset + self._MAX_BRIDGE_CHUNK < sub_len:
-                        if not self._wait_for_bridge_ack(handle, bridge_idx, sw_id, timeout):
-                            logger.warning("centurion_bridge_request: no ACK for fragment at offset %d", offset)
-                            return None
+                # Multi-fragment send
+                # Fragment 0: bridge_prefix + bridge_hdr + first chunk of sub_msg
+                # Fragments 1+: raw sub_msg continuation data (no bridge overhead)
+                # CPL flags = (frag_index << 1) | (1 if more_fragments else 0)
+                # All fragments are sent back-to-back without waiting for
+                # intermediate ACKs (verified via LGHUB pcap).  The device
+                # reassembles internally and sends a single ACK + MessageEvent
+                # after the last fragment.
+                frag_index = 0
+                offset = 0
+                while offset < sub_len:
+                    if frag_index == 0:
+                        chunk_size = self._BRIDGE_FIRST_CHUNK
+                        chunk = sub_msg[offset : offset + chunk_size]
+                        layer3 = bridge_prefix + bridge_hdr + chunk
+                    else:
+                        chunk_size = self._BRIDGE_CONT_CHUNK
+                        chunk = sub_msg[offset : offset + chunk_size]
+                        layer3 = chunk
+                    has_more = (offset + chunk_size) < sub_len
+                    flags = (frag_index << 1) | (1 if has_more else 0)
+                    base.write_centurion_cpl(handle, layer3, flags=flags)
+                    offset += len(chunk)
+                    frag_index += 1
 
             if no_reply:
                 return None

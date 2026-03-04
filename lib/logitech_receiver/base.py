@@ -363,17 +363,21 @@ def write(handle, devnumber, data, long_message=False):
         raise exceptions.NoReceiver(reason=reason) from reason
 
 
-def write_centurion_cpl(handle, layer3_payload):
+def write_centurion_cpl(handle, layer3_payload, flags=0x00):
     """Send a Centurion CPL frame with the given Layer 3+ payload.
 
-    Builds: [0x51, cpl_length, flags=0x00, layer3_payload..., zero-pad to 64 bytes]
+    Builds: [0x51, cpl_length, flags, layer3_payload..., zero-pad to 64 bytes]
     where cpl_length = len(layer3_payload) + 1 (the +1 counts the flags byte).
+
+    For multi-fragment sends, flags encodes fragment index and continuation:
+      flags = (fragment_index << 1) | (1 if more_fragments else 0)
+    Single-frame messages use flags=0x00 (default).
     """
     ihandle = int(handle)
     if ihandle not in _centurion_handles:
         raise ValueError("write_centurion_cpl called on non-Centurion handle")
     cpl_length = len(layer3_payload) + 1  # +1 for flags byte
-    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, 0x00) + layer3_payload
+    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, flags) + layer3_payload
     wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("(%s) <= centurion_cpl[%s]", handle, common.strhex(wdata[: cpl_length + 2]))
