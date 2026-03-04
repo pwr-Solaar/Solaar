@@ -1089,6 +1089,10 @@ class Device:
                 return False
             if protocol:
                 self._protocol = protocol
+                # Pick up raw Centurion protocol version from ping response
+                cent_ver = base._centurion_protocol_versions.get(int(handle))
+                if cent_ver:
+                    self._centurion_protocol = cent_ver
             # Dongle responded — now check if headset is actually on by probing through bridge.
             # Send ROOT.GetFeature(0x0001) to the sub-device via CentPPBridge.
             bridge_idx = getattr(self, "_centurion_bridge_index", None)

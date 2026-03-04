@@ -107,6 +107,8 @@ _CENTURION_MSG_SIZE = 63  # max reconstructed message size after unwrapping (2 +
 
 # Set of handles that use Centurion framing
 _centurion_handles: set[int] = set()
+# Raw Centurion protocol version (major, minor) by handle, from ping response
+_centurion_protocol_versions: dict[int, tuple[int, int]] = {}
 
 
 """Default timeout on read (in seconds)."""
@@ -300,6 +302,7 @@ def close(handle):
         try:
             if isinstance(handle, int):
                 _centurion_handles.discard(handle)
+                _centurion_protocol_versions.pop(handle, None)
                 hidapi.close(handle)
             else:
                 handle.close()
@@ -715,7 +718,11 @@ def ping(handle, devnumber, long_message: bool = False):
                     mark_ok = is_centurion or reply_data[4:5] == request_data[-1:]
                     if reply_data[:2] == request_data[:2] and mark_ok:
                         # HID++ 2.0+ device, currently connected
-                        return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
+                        major = ord(reply_data[2:3])
+                        minor = ord(reply_data[3:4])
+                        if is_centurion:
+                            _centurion_protocol_versions[int(handle)] = (major, minor)
+                        return major + minor / 10.0
 
                     if (
                         report_id == HIDPP_SHORT_MESSAGE_ID
