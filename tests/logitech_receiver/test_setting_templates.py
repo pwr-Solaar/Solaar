@@ -643,17 +643,53 @@ key_tests = [
         [-12, 12],
         fake_hidpp.Response("8000000002", 0x0400),  # GetEQInfos: has_hw_eq, 2 bands
         fake_hidpp.Response("00020080FE0A0100030A", 0x0410, "00"),  # GetEQParameters
-        fake_hidpp.Response(  # SetEQParameters: write initial values back
+        fake_hidpp.Response(  # SetEQParameters: write initial values back (slot 0x00)
             "00",
             0x0420,
-            "00020080FE0A0100030A030E0001000000010017005FCDFF03DB3502F84C46FE03DB3502F8AA13FE03"
-            "37980004E10704F8D685FC03E10704F80D1EFD0300000004",
+            "00020080FE0A0100030A"
+            "055AE300"  # mystery bytes (from pcap)
+            "030E00020000000100170002"
+            "007A6B00D69D94008C516B00C82380005DC27F0075"
+            "906B0022B6940002226B00B44080007EA37F00C1C3040044"
+            "0200170002"
+            "00506B00900F95006ED56A00D185800060477F00CA"
+            "906B00229D950052496A00A12E810085EC7E0075C40400AC",
         ),
-        fake_hidpp.Response(  # SetEQParameters: write updated band 1 gain=5
+        fake_hidpp.Response(  # SetEQParameters: persist initial values (slot 0x80)
             "00",
             0x0420,
-            "00020080FE0A0100050A030E0001000000010017005FCDFF03DB3502F84C46FE03DB3502F8AA13FE03"
-            "FAFF0004C6B703F83A6EFC03C6B703F8346EFD0300000004",
+            "80020080FE0A0100030A"
+            "055AE300"
+            "030E00020000000100170002"
+            "007A6B00D69D94008C516B00C82380005DC27F0075"
+            "906B0022B6940002226B00B44080007EA37F00C1C3040044"
+            "0200170002"
+            "00506B00900F95006ED56A00D185800060477F00CA"
+            "906B00229D950052496A00A12E810085EC7E0075C40400AC",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: write updated band 1 gain=5 (slot 0x00)
+            "00",
+            0x0420,
+            "00020080FE0A0100050A"
+            "055AE300"
+            "030E00020000000100170002"
+            "006F6B00F5A894006A466B00EB2380005DC27F0075"
+            "906B0022BC9400AA156B00613B80007CAD7F00C6C30400BF"
+            "0200170002"
+            "00306B00272F9500BAB56A008C85800060477F00CA"
+            "906B0022B1950002226A000E1F8100AB0A7F004FC604001D",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: persist updated values (slot 0x80)
+            "00",
+            0x0420,
+            "80020080FE0A0100050A"
+            "055AE300"
+            "030E00020000000100170002"
+            "006F6B00F5A894006A466B00EB2380005DC27F0075"
+            "906B0022BC9400AA156B00613B80007CAD7F00C6C30400BF"
+            "0200170002"
+            "00306B00272F9500BAB56A008C85800060477F00CA"
+            "906B0022B1950002226A000E1F8100AB0A7F004FC604001D",
         ),
     ),
     Setup(

@@ -1745,7 +1745,20 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
                 q = self._band_qs[i] if i < len(self._band_qs) else 10
                 gain = new_values.get(i, 0)
                 bands.append((freq, gain, q))
+            self._pending_bands = bands  # stash for persist step
             return hidpp20._build_set_eq_payload(0x00, bands)
+
+    def write(self, map, save=True):
+        result = super().write(map, save)
+        # Also persist to device flash (slot 0x80) so EQ survives power cycle
+        if result is not None and hasattr(self._validator, "_pending_bands"):
+            bands = self._validator._pending_bands
+            del self._validator._pending_bands
+            try:
+                self._device.feature_request(_F.HEADSET_ONBOARD_EQ, 0x20, hidpp20._build_set_eq_payload(0x80, bands))
+            except Exception:
+                logger.warning("HeadsetOnboardEQ: failed to persist EQ to slot 0x80")
+        return result
 
 
 class BrightnessControl(settings.Setting):
