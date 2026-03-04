@@ -545,6 +545,69 @@ class PackedRangeControl(MultipleRangeControl):
         self._button.set_tooltip_text(b)
 
 
+class GraphicEQControl(MultipleControl):
+    def setup(self, setting):
+        self._items = []
+        validator = setting._validator
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.HBox(homogeneous=True, spacing=8)
+        for item in range(validator.count):
+            vbox = Gtk.VBox(homogeneous=False, spacing=2)
+            scale = Gtk.Scale.new_with_range(Gtk.Orientation.VERTICAL, validator.min_value, validator.max_value, 1)
+            scale.set_inverted(True)
+            scale.set_round_digits(0)
+            scale.set_digits(0)
+            scale.set_draw_value(True)
+            scale.connect("format-value", lambda s, v: f"{int(v)} dB")
+            scale.set_has_origin(True)
+            scale.set_size_request(-1, 150)
+            scale.add_mark(0, Gtk.PositionType.LEFT, "0")
+            scale.connect(GtkSignal.VALUE_CHANGED.value, self._changed, validator.keys[item])
+            lbl = Gtk.Label(label=str(validator.keys[item]))
+            lbl.set_line_wrap(True)
+            lbl.set_justify(Gtk.Justification.CENTER)
+            vbox.pack_start(scale, True, True, 0)
+            vbox.pack_end(lbl, False, False, 0)
+            vbox._setting_item = validator.keys[item]
+            vbox.control = scale
+            hbox.pack_start(vbox, True, True, 0)
+            self._items.append(vbox)
+        row.add(hbox)
+        self.add(row)
+
+    def _changed(self, control, item):
+        if control.get_sensitive():
+            if hasattr(control, "_timer"):
+                control._timer.cancel()
+            control._timer = Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
+            control._timer.start()
+
+    def _write(self, control, item):
+        control._timer.cancel()
+        delattr(control, "_timer")
+        new_state = int(control.get_value())
+        if self.sbox.setting._value[int(item)] != new_state:
+            self.sbox.setting._value[int(item)] = new_state
+            _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
+
+    def set_value(self, value):
+        if value is None:
+            return
+        b = ""
+        n = len(self._items)
+        for vbox in self._items:
+            item = vbox._setting_item
+            v = value.get(int(item), None)
+            if v is not None:
+                vbox.control.set_value(v)
+            else:
+                v = self.sbox.setting._value[int(item)]
+            b += f"{str(item)}: ({str(v)}) "
+        lbl_text = ngettext("%d value", "%d values", n) % n
+        self._button.set_label(lbl_text)
+        self._button.set_tooltip_text(b)
+
+
 # control with an ID key that determines what else to show
 class HeteroKeyControl(Gtk.HBox, Control):
     def __init__(self, sbox, delegate=None):
@@ -715,6 +778,8 @@ def _create_sbox(s, _device):
         control = MultipleRangeControl(sbox, change)
     elif s.kind == settings.Kind.PACKED_RANGE:
         control = PackedRangeControl(sbox, change)
+    elif s.kind == settings.Kind.GRAPHIC_EQ:
+        control = GraphicEQControl(sbox, change)
     elif s.kind == settings.Kind.HETERO:
         control = HeteroKeyControl(sbox, change)
     else:
