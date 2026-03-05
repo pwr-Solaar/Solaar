@@ -1200,7 +1200,7 @@ msgid "Force Sensing Button"
 msgstr "Voimaa tunnistava painike"
 
 #: lib/logitech_receiver/settings_templates.py:1814
-msgid "Haptic Feeback Level"
+msgid "Haptic Feedback Level"
 msgstr "Haptisen palautteen taso"
 
 #: lib/logitech_receiver/settings_templates.py:1815
