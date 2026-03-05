@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.1.19\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2026-01-08 22:39-0300\n"
+        "POT-Creation-Date: 2026-03-05 13:08+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1175,19 +1175,19 @@ msgid   "Manages Logitech receivers,\n"
         "keyboards, mice, and tablets."
 msgstr  ""
 
-#: lib/solaar/ui/about/model.py:63
+#: lib/solaar/ui/about/model.py:64
 msgid   "Additional Programming"
 msgstr  ""
 
-#: lib/solaar/ui/about/model.py:64
+#: lib/solaar/ui/about/model.py:65
 msgid   "GUI design"
 msgstr  ""
 
-#: lib/solaar/ui/about/model.py:66
+#: lib/solaar/ui/about/model.py:67
 msgid   "Testing"
 msgstr  ""
 
-#: lib/solaar/ui/about/model.py:74
+#: lib/solaar/ui/about/model.py:75
 msgid   "Logitech documentation"
 msgstr  ""
 
