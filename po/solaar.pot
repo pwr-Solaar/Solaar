@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.1.19\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2026-03-05 13:08+0200\n"
+        "POT-Creation-Date: 2026-03-05 14:00+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1151,7 +1151,7 @@ msgid   "Force Sensing Button"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:1814
-msgid   "Haptic Feeback Level"
+msgid   "Haptic Feedback Level"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:1815
