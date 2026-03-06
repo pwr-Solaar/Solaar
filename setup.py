@@ -89,5 +89,9 @@ setup(
     packages=find_packages(where="lib"),
     data_files=list(_data_files()),
     include_package_data=True,
-    scripts=glob("bin/*"),
+    entry_points={
+        "console_scripts": [
+            "solaar = solaar.gtk:main",
+        ],
+    },
 )
