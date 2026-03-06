@@ -97,6 +97,26 @@ A working example:
 
 This displayed the Unifying Receiver and the M720 Triathlon, including battery state and configurable features.
 
+## Automated installer script
+
+A guided installer script is included in this repository and automates the RHEL workflow in this document while prompting before each major action.
+
+Run it from the Solaar checkout:
+
+```bash
+./tools/install-rhel.sh
+```
+
+The script can:
+
+* check for Logitech receiver visibility with `lsusb`
+* install required packages with `dnf`
+* create the checkout directory and clone/update Solaar
+* install Solaar with `python3 -m pip install --user`
+* optionally add a Bash alias for `solaar`
+* optionally run `solaar show`, `solaar config`, `libinput debug-events`, and `keyd monitor`
+* write a timestamped evidence log in `~/.local/state/solaar/`
+
 ## Wayland note
 
 On KDE Wayland, Solaar prints a warning similar to:
