@@ -25,6 +25,7 @@ from logitech_receiver import settings_templates
 from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import strhex
+from logitech_receiver.device import CenturionReceiver
 from logitech_receiver.hidpp20_constants import SupportedFeature
 
 from solaar import NAME
@@ -35,36 +36,80 @@ _hidpp20 = hidpp20.Hidpp20()
 
 
 def _print_receiver(receiver):
+    is_centurion = isinstance(receiver, CenturionReceiver)
     paired_count = receiver.count()
 
     print(receiver.name)
     print("  Device path  :", receiver.path)
     print(f"  USB id       : {LOGITECH_VENDOR_ID:04x}:{receiver.product_id}")
-    print("  Serial       :", receiver.serial)
-    pending = hidpp10.get_configuration_pending_flags(receiver)
-    if pending:
-        print(f"  C Pending    : {pending:02x}")
+    if is_centurion:
+        print("  Protocol     : Centurion")
+    if receiver.serial:
+        print("  Serial       :", receiver.serial)
+    if not is_centurion:
+        pending = hidpp10.get_configuration_pending_flags(receiver)
+        if pending:
+            print(f"  C Pending    : {pending:02x}")
     if receiver.firmware:
         for f in receiver.firmware:
             print("    %-11s: %s" % (f.kind, f.version))
 
-    print("  Has", paired_count, f"paired device(s) out of a maximum of {int(receiver.max_devices)}.")
-    if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        print(f"  Has {int(receiver.remaining_pairings())} successful pairing(s) remaining.")
+    if is_centurion:
+        print("  Has", paired_count, f"device(s) out of a maximum of {int(receiver.max_devices)}.")
+    else:
+        print("  Has", paired_count, f"paired device(s) out of a maximum of {int(receiver.max_devices)}.")
+        if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
+            print(f"  Has {int(receiver.remaining_pairings())} successful pairing(s) remaining.")
 
-    notification_flags = _hidpp10.get_notification_flags(receiver)
-    if notification_flags is not None:
-        if notification_flags:
-            notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
-            print(f"  Notifications: {', '.join(notification_names)} (0x{notification_flags.value:06X})")
+    if is_centurion:
+        _print_centurion_dongle_features(receiver)
+    else:
+        notification_flags = _hidpp10.get_notification_flags(receiver)
+        if notification_flags is not None:
+            if notification_flags:
+                notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
+                print(f"  Notifications: {', '.join(notification_names)} (0x{notification_flags.value:06X})")
+            else:
+                print("  Notifications: (none)")
+
+        activity = receiver.read_register(hidpp10_constants.Registers.DEVICES_ACTIVITY)
+        if activity:
+            activity = [(d, ord(activity[d - 1 : d])) for d in range(1, receiver.max_devices)]
+            activity_text = ", ".join(f"{int(d)}={int(a)}" for d, a in activity if a > 0)
+            print("  Device activity counters:", activity_text or "(empty)")
+
+
+def _print_centurion_dongle_features(receiver):
+    """Print dongle-level features, probed independently on the dongle hardware."""
+    features = receiver.dongle_features
+    if not features:
+        return
+    print(f"  Supports {len(features)} dongle features:")
+    for feature, feat_id, index in features:
+        display_name = "CENTPP BRIDGE" if feat_id == 0x0003 else feature
+        feat_bytes = feat_id.to_bytes(2, byteorder="big")
+        try:
+            flags_resp = receiver.request(0x0000, feat_bytes[0], feat_bytes[1])
+        except Exception:
+            flags_resp = None
+        if flags_resp is not None and len(flags_resp) >= 2:
+            flags = flags_resp[1]
+            flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
+            print("      %2d: %-22s {%04X}    %s " % (index, display_name, feat_id, ", ".join(flag_names)))
         else:
-            print("  Notifications: (none)")
-
-    activity = receiver.read_register(hidpp10_constants.Registers.DEVICES_ACTIVITY)
-    if activity:
-        activity = [(d, ord(activity[d - 1 : d])) for d in range(1, receiver.max_devices)]
-        activity_text = ", ".join(f"{int(d)}={int(a)}" for d, a in activity if a > 0)
-        print("  Device activity counters:", activity_text or "(empty)")
+            print("      %2d: %-22s {%04X}" % (index, display_name, feat_id))
+        if feature == SupportedFeature.CENTURION_DEVICE_INFO:
+            fw_list = _hidpp20.get_firmware_centurion(receiver)
+            serial = _hidpp20.get_serial_centurion(receiver)
+            hw_info = _hidpp20.get_hardware_info_centurion(receiver)
+            if fw_list:
+                for fw in fw_list:
+                    print(f"          Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+            if serial and serial.strip() and serial.strip().isprintable():
+                print(f"          Serial: {serial}")
+            if hw_info:
+                model_id, hw_rev, product_id = hw_info
+                print(f"          Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
 
 
 def _battery_text(level) -> str:
@@ -91,9 +136,11 @@ def _battery_line(dev):
 
 def _print_device(dev, num=None):
     assert dev is not None
+    is_centurion = getattr(dev, "centurion", False)
+    is_centurion_child = is_centurion and isinstance(getattr(dev, "receiver", None), CenturionReceiver)
     # try to ping the device to see if it actually exists and to wake it up
     try:
-        dev.ping()
+        online = dev.ping()
     except exceptions.NoSuchDevice:
         print(f"  {num}: Device not found" or dev.number)
         return
@@ -102,18 +149,29 @@ def _print_device(dev, num=None):
         print(f"  {int(num or dev.number)}: {dev.name}")
     else:
         print(f"{dev.name}")
-    print("     Device path  :", dev.path)
-    if dev.wpid:
+
+    if not online:
+        print("     Device is offline.")
+        return
+    # Centurion child has no separate hidraw path — show receiver's path
+    device_path = dev.path or (dev.receiver.path if is_centurion_child else None)
+    print("     Device path  :", device_path)
+    if dev.wpid and not is_centurion_child:
         print(f"     WPID         : {dev.wpid}")
     if dev.product_id:
         print(f"     USB id       : {LOGITECH_VENDOR_ID:04x}:{dev.product_id}")
     print("     Codename     :", dev.codename)
     print("     Kind         :", dev.kind)
     if dev.protocol:
-        print(f"     Protocol     : HID++ {dev.protocol:1.1f}")
+        proto_name = "Centurion" if is_centurion else "HID++"
+        cent_proto = getattr(dev, "_centurion_protocol", None)
+        if cent_proto:
+            print(f"     Protocol     : {proto_name} {cent_proto[0]}.{cent_proto[1]}")
+        else:
+            print(f"     Protocol     : {proto_name} {dev.protocol:1.1f}")
     else:
         print("     Protocol     : unknown (device is offline)")
-    if dev.polling_rate:
+    if not is_centurion and dev.polling_rate:
         print("     Report Rate :", dev.polling_rate)
     print("     Serial number:", dev.serial)
     if dev.modelId:
@@ -127,7 +185,8 @@ def _print_device(dev, num=None):
     if dev.power_switch_location:
         print(f"     The power switch is located on the {dev.power_switch_location}.")
 
-    if dev.online:
+    # Skip HID++ 1.0 register reads for centurion devices — they don't support these
+    if dev.online and not is_centurion:
         notification_flags = _hidpp10.get_notification_flags(dev)
         if notification_flags is not None:
             if notification_flags:
@@ -144,25 +203,57 @@ def _print_device(dev, num=None):
                 print("     Features: (none)")
 
     if dev.online and dev.features:
-        print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
+        is_centurion = getattr(dev, "centurion", False)
+        parent_count = dev.features.count
+        sub_count = getattr(dev.features, "_sub_feature_count", 0)
+        # For centurion child devices, dongle features are shown on the receiver —
+        # only show sub-device (headset) features here.
+        if is_centurion_child and sub_count > 0:
+            print(f"     Supports {sub_count} HID++ 2.0 features:")
+        elif is_centurion and sub_count > 0:
+            print(f"     Supports {parent_count} dongle + {sub_count} headset features:")
+        else:
+            print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
         dev_settings = []
         settings_templates.check_feature_settings(dev, dev_settings)
+        feature_num = 0
+        in_sub_device = False
         for feature, index in dev.features.enumerate():
+            if is_centurion and not in_sub_device and feature_num >= parent_count:
+                in_sub_device = True
+                if not is_centurion_child:
+                    print("       Headset (via CentPPBridge):")
+            feature_num += 1
+            # For centurion child, skip dongle features (already shown on the receiver)
+            if is_centurion_child and not in_sub_device:
+                continue
             if isinstance(feature, str):
                 feature_bytes = bytes.fromhex(feature[-4:])
             else:
                 feature_bytes = feature.to_bytes(2, byteorder="little")
             feature_int = int.from_bytes(feature_bytes, byteorder="little")
-            try:
-                flags = dev.request(0x0000, feature_bytes)
-            except Exception:
-                print("        %2d: %-22s {%04X} - can't retrieve" % (index, feature, feature_int))
-                continue
-            flags = 0 if flags is None else ord(flags[1:2])
-            flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
-            version = dev.features.get_feature_version(feature_int)
-            version = version if version else 0
-            print("        %2d: %-22s {%04X} V%s    %s " % (index, feature, feature_int, version, ", ".join(flags)))
+            # On Centurion, parent feature 0x0003 is CentPPBridge, not DEVICE_FW_VERSION
+            display_name = "CENTPP BRIDGE" if is_centurion and not in_sub_device and feature_int == 0x0003 else feature
+            if is_centurion_child and in_sub_device:
+                # Use cached version — skip slow bridge ROOT queries
+                version = dev.features.get_feature_version(feature_int) or 0
+                print("        %2d: %-22s {%04X} V%s" % (index, display_name, feature_int, version))
+            else:
+                try:
+                    flags = dev.request(0x0000, feature_bytes)
+                except Exception:
+                    flags = None
+                if flags is not None:
+                    flags = ord(flags[1:2])
+                    flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
+                    version = dev.features.get_feature_version(feature_int)
+                    version = version if version else 0
+                    print(
+                        "        %2d: %-22s {%04X} V%s    %s "
+                        % (index, display_name, feature_int, version, ", ".join(flag_names))
+                    )
+                else:
+                    print("        %2d: %-22s {%04X}" % (index, display_name, feature_int))
             if feature == SupportedFeature.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
@@ -230,7 +321,25 @@ def _print_device(dev, num=None):
                 print(f"            Kind: {_hidpp20.get_kind(dev)}")
             elif feature == SupportedFeature.DEVICE_FRIENDLY_NAME:
                 print(f"            Friendly Name: {_hidpp20.get_friendly_name(dev)}")
-            elif feature == SupportedFeature.DEVICE_FW_VERSION:
+            elif feature == SupportedFeature.CENTURION_DEVICE_INFO:
+                if in_sub_device:
+                    # Use cached device properties to avoid redundant bridge requests
+                    fw_list = dev.firmware
+                    serial = dev.serial
+                    hw_info = _hidpp20.get_hardware_info_centurion_sub(dev)
+                else:
+                    fw_list = _hidpp20.get_firmware_centurion(dev)
+                    serial = _hidpp20.get_serial_centurion(dev)
+                    hw_info = _hidpp20.get_hardware_info_centurion(dev)
+                if fw_list:
+                    for fw in fw_list:
+                        print(f"            Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+                if serial and serial.strip() and serial.strip().isprintable():
+                    print(f"            Serial: {serial}")
+                if hw_info:
+                    model_id, hw_rev, product_id = hw_info
+                    print(f"            Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
+            elif feature == SupportedFeature.DEVICE_FW_VERSION and not (is_centurion and not in_sub_device):
                 for fw in _hidpp20.get_firmware(dev):
                     extras = strhex(fw.extras) if fw.extras else ""
                     print(f"            Firmware: {fw.kind} {fw.name} {fw.version} {extras}")
@@ -251,6 +360,10 @@ def _print_device(dev, num=None):
                 else:
                     mode = "On-Board"
                 print(f"            Device Mode: {mode}")
+            elif feature == SupportedFeature.HEADSET_ONBOARD_EQ:
+                bands = hidpp20.get_onboard_eq_params(dev)
+                if bands:
+                    print(f"            EQ: {', '.join(f'{f}Hz:{g:+d}dB' for f, g, _q in bands)}")
             elif hidpp20.battery_functions.get(feature, None):
                 print("", end="       ")
                 _battery_line(dev)
@@ -324,7 +437,7 @@ def run(devices, args, find_receiver, find_device):
 
     if device_name == "all":
         for d in devices:
-            if isinstance(d, receiver.Receiver):
+            if isinstance(d, (receiver.Receiver, CenturionReceiver)):
                 _print_receiver(d)
                 count = d.count()
                 if count:
@@ -336,8 +449,8 @@ def run(devices, args, find_receiver, find_device):
                             break
                 print("")
             else:
-                print("")
                 _print_device(d)
+                print("")
         return
 
     dev = find_receiver(devices, device_name)

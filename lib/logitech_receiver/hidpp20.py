@@ -35,6 +35,7 @@ import yaml
 from solaar.i18n import _
 from typing_extensions import Protocol
 
+from . import centurion as _centurion
 from . import common
 from . import exceptions
 from . import hidpp10_constants
@@ -161,13 +162,106 @@ class FeaturesArray(dict):
                     logger.warning("FEATURE_SET found, but failed to read features count")
                     return False
                 else:
-                    self.count = count[0] + 1  # ROOT feature not included in count
                     self[SupportedFeature.ROOT] = 0
                     self[SupportedFeature.FEATURE_SET] = fs_index
+                    if getattr(self.device, "centurion", False):
+                        self._check_centurion(fs_index, count)
+                    else:
+                        self.count = count[0] + 1  # ROOT feature not included in count
                     return True
             else:
                 self.supported = False
         return False
+
+    def _check_centurion(self, fs_index, count_response):
+        """Enumerate features on a Centurion device (parent + sub-device via CentPPBridge).
+
+        Phase A: Enumerate parent device features via CenturionFeatureSet.
+                 Find the CentPPBridge index (feature ID 0x0003 on Centurion = CentPPBridge).
+        Phase B: Route through CentPPBridge to discover sub-device features.
+                 Use CenturionFeatureSet bulk query to get all sub-device features.
+                 Store sub-device features keyed by SupportedFeature enum.
+        """
+        # Phase A: Parent features
+        feature_count = count_response[0]  # includes ROOT on Centurion
+        self.count = feature_count
+        bridge_index = None
+        for index in range(feature_count):
+            if self.inverse.get(index) is not None:
+                continue  # already registered (ROOT=0, FEATURE_SET=fs_index)
+            response = self.device.request((fs_index << 8) | 0x10, index)
+            if response is None or len(response) < 3:
+                continue
+            # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, flags]
+            feat_id = struct.unpack("!H", response[1:3])[0]
+            try:
+                feature = SupportedFeature(feat_id)
+            except ValueError:
+                feature = f"unknown:{feat_id:04X}"
+            self[feature] = index
+            self.inverse[index] = feature
+            # Feature 0x0003 on Centurion = CentPPBridge (not FirmwareInfo)
+            if feat_id == 0x0003:
+                bridge_index = index
+
+        if bridge_index is not None:
+            self.device._centurion_bridge_index = bridge_index
+            self.device._centurion_sub_features = set()
+            self.device._centurion_sub_indices = {}
+            self._discover_sub_device_features(bridge_index)
+
+    def _discover_sub_device_features(self, bridge_index):
+        """Phase B: Discover sub-device features via CentPPBridge.
+
+        Uses CenturionFeatureSet bulk query (function 1, index 0) routed through
+        the bridge to get all sub-device features at once.
+        """
+        # First, find the sub-device's FeatureSet index via CenturionRoot (sub_feat_idx=0)
+        # Query: CenturionRoot.GetFeature(0x0001) to find FeatureSet index on sub-device
+        fs_id_hi = (SupportedFeature.FEATURE_SET >> 8) & 0xFF
+        fs_id_lo = SupportedFeature.FEATURE_SET & 0xFF
+        response = self.device.centurion_bridge_request(0x00, 0x00, fs_id_hi, fs_id_lo)
+        if response is None or len(response) < 1:
+            logger.warning("Failed to find FeatureSet on Centurion sub-device")
+            return
+        sub_fs_index = response[0]
+        if sub_fs_index == 0:
+            logger.warning("Sub-device FeatureSet not found (index=0)")
+            return
+
+        # Bulk enumerate: CenturionFeatureSet.GetFeatureId(func=1=0x10, start_index=0)
+        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
+        response = self.device.centurion_bridge_request(sub_fs_index, 0x10, 0x00)
+        if response is None or len(response) < 1:
+            logger.warning("Failed to enumerate sub-device features")
+            return
+
+        entry_count = response[0]
+        entries = response[1:]
+        sub_feat_idx = 0  # sub-device feature indices start at 0
+        for i in range(entry_count):
+            offset = i * 4
+            if offset + 2 > len(entries):
+                break
+            feat_id = struct.unpack("!H", entries[offset : offset + 2])[0]
+            try:
+                feature = SupportedFeature(feat_id)
+            except ValueError:
+                feature = f"unknown:{feat_id:04X}"
+            # Store sub-device index for ALL features (including parent overlaps)
+            # This enables querying the sub-device's copy of shared features via bridge
+            self.device._centurion_sub_indices[feature] = sub_feat_idx
+            # Only store unique sub-device features in dict (skip parent overlaps like ROOT, FEATURE_SET)
+            # This avoids clobbering parent inverse entries via __setitem__
+            if dict.get(self, feature) is None:
+                dict.__setitem__(self, feature, sub_feat_idx)
+                self.device._centurion_sub_features.add(feature)
+            # Always store in offset inverse for sub-device enumerate/display
+            self.inverse[sub_feat_idx + 0x100] = feature
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
+            sub_feat_idx += 1
+        self._sub_feature_count = sub_feat_idx
 
     def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)
@@ -177,7 +271,14 @@ class FeaturesArray(dict):
             feature = self.inverse.get(index)
             if feature is not None:
                 return feature
-            response = self.device.feature_request(SupportedFeature.FEATURE_SET, 0x10, index)
+            # On Centurion devices, all features are discovered upfront (parent + sub-device)
+            if getattr(self.device, "centurion", False):
+                return None
+            try:
+                response = self.device.feature_request(SupportedFeature.FEATURE_SET, 0x10, index)
+            except exceptions.FeatureCallError:
+                logger.warning("failed to retrieve feature at index %d", index)
+                return None
             if response:
                 data = struct.unpack("!H", response[:2])[0]
                 try:
@@ -193,7 +294,14 @@ class FeaturesArray(dict):
         if self._check():
             for index in range(self.count):
                 feature = self.get_feature(index)
-                yield feature, index
+                if feature is not None:
+                    yield feature, index
+            # Also yield sub-device features for Centurion devices
+            sub_count = getattr(self, "_sub_feature_count", 0)
+            for sub_idx in range(sub_count):
+                feature = self.inverse.get(sub_idx + 0x100)
+                if feature is not None:
+                    yield feature, sub_idx
 
     def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
@@ -223,7 +331,10 @@ class FeaturesArray(dict):
             index = super().get(feature)
             if index is not None:
                 return index
-            response = self.device.request(0x0000, struct.pack("!H", feature))
+            try:
+                response = self.device.request(0x0000, struct.pack("!H", feature))
+            except exceptions.FeatureCallError:
+                return None
             if response:
                 index = response[0]
                 self[feature] = index if index else False
@@ -242,7 +353,7 @@ class FeaturesArray(dict):
         raise ValueError("Don't delete features from FeatureArray")
 
     def __len__(self) -> int:
-        return self.count
+        return self.count + getattr(self, "_sub_feature_count", 0)
 
     __bool__ = __nonzero__ = _check
 
@@ -1574,6 +1685,27 @@ class Hidpp20:
                     fw.append(fw_info)
             return tuple(fw)
 
+    def get_firmware_centurion(self, device):
+        return _centurion.get_firmware_centurion(device)
+
+    def get_serial_centurion(self, device):
+        return _centurion.get_serial_centurion(device)
+
+    def get_hardware_info_centurion(self, device):
+        return _centurion.get_hardware_info_centurion(device)
+
+    def _centurion_sub_device_info_request(self, device, function=0x00, *params):
+        return _centurion._centurion_sub_device_info_request(device, function, *params)
+
+    def get_firmware_centurion_sub(self, device):
+        return _centurion.get_firmware_centurion_sub(device)
+
+    def get_serial_centurion_sub(self, device):
+        return _centurion.get_serial_centurion_sub(device)
+
+    def get_hardware_info_centurion_sub(self, device):
+        return _centurion.get_hardware_info_centurion_sub(device)
+
     def get_ids(self, device):
         """Reads a device's ids (unit and model numbers)"""
         ids = device.feature_request(SupportedFeature.DEVICE_FW_VERSION)
@@ -1625,6 +1757,9 @@ class Hidpp20:
 
             return name.decode("utf-8")
 
+    def get_name_centurion(self, device):
+        return _centurion.get_name_centurion(device)
+
     def get_friendly_name(self, device: Device):
         """Reads a device's friendly name.
 
@@ -1668,6 +1803,9 @@ class Hidpp20:
                 return decipher_adc_measurement(report)
         except exceptions.FeatureCallError:
             return SupportedFeature.ADC_MEASUREMENT if SupportedFeature.ADC_MEASUREMENT in device.features else None
+
+    def get_battery_centurion(self, device: Device):
+        return _centurion.get_battery_centurion(device)
 
     def get_battery(self, device, feature):
         """Return battery information - feature, approximate level, next, charging, voltage
@@ -1900,6 +2038,7 @@ battery_functions = {
     SupportedFeature.BATTERY_VOLTAGE: Hidpp20.get_battery_voltage,
     SupportedFeature.UNIFIED_BATTERY: Hidpp20.get_battery_unified,
     SupportedFeature.ADC_MEASUREMENT: Hidpp20.get_adc_measurement,
+    SupportedFeature.CENTURION_BATTERY_SOC: Hidpp20.get_battery_centurion,
 }
 
 
@@ -1978,6 +2117,9 @@ def decipher_battery_unified(report) -> tuple[SupportedFeature, Battery]:
         approx_level = BatteryLevelApproximation.EMPTY
 
     return SupportedFeature.UNIFIED_BATTERY, Battery(discharge if discharge else approx_level, None, status, None)
+
+
+decipher_battery_centurion = _centurion.decipher_battery_centurion
 
 
 def decipher_adc_measurement(report) -> tuple[SupportedFeature, Battery]:
@@ -2119,3 +2261,10 @@ class ForceSensingButtonArray(UserDict):
 
     def acceptable_current_key(self, index: int, value: int) -> bool:
         return self[index].acceptable(value)
+
+
+# --- OnboardEQ (0x0636) — re-exported from onboard_eq.py ---
+from .onboard_eq import _build_set_eq_payload  # noqa: E402, F401
+from .onboard_eq import get_onboard_eq_info  # noqa: E402, F401
+from .onboard_eq import get_onboard_eq_params  # noqa: E402, F401
+from .onboard_eq import set_onboard_eq_params  # noqa: E402, F401

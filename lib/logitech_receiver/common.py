@@ -674,3 +674,17 @@ class Notification(IntEnum):
 class BusID(IntEnum):
     USB = 0x03
     BLUETOOTH = 0x05
+
+
+def _read_usb_product_string(hidraw_path):
+    """Read the USB product string from sysfs for a hidraw device path."""
+    import pathlib
+
+    try:
+        # /sys/class/hidraw/hidrawN/device/../../product → USB device product string
+        hidraw_name = pathlib.Path(hidraw_path).name
+        product_path = pathlib.Path("/sys/class/hidraw") / hidraw_name / "device" / ".." / ".." / "product"
+        product = product_path.read_text().strip()
+        return product if product else None
+    except (OSError, ValueError):
+        return None
