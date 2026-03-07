@@ -406,6 +406,7 @@ class ActionMenu:
                     [
                         (_("Key press"), diversion.KeyPress, "space"),
                         (_("Mouse scroll"), diversion.MouseScroll, [0, 0]),
+                        (_("Mouse scroll (hi-res)"), diversion.MouseScrollHiRes, [0, 0]),
                         (_("Mouse click"), diversion.MouseClick, ["left", 1]),
                         (_("Set"), diversion.Set, [None, "", None]),
                         (_("Execute"), diversion.Execute, [""]),
@@ -1855,6 +1856,7 @@ COMPONENT_UI: dict[Any, RuleComponentUI] = {
     diversion.MouseGesture: rule_conditions.MouseGestureUI,
     diversion.KeyPress: rule_actions.KeyPressUI,
     diversion.MouseScroll: rule_actions.MouseScrollUI,
+    diversion.MouseScrollHiRes: rule_actions.MouseScrollHiResUI,
     diversion.MouseClick: rule_actions.MouseClickUI,
     diversion.Execute: rule_actions.ExecuteUI,
     diversion.Set: SetUI,
