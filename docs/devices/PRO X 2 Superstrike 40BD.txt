@@ -1,0 +1,100 @@
+Solaar version 1.1.19
+
+  1: PRO X 2 Superstrike
+     Device path  : None
+     WPID         : 40BD
+     Codename     : PRO X 2 Superstrike
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Report Rate  : 1ms
+     Serial number:
+     Model ID:      40BDC0A80000
+     Unit ID:
+        Bootloader: BL2 73.00.B0011
+          Firmware: MPM 42.00.B0011
+     The power switch is located on the base.
+     Supports 36 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V7
+            Firmware: Bootloader BL2 73.00.B0011
+            Firmware: Firmware MPM 42.00.B0011
+            Unit ID:   Model ID: 40BDC0A80000  Transport IDs: {'wpid': '40BD', 'usbid': 'C0A8'}
+         3: DEVICE NAME            {0005} V5
+            Name: PRO X2 SUPERSTRIKE
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: UNIFIED BATTERY        {1004} V5
+         7: XY STATS               {2250} V1
+         8: WHEEL STATS            {2251} V0
+         9: EXTENDED ADJUSTABLE DPI {2202} V0
+            Sensitivity (DPI): {X:800, Y:800, LOD:HIGH}
+        10: MODE STATUS            {8090} V3
+        11: unknown:80E0           {80E0} V0
+        12: SUPERSTRIKE TUNING     {1B0C} V0
+            Left Button Actuation Point: 5
+            Left Button Rapid Trigger Level: 3
+            Left Button Click Haptics: 3
+            Right Button Actuation Point: 5
+            Right Button Rapid Trigger Level: 3
+            Right Button Click Haptics: 3
+        13: EXTENDED ADJUSTABLE REPORT RATE {8061} V0
+            Report Rate: 1ms
+        14: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Onboard Profiles: Profile 1
+        15: MOUSE BUTTON SPY       {8110} V0
+        16: FORCE PAIRING          {1500} V0
+        17: unknown:1801           {1801} V0    internal, hidden
+        18: DEVICE RESET           {1802} V0
+        19: unknown:1803           {1803} V0    internal, hidden
+        20: CONFIG DEVICE PROPS    {1806} V8
+        21: unknown:1817           {1817} V0    internal, hidden
+        22: OOBSTATE               {1805} V0
+        23: unknown:1830           {1830} V0    internal, hidden
+        24: unknown:1877           {1877} V0    internal, hidden
+        25: unknown:9403           {9403} V0    internal, hidden
+        26: unknown:1861           {1861} V0    internal, hidden
+        27: unknown:1890           {1890} V0    internal, hidden
+        28: unknown:18A1           {18A1} V0    internal, hidden
+        29: unknown:1E00           {1E00} V0    hidden
+        30: unknown:1E02           {1E02} V0    internal, hidden
+        31: unknown:1E22           {1E22} V0    internal, hidden
+        32: unknown:1E30           {1E30} V0    internal, hidden
+        33: unknown:1602           {1602} V0
+        34: unknown:1EB0           {1EB0} V0    internal, hidden
+        35: unknown:18B1           {18B1} V0    internal, hidden
+     Battery: discharging.
+
+SUPERSTRIKE TUNING Feature (0x1B0C)
+-----------------------------------
+This feature controls the HITS (Hall-Effect Inductive Trigger Switch) settings
+for the left and right mouse buttons.
+
+Capabilities (function 0x00):
+  Byte 0: Flags
+  Byte 1: Button count (3, but only 0 and 1 are accessible)
+  Byte 2: Max actuation value (40)
+  Byte 3: Max rapid trigger value (20)
+  Byte 4: Max haptics value (20)
+
+Read button settings (function 0x20, param: button_index):
+  Response: [button_index, actuation, rapid_trigger, haptics, ...]
+  - actuation: 4-40 (quantized to multiples of 4)
+  - rapid_trigger: 1-20 (cannot be set to 0)
+  - haptics: 0-20 (quantized to multiples of 4: 0, 4, 8, 12, 16, 20)
+
+Write button settings (function 0x10):
+  Params: [button_index, actuation, rapid_trigger, haptics]
+
+Solaar Settings:
+  - superstrike-tuning_actuation-{0,1}: Range 1-10 (maps to device 4-40)
+  - superstrike-tuning_rapid-trigger-level-{0,1}: Range 1-5 (maps to device 1-20)
+  - superstrike-tuning_haptics-{0,1}: Range 0-5 (maps to device 0-20)
+
+Note: Feature 0x80E0 (unknown:80E0) appears to be a non-functional stub for haptics.
+Haptics are actually controlled via byte 3 of the SUPERSTRIKE TUNING feature.
+
+Note: Feature 0x9403 (unknown:9403) appears to be a hidden BHOP (bunny hop) feature
+that is not accessible via HID++.
