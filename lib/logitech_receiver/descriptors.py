@@ -213,7 +213,7 @@ _D(
 _D("Wireless Keyboard K520", codename="K520", protocol=1.0, wpid="2011", registers=(Reg.BATTERY_STATUS,))
 _D("Wireless Solar Keyboard K750", codename="K750", protocol=2.0, wpid="4002")
 _D("Wireless Keyboard K270 (unifying)", codename="K270", protocol=2.0, wpid="4003")
-_D("Wireless Keyboard K360", codename="K360", protocol=2.0, wpid="4004")
+# incorrect _D("Wireless Keyboard K360", codename="K360", protocol=2.0, wpid="4004")
 _D("Wireless Keyboard K230", codename="K230", protocol=2.0, wpid="400D")
 _D("Wireless Touch Keyboard K400", codename="K400", protocol=2.0, wpid=("400E", "4024"))
 _D("Wireless Keyboard MK270", codename="MK270", protocol=2.0, wpid="4023")
