@@ -204,7 +204,7 @@ class Device:
             self.registers = self.descriptor.registers if self.descriptor.registers else []
 
         if self._protocol is not None:
-            self.features = None if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
+            self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
         else:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
 
