@@ -1690,10 +1690,10 @@ class Hidpp20:
     def get_keys(self, device: Device):
         # TODO: add here additional variants for other REPROG_CONTROLS
         count = None
-        if SupportedFeature.REPROG_CONTROLS_V2 in device.features:
+        if device.features and SupportedFeature.REPROG_CONTROLS_V2 in device.features:
             count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V2)
             return KeysArrayV2(device, ord(count[:1]))
-        elif SupportedFeature.REPROG_CONTROLS_V4 in device.features:
+        elif device.features and SupportedFeature.REPROG_CONTROLS_V4 in device.features:
             count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V4)
             return KeysArrayV4(device, ord(count[:1]))
         return None
