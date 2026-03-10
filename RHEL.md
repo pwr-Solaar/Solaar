@@ -1,8 +1,9 @@
-# Solaar Installation Guide for RHEL / Rocky / AlmaLinux
+# Solaar installation guide for RHEL, Rocky, AlmaLinux, and CentOS Stream
 
-This guide provides both manual installation steps and an automated installation script for Solaar on Red Hat Enterprise Linux compatible systems.
+This guide covers manual installation and an automated install example for
+RHEL-family systems using `dnf`.
 
-Supported distributions:
+## Supported distributions
 
 - Red Hat Enterprise Linux (RHEL)
 - Rocky Linux
@@ -10,199 +11,165 @@ Supported distributions:
 - Oracle Linux
 - CentOS Stream
 
-The commands assume a minimal CLI system with sudo access.
+The commands assume a minimal CLI system with `sudo` access.
 
----
+## 1) Install dependencies
 
-# 1. Install Required Dependencies
-
-Update the system and install required packages.
-
-sudo dnf update -y
-
+```bash
+sudo dnf makecache --refresh
 sudo dnf install -y \
-python3 \
-python3-pip \
-python3-devel \
-python3-gobject \
-python3-dbus \
-gtk3 \
-libappindicator-gtk3 \
-git \
-hidapi \
-libusb1
+  git \
+  gtk3 \
+  python3 \
+  python3-devel \
+  python3-dbus \
+  python3-gobject \
+  python3-pip \
+  python3-psutil \
+  python3-pyudev \
+  python3-setuptools \
+  python3-xlib \
+  python3-yaml
+```
 
-Optional but recommended tools:
+Optional troubleshooting helpers:
 
+```bash
 sudo dnf install -y \
-python3-virtualenv \
-python3-setuptools
+  evemu \
+  libinput \
+  usbutils
+```
 
----
+## 2) Clone Solaar
 
-# 2. Clone Solaar Repository
-
-Clone the upstream Solaar repository.
-
+```bash
 git clone https://github.com/pwr-Solaar/Solaar.git
+cd Solaar
+```
+
+## 3) Install Solaar
+
+Install for the current user:
+
+```bash
+python3 -m pip install --user .
+```
+
+Or install system-wide:
+
+```bash
+sudo python3 -m pip install .
+```
+
+## 4) Install udev rules
+
+Install the recommended `uinput` rule:
+
+```bash
+sudo make install_udev_uinput
+```
+
+Verify rule installation:
+
+```bash
+ls -l /etc/udev/rules.d/42-logitech-unify-permissions.rules
+```
+
+Rollback udev rule installation:
+
+```bash
+sudo make uninstall_udev
+```
+
+## 5) Run Solaar
+
+```bash
+solaar
+```
+
+or:
+
+```bash
+python3 -m solaar
+```
+
+## 6) Automated install options
+
+Use the guided installer in this repository:
+
+```bash
+./tools/install-rhel.sh
+```
+
+Minimal non-interactive example script:
+
+```bash
+cat > install-rhel-solaar.sh <<'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${EUID}" -eq 0 ]]; then
+  echo "Run as a regular user with sudo access, not as root."
+  exit 1
+fi
+
+sudo dnf makecache --refresh
+sudo dnf install -y \
+  git \
+  gtk3 \
+  python3 \
+  python3-devel \
+  python3-dbus \
+  python3-gobject \
+  python3-pip \
+  python3-psutil \
+  python3-pyudev \
+  python3-setuptools \
+  python3-xlib \
+  python3-yaml
+
+if [[ ! -d Solaar/.git ]]; then
+  git clone https://github.com/pwr-Solaar/Solaar.git
+fi
 
 cd Solaar
+python3 -m pip install --user .
+sudo make install_udev_uinput
+~/.local/bin/solaar --version
+SCRIPT
 
----
-
-# 3. Install Solaar
-
-Install using pip.
-
-pip3 install .
-
-If installing system-wide:
-
-sudo pip3 install .
-
----
-
-# 4. Running Solaar
-
-Launch from terminal.
-
-solaar
-
-or
-
-python3 -m solaar
-
-If running a desktop environment, Solaar should appear in the system tray.
-
----
-
-# 5. Permissions for Logitech Receiver
-
-If the receiver is not detected, add udev rules.
-
-sudo tee /etc/udev/rules.d/42-logitech-unify-permissions.rules <<EOF
-SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666"
-EOF
-
-Reload rules.
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-
-Reconnect the Logitech receiver.
-
----
-
-# 6. Automated Installation Script
-
-An automated script is included to simplify installation.
-
-Example usage:
-
-sudo ./install-rhel.sh
-
-The script performs the following actions:
-
-1. Detects the distribution
-2. Installs required dependencies
-3. Clones the repository if needed
-4. Installs Solaar
-5. Configures udev permissions
-6. Verifies installation
-
----
-
-# 7. Example Automated Script
-
-Below is a reference automation script.
-
+chmod +x install-rhel-solaar.sh
+./install-rhel-solaar.sh
 ```
 
-#!/usr/bin/env bash
+## 7) Verification
 
-set -e
-
-echo "Solaar RHEL Installer"
-
-if [[ $EUID -ne 0 ]]; then
-echo "Run this script with sudo"
-exit 1
-fi
-
-echo "Updating system..."
-dnf update -y
-
-echo "Installing dependencies..."
-dnf install -y 
-python3 
-python3-pip 
-python3-gobject 
-gtk3 
-libappindicator-gtk3 
-git 
-hidapi 
-libusb1
-
-WORKDIR="/opt/solaar"
-
-if [[ ! -d "$WORKDIR" ]]; then
-echo "Cloning repository..."
-git clone [https://github.com/pwr-Solaar/Solaar.git](https://github.com/pwr-Solaar/Solaar.git) "$WORKDIR"
-fi
-
-cd "$WORKDIR"
-
-echo "Installing Solaar..."
-pip3 install .
-
-echo "Configuring Logitech receiver permissions..."
-
-cat <<EOF > /etc/udev/rules.d/42-logitech-unify-permissions.rules
-SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666"
-EOF
-
-udevadm control --reload-rules
-udevadm trigger
-
-echo "Installation complete."
-
-echo "Run Solaar using:"
-echo "solaar"
-
-```
-
----
-
-# 8. Verification
-
-Confirm installation.
-
-which solaar
-
-Check version.
-
+```bash
+command -v solaar
 solaar --version
+python3 -m pip show solaar
+```
 
----
+If installed with `--user`, ensure `~/.local/bin` is on your `PATH`:
 
-# 9. Troubleshooting
+```bash
+echo "$PATH" | tr ':' '\n' | grep -Fx "$HOME/.local/bin" >/dev/null || \
+  echo 'Add ~/.local/bin to PATH'
+```
+
+## 8) Troubleshooting
 
 Receiver not detected:
 
-lsusb | grep Logitech
-
-Restart udev.
-
+```bash
+lsusb | grep -Ei 'logitech|046d'
 sudo udevadm trigger
+```
 
-Check device permissions.
+Check access to hidraw devices:
 
+```bash
 ls -l /dev/hidraw*
-
----
-
-# 10. Notes
-
-Solaar supports Logitech Unifying and Bolt receivers. Some advanced device features may depend on kernel HID support.
-
-For enterprise deployments, administrators may package Solaar as an RPM or deploy using configuration management tools such as Ansible.
+getfacl /dev/hidraw* 2>/dev/null | sed -n '1,80p'
+```
