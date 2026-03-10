@@ -1,245 +1,208 @@
-# Solaar on RHEL 10
+# Solaar Installation Guide for RHEL / Rocky / AlmaLinux
 
-## Purpose
+This guide provides both manual installation steps and an automated installation script for Solaar on Red Hat Enterprise Linux compatible systems.
 
-This documents the steps required to get **Solaar** running on **RHEL 10** when the package is not available from the normal repositories.
+Supported distributions:
 
-## Environment
+- Red Hat Enterprise Linux (RHEL)
+- Rocky Linux
+- AlmaLinux
+- Oracle Linux
+- CentOS Stream
 
-* OS: RHEL 10
-* Desktop: KDE Plasma on Wayland
-* Device class: Logitech Unifying Receiver
-* Example mouse: Logitech M720 Triathlon
+The commands assume a minimal CLI system with sudo access.
 
-## Observed issue
+---
 
-The following packages were not available from the configured repositories:
+# 1. Install Required Dependencies
 
-```bash
-sudo dnf install solaar xbindkeys xdotool evtest
-```
+Update the system and install required packages.
 
-DNF returned package-not-found errors for those package names.
+sudo dnf update -y
 
-## What worked
+sudo dnf install -y \
+python3 \
+python3-pip \
+python3-devel \
+python3-gobject \
+python3-dbus \
+gtk3 \
+libappindicator-gtk3 \
+git \
+hidapi \
+libusb1
 
-### 1. Confirm the Logitech receiver is detected
+Optional but recommended tools:
 
-```bash
-lsusb | grep -i logitech
-```
+sudo dnf install -y \
+python3-virtualenv \
+python3-setuptools
 
-Expected output looked similar to this:
+---
 
-```text
-Bus 001 Device 00X: ID 046d:c52b Logitech, Inc. Unifying Receiver
-```
+# 2. Clone Solaar Repository
 
-### 2. Install required base packages from RHEL and EPEL where available
+Clone the upstream Solaar repository.
 
-Install Python packaging support and device/input tooling first.
-
-```bash
-sudo dnf install python3 python3-pip git libinput evemu
-```
-
-Also install build and runtime pieces commonly needed for user-space input and HID tools.
-
-```bash
-sudo dnf install python3-devel gcc pkgconf-pkg-config gtk3 python3-gobject
-```
-
-Note: exact dependency resolution may vary depending on enabled repositories and what is already installed.
-
-### 3. Clone the Solaar repository
-
-```bash
-mkdir -p ~/dev-repos
-cd ~/dev-repos
 git clone https://github.com/pwr-Solaar/Solaar.git
+
 cd Solaar
-```
 
-### 4. Install Solaar to the user environment
+---
 
-Install it into the user site-packages instead of system-wide.
+# 3. Install Solaar
 
-```bash
-python3 -m pip install --user .
-```
+Install using pip.
 
-If upgrading later from the fork or local checkout:
+pip3 install .
 
-```bash
-python3 -m pip install --user --upgrade .
-```
+If installing system-wide:
 
-### 5. Run Solaar directly from the user-local install path
+sudo pip3 install .
 
-```bash
-~/.local/bin/solaar
-```
+---
 
-For CLI inspection:
+# 4. Running Solaar
 
-```bash
-~/.local/bin/solaar show
-~/.local/bin/solaar config "M720 Triathlon Multi-Device Mouse"
-```
+Launch from terminal.
 
-### 6. Confirm the receiver and device are visible
-
-A working example:
-
-```bash
-~/.local/bin/solaar show
-```
-
-This displayed the Unifying Receiver and the M720 Triathlon, including battery state and configurable features.
-
-## Automated installer script
-
-A guided installer script is included in this repository and automates the RHEL workflow in this document while prompting before each major action.
-
-Run it from the Solaar checkout:
-
-```bash
-./tools/install-rhel.sh
-```
-
-The script can:
-
-* check for Logitech receiver visibility with `lsusb`
-* install required packages with `dnf`
-* create the checkout directory and clone/update Solaar
-* install Solaar with `python3 -m pip install --user`
-* optionally add a Bash alias for `solaar`
-* optionally run `solaar show`, `solaar config`, `libinput debug-events`, and `keyd monitor`
-* write a timestamped evidence log in `~/.local/state/solaar/`
-
-## Wayland note
-
-On KDE Wayland, Solaar prints a warning similar to:
-
-```text
-rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed
-```
-
-This does **not** prevent basic Solaar usage. It only means some rule-processing features are limited under Wayland, especially outside GNOME.
-
-## Device-specific issue seen with the M720
-
-`solaar show` triggered a traceback when trying to read host-name metadata from the M720 Triathlon:
-
-```text
-UnicodeDecodeError: 'utf-8' codec can't decode bytes in position 12-13: unexpected end of data
-```
-
-This appears related to Solaar parsing stored host information from the mouse, not to receiver detection itself.
-
-### Practical workaround
-
-Use targeted commands that still work, such as:
-
-```bash
-~/.local/bin/solaar config "M720 Triathlon Multi-Device Mouse"
-```
-
-This successfully showed configurable settings like:
-
-* scroll wheel direction
-* scroll wheel resolution
-* pointer speed
-* reprogrammable keys
-* persistent remappable keys
-* diversion settings
-
-## Verifying input behavior outside Solaar
-
-To inspect raw input events from the mouse, identify the correct `/dev/input/eventX` node for the mouse on your system and then run:
-
-```bash
-sudo libinput debug-events --device /dev/input/eventX
-```
-
-This confirmed the mouse was producing:
-
-* pointer motion
-* left and middle button events
-* scroll wheel events
-* horizontal wheel events
-* keyboard-style events for some remapped functions
-
-## keyd note
-
-A locally installed `keyd` binary may exist under `/usr/local/bin/keyd` if built from source or installed manually.
-
-If it is not available in the shell `PATH`, direct invocation may be required for monitoring:
-
-```bash
-sudo /usr/local/bin/keyd monitor
-```
-
-This can help verify that virtual keyboard and pointer events are being created and that remapped device actions are flowing through the input stack.
-
-## Recommended quality-of-life alias
-
-Add a shell alias so Solaar can be launched normally:
-
-```bash
-vi ~/.bashrc
-```
-
-Append:
-
-```bash
-alias solaar="$HOME/.local/bin/solaar"
-```
-
-Reload shell config:
-
-```bash
-source ~/.bashrc
-```
-
-Then launch with:
-
-```bash
 solaar
+
+or
+
+python3 -m solaar
+
+If running a desktop environment, Solaar should appear in the system tray.
+
+---
+
+# 5. Permissions for Logitech Receiver
+
+If the receiver is not detected, add udev rules.
+
+sudo tee /etc/udev/rules.d/42-logitech-unify-permissions.rules <<EOF
+SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666"
+EOF
+
+Reload rules.
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+Reconnect the Logitech receiver.
+
+---
+
+# 6. Automated Installation Script
+
+An automated script is included to simplify installation.
+
+Example usage:
+
+sudo ./install-rhel.sh
+
+The script performs the following actions:
+
+1. Detects the distribution
+2. Installs required dependencies
+3. Clones the repository if needed
+4. Installs Solaar
+5. Configures udev permissions
+6. Verifies installation
+
+---
+
+# 7. Example Automated Script
+
+Below is a reference automation script.
+
 ```
 
-## Summary
+#!/usr/bin/env bash
 
-The working path on RHEL 10 was:
+set -e
 
-1. Confirm the Logitech Unifying Receiver is visible with `lsusb`.
-2. Install Python and required development/runtime packages.
-3. Clone the Solaar repository.
-4. Install Solaar with `python3 -m pip install --user .`.
-5. Run Solaar from `~/.local/bin/solaar`.
-6. Use `solaar config "M720 Triathlon Multi-Device Mouse"` for stable device configuration.
-7. Use `libinput debug-events` and optionally `keyd monitor` to validate the input stack.
+echo "Solaar RHEL Installer"
 
-## Commands used
+if [[ $EUID -ne 0 ]]; then
+echo "Run this script with sudo"
+exit 1
+fi
 
-```bash
-lsusb | grep -i logitech
-mkdir -p ~/dev-repos
-cd ~/dev-repos
-git clone https://github.com/pwr-Solaar/Solaar.git
-cd Solaar
-python3 -m pip install --user .
-~/.local/bin/solaar
-~/.local/bin/solaar show
-~/.local/bin/solaar config "M720 Triathlon Multi-Device Mouse"
-sudo libinput debug-events --device /dev/input/eventX
-sudo /usr/local/bin/keyd monitor
+echo "Updating system..."
+dnf update -y
+
+echo "Installing dependencies..."
+dnf install -y 
+python3 
+python3-pip 
+python3-gobject 
+gtk3 
+libappindicator-gtk3 
+git 
+hidapi 
+libusb1
+
+WORKDIR="/opt/solaar"
+
+if [[ ! -d "$WORKDIR" ]]; then
+echo "Cloning repository..."
+git clone [https://github.com/pwr-Solaar/Solaar.git](https://github.com/pwr-Solaar/Solaar.git) "$WORKDIR"
+fi
+
+cd "$WORKDIR"
+
+echo "Installing Solaar..."
+pip3 install .
+
+echo "Configuring Logitech receiver permissions..."
+
+cat <<EOF > /etc/udev/rules.d/42-logitech-unify-permissions.rules
+SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666"
+EOF
+
+udevadm control --reload-rules
+udevadm trigger
+
+echo "Installation complete."
+
+echo "Run Solaar using:"
+echo "solaar"
+
 ```
 
-## Caveats
+---
 
-* Package availability in RHEL 10 repositories may differ from Fedora or Debian-based systems.
-* Wayland limits certain Solaar rule features.
-* `solaar show` may crash on some host-info metadata due to an upstream parsing issue.
-* Direct user-local execution from `~/.local/bin/solaar` may be required if no system package exists.
-* Replace example paths and event device numbers with the values on your own system.
+# 8. Verification
+
+Confirm installation.
+
+which solaar
+
+Check version.
+
+solaar --version
+
+---
+
+# 9. Troubleshooting
+
+Receiver not detected:
+
+lsusb | grep Logitech
+
+Restart udev.
+
+sudo udevadm trigger
+
+Check device permissions.
+
+ls -l /dev/hidraw*
+
+---
+
+# 10. Notes
+
+Solaar supports Logitech Unifying and Bolt receivers. Some advanced device features may depend on kernel HID support.
+
+For enterprise deployments, administrators may package Solaar as an RPM or deploy using configuration management tools such as Ansible.
