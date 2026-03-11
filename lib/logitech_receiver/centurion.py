@@ -39,6 +39,7 @@ from .common import Alert
 from .common import Battery
 from .common import BatteryStatus
 from .common import FirmwareKind
+from .centurion_constants import CenturionCoreFeature
 from .common import _read_usb_product_string
 from .hidpp20_constants import SupportedFeature
 
@@ -395,7 +396,7 @@ class CenturionReceiver:
         dev._centurion_usb_name = self._usb_name
         # Pre-set bridge index from dongle features so ping can probe the headset
         for _feat, feat_id, idx in self._dongle_features or []:
-            if feat_id == 0x0003:  # CentPPBridge
+            if feat_id == CenturionCoreFeature.CENT_PP_BRIDGE:
                 dev._centurion_bridge_index = idx
                 break
 
@@ -493,7 +494,7 @@ def create_centurion_receiver(low_level, device_info, setting_callback=None):
             base._centurion_handles.add(int(handle))
             cr = CenturionReceiver(low_level, handle, device_info, setting_callback)
             # Check if any discovered feature is CentPPBridge (0x0003)
-            has_bridge = any(feat_id == 0x0003 for _, feat_id, _ in (cr.dongle_features or []))
+            has_bridge = any(feat_id == CenturionCoreFeature.CENT_PP_BRIDGE for _, feat_id, _ in (cr.dongle_features or []))
             if not has_bridge:
                 logger.info("Centurion device %s has no bridge, treating as direct device", device_info.path)
                 base._centurion_handles.discard(int(handle))
