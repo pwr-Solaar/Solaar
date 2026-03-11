@@ -232,8 +232,7 @@ def _print_device(dev, num=None):
             else:
                 feature_bytes = feature.to_bytes(2, byteorder="little")
             feature_int = int.from_bytes(feature_bytes, byteorder="little")
-            # On Centurion, parent feature 0x0003 is CentPPBridge, not DEVICE_FW_VERSION
-            display_name = "CENTPP BRIDGE" if is_centurion and not in_sub_device and feature_int == 0x0003 else feature
+            display_name = feature
             if is_centurion_child and in_sub_device:
                 # Use cached version — skip slow bridge ROOT queries
                 version = dev.features.get_feature_version(feature_int) or 0
@@ -339,7 +338,7 @@ def _print_device(dev, num=None):
                 if hw_info:
                     model_id, hw_rev, product_id = hw_info
                     print(f"            Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
-            elif feature == SupportedFeature.DEVICE_FW_VERSION and not (is_centurion and not in_sub_device):
+            elif isinstance(feature, SupportedFeature) and feature == SupportedFeature.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
                     extras = strhex(fw.extras) if fw.extras else ""
                     print(f"            Firmware: {fw.kind} {fw.name} {fw.version} {extras}")

@@ -52,6 +52,8 @@ from .hidpp20_constants import ErrorCode
 from .hidpp20_constants import FeatureFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
+from .centurion_constants import CenturionCoreFeature
+from .centurion_constants import resolve_feature
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
@@ -139,6 +141,7 @@ class FeaturesArray(dict):
         self.supported = True  # Actually don't know whether it is supported yet
         self.device = device
         self.inverse = {}
+        self.sub_inverse = {}
         self.version = {}
         self.flags = {}
         self.count = 0
@@ -194,14 +197,12 @@ class FeaturesArray(dict):
                 continue
             # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, flags]
             feat_id = struct.unpack("!H", response[1:3])[0]
-            try:
-                feature = SupportedFeature(feat_id)
-            except ValueError:
+            feature = resolve_feature(feat_id, centurion=True)
+            if feature is None:
                 feature = f"unknown:{feat_id:04X}"
             self[feature] = index
             self.inverse[index] = feature
-            # Feature 0x0003 on Centurion = CentPPBridge (not FirmwareInfo)
-            if feat_id == 0x0003:
+            if feature is CenturionCoreFeature.CENT_PP_BRIDGE:
                 bridge_index = index
 
         if bridge_index is not None:
@@ -256,8 +257,8 @@ class FeaturesArray(dict):
             if dict.get(self, feature) is None:
                 dict.__setitem__(self, feature, sub_feat_idx)
                 self.device._centurion_sub_features.add(feature)
-            # Always store in offset inverse for sub-device enumerate/display
-            self.inverse[sub_feat_idx + 0x100] = feature
+            # Always store in sub_inverse for sub-device enumerate/display
+            self.sub_inverse[sub_feat_idx] = feature
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
             sub_feat_idx += 1
@@ -299,7 +300,7 @@ class FeaturesArray(dict):
             # Also yield sub-device features for Centurion devices
             sub_count = getattr(self, "_sub_feature_count", 0)
             for sub_idx in range(sub_count):
-                feature = self.inverse.get(sub_idx + 0x100)
+                feature = self.sub_inverse.get(sub_idx)
                 if feature is not None:
                     yield feature, sub_idx
 
