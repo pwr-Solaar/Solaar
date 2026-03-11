@@ -35,11 +35,11 @@ from solaar import configuration
 from . import base
 from . import exceptions
 from . import hidpp10
+from .centurion_constants import CenturionCoreFeature
 from .common import Alert
 from .common import Battery
 from .common import BatteryStatus
 from .common import FirmwareKind
-from .centurion_constants import CenturionCoreFeature
 from .common import _read_usb_product_string
 from .hidpp20_constants import SupportedFeature
 
