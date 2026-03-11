@@ -40,6 +40,8 @@ from . import common
 from . import exceptions
 from . import hidpp10_constants
 from . import special_keys
+from .centurion_constants import CenturionCoreFeature
+from .centurion_constants import resolve_feature
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
@@ -52,8 +54,6 @@ from .hidpp20_constants import ErrorCode
 from .hidpp20_constants import FeatureFlag
 from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
-from .centurion_constants import CenturionCoreFeature
-from .centurion_constants import resolve_feature
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
