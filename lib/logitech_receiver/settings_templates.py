@@ -1972,7 +1972,7 @@ class SuperstrikeTuning_(settings.Setting):
 
 class HapticLevel(settings.Setting):
     name = "haptic-level"
-    label = _("Haptic Feeback Level")
+    label = _("Haptic Feedback Level")
     description = _("Change power of haptic feedback.  (Zero to turn off.)")
     feature = _F.HAPTIC
     choices_universe = common.NamedInts(Off=0, Low=25, Medium=50, High=75, Maximum=100)

@@ -15,9 +15,9 @@ although on GNOME desktop under Wayland, you can use those with the Solaar Gnome
 You can install it from `https://extensions.gnome.org/extension/6162/solaar-extension`.
 Under Wayland using keyboard groups may result in incorrect symbols being input for simulated input.
 Under Wayland simulating inputs when modifier keys are pressed may result in incorrect symbols being sent.
-Simulated input uses Xtest if available under X11 or uinput if the user has write access to /dev/uinput.
-The easiest way to maintain write access to /dev/uinput is to use Solaar's alternative udev rule by downloading
-`https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/rules.d-uinput/42-logitech-unify-permissions.rules`
+Simulated input uses uinput to simulate input so the user has to have write access to /dev/uinput.
+The easiest way to maintain write access to /dev/uinput is to use Solaar's udev rule by downloading
+`https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/rules.d/42-logitech-unify-permissions.rules`
 and copying it as root into the `/etc/udev/rules.d` directory.
 You may have to reboot your system for the write permission to be set up.
 Another way to get write access to /dev/uinput is to run `sudo setfacl -m u:${USER}:rw /dev/uinput`
