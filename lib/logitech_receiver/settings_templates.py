@@ -2179,6 +2179,7 @@ class RGBPowerManager:
         self._dim_timer_id = None  # dim ramp animation timer
         self._dim_step = 0
         self._dim_zones = []  # list of (zone, start_color, target_color)
+        self._dim_perkey = None  # dict of {zone_id: (start_color, target_color)} or None
         # Activity monitoring
         self._hidraw_fd = None
         self._hidraw_watch_id = None
@@ -2346,47 +2347,82 @@ class RGBPowerManager:
             self._apply_animation(self._idle_effect)
 
     def _start_dim_ramp(self, dim_pct):
-        """Start a smooth ~5s dim ramp to the target brightness percentage."""
+        """Start a smooth ~5s dim ramp to the target brightness percentage.
+
+        When per-key lighting is active, the per-key layer completely masks zone
+        effects (confirmed on G515). In that case, ALL dimming goes through 0x8081
+        per-key writes and zone dimming is skipped entirely.
+        """
         infos = getattr(self._device, "led_effects", None)
         if not infos or not infos.zones:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: dim ramp skipped — no led_effects/zones", self._device)
             self._state = self.IDLE
             return
-        self._dim_zones = []
-        for zone in infos.zones:
-            effect_ids = [e.ID for e in zone.effects]
-            if 0x01 in effect_ids:  # Zone supports Static
-                start_color = self._get_zone_color(zone)
-                target_color = self._compute_dim_color(start_color, dim_pct)
-                self._dim_zones.append((zone, start_color, target_color))
-                if logger.isEnabledFor(logging.DEBUG):
+
+        # Check if per-key lighting is active with real colors — it completely masks zone effects
+        perkey_setting = self._find_perkey_setting()
+        perkey_active = (
+            perkey_setting is not None
+            and self._has_perkey_zones(perkey_setting)
+            and self._has_real_perkey_colors(perkey_setting)
+        )
+
+        self._dim_perkey = None
+        if perkey_active:
+            # Per-key masks zones: dim ALL per-key zones, skip zone dimming
+            self._dim_zones = []
+            self._dim_perkey = self._build_full_perkey_dim_map(perkey_setting, dim_pct)
+            if self._dim_perkey:
+                # Push zone base color to unset keys before dimming starts,
+                # so they show the correct color instead of white/stale values
+                self._init_unset_perkey_zones(perkey_setting)
+        else:
+            # No per-key active: dim via zone effects (original behavior)
+            self._dim_zones = []
+            for zone in infos.zones:
+                effect_ids = [e.ID for e in zone.effects]
+                if 0x01 in effect_ids:  # Zone supports Static
+                    start_color = self._get_zone_color(zone)
+                    target_color = self._compute_dim_color(start_color, dim_pct)
+                    self._dim_zones.append((zone, start_color, target_color))
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug(
+                            "%s: dim zone %s (loc %s): start=#%06x target=#%06x, effects=%s",
+                            self._device,
+                            zone.index,
+                            zone.location,
+                            start_color,
+                            target_color,
+                            effect_ids,
+                        )
+                elif logger.isEnabledFor(logging.DEBUG):
                     logger.debug(
-                        "%s: dim zone %s (loc %s): start=#%06x target=#%06x, effects=%s",
+                        "%s: dim zone %s skipped — no Static (0x01) in effects=%s",
                         self._device,
                         zone.index,
-                        zone.location,
-                        start_color,
-                        target_color,
                         effect_ids,
                     )
-            elif logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    "%s: dim zone %s skipped — no Static (0x01) in effects=%s",
-                    self._device,
-                    zone.index,
-                    effect_ids,
-                )
-        if not self._dim_zones:
+
+        if not self._dim_zones and not self._dim_perkey:
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: dim ramp skipped — no zones support Static", self._device)
+                logger.debug("%s: dim ramp skipped — no zones or per-key colors to dim", self._device)
             self._state = self.IDLE
             return
         self._dim_step = 0
         self._state = self.DIMMING
         self._dim_timer_id = GLib.timeout_add(self._DIM_INTERVAL_MS, self._dim_ramp_step)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s: starting dim ramp to %d%% brightness (%d zones)", self._device, dim_pct, len(self._dim_zones))
+            n_zones = len(self._dim_zones)
+            n_perkey = len(self._dim_perkey) if self._dim_perkey else 0
+            logger.debug(
+                "%s: starting dim ramp to %d%% brightness (%d zones, %d per-key%s)",
+                self._device,
+                dim_pct,
+                n_zones,
+                n_perkey,
+                ", per-key masking zones" if perkey_active else "",
+            )
 
     def _dim_ramp_step(self):
         """GLib callback — one step of the smooth dim animation."""
@@ -2402,6 +2438,13 @@ class RGBPowerManager:
             except Exception as e:
                 if logger.isEnabledFor(logging.WARNING):
                     logger.warning("%s: dim ramp step failed for zone %s: %s", self._device, zone.index, e)
+        # Also dim per-key colors
+        if self._dim_perkey:
+            try:
+                self._push_perkey_dimmed(t)
+            except Exception as e:
+                if logger.isEnabledFor(logging.WARNING):
+                    logger.warning("%s: dim ramp step failed for per-key: %s", self._device, e)
         if self._dim_step >= self._DIM_STEPS:
             # Dim complete — release effect control to firmware to hold the dim level
             try:
@@ -2433,6 +2476,35 @@ class RGBPowerManager:
         params = bytes([r, g, b, 0, 0, 0, 0, 0, 0, 0])
         payload = bytes([zone.index, static_effect.index]) + params + b"\x01"
         self._device.feature_request(_F.RGB_EFFECTS, 0x10, payload)
+
+    def _push_perkey_dimmed(self, t):
+        """Push interpolated per-key colors for one dim ramp step.
+
+        Groups keys by their interpolated color and uses SetRgbZonesSingleValue
+        (0x8081 function 6) for efficient bulk writes — up to 13 zone IDs per
+        HID message when multiple keys share the same dimmed color.
+        """
+        # Build color -> [zone_ids] map for this interpolation step
+        color_groups = {}
+        for zone_id, (start_color, target_color) in self._dim_perkey.items():
+            color = self._interpolate_color(start_color, target_color, t)
+            if color not in color_groups:
+                color_groups[color] = []
+            color_groups[color].append(zone_id)
+
+        feat = _F.PER_KEY_LIGHTING_V2
+        for color, zone_ids in color_groups.items():
+            r = (color >> 16) & 0xFF
+            g = (color >> 8) & 0xFF
+            b = color & 0xFF
+            # Function 6: SetRgbZonesSingleValue — color(3) + zone_ids (up to 13 per report)
+            while zone_ids:
+                batch = zone_ids[:13]
+                zone_ids = zone_ids[13:]
+                data = bytes([r, g, b]) + bytes(batch)
+                self._device.feature_request(feat, 0x60, data)
+        # Commit the frame
+        self._device.feature_request(feat, 0x70, b"\x00\x00\x00\x00\x00")
 
     def _apply_animation(self, effect_id):
         """Switch to a firmware-handled animation (Breathe/Ripple) for idle effect."""
@@ -2482,14 +2554,17 @@ class RGBPowerManager:
     # --- Sleep ---
 
     def _start_sleep(self):
-        """Send firmware fade-to-off command."""
+        """Enter low-power sleep via firmware power mode command.
+
+        The firmware fade handles its own smooth dim from whatever the
+        current brightness level is, so no need to snap to zero first.
+        """
         self._cancel_dim_timer()
         try:
-            # SetRgbPowerMode(cluster=1, mode=3=idle) triggers ~30s firmware fade
             self._device.feature_request(_F.RGB_EFFECTS, 0x80, b"\x01\x03\x00")
             self._state = self.SLEEPING
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: RGB entering sleep (firmware fade-to-off)", self._device)
+                logger.debug("%s: RGB entering sleep (firmware power-down)", self._device)
         except Exception as e:
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning("%s: failed to enter RGB sleep: %s", self._device, e)
@@ -2533,6 +2608,114 @@ class RGBPowerManager:
                 return getattr(s._value, "color", 0xFFFFFF)
         return 0xFFFFFF  # fallback to white
 
+    def _get_zone_base_color(self):
+        """Get the primary zone effect color (used as base for unset per-key zones)."""
+        for s in self._device.settings:
+            if s.name.startswith("rgb_zone_") and s._value is not None:
+                color = getattr(s._value, "color", None)
+                if color is not None:
+                    return color
+        return 0xFFFFFF  # fallback to white
+
+    def _find_perkey_setting(self):
+        """Find the per-key-lighting setting, or None."""
+        for s in self._device.settings:
+            if s.name == "per-key-lighting" and s._value is not None:
+                return s
+        return None
+
+    @staticmethod
+    def _has_perkey_zones(perkey_setting):
+        """Check if the per-key setting has a valid zone map from its validator."""
+        return (
+            hasattr(perkey_setting, "_validator")
+            and perkey_setting._validator is not None
+            and hasattr(perkey_setting._validator, "choices")
+            and len(perkey_setting._validator.choices) > 0
+        )
+
+    @staticmethod
+    def _has_real_perkey_colors(perkey_setting):
+        """Check if any per-key zones have actual colors (not just 'No change')."""
+        if not perkey_setting._value:
+            return False
+        no_change = special_keys.COLORSPLUS["No change"]
+        return any(color != no_change and isinstance(color, int) and color >= 0 for color in perkey_setting._value.values())
+
+    def _build_full_perkey_dim_map(self, perkey_setting, dim_pct):
+        """Build a dim map for ALL per-key zones (user-set and unset).
+
+        User-set keys dim from their set color. Unset keys dim from the zone
+        base color. Returns dict of {zone_id: (start_color, target_color)}.
+        """
+        no_change = special_keys.COLORSPLUS["No change"]
+        zone_base = self._get_zone_base_color()
+
+        # Build lookup of user-set colors
+        user_colors = {}
+        for key, color in perkey_setting._value.items():
+            if color != no_change and isinstance(color, int) and color >= 0:
+                user_colors[int(key)] = color
+
+        # Build dim map for ALL zones
+        perkey = {}
+        for key in perkey_setting._validator.choices:
+            zone_id = int(key)
+            start_color = user_colors.get(zone_id, zone_base)
+            target = self._compute_dim_color(start_color, dim_pct)
+            perkey[zone_id] = (start_color, target)
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "%s: per-key dim map: %d total zones (%d user-set, %d zone-base #%06x)",
+                self._device,
+                len(perkey),
+                len(user_colors),
+                len(perkey) - len(user_colors),
+                zone_base,
+            )
+        return perkey
+
+    def _init_unset_perkey_zones(self, perkey_setting):
+        """Push the zone base color to all per-key zones not explicitly set by the user.
+
+        This fixes the 'white default' problem: when per-key is activated, unset
+        zones default to white in the device's frame buffer. This method sets
+        them to the zone effect color instead, so the keyboard looks consistent.
+        """
+        no_change = special_keys.COLORSPLUS["No change"]
+        zone_base = self._get_zone_base_color()
+        r = (zone_base >> 16) & 0xFF
+        g = (zone_base >> 8) & 0xFF
+        b = zone_base & 0xFF
+
+        # Collect zone IDs that the user hasn't explicitly set
+        user_set = set()
+        for key, color in perkey_setting._value.items():
+            if color != no_change and isinstance(color, int) and color >= 0:
+                user_set.add(int(key))
+
+        unset_zones = [int(k) for k in perkey_setting._validator.choices if int(k) not in user_set]
+        if not unset_zones:
+            return
+
+        feat = _F.PER_KEY_LIGHTING_V2
+        remaining = list(unset_zones)
+        while remaining:
+            batch = remaining[:13]
+            remaining = remaining[13:]
+            data = bytes([r, g, b]) + bytes(batch)
+            self._device.feature_request(feat, 0x60, data)
+        self._device.feature_request(feat, 0x70, b"\x00\x00\x00\x00\x00")
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "%s: initialized %d unset per-key zones to base color #%06x",
+                self._device,
+                len(unset_zones),
+                zone_base,
+            )
+
     @staticmethod
     def _compute_dim_color(color, dim_pct):
         """Compute the dimmed color (dim_pct is target brightness percentage)."""
@@ -2566,16 +2749,37 @@ class RGBPowerManager:
                 _time.sleep(0.1)
 
     def _restore_colors(self):
-        """Re-push cached lighting state after waking."""
+        """Re-push cached lighting state after waking.
+
+        When per-key lighting is active, it completely masks zone effects.
+        Zone writes via 0x8071 are skipped to avoid a visible flash (the zone
+        write would briefly show the base color before per-key overwrites it).
+        PerKeyLighting.write() fills unset zones with the zone base color
+        before its FrameEnd, so the entire keyboard restores atomically.
+        """
+        perkey_setting = self._find_perkey_setting()
+        has_perkey = (
+            perkey_setting is not None
+            and self._has_perkey_zones(perkey_setting)
+            and self._has_real_perkey_colors(perkey_setting)
+        )
         for s in self._device.settings:
-            if (s.name == "per-key-lighting" or s.name.startswith("rgb_zone_")) and s._value is not None:
-                try:
-                    s.write(s._value, save=False)
-                    if logger.isEnabledFor(logging.DEBUG):
-                        logger.debug("%s: restored %s after wake", self._device, s.name)
-                except Exception as e:
-                    if logger.isEnabledFor(logging.WARNING):
-                        logger.warning("%s: failed to restore %s: %s", self._device, s.name, e)
+            if s._value is None:
+                continue
+            if s.name == "per-key-lighting":
+                pass  # always restore per-key
+            elif s.name.startswith("rgb_zone_"):
+                if has_perkey:
+                    continue  # skip zone writes — invisible and causes flash
+            else:
+                continue
+            try:
+                s.write(s._value, save=False)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("%s: restored %s after wake", self._device, s.name)
+            except Exception as e:
+                if logger.isEnabledFor(logging.WARNING):
+                    logger.warning("%s: failed to restore %s: %s", self._device, s.name, e)
 
 
 class RGBEffectSetting(LEDZoneSetting):
@@ -2609,6 +2813,55 @@ class PerKeyLighting(settings.Settings):
                     s.write(1)  # Triggers full claim sequence in RGBControl
                 return
 
+    def _fill_unset_zones_with_base_color(self):
+        """Set all unset per-key zones to the zone effect base color.
+
+        The per-key layer completely masks zone effects on devices like the G515.
+        When per-key is activated, unset zones default to white (0xFF,0xFF,0xFF)
+        in the device's frame buffer. This pushes the zone base color to all
+        zones not explicitly set by the user, so the keyboard looks consistent.
+
+        Called after writing per-key colors. Skips the FrameEnd — the caller's
+        FrameEnd commits both the user's colors and these base fills together.
+        """
+        if not self._has_rgb_effects:
+            return  # No zone effects, nothing to fill from
+        no_change = special_keys.COLORSPLUS["No change"]
+        # Get zone base color from rgb_zone_* settings
+        zone_base = 0xFFFFFF
+        for s in self._device.settings:
+            if s.name.startswith("rgb_zone_") and s._value is not None:
+                color = getattr(s._value, "color", None)
+                if color is not None:
+                    zone_base = color
+                    break
+        r = (zone_base >> 16) & 0xFF
+        g = (zone_base >> 8) & 0xFF
+        b = zone_base & 0xFF
+        # Collect unset zone IDs
+        user_set = set()
+        if self._value:
+            for key, color in self._value.items():
+                if color != no_change and isinstance(color, int) and color >= 0:
+                    user_set.add(int(key))
+        unset_zones = [int(k) for k in self._validator.choices if int(k) not in user_set]
+        if not unset_zones:
+            return
+        # Bulk write using SetRgbZonesSingleValue (function 6)
+        remaining = list(unset_zones)
+        while remaining:
+            batch = remaining[:13]
+            remaining = remaining[13:]
+            data = bytes([r, g, b]) + bytes(batch)
+            self._device.feature_request(self.feature, 0x60, data)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "%s: filled %d unset per-key zones with base color #%06x",
+                self._device,
+                len(unset_zones),
+                zone_base,
+            )
+
     def read(self, cached=True):
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -2634,7 +2887,6 @@ class PerKeyLighting(settings.Settings):
                     if value != special_keys.COLORSPLUS["No change"]:  # this signals no change, so don't update at all
                         data_bytes = keys[0].to_bytes(1, "big") + keys[-1].to_bytes(1, "big") + value.to_bytes(3, "big")
                         self._device.feature_request(self.feature, 0x50, data_bytes)  # range update command to update all keys
-                        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
             else:
                 data_bytes = b""
                 for value, keys in table.items():  # only one, of course
@@ -2650,18 +2902,42 @@ class PerKeyLighting(settings.Settings):
                                 data_bytes = b""
                 if len(data_bytes) > 0:  # update any remaining keys
                     self._device.feature_request(self.feature, 0x10, data_bytes)
-                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+            # Fill unset zones with zone base color before committing the frame,
+            # so the entire keyboard updates atomically (no white flash)
+            self._fill_unset_zones_with_base_color()
+            self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
         return map
 
     def write_key_value(self, key, value, save=True):
         self._ensure_sw_control()
-        if value != special_keys.COLORSPLUS["No change"]:  # this signals no change
+        no_change = special_keys.COLORSPLUS["No change"]
+        if value != no_change:
             result = super().write_key_value(int(key), value, save)
             if self._device.online:
+                # Fill unset zones on first per-key write (avoids white default)
+                if not getattr(self, "_base_filled", False):
+                    self._fill_unset_zones_with_base_color()
+                    self._base_filled = True
                 self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
             return result
         else:
-            return True
+            # Un-set this key: store "No change", push zone base color to device
+            self.update_key_value(int(key), no_change, save)
+            if self._device.online:
+                zone_base = 0xFFFFFF
+                for s in self._device.settings:
+                    if s.name.startswith("rgb_zone_") and s._value is not None:
+                        color = getattr(s._value, "color", None)
+                        if color is not None:
+                            zone_base = color
+                            break
+                r = (zone_base >> 16) & 0xFF
+                g = (zone_base >> 8) & 0xFF
+                b = zone_base & 0xFF
+                zone_id = int(key)
+                self._device.feature_request(self.feature, 0x10, bytes([zone_id, r, g, b]))
+                self._device.feature_request(self.feature, 0x70, 0x00)
+            return no_change
 
     class rw_class(settings.FeatureRWMap):
         pass
