@@ -1686,6 +1686,57 @@ class RGBControl(settings.Setting):
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
 
+    def write(self, value, save=True):
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        assert value is not None
+        device = self._device
+        if not device.online:
+            return None
+        if self._value != value:
+            self.update(value, save)
+        claiming = int(value) == 1  # Solaar
+        if claiming:
+            self._claim_sw_control(device)
+        else:
+            self._release_sw_control(device)
+        return value
+
+    def _claim_sw_control(self, device):
+        # Disable firmware power management via profile management or onboard profiles
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x05")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
+        # Claim LED pipeline: SetSWControl(mode=3, flags=5)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
+        # Register cleanup for graceful release on device close
+        if _rgb_cleanup not in device.cleanups:
+            device.cleanups.append(_rgb_cleanup)
+
+    def _release_sw_control(self, device):
+        # Release LED pipeline: SetSWControl(mode=0, flags=0)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        # Restore firmware power management
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
+        if _rgb_cleanup in device.cleanups:
+            device.cleanups.remove(_rgb_cleanup)
+
+
+def _rgb_cleanup(device):
+    """Cleanup handler called when device is closed — restores firmware control."""
+    try:
+        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
+    except Exception:
+        pass  # Device may already be offline
+
 
 class RGBEffectSetting(LEDZoneSetting):
     name = "rgb_zone_"  # the trailing underscore signals that this setting creates other settings
@@ -1706,6 +1757,18 @@ class PerKeyLighting(settings.Settings):
     keys_universe = special_keys.KEYCODES
     choices_universe = special_keys.COLORSPLUS
 
+    def _ensure_sw_control(self):
+        """Ensure SW control is claimed before writing per-key colors."""
+        if getattr(self, "_has_rgb_effects", None) is None:
+            self._has_rgb_effects = bool(self._device.features and _F.RGB_EFFECTS in self._device.features)
+        if not self._has_rgb_effects:
+            return  # No autonomous effect engine, no claim needed
+        for s in self._device.settings:
+            if s.name == "rgb_control":
+                if s._value != 1:  # Not already claimed by Solaar
+                    s.write(1)  # Triggers full claim sequence in RGBControl
+                return
+
     def read(self, cached=True):
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -1718,6 +1781,7 @@ class PerKeyLighting(settings.Settings):
 
     def write(self, map, save=True):
         if self._device.online:
+            self._ensure_sw_control()
             self.update(map, save)
             table = {}
             for key, value in map.items():
@@ -1750,6 +1814,7 @@ class PerKeyLighting(settings.Settings):
         return map
 
     def write_key_value(self, key, value, save=True):
+        self._ensure_sw_control()
         if value != special_keys.COLORSPLUS["No change"]:  # this signals no change
             result = super().write_key_value(int(key), value, save)
             if self._device.online:

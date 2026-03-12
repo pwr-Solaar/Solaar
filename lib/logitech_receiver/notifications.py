@@ -419,6 +419,10 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     brightness = struct.unpack("!H", device.feature_request(SupportedFeature.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
 
+    elif feature == SupportedFeature.RGB_EFFECTS:
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB_EFFECTS notification addr=%02x: %s", device, notification.address, notification)
+
     diversion.process_notification(device, notification, feature)
     return True
 
