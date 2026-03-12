@@ -122,7 +122,9 @@ def run_loop(
 
 
 def _status_changed(device, alert, reason, refresh=False):
-    assert device is not None
+    if device is None:
+        logger.debug("status changed on nil device: %s (%s) %s", device, alert, reason)
+        return
     logger.debug("status changed: %s (%s) %s", device, alert, reason)
     if alert is None:
         alert = Alert.NONE
