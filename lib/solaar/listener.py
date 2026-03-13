@@ -248,7 +248,9 @@ def _process_bluez_dbus(device: Device, path, dictionary: dict, signature):
 
 def _cleanup_bluez_dbus(device: Device):
     """Remove dbus signal receiver for device"""
-    logger.info("bluez cleanup for %s", device)
+    diversion_remove_inheritance
+    if device and logger.isEnabledFor(logging.INFO):
+        logger.info(f"bluez cleanup for {device}")
     dbus.watch_bluez_connect(device.hid_serial, None)
 
 
