@@ -16,8 +16,8 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from __future__ import annotations
 
-from enum import Flag
 from enum import IntEnum
+from enum import IntFlag
 from typing import List
 
 from .common import NamedInts
@@ -68,7 +68,7 @@ class PowerSwitchLocation(IntEnum):
             return cls.UNKNOWN
 
 
-class NotificationFlag(Flag):
+class NotificationFlag(IntFlag):
     """Some flags are used both by devices and receivers.
 
     The Logitech documentation mentions that the first and last (third)
@@ -207,7 +207,7 @@ class InfoSubRegisters(IntEnum):
     BOLT_DEVICE_NAME = 0x60  # 0x6N01, by connected device
 
 
-class DeviceFeature(Flag):
+class DeviceFeature(IntFlag):
     """Features for devices.
 
     Flags taken from
