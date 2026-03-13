@@ -64,6 +64,15 @@ def _startup(app, startup_hook, use_tray, show_window):
     window.init(show_window, use_tray)
     startup_hook()
 
+    # Setup DBus service for external window tracking after app is registered
+    try:
+        from solaar import dbus as solaar_dbus
+
+        connection = app.get_dbus_connection()
+        solaar_dbus.setup_solaar_dbus_service(connection)
+    except Exception as e:
+        logger.warning("failed to setup DBus service for window tracking: %s", e)
+
 
 def _activate(app):
     logger.debug("activate")
