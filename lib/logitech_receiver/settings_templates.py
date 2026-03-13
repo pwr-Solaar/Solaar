@@ -1905,7 +1905,7 @@ class RGBControl(settings.Setting):
         elif device.features and _F.ONBOARD_PROFILES in device.features:
             device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
         # Claim LED pipeline: SetSWControl(mode=3, flags=5)
-        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
+        device.feature_request(_F.RGB_EFFECTS, 0x50, _RGB_SW_ACTIVE)
         # Start software power management
         _rgb_power_manager_start(device)
         # Register cleanup for graceful release on device close
@@ -1916,7 +1916,7 @@ class RGBControl(settings.Setting):
         # Stop software power management
         _rgb_power_manager_stop(device)
         # Release LED pipeline: SetSWControl(mode=0, flags=0)
-        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        device.feature_request(_F.RGB_EFFECTS, 0x50, _RGB_SW_RELEASE)
         # Restore firmware power management
         if device.features and _F.PROFILE_MANAGEMENT in device.features:
             device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
@@ -2054,7 +2054,7 @@ def _rgb_cleanup(device):
     """Cleanup handler called when device is closed — restores firmware control."""
     _rgb_power_manager_stop(device)
     try:
-        device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x00\x00")
+        device.feature_request(_F.RGB_EFFECTS, 0x50, _RGB_SW_RELEASE)
         if device.features and _F.PROFILE_MANAGEMENT in device.features:
             device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
         elif device.features and _F.ONBOARD_PROFILES in device.features:
@@ -2064,6 +2064,16 @@ def _rgb_cleanup(device):
 
 
 # --- RGB Software Power Management ---
+
+# SetSWControl flag bits for RGB_EFFECTS (0x8071)
+_RGB_FLAG_ZONE = 0x01  # SW controls zone/color assignment
+_RGB_FLAG_POWER = 0x02  # SW controls power state — firmware monitors for activity
+_RGB_FLAG_EFFECT = 0x04  # SW controls effect playback — firmware monitors for idle
+
+# SetSWControl payloads: cluster=1, mode=3, flags
+_RGB_SW_ACTIVE = bytes([0x01, 0x03, _RGB_FLAG_ZONE | _RGB_FLAG_EFFECT])  # flags=5: idle detection
+_RGB_SW_IDLE = bytes([0x01, 0x03, _RGB_FLAG_ZONE | _RGB_FLAG_POWER])  # flags=3: activity detection
+_RGB_SW_RELEASE = bytes([0x01, 0x00, 0x00])  # release all control
 
 _rgb_power_managers = {}  # keyed by id(device)
 
@@ -2208,6 +2218,11 @@ class RGBPowerManager:
                 return  # Already idle/dimming/sleeping, ignore burst
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: firmware IDLE event — starting idle sequence", self._device)
+            # Switch to flags=3 so firmware monitors for activity during dim/idle
+            try:
+                self._device.feature_request(_F.RGB_EFFECTS, 0x50, _RGB_SW_IDLE)
+            except Exception:
+                pass
             # Start idle effect (dim/animation) if enabled
             idle_enabled = self._idle_effect != 0 and self._idle_timeout > 0
             if idle_enabled:
@@ -2394,11 +2409,6 @@ class RGBPowerManager:
                 if logger.isEnabledFor(logging.WARNING):
                     logger.warning("%s: dim ramp step failed for per-key: %s", self._device, e)
         if self._dim_step >= self._DIM_STEPS:
-            # Dim complete — release effect control to firmware to hold the dim level
-            try:
-                self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x03")
-            except Exception:
-                pass
             self._state = self.IDLE
             self._dim_timer_id = None
             if logger.isEnabledFor(logging.DEBUG):
@@ -2490,11 +2500,6 @@ class RGBPowerManager:
                         zone.index,
                         exc,
                     )
-        # Release to firmware for animation playback
-        try:
-            self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x03")
-        except Exception:
-            pass
         self._state = self.IDLE
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: applied animation idle effect 0x%02x", self._device, effect_id)
@@ -2530,7 +2535,7 @@ class RGBPowerManager:
             if prev_state == self.SLEEPING:
                 self._set_power_mode_with_retry(1)
             # Re-claim full LED pipeline control
-            self._device.feature_request(_F.RGB_EFFECTS, 0x50, b"\x01\x03\x05")
+            self._device.feature_request(_F.RGB_EFFECTS, 0x50, _RGB_SW_ACTIVE)
             self._restore_colors()
             self._state = self.ACTIVE
             if logger.isEnabledFor(logging.DEBUG):
