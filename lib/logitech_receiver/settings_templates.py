@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import enum
 import logging
-import os
 import socket
 import struct
 import traceback
@@ -2068,7 +2067,12 @@ def _rgb_cleanup(device):
 
 _rgb_power_managers = {}  # keyed by id(device)
 
-_RGB_CHECK_INTERVAL = 5  # seconds between idle checks
+
+def _rgb_on_user_activity(device, activity_type):
+    """Dispatch firmware onUserActivity events to the power manager."""
+    mgr = _rgb_power_managers.get(id(device))
+    if mgr:
+        mgr.on_user_activity(activity_type)
 
 
 def _rgb_power_manager_start(device):
@@ -2099,60 +2103,16 @@ def _rgb_power_manager_stop(device):
         mgr.stop()
 
 
-def _find_hidraw_activity_node(hidpp_path, keyboard=True):
-    """Find the keyboard (or mouse) HID hidraw node sibling of a HID++ hidraw device.
-
-    Logitech receivers/devices expose three USB interfaces:
-      Interface 0: Mouse HID reports    (protocol 2, boot mouse)
-      Interface 1: Keyboard HID reports (protocol 1, boot keyboard)
-      Interface 2: HID++ / vendor       (protocol 0)
-
-    The hidraw for interface 1 (or 0) receives raw HID reports that are NOT affected
-    by EVIOCGRAB on the evdev device, making it a reliable activity signal even when
-    a game has exclusive input access.
-    """
-    import pyudev
-
-    # USB HID boot interface protocol: 1=keyboard, 2=mouse
-    target_protocol = 1 if keyboard else 2
-    context = pyudev.Context()
-    try:
-        hidpp_dev = pyudev.Devices.from_device_file(context, hidpp_path)
-        usb_dev = hidpp_dev.find_parent("usb", "usb_device")
-        if not usb_dev:
-            return None
-    except Exception:
-        return None
-    usb_dev_path = usb_dev.sys_path
-    for dev in context.list_devices(subsystem="hidraw"):
-        if dev.device_node == hidpp_path:
-            continue  # Skip the HID++ node itself
-        # Check this hidraw belongs to the same USB device
-        dev_usb = dev.find_parent("usb", "usb_device")
-        if not dev_usb or dev_usb.sys_path != usb_dev_path:
-            continue
-        # Check the USB interface protocol (e.g. "3/1/1" = HID boot keyboard, "3/1/2" = HID boot mouse)
-        usb_iface = dev.find_parent("usb", "usb_interface")
-        if not usb_iface:
-            continue
-        iface_desc = usb_iface.get("INTERFACE", "")
-        parts = iface_desc.split("/")
-        try:
-            if len(parts) == 3 and int(parts[2]) == target_protocol:
-                return dev.device_node
-        except ValueError:
-            continue
-    return None
-
-
 class RGBPowerManager:
-    """Manages LED idle/sleep states in software when firmware power management is disabled.
+    """Manages LED idle/sleep states using firmware onUserActivity events from RGB_EFFECTS (0x8071).
+
+    The firmware handles idle detection via SetSWControl flags:
+      - flags=5 (ZONE|EFFECT): firmware monitors for inactivity, sends IDLE event at idle_timeout
+      - flags=3 (ZONE|POWER): firmware monitors for activity, sends ACTIVE event on keypress
 
     Two-stage idle behavior matching LGHUB:
-      Stage 1 — Idle Effect: Smooth dim ramp or firmware animation after idle timeout.
-      Stage 2 — Sleep: Firmware fade-to-off after sleep timeout.
-
-    Activity on hidraw instantly restores full lighting from any stage.
+      Stage 1 — Idle Effect: Smooth dim ramp or firmware animation (triggered by firmware IDLE event).
+      Stage 2 — Sleep: Firmware fade-to-off (software timer: sleep_timeout - idle_timeout after IDLE).
 
     State machine: ACTIVE → DIMMING → IDLE → SLEEPING
     """
@@ -2167,38 +2127,32 @@ class RGBPowerManager:
 
     def __init__(self, device):
         self._device = device
-        self._last_activity = time()
         self._state = self.ACTIVE
-        self._was_online = True
         # Settings (overridden from persisted values via _rgb_power_manager_start)
-        self._idle_timeout = 60  # seconds before idle effect
-        self._sleep_timeout = 300  # seconds before sleep (0=disabled)
+        self._idle_timeout = 60  # seconds — firmware idle detection threshold
+        self._sleep_timeout = 300  # seconds — total time before sleep (0=disabled)
         self._idle_effect = 50  # 0=disabled, 25/50/75=dim%, 0x0A/0x0B=animation
         # Timers
-        self._timer_id = None  # idle check timer
+        self._sleep_timer_id = None  # software sleep timer (fires sleep_timeout - idle_timeout after IDLE)
         self._dim_timer_id = None  # dim ramp animation timer
         self._dim_step = 0
         self._dim_zones = []  # list of (zone, start_color, target_color)
         self._dim_perkey = None  # dict of {zone_id: (start_color, target_color)} or None
-        # Activity monitoring
-        self._hidraw_fd = None
-        self._hidraw_watch_id = None
 
     def start(self):
-        self._last_activity = time()
         self._state = self.ACTIVE
-        self._was_online = True
-        self._timer_id = GLib.timeout_add_seconds(_RGB_CHECK_INTERVAL, self._check_idle)
-        self._start_hidraw_monitor()
+        self._read_firmware_timers()
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s: RGB power manager started", self._device)
+            logger.debug(
+                "%s: RGB power manager started (firmware idle=%ds, sleep=%ds)",
+                self._device,
+                self._idle_timeout,
+                self._sleep_timeout,
+            )
 
     def stop(self):
         self._cancel_dim_timer()
-        self._stop_hidraw_monitor()
-        if self._timer_id is not None:
-            GLib.source_remove(self._timer_id)
-            self._timer_id = None
+        self._cancel_sleep_timer()
         if self._state != self.ACTIVE:
             try:
                 self._wake()
@@ -2208,16 +2162,19 @@ class RGBPowerManager:
             logger.debug("%s: RGB power manager stopped", self._device)
 
     def set_idle_timeout(self, seconds):
-        """Update the idle timeout for the idle effect stage."""
+        """Update the idle timeout — also writes to firmware so it fires IDLE at the right time."""
         self._idle_timeout = seconds
+        self._cancel_sleep_timer()
         if seconds == 0 and self._state in (self.DIMMING, self.IDLE):
             self._wake()
+        self._write_firmware_idle_timeout(seconds)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: RGB idle timeout set to %ss", self._device, seconds)
 
     def set_sleep_timeout(self, seconds):
         """Update the sleep timeout (stage 2). 0 disables sleep."""
         self._sleep_timeout = seconds
+        self._cancel_sleep_timer()
         if seconds == 0 and self._state == self.SLEEPING:
             self._wake()
         if logger.isEnabledFor(logging.DEBUG):
@@ -2231,111 +2188,102 @@ class RGBPowerManager:
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: RGB idle effect set to %s", self._device, effect)
 
-    # --- Activity monitoring ---
+    # --- Firmware activity events ---
 
-    def _start_hidraw_monitor(self):
-        """Monitor the keyboard HID hidraw node for activity (immune to EVIOCGRAB)."""
-        hidpp_path = getattr(self._device, "path", None)
-        if not hidpp_path and hasattr(self._device, "receiver") and self._device.receiver:
-            hidpp_path = self._device.receiver.path
-        if not hidpp_path:
-            return
-        is_keyboard = str(getattr(self._device, "kind", "")) == "keyboard"
-        hidraw_node = _find_hidraw_activity_node(hidpp_path, keyboard=is_keyboard)
-        if not hidraw_node:
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("%s: no hidraw activity node found, hidraw activity monitoring unavailable", self._device)
-            return
-        try:
-            self._hidraw_fd = os.open(hidraw_node, os.O_RDONLY | os.O_NONBLOCK)
-            self._hidraw_watch_id = GLib.io_add_watch(self._hidraw_fd, GLib.IO_IN, self._on_activity)
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: monitoring hidraw %s for activity (grab-immune)", self._device, hidraw_node)
-        except OSError as e:
-            if logger.isEnabledFor(logging.WARNING):
-                logger.warning("%s: cannot open %s for hidraw monitoring: %s", self._device, hidraw_node, e)
-            self._hidraw_fd = None
+    def on_user_activity(self, activity_type):
+        """Handle firmware onUserActivity event from RGB_EFFECTS (0x8071).
 
-    def _stop_hidraw_monitor(self):
-        if self._hidraw_watch_id is not None:
-            GLib.source_remove(self._hidraw_watch_id)
-            self._hidraw_watch_id = None
-        if self._hidraw_fd is not None:
-            os.close(self._hidraw_fd)
-            self._hidraw_fd = None
+        activity_type=0: IDLE — user stopped typing, firmware idle timer expired.
+        activity_type!=0: ACTIVE — user resumed typing after being idle.
 
-    def _restart_hidraw_monitor(self):
-        """Restart hidraw watch after a device comes back online."""
-        self._stop_hidraw_monitor()
-        self._start_hidraw_monitor()
-
-    def _on_activity(self, fd, condition):
-        """GLib callback when HID reports arrive on hidraw — reset idle timer."""
-        try:
-            os.read(fd, 4096)
-        except BlockingIOError:
-            return True  # No data ready (EAGAIN) — normal for non-blocking fd
-        except OSError:
-            # Device gone (EIO/ENODEV) — stop this watch, cleanup will handle the rest
-            return False
-        self._last_activity = time()
-        if self._state != self.ACTIVE:
-            self._wake()
-        return True  # Keep the watch active
-
-    # --- State machine ---
-
-    def _check_idle(self):
-        """Periodic check — manage idle/sleep transitions."""
+        The firmware sends a burst of ~8 events with exponential backoff.
+        Only the first event matters; subsequent events for the same transition are ignored.
+        """
         if not self._device.online:
-            self._was_online = False
-            return True  # Stay dormant while device is offline
-        if not self._was_online:
-            # Device just came back online — reset state
-            self._was_online = True
-            self._last_activity = time()
-            self._cancel_dim_timer()
-            self._state = self.ACTIVE
-            self._restart_hidraw_monitor()
+            return
+
+        if activity_type == 0:
+            # IDLE event — firmware detected inactivity at idle_timeout
+            if self._state != self.ACTIVE:
+                return  # Already idle/dimming/sleeping, ignore burst
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: RGB power manager resumed after device came back online", self._device)
-            return True
-
-        idle_enabled = self._idle_effect != 0 and self._idle_timeout > 0
-        sleep_enabled = self._sleep_timeout > 0
-        if not idle_enabled and not sleep_enabled:
-            return True  # Nothing to do
-
-        idle_secs = time() - self._last_activity
-
-        if self._state == self.ACTIVE:
-            idle_trigger = self._idle_timeout if idle_enabled else float("inf")
-            sleep_trigger = max(self._sleep_timeout - 30, 0) if sleep_enabled else float("inf")
-            # Whichever fires first wins; ties go to idle
-            if idle_trigger <= sleep_trigger and idle_secs >= idle_trigger:
+                logger.debug("%s: firmware IDLE event — starting idle sequence", self._device)
+            # Start idle effect (dim/animation) if enabled
+            idle_enabled = self._idle_effect != 0 and self._idle_timeout > 0
+            if idle_enabled:
                 self._start_idle_effect()
-            elif sleep_trigger < float("inf") and idle_secs >= sleep_trigger:
-                self._start_sleep()
-        elif self._state == self.IDLE:
-            if sleep_enabled and idle_secs >= max(self._sleep_timeout - 30, 0):
-                self._start_sleep()
-        # DIMMING: dim timer handles progression
-        # SLEEPING: waiting for activity
+            else:
+                self._state = self.IDLE
+            # Schedule software sleep timer
+            sleep_enabled = self._sleep_timeout > 0
+            if sleep_enabled:
+                delay = max(self._sleep_timeout - self._idle_timeout, 0)
+                if delay == 0:
+                    self._start_sleep()
+                else:
+                    self._sleep_timer_id = GLib.timeout_add_seconds(delay, self._sleep_timer_fired)
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s: sleep timer scheduled in %ds", self._device, delay)
+        else:
+            # ACTIVE event — user resumed typing
+            if self._state == self.ACTIVE:
+                return  # Already active, ignore burst
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: firmware ACTIVE event — waking", self._device)
+            self._cancel_sleep_timer()
+            self._wake()
 
-        if logger.isEnabledFor(logging.DEBUG):
-            state_names = {self.ACTIVE: "ACTIVE", self.DIMMING: "DIMMING", self.IDLE: "IDLE", self.SLEEPING: "SLEEPING"}
-            idle_at = self._idle_timeout if idle_enabled else None
-            sleep_at = max(self._sleep_timeout - 30, 0) if sleep_enabled else None
-            logger.debug(
-                "%s: RGB _check_idle: idle=%.0fs, state=%s, effect=%s, idle_trigger=%s, sleep_trigger=%s",
-                self._device,
-                idle_secs,
-                state_names.get(self._state, "?"),
-                self._idle_effect,
-                f"{idle_at}s" if idle_at is not None else "off",
-                f"{sleep_at}s" if sleep_at is not None else "off",
-            )
-        return True  # Keep timer running
+    def _sleep_timer_fired(self):
+        """GLib callback — software sleep timer expired after IDLE."""
+        self._sleep_timer_id = None
+        if self._state in (self.IDLE, self.DIMMING) and self._device.online:
+            self._start_sleep()
+        return False  # One-shot timer
+
+    def _cancel_sleep_timer(self):
+        if self._sleep_timer_id is not None:
+            GLib.source_remove(self._sleep_timer_id)
+            self._sleep_timer_id = None
+
+    def _read_firmware_timers(self):
+        """Read idle/sleep timeouts from firmware via GetRgbPowerModeConfig.
+
+        These serve as defaults; persisted user settings may override them.
+        """
+        try:
+            # GetRgbPowerModeConfig: function 7, sub-function 0x00 (get)
+            resp = self._device.feature_request(_F.RGB_EFFECTS, 0x70, b"\x00")
+            if resp and len(resp) >= 5:
+                # Response: [0]=echo(0x00), [1:3]=idle_timeout_s, [3:5]=sleep_timeout_s
+                idle_s = (resp[1] << 8) | resp[2]
+                sleep_s = (resp[3] << 8) | resp[4]
+                if idle_s > 0:
+                    self._idle_timeout = idle_s
+                if sleep_s > 0:
+                    self._sleep_timeout = sleep_s
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "%s: firmware timers: idle=%ds, sleep=%ds",
+                        self._device,
+                        idle_s,
+                        sleep_s,
+                    )
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: could not read firmware timers, using defaults: %s", self._device, e)
+
+    def _write_firmware_idle_timeout(self, seconds):
+        """Write idle timeout to firmware so it fires IDLE events at the right time."""
+        try:
+            idle_hi = (seconds >> 8) & 0xFF
+            idle_lo = seconds & 0xFF
+            sleep_hi = (self._sleep_timeout >> 8) & 0xFF
+            sleep_lo = self._sleep_timeout & 0xFF
+            # SetRgbPowerModeConfig: function 7, sub-function 0x01 (set)
+            self._device.feature_request(_F.RGB_EFFECTS, 0x70, bytes([0x01, idle_hi, idle_lo, sleep_hi, sleep_lo]))
+        except Exception as e:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("%s: could not write firmware idle timeout: %s", self._device, e)
 
     # --- Idle effect ---
 
@@ -2577,6 +2525,7 @@ class RGBPowerManager:
             return
         prev_state = self._state
         self._cancel_dim_timer()
+        self._cancel_sleep_timer()
         try:
             if prev_state == self.SLEEPING:
                 self._set_power_mode_with_retry(1)

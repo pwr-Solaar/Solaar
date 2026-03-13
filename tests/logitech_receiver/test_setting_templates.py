@@ -294,6 +294,7 @@ simple_tests = [
         FeatureTest(settings_templates.RGBControl, 0, 1),
         fake_hidpp.Response("0000", 0x0450),
         fake_hidpp.Response("010305", 0x0450, "010305"),
+        fake_hidpp.Response("00003C012C", 0x0470, "00"),  # GetRgbPowerModeConfig: idle=60s, sleep=300s
     ),
     Setup(  # RGBIdleEffect — software-only, no feature requests for read/write
         FeatureTest(settings_templates.RGBIdleEffect, 50, 75, 0),
