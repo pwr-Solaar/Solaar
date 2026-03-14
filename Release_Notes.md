@@ -1,5 +1,10 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.20
+
+* Solaar now supports the Centurion protocol, a variation of the HIDP++ protocol that is used by several headsets
+* Solaar now uses uinput for all simulated input, even in X11.  As a result there is no need for a separate udev rule for Wayland, and it may be removed in future.
+
 ## Version 1.1.18
 
 * Solaar is only guaranteed to work in Python 3.13 or later.
