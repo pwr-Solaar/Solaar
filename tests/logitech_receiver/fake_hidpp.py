@@ -386,6 +386,7 @@ class Device:
     version: Optional[int] = 0
     wpid: Optional[str] = "0000"
     setting_callback: Any = None
+    centurion: bool = False
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
     number = "d1"
@@ -400,6 +401,7 @@ class Device:
     gestures = device.Device.gestures
     __hash__ = device.Device.__hash__
     feature_request = device.Device.feature_request
+    _infer_kind_centurion = device.Device._infer_kind_centurion
 
     def __post_init__(self):
         self._name = self.name
@@ -424,6 +426,9 @@ class Device:
         if self.setting_callback is None:
             self.setting_callback = lambda x, y, z: None
         self.add_notification_handler = lambda x, y: None
+        # Centurion bridge responses: keyed by (sub_feat_idx, sub_function) -> response bytes
+        if not hasattr(self, "_bridge_responses"):
+            self._bridge_responses = {}
 
     def request(self, id, *params, no_reply=False, long_message=False, protocol=2.0):
         params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
@@ -433,6 +438,24 @@ class Device:
                 print("RESPONSE", self._name, hex(r.id), r.params, r.response)
                 return bytes.fromhex(r.response) if isinstance(r.response, str) else r.response
         print("RESPONSE", self._name, None)
+
+    def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
+        """Fake bridge request — looks up (sub_feat_idx, sub_function, params) in _bridge_responses."""
+        params_bytes = b"".join(pack("B", p) if isinstance(p, int) else p for p in params) if params else b""
+        key = (sub_feat_idx, sub_function, params_bytes.hex().upper())
+        print("BRIDGE  ", self._name, f"sub_idx={sub_feat_idx} func={sub_function} params={params_bytes.hex().upper()}")
+        result = self._bridge_responses.get(key)
+        if result is not None:
+            print("BRIDGE_R", self._name, result.hex().upper())
+            return result
+        # Try without params for convenience
+        key_no_params = (sub_feat_idx, sub_function, "")
+        result = self._bridge_responses.get(key_no_params)
+        if result is not None:
+            print("BRIDGE_R", self._name, result.hex().upper())
+            return result
+        print("BRIDGE_R", self._name, None)
+        return None
 
     def ping(self, handle=None, devnumber=None, long_message=False):
         print("PING", self._protocol)
@@ -449,6 +472,25 @@ class Device:
 
     def status_string(self):
         pass
+
+
+# Centurion headset (PRO X 2 LIGHTSPEED) parent device responses.
+# Parent has 5 features: ROOT(0), FeatureSet(1), DeviceInfo(2), CentPPBridge(3), GenericDFU(4)
+# Feature 0x0003 on Centurion = CentPPBridge (NOT FirmwareInfo).
+r_centurion_headset = [
+    Response(2.6, 0x0010),  # ping (protocol 2.6)
+    Response("010001", 0x0000, "0001"),  # FeatureSet at index 1
+    Response("020001", 0x0000, "0100"),  # DeviceInfo at index 2
+    Response("030001", 0x0000, "0003"),  # CentPPBridge at index 3
+    Response("040001", 0x0000, "010A"),  # GenericDFU at index 4
+    Response("05", 0x0100),  # feature count = 5 (includes ROOT on Centurion)
+    # FeatureSet.getFeatureID responses: [remaining_count, feat_hi, feat_lo, type, flags]
+    Response("0400000000", 0x0110, "00"),  # index 0: ROOT (0x0000)
+    Response("0300010001", 0x0110, "01"),  # index 1: FeatureSet (0x0001)
+    Response("0201000001", 0x0110, "02"),  # index 2: DeviceInfo (0x0100)
+    Response("0100030001", 0x0110, "03"),  # index 3: CentPPBridge (0x0003)
+    Response("00010A0001", 0x0110, "04"),  # index 4: GenericDFU (0x010A)
+]
 
 
 def match_requests(number, responses, call_args_list):

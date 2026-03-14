@@ -27,6 +27,7 @@ from solaar.i18n import _
 from . import common
 from . import hidpp20_constants
 from . import settings_validator
+from .centurion_constants import CenturionCoreFeature
 from .common import NamedInt
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class Kind(IntEnum):
     MAP_CHOICE = 0x0A
     MULTIPLE_TOGGLE = 0x10
     PACKED_RANGE = 0x20
+    GRAPHIC_EQ = 0x21
     MULTIPLE_RANGE = 0x40
     HETERO = 0x80
     MAP_RANGE = 0x102
@@ -627,7 +629,7 @@ class FeatureRW:
         read_prefix=b"",
         no_reply=False,
     ):
-        assert isinstance(feature, hidpp20_constants.SupportedFeature)
+        assert isinstance(feature, (hidpp20_constants.SupportedFeature, CenturionCoreFeature))
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
@@ -664,7 +666,7 @@ class FeatureRWMap(FeatureRW):
         key_byte_count=default_key_byte_count,
         no_reply=False,
     ):
-        assert isinstance(feature, hidpp20_constants.SupportedFeature)
+        assert isinstance(feature, (hidpp20_constants.SupportedFeature, CenturionCoreFeature))
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
