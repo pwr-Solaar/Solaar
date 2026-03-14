@@ -188,6 +188,42 @@ Solaar uses the standard US keyboard layout.  This currently only matters for th
 This is an experimental feature and may be modified or even eliminated.
 
 
+### HITS Tuning (Hall-Effect Inductive Trigger Switch)
+
+Some gaming mice (such as the PRO X 2 Superstrike) feature hall-effect magnetic switches on their primary buttons instead of traditional mechanical switches. These switches expose tunable parameters via the `SUPERSTRIKE_TUNING` HID++ feature (`0x1B0C`).
+
+Solaar supports three per-button settings for each primary button (left = 0, right = 1):
+
+- **Actuation Point** (`superstrike-tuning_actuation-{0,1}`): How deep the button must be pressed to register a click. Range 1–10, where 1 is the shallowest (hair trigger) and 10 is the deepest (full press). Default is 5.
+- **Rapid Trigger Level** (`superstrike-tuning_rapid-trigger-level-{0,1}`): Sensitivity of rapid re-actuation after partial release. Range 1–5, where 1 is the most sensitive and 5 is the least. This cannot be fully disabled.
+- **Click Haptics** (`superstrike-tuning_haptics-{0,1}`): Intensity of haptic feedback on click. Range 0–5, where 0 disables haptics and 5 is maximum intensity.
+
+These settings are written directly to the device and persist across reconnections regardless of the onboard profile state.
+
+### Extended DPI
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_DPI` feature (`0x2202`) which allows independent X and Y axis DPI configuration as well as lift-off distance (LOD) control. This is exposed via the `dpi_extended` setting:
+
+```bash
+solaar config <device> dpi_extended "{X:1600, Y:1600, LOD:HIGH}"
+```
+
+LOD values are `LOW` and `HIGH`. DPI range depends on the device sensor (up to 32000 DPI on the PRO X 2 Superstrike).
+
+### Extended Report Rate
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_REPORT_RATE` feature (`0x8061`) which enables sub-millisecond polling rates beyond the standard 1 ms (1000 Hz). This is exposed via the `report_rate_extended` setting:
+
+| Value   | Polling Rate |
+|---------|-------------|
+| `8ms`   | 125 Hz      |
+| `4ms`   | 250 Hz      |
+| `2ms`   | 500 Hz      |
+| `1ms`   | 1000 Hz     |
+| `500us` | 2000 Hz     |
+| `250us` | 4000 Hz     |
+| `125us` | 8000 Hz     |
+
 ### Onboard Profiles
 
 Some mice store one or more profiles onboard.  An onboard profile controls certain aspects of the behavior of the mouse, including the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, LED effects, and maybe more.  Solaar has a setting that switches between profiles or disables all profiles.
