@@ -1,3 +1,32 @@
+# 1.1.20rc1
+
+* Treat empty hidraw read as device removal (EOF) (#3174)
+* fix interface for K845
+* support PRO X 2 LIGHTSPEED headphones Centurion features (#3150)
+* Fix crash in NotificationFlag.flag_names when flags is None (#3185)
+* Add PRO X 2 Superstrike mouse support with HITS tuning settings (#3132)
+* Add names for some HID++ 2.0 features and sort by ID (#3153)
+* Don't use Logitech for codename
+* Put lock around getting device name
+* Fix bug when showing device notification flags
+* Be defensive about no device features
+* Add feature x1b04 flag sent by M510 4004
+* Remove incorrect descriptor for WPID 4004
+* Better handling of missing devices
+* Improve RHEL installation guide and add automated install example (#3162)
+* Remove use of XTest and use uinput in all cases
+* Add installation guide for Solaar on RHEL 10 (#3158)
+* Use console_scripts entry point for pipx compatibility
+* Skip Logitech webcams to prevent them from locking up during HID++ checks on Macs
+* Downgrade ping no such device to informational log entry
+* Recover from guessing the wrong number for direct-connected HID++ 1.0 devices
+* Tolerate devices with no unitId
+* Correctly handle timeout in Bolt discovery
+* Update or add fr, pt_BR, sk, Ukrainian, Finnish, Bulgarian translations
+* Handle missing receiver_path more gracefully
+* Handle inaccessiable devices when determining protocol
+* Be defensive when showing features in solaar show
+
 # 1.1.19
 
 * New Georgian translation
