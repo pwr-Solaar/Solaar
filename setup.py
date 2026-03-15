@@ -92,6 +92,7 @@ setup(
     entry_points={
         "console_scripts": [
             "solaar = solaar.gtk:main",
+            "solaar-game-profile-detector = solaar.game_profile_detector:main",
         ],
     },
 )
