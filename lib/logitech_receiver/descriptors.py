@@ -447,6 +447,7 @@ _D(
 
 _D("G533 Gaming Headset", codename="G533 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0A66)
 _D("G535 Gaming Headset", codename="G535 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0AC4)
+_D("G933 Gaming Headset", codename="G933 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0A5B)
 _D("G935 Gaming Headset", codename="G935 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0A87)
 _D("G733 Gaming Headset", codename="G733 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0AB5)
 _D(
