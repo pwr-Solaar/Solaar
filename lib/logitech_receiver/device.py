@@ -153,6 +153,7 @@ class Device:
         self._gestures_lock = threading.Lock()
         self._settings_lock = threading.Lock()
         self._persister_lock = threading.Lock()
+        self._simple_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
 
@@ -243,8 +244,10 @@ class Device:
     @property
     def name(self):
         if not self._name:
-            if self.online and self.protocol >= 2.0:
-                self._name = _hidpp20.get_name(self)
+            with self._simple_lock:
+                if self._name is None:
+                    if self.online and self.protocol >= 2.0:
+                        self._name = _hidpp20.get_name(self)
         return self._name or self._codename or f"Unknown device {self.wpid or self.product_id}"
 
     def get_ids(self):
