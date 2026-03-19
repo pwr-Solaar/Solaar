@@ -231,8 +231,9 @@ class Device:
         if not self._codename:
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
-                if not self._codename:
-                    self._codename = self.name.split(" ", 1)[0] if self.name else None
+                if not self._codename and self.name:
+                    names = self.name.split(" ")
+                    self._codename = names[1 if len(names) > 1 and names[0] == "Logitech" else 0]
             if not self._codename and self.receiver:
                 codename = self.receiver.device_codename(self.number)
                 if codename:
