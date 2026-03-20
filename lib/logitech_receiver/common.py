@@ -645,6 +645,8 @@ class BatteryStatus(Flag):
     SLOW_RECHARGE = 0x04
     INVALID_BATTERY = 0x05
     THERMAL_ERROR = 0x06
+    # Solaar internal — not a HID++ protocol value
+    OFFLINE = 0xFF
 
 
 class BatteryLevelApproximation(IntEnum):

@@ -40,6 +40,7 @@ from . import settings
 from . import settings_templates
 from .common import Alert
 from .common import Battery
+from .common import BatteryStatus
 from .common import _read_usb_product_string
 from .hidpp10_constants import NotificationFlag
 from .hidpp20_constants import SupportedFeature
@@ -545,6 +546,14 @@ class Device:
                     self.read_battery()  # battery information may have changed so try to read it now
             elif was_active and self.receiver and not isinstance(self.receiver, CenturionReceiver):
                 hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
+            if not active and self.receiver and self.battery_info is not None and self.battery_info.level is not None:
+                self.battery_info = Battery(
+                    self.battery_info.level,
+                    self.battery_info.next_level,
+                    BatteryStatus.OFFLINE,
+                    self.battery_info.voltage,
+                    self.battery_info.light_level,
+                )
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
         if self.status_callback is not None:

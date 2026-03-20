@@ -306,6 +306,7 @@ def test_kw_exception():
             "Battery: low (slow recharge)",
         ),
         (common.BatteryStatus.DISCHARGING, None, True, False, ""),
+        (common.BatteryStatus.OFFLINE, None, True, False, ""),
     ],
 )
 def test_battery(status, expected_level, expected_ok, expected_charging, expected_string):
@@ -326,3 +327,13 @@ def test_battery_2():
     assert battery.ok()
     assert not battery.charging()
     assert battery.to_str() == "Battery: 50% (discharging)"
+
+
+def test_battery_offline():
+    battery = common.Battery(58, None, common.BatteryStatus.OFFLINE, None)
+
+    assert battery.status == common.BatteryStatus.OFFLINE
+    assert battery.level == 58
+    assert battery.ok()
+    assert not battery.charging()
+    assert battery.to_str() == "Battery: 58% (offline)"
