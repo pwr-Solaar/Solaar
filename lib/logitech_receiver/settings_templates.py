@@ -2093,17 +2093,20 @@ def _rgb_power_manager_start(device):
         mgr = RGBPowerManager(device)
         _rgb_power_managers[key] = mgr
         mgr.start()
-        # Apply persisted settings
-        for s in device.settings:
-            if s.name == "rgb_idle_timeout":
-                val = s._value if s._value is not None else 60
-                mgr.set_idle_timeout(int(val))
-            elif s.name == "rgb_sleep_timeout":
-                val = s._value if s._value is not None else 300
-                mgr.set_sleep_timeout(int(val))
-            elif s.name == "rgb_idle_effect":
-                val = s._value if s._value is not None else 50
-                mgr.set_idle_effect(int(val))
+    else:
+        mgr = _rgb_power_managers[key]
+        mgr.reset()
+    # Apply persisted settings (both new and reset managers)
+    for s in device.settings:
+        if s.name == "rgb_idle_timeout":
+            val = s._value if s._value is not None else 60
+            mgr.set_idle_timeout(int(val))
+        elif s.name == "rgb_sleep_timeout":
+            val = s._value if s._value is not None else 300
+            mgr.set_sleep_timeout(int(val))
+        elif s.name == "rgb_idle_effect":
+            val = s._value if s._value is not None else 50
+            mgr.set_idle_effect(int(val))
 
 
 def _rgb_power_manager_stop(device):
@@ -2170,6 +2173,21 @@ class RGBPowerManager:
                 pass  # Best effort during shutdown
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: RGB power manager stopped", self._device)
+
+    def reset(self):
+        """Reset to ACTIVE state after a device wake cycle.
+
+        Unlike stop()+start(), this does NOT call _wake() (the device just came
+        online with stale LED state — the settings push will restore colors) and
+        does NOT re-read firmware timers (the settings push will write them).
+        """
+        if self._state == self.ACTIVE:
+            return
+        self._cancel_dim_timer()
+        self._cancel_sleep_timer()
+        self._state = self.ACTIVE
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB power manager reset to ACTIVE", self._device)
 
     def set_idle_timeout(self, seconds):
         """Update the idle timeout — also writes to firmware so it fires IDLE at the right time."""
