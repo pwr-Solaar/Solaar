@@ -97,18 +97,30 @@ HIDPP_LONG_MESSAGE_ID = 0x11
 DJ_MESSAGE_ID = 0x20
 
 # Centurion transport (used by PRO X 2 LIGHTSPEED headset and similar)
-# Uses report ID 0x51 on usage page 0xFFA0, 64-byte frames.
-# Wire format (CPL): [0x51, cpl_length, flags=0x00, feat_idx, func_sw, params..., pad]
+# Two variants exist, distinguished by report ID:
+#   0x51 (PRO X 2): [0x51, cpl_length, flags, feat_idx, func_sw, params..., pad]
+#   0x50 (G522):    [0x50, device_addr, cpl_length, flags, feat_idx, func_sw, params..., pad]
+# The 0x50 variant adds a device_addr byte at position [1], shifting all CPL fields by +1.
 # cpl_length = number of bytes from flags to end of meaningful data (includes flags byte).
 # The device_index byte from standard HID++ is NOT present in Centurion framing.
 CENTURION_REPORT_ID = 0x51
+CENTURION_ADDRESSED_REPORT_ID = 0x50  # addressed variant with device_addr byte at frame[1] (G522 etc.)
 CENTURION_FRAME_SIZE = 64  # 1 byte report ID + 63 bytes payload
 _CENTURION_MSG_SIZE = 63  # max reconstructed message size after unwrapping (2 + 61 payload bytes)
 
-# Set of handles that use Centurion framing
-_centurion_handles: set[int] = set()
-# Raw Centurion protocol version (major, minor) by handle, from ping response
-_centurion_protocol_versions: dict[int, tuple[int, int]] = {}
+
+@dataclasses.dataclass
+class CenturionHandleState:
+    """Per-handle state for Centurion devices."""
+
+    report_id: int = CENTURION_REPORT_ID  # 0x50 or 0x51
+    device_addr: int | None = None  # learned from first RX (0x50 only)
+    protocol_version: tuple[int, int] | None = None  # from ping response
+
+
+# All centurion per-handle state in a single dict.
+# Membership test (ihandle in _centurion_handles) gates centurion-specific code paths.
+_centurion_handles: dict[int, CenturionHandleState] = {}
 
 
 """Default timeout on read (in seconds)."""
@@ -301,8 +313,7 @@ def close(handle):
     if handle:
         try:
             if isinstance(handle, int):
-                _centurion_handles.discard(handle)
-                _centurion_protocol_versions.pop(handle, None)
+                _centurion_handles.pop(handle, None)
                 hidapi.close(handle)
             else:
                 handle.close()
@@ -311,6 +322,58 @@ def close(handle):
             pass
 
     return False
+
+
+def _centurion_frame_header(state: CenturionHandleState, cpl_length: int, flags: int) -> bytes:
+    """Build the fixed prefix of a centurion frame.
+
+    0x51: [0x51, cpl_length, flags]           (3 bytes)
+    0x50: [0x50, device_addr, cpl_length, flags]  (4 bytes)
+    """
+    if state.report_id == CENTURION_ADDRESSED_REPORT_ID:
+        device_addr = state.device_addr if state.device_addr is not None else 0x00
+        return struct.pack("!BBBB", CENTURION_ADDRESSED_REPORT_ID, device_addr, cpl_length, flags)
+    return struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, flags)
+
+
+_CENTURION_REPORT_IDS = (CENTURION_REPORT_ID, CENTURION_ADDRESSED_REPORT_ID)
+
+
+def _unwrap_centurion_frame(data: bytes, ihandle: int, handle) -> bytes:
+    """Unwrap a Centurion CPL frame (0x50 or 0x51) into a standard HID++ long message.
+
+    Auto-detects the variant from the raw report ID byte (self-describing),
+    matching how _read() handles 0x10 vs 0x11.
+
+    For 0x50, learns the device address from byte[1] on first receive.
+    """
+    raw_report_id = ord(data[:1])
+    if raw_report_id == CENTURION_ADDRESSED_REPORT_ID:
+        # 0x50: [report_id, device_addr, cpl_length, flags, feat_idx, func_sw, data...]
+        device_addr = ord(data[1:2])
+        state = _centurion_handles.get(ihandle)
+        if state is not None and state.device_addr is None:
+            state.device_addr = device_addr
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("(%s) learned centurion device addr 0x%02X", handle, device_addr)
+        cpl_length = ord(data[2:3])
+        inner_payload = data[4 : 3 + cpl_length]  # cpl_length - 1 bytes (skip flags)
+    elif raw_report_id == CENTURION_REPORT_ID:
+        # 0x51: [report_id, cpl_length, flags, feat_idx, func_sw, data...]
+        cpl_length = ord(data[1:2])
+        inner_payload = data[3 : 2 + cpl_length]  # cpl_length - 1 bytes (skip flags)
+    else:
+        return data  # not a centurion frame
+
+    data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
+    # Pad to a valid message size: standard long (20) or Centurion extended (63)
+    if len(data) <= _LONG_MESSAGE_SIZE:
+        data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
+    elif len(data) <= _CENTURION_MSG_SIZE:
+        data = data + b"\x00" * (_CENTURION_MSG_SIZE - len(data))
+    else:
+        data = data[:_CENTURION_MSG_SIZE]
+    return data
 
 
 def write(handle, devnumber, data, long_message=False):
@@ -337,12 +400,12 @@ def write(handle, devnumber, data, long_message=False):
 
     ihandle = int(handle)
     if ihandle in _centurion_handles:
-        # Centurion CPL framing: [0x51, cpl_length, flags=0x00, feat_idx, func_sw, params...]
-        # cpl_length = len(meaningful_payload) + 1 (the +1 counts the flags byte)
-        # The device_index is stripped — only the HID++ payload (feat_idx + func_sw + params) remains.
+        # Centurion CPL framing — strip device_index from HID++ and wrap in CPL header.
+        # cpl_length = len(meaningful_payload) + 1 (the +1 counts the flags byte).
+        state = _centurion_handles[ihandle]
         payload = wdata[2:]  # skip report_id and devnumber from standard frame
         cpl_length = len(data) + 1  # data is the unpadded payload; +1 for flags byte
-        wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, 0x00) + payload
+        wdata = _centurion_frame_header(state, cpl_length, 0x00) + payload
         wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -366,7 +429,9 @@ def write(handle, devnumber, data, long_message=False):
 def write_centurion_cpl(handle, layer3_payload, flags=0x00):
     """Send a Centurion CPL frame with the given Layer 3+ payload.
 
-    Builds: [0x51, cpl_length, flags, layer3_payload..., zero-pad to 64 bytes]
+    Builds the appropriate header for the handle's report ID variant:
+      0x51: [0x51, cpl_length, flags, layer3_payload..., pad to 64]
+      0x50: [0x50, device_addr, cpl_length, flags, layer3_payload..., pad to 64]
     where cpl_length = len(layer3_payload) + 1 (the +1 counts the flags byte).
 
     For multi-fragment sends, flags encodes fragment index and continuation:
@@ -376,11 +441,13 @@ def write_centurion_cpl(handle, layer3_payload, flags=0x00):
     ihandle = int(handle)
     if ihandle not in _centurion_handles:
         raise ValueError("write_centurion_cpl called on non-Centurion handle")
+    state = _centurion_handles[ihandle]
     cpl_length = len(layer3_payload) + 1  # +1 for flags byte
-    wdata = struct.pack("!BBB", CENTURION_REPORT_ID, cpl_length, flags) + layer3_payload
+    header = _centurion_frame_header(state, cpl_length, flags)
+    wdata = header + layer3_payload
     wdata = wdata + b"\x00" * (CENTURION_FRAME_SIZE - len(wdata))
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("(%s) <= centurion_cpl[%s]", handle, common.strhex(wdata[: cpl_length + 2]))
+        logger.debug("(%s) <= centurion_cpl[%s]", handle, common.strhex(wdata[: len(header) + cpl_length - 1]))
     try:
         hidapi.write(ihandle, wdata)
     except Exception as reason:
@@ -452,22 +519,8 @@ def _read(handle, timeout) -> tuple[int, int, bytes]:
         close(handle)
         raise exceptions.NoReceiver(reason=reason) from reason
 
-    if data and is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
-        # Unwrap Centurion CPL framing:
-        # RX: [0x51, cpl_length, flags=0x00, feat_idx, func_sw, data...]
-        # cpl_length includes the flags byte, so meaningful payload starts at byte 3
-        # and has (cpl_length - 1) bytes.
-        # Reconstruct as HID++ long message: [0x11, devnumber=0xFF, feat_idx, func_sw, data...]
-        cpl_length = ord(data[1:2])
-        inner_payload = data[3 : 2 + cpl_length]  # bytes 3..2+cpl_length-1 = cpl_length-1 bytes
-        data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
-        # Pad to a valid message size: standard long (20) or Centurion extended (63)
-        if len(data) <= _LONG_MESSAGE_SIZE:
-            data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
-        elif len(data) <= _CENTURION_MSG_SIZE:
-            data = data + b"\x00" * (_CENTURION_MSG_SIZE - len(data))
-        else:
-            data = data[:_CENTURION_MSG_SIZE]
+    if data and is_centurion and ord(data[:1]) in _CENTURION_REPORT_IDS:
+        data = _unwrap_centurion_frame(data, ihandle, handle)
 
     if data and _is_relevant_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
@@ -725,7 +778,7 @@ def ping(handle, devnumber, long_message: bool = False):
                         major = ord(reply_data[2:3])
                         minor = ord(reply_data[3:4])
                         if is_centurion:
-                            _centurion_protocol_versions[int(handle)] = (major, minor)
+                            _centurion_handles[int(handle)].protocol_version = (major, minor)
                         return major + minor / 10.0
 
                     if (
@@ -771,17 +824,8 @@ def _read_input_buffer(handle, ihandle, notifications_hook):
             raise exceptions.NoReceiver(reason=reason) from reason
 
         if data:
-            if is_centurion and ord(data[:1]) == CENTURION_REPORT_ID:
-                # Unwrap Centurion CPL framing same as in _read()
-                cpl_length = ord(data[1:2])
-                inner_payload = data[3 : 2 + cpl_length]
-                data = bytes([HIDPP_LONG_MESSAGE_ID, 0xFF]) + inner_payload
-                if len(data) <= _LONG_MESSAGE_SIZE:
-                    data = data + b"\x00" * (_LONG_MESSAGE_SIZE - len(data))
-                elif len(data) <= _CENTURION_MSG_SIZE:
-                    data = data + b"\x00" * (_CENTURION_MSG_SIZE - len(data))
-                else:
-                    data = data[:_CENTURION_MSG_SIZE]
+            if is_centurion and ord(data[:1]) in _CENTURION_REPORT_IDS:
+                data = _unwrap_centurion_frame(data, ihandle, handle)
             if _is_relevant_message(data):  # only process messages that pass check
                 # report_id = ord(data[:1])
                 if notifications_hook:

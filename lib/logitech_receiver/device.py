@@ -78,7 +78,8 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
         handle = low_level.open_path(device_info.path)
         if handle:
             if getattr(device_info, "centurion", False):
-                base._centurion_handles.add(int(handle))
+                report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
+                base._centurion_handles[int(handle)] = base.CenturionHandleState(report_id=report_id)
             # a direct connected device might not be online (as reported by user)
             return Device(
                 low_level,
@@ -625,20 +626,22 @@ class Device:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
-    # Max sub-message bytes in the first bridge fragment:
+    # Max sub-message bytes in the first bridge fragment (for 0x51):
     # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57
     # LGHUB uses 56 for first fragment (60 byte payload - 4 bridge overhead)
+    # For 0x50, subtract 1 more for the device_addr byte.
     _BRIDGE_FIRST_CHUNK = 56
     # Continuation fragments carry raw sub_msg data (no bridge prefix/hdr):
     # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61, but LGHUB uses 60
+    # For 0x50, subtract 1 more for the device_addr byte.
     _BRIDGE_CONT_CHUNK = 60
 
     def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
         """Send a request to a Centurion sub-device via CentPPBridge.
 
         Builds the 4-layer nested message:
-        Layer 1: [0x51]
-        Layer 2: [cpl_length, flags]
+        Layer 1: [report_id]  (0x51 or 0x50)
+        Layer 2: [device_addr (0x50 only),] cpl_length, flags
         Layer 3: [bridge_idx, sendFragment_func|swid, bridge_hdr...]
         Layer 4: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
 
@@ -659,6 +662,12 @@ class Device:
         if not handle:
             return None
 
+        # Adjust bridge chunk sizes for 0x50 variant (device_addr byte takes 1 frame byte)
+        cent_state = base._centurion_handles.get(int(handle))
+        addr_overhead = 1 if cent_state and cent_state.report_id == base.CENTURION_ADDRESSED_REPORT_ID else 0
+        first_chunk = self._BRIDGE_FIRST_CHUNK - addr_overhead
+        cont_chunk = self._BRIDGE_CONT_CHUNK - addr_overhead
+
         sw_id = base._get_next_sw_id()
 
         # Build sub-device message: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
@@ -674,7 +683,7 @@ class Device:
 
         timeout = base.DEFAULT_TIMEOUT
         with base.acquire_timeout(base.handle_lock(handle), handle, timeout):
-            if sub_len <= self._BRIDGE_FIRST_CHUNK:
+            if sub_len <= first_chunk:
                 # Single-frame path
                 layer3 = bridge_prefix + bridge_hdr + sub_msg
                 base.write_centurion_cpl(handle, layer3)
@@ -691,11 +700,11 @@ class Device:
                 offset = 0
                 while offset < sub_len:
                     if frag_index == 0:
-                        chunk_size = self._BRIDGE_FIRST_CHUNK
+                        chunk_size = first_chunk
                         chunk = sub_msg[offset : offset + chunk_size]
                         layer3 = bridge_prefix + bridge_hdr + chunk
                     else:
-                        chunk_size = self._BRIDGE_CONT_CHUNK
+                        chunk_size = cont_chunk
                         chunk = sub_msg[offset : offset + chunk_size]
                         layer3 = chunk
                     has_more = (offset + chunk_size) < sub_len
@@ -811,9 +820,9 @@ class Device:
     def _record_ping_protocol(self, handle, protocol):
         """Record a successful ping's protocol version, including raw Centurion (major, minor)."""
         self._protocol = protocol
-        cent_ver = base._centurion_protocol_versions.get(int(handle))
-        if cent_ver:
-            self._centurion_protocol = cent_ver
+        cent_state = base._centurion_handles.get(int(handle))
+        if cent_state and cent_state.protocol_version:
+            self._centurion_protocol = cent_state.protocol_version
 
     def ping(self):
         """Checks if the device is online and present, returns True of False.

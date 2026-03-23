@@ -19,3 +19,4 @@ class DeviceInfo:
     hidpp_short: str | None
     hidpp_long: str | None
     centurion: bool = False
+    centurion_report_id: int | None = None  # 0x50 or 0x51 when centurion=True
