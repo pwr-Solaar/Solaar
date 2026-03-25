@@ -76,7 +76,7 @@ class SupportedFeature(IntEnum):
     REPROG_CONTROLS_V2_2 = 0x1B02  # LogiOptions 2.10.73 features.xml
     REPROG_CONTROLS_V3 = 0x1B03
     REPROG_CONTROLS_V4 = 0x1B04
-    SUPERSTRIKE_TUNING = 0x1B0C  # PRO X 2 Superstrike HITS tuning (actuation, rapid trigger, haptics)
+    ANALOG_BUTTONS = 0x1B0C  # Analog button tuning (actuation point, rapid trigger, haptics)
     FULL_KEY_CUSTOMIZATION = 0x1B05
     CONTROL_LIST = 0x1B10
     SWITCH_SWAPABILITY = 0x1B20

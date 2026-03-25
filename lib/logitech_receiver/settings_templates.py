@@ -1809,108 +1809,76 @@ class ForceSensing(settings_new.Settings):
             return setting
 
 
-# PRO X 2 Superstrike HITS (Hall-Effect Inductive Trigger Switch) settings
+# Analog button tuning settings (actuation point, rapid trigger, haptics)
 
 
-class _SuperstrikeActuationRW(settings.FeatureRW):
-    """RW for Superstrike actuation point (1-10) per button."""
+class _AnalogButtonActuationRW(settings.FeatureRW):
+    """RW for analog button actuation point per button."""
 
-    def __init__(self, feature, button_index, max_actuation):
-        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)  # Write is 0x10, not 0x30
-        self.button_index = button_index
-        self.max_actuation = max_actuation  # Device's max value (e.g., 40)
-
-    def read(self, device, data_bytes=b""):
-        res = device.feature_request(self.feature, 0x20, self.button_index)
-        if not res:
-            return b"\x05"  # default mid-point
-        # Actuation is in byte 1, scale from device range (1-max) to UI range (1-10)
-        device_val = res[1]
-        ui_val = max(1, min(10, round(device_val * 10 / self.max_actuation)))
-        return bytes([ui_val])
-
-    def write(self, device, data_bytes):
-        current = device.feature_request(self.feature, 0x20, self.button_index)
-        if not current:
-            return None
-        # Scale from UI range (1-10) to device range (4-max, step 4 based on observed behavior)
-        ui_val = data_bytes[0]
-        device_val = max(4, min(self.max_actuation, round(ui_val * self.max_actuation / 10)))
-        # Round to nearest multiple of 4 (device seems to quantize)
-        device_val = ((device_val + 2) // 4) * 4
-        # Write using func 0x10: [button_index, actuation, rt, byte3]
-        return device.feature_request(self.feature, 0x10, self.button_index, device_val, current[2], current[3])
-
-
-class _SuperstrikeRapidTriggerLevelRW(settings.FeatureRW):
-    """RW for Superstrike rapid trigger sensitivity (1=fast to 5=slow) per button."""
-
-    def __init__(self, feature, button_index, max_rt_level):
-        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)  # Write is 0x10
-        self.button_index = button_index
-        self.max_rt_level = max_rt_level  # Device's max RT level (e.g., 20)
-
-    def read(self, device, data_bytes=b""):
-        res = device.feature_request(self.feature, 0x20, self.button_index)
-        if not res or res[2] == 0:
-            return b"\x03"  # default mid-point if RT disabled
-        # Scale from device range (1-max) to UI range (1-5)
-        device_val = res[2]
-        ui_val = max(1, min(5, round(device_val * 5 / self.max_rt_level)))
-        return bytes([ui_val])
-
-    def write(self, device, data_bytes):
-        current = device.feature_request(self.feature, 0x20, self.button_index)
-        if not current:
-            return None
-        # Scale from UI range (1-5) to device range (1-max)
-        ui_val = data_bytes[0]
-        device_val = max(1, min(self.max_rt_level, round(ui_val * self.max_rt_level / 5)))
-        return device.feature_request(self.feature, 0x10, self.button_index, current[1], device_val, current[3])
-
-
-class _SuperstrikeHapticsRW(settings.FeatureRW):
-    """RW for Superstrike click haptics (0-5) per button via TUNING feature byte3.
-
-    Device stores haptics in byte3 of the TUNING response with values 0, 4, 8, 12, 16, 20.
-    UI range is 0-5 where 0=off and 5=strongest.
-    """
-
-    def __init__(self, feature, button_index, max_haptics):
+    def __init__(self, feature, button_index):
         super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
         self.button_index = button_index
-        self.max_haptics = max_haptics  # Device's max haptics value (e.g., 20)
 
     def read(self, device, data_bytes=b""):
         res = device.feature_request(self.feature, 0x20, self.button_index)
         if not res:
-            return b"\x03"  # default mid-point
-        # Haptics is in byte 3, scale from device range (0-max) to UI range (0-5)
-        device_val = res[3]
-        ui_val = round(device_val * 5 / self.max_haptics)
-        return bytes([ui_val])
+            return b"\x14"  # default mid-point
+        return bytes([res[1]])
 
     def write(self, device, data_bytes):
         current = device.feature_request(self.feature, 0x20, self.button_index)
         if not current:
             return None
-        # Scale from UI range (0-5) to device range (0-max, step 4)
-        ui_val = data_bytes[0]
-        device_val = round(ui_val * self.max_haptics / 5)
-        # Round to nearest multiple of 4 (device quantizes to 0, 4, 8, 12, 16, 20)
-        device_val = ((device_val + 2) // 4) * 4
-        device_val = min(device_val, self.max_haptics)
-        # Write: [button_index, actuation, rt, haptics]
-        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], device_val)
+        return device.feature_request(self.feature, 0x10, self.button_index, data_bytes[0], current[2], current[3])
 
 
-class SuperstrikeTuning_(settings.Setting):
-    """HITS tuning settings: actuation point, rapid trigger, and haptics configuration."""
+class _AnalogButtonRapidTriggerRW(settings.FeatureRW):
+    """RW for analog button rapid trigger sensitivity per button."""
 
-    name = "superstrike-tuning_"
-    label = _("HITS Tuning")
-    description = _("Configure Hall-Effect Inductive Trigger Switch settings including haptics.")
-    feature = _F.SUPERSTRIKE_TUNING
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[2]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], data_bytes[0], current[3])
+
+
+class _AnalogButtonHapticsRW(settings.FeatureRW):
+    """RW for analog button click haptics per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[3]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], data_bytes[0])
+
+
+class AnalogButtonTuning(settings.Setting):
+    """Analog button tuning: actuation point, rapid trigger, and haptics configuration."""
+
+    name = "analog-button-tuning"
+    label = _("Analog Button Tuning")
+    description = _("Configure analog button settings including actuation point, rapid trigger, and haptics.")
+    feature = _F.ANALOG_BUTTONS
 
     @classmethod
     def build(cls, device):
@@ -1931,40 +1899,31 @@ class SuperstrikeTuning_(settings.Setting):
         button_names = [_("Left Button"), _("Right Button")]
         all_settings = []
 
-        # Group settings by feature type for better UI organization
-
-        # Actuation Points (UI: 1-10, device: 1-max_actuation)
         for i in range(button_count):
             btn_name = button_names[i] if i < len(button_names) else f"Button {i}"
-            rw_act = _SuperstrikeActuationRW(cls.feature, i, max_actuation)
-            val_act = settings_validator.RangeValidator(min_value=1, max_value=10)
+
+            rw_act = _AnalogButtonActuationRW(cls.feature, i)
+            val_act = settings_validator.RangeValidator(min_value=1, max_value=max_actuation)
             s_act = settings.Setting(device, rw_act, val_act)
-            s_act.name = f"superstrike-tuning_actuation-{i}"
+            s_act.name = f"analog-button-tuning_actuation-{i}"
             s_act.label = f"{btn_name} Actuation Point"
-            s_act.description = _("Actuation point depth (1=shallow, 10=deep).")
+            s_act.description = _("Actuation point depth (raw device value).")
             all_settings.append(s_act)
 
-        # Rapid Trigger Levels (UI: 1-5, device: 1-max_rt_level)
-        # Note: Device doesn't support disabling rapid trigger (rt_level=0 returns error)
-        for i in range(button_count):
-            btn_name = button_names[i] if i < len(button_names) else f"Button {i}"
-            rw_rt_lvl = _SuperstrikeRapidTriggerLevelRW(cls.feature, i, max_rt_level)
-            val_rt_lvl = settings_validator.RangeValidator(min_value=1, max_value=5)
-            s_rt_lvl = settings.Setting(device, rw_rt_lvl, val_rt_lvl)
-            s_rt_lvl.name = f"superstrike-tuning_rapid-trigger-level-{i}"
-            s_rt_lvl.label = f"{btn_name} Rapid Trigger Level"
-            s_rt_lvl.description = _("Rapid trigger sensitivity (1=fast, 5=slow).")
-            all_settings.append(s_rt_lvl)
+            rw_rt = _AnalogButtonRapidTriggerRW(cls.feature, i)
+            val_rt = settings_validator.RangeValidator(min_value=1, max_value=max_rt_level)
+            s_rt = settings.Setting(device, rw_rt, val_rt)
+            s_rt.name = f"analog-button-tuning_rapid-trigger-{i}"
+            s_rt.label = f"{btn_name} Rapid Trigger"
+            s_rt.description = _("Rapid trigger sensitivity (raw device value).")
+            all_settings.append(s_rt)
 
-        # Click Haptics (UI: 0-5, device: 0-max_haptics in steps of 4)
-        for i in range(button_count):
-            btn_name = button_names[i] if i < len(button_names) else f"Button {i}"
-            rw_haptics = _SuperstrikeHapticsRW(cls.feature, i, max_haptics)
-            val_haptics = settings_validator.RangeValidator(min_value=0, max_value=5)
+            rw_haptics = _AnalogButtonHapticsRW(cls.feature, i)
+            val_haptics = settings_validator.RangeValidator(min_value=0, max_value=max_haptics)
             s_haptics = settings.Setting(device, rw_haptics, val_haptics)
-            s_haptics.name = f"superstrike-tuning_haptics-{i}"
+            s_haptics.name = f"analog-button-tuning_haptics-{i}"
             s_haptics.label = f"{btn_name} Click Haptics"
-            s_haptics.description = _("Click haptic feedback intensity (0=off, 5=strongest).")
+            s_haptics.description = _("Click haptic feedback intensity (raw device value, 0=off).")
             all_settings.append(s_haptics)
 
         return all_settings if all_settings else None
@@ -2093,7 +2052,7 @@ SETTINGS: list[settings.Setting] = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
-    SuperstrikeTuning_,
+    AnalogButtonTuning,
     HapticLevel,
     PlayHapticWaveForm,
     Sidetone,
