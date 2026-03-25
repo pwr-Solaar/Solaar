@@ -118,6 +118,7 @@ class MappingFlag(Flag):
     UNUSED_4000 = 0x4000
     UNUSED_1000 = 0x1000
     RAW_WHEEL = 0x400
+    UNKNOWN_200 = 0x200  # seen on a Wireless Mouse M510 WPID 4004
     ANALYTICS_KEY_EVENTS_REPORTING = 0x100
     FORCE_RAW_XY_DIVERTED = 0x40
     RAW_XY_DIVERTED = 0x10
@@ -1689,10 +1690,10 @@ class Hidpp20:
     def get_keys(self, device: Device):
         # TODO: add here additional variants for other REPROG_CONTROLS
         count = None
-        if SupportedFeature.REPROG_CONTROLS_V2 in device.features:
+        if device.features and SupportedFeature.REPROG_CONTROLS_V2 in device.features:
             count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V2)
             return KeysArrayV2(device, ord(count[:1]))
-        elif SupportedFeature.REPROG_CONTROLS_V4 in device.features:
+        elif device.features and SupportedFeature.REPROG_CONTROLS_V4 in device.features:
             count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V4)
             return KeysArrayV4(device, ord(count[:1]))
         return None

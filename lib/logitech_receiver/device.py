@@ -153,6 +153,7 @@ class Device:
         self._gestures_lock = threading.Lock()
         self._settings_lock = threading.Lock()
         self._persister_lock = threading.Lock()
+        self._simple_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
 
@@ -204,7 +205,7 @@ class Device:
             self.registers = self.descriptor.registers if self.descriptor.registers else []
 
         if self._protocol is not None:
-            self.features = None if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
+            self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
         else:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
 
@@ -230,8 +231,9 @@ class Device:
         if not self._codename:
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
-                if not self._codename:
-                    self._codename = self.name.split(" ", 1)[0] if self.name else None
+                if not self._codename and self.name:
+                    names = self.name.split(" ")
+                    self._codename = names[1 if len(names) > 1 and names[0] == "Logitech" else 0]
             if not self._codename and self.receiver:
                 codename = self.receiver.device_codename(self.number)
                 if codename:
@@ -243,8 +245,10 @@ class Device:
     @property
     def name(self):
         if not self._name:
-            if self.online and self.protocol >= 2.0:
-                self._name = _hidpp20.get_name(self)
+            with self._simple_lock:
+                if self._name is None:
+                    if self.online and self.protocol >= 2.0:
+                        self._name = _hidpp20.get_name(self)
         return self._name or self._codename or f"Unknown device {self.wpid or self.product_id}"
 
     def get_ids(self):
