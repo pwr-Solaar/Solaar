@@ -20,13 +20,11 @@ import logging
 import socket
 import struct
 import traceback
-
 from time import time
 from typing import Callable
 from typing import Protocol
 
 from solaar.i18n import _
-
 from . import base
 from . import common
 from . import descriptors
@@ -1055,10 +1053,15 @@ class ExtendedAdjustableDpi(settings.Setting):
     keys = common.NamedInts(X=0, Y=1, LOD=2)
 
     def write_key_value(self, key, value, save=True):
+        # Force a read to populate the full X/Y/LOD dictionary if it's missing (fixes CLI)
+        if not isinstance(self._value, dict):
+            self.read()
+
         if isinstance(self._value, dict):
             self._value[key] = value
         else:
             self._value = {key: value}
+
         result = self.write(self._value, save)
         return result[key] if isinstance(result, dict) else result
 
