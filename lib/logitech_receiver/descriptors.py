@@ -237,7 +237,7 @@ _D("G213 Prodigy Gaming Keyboard", codename="G213", usbid=0xC336, interface=1)
 _D("G512 RGB Mechanical Gaming Keyboard", codename="G512", usbid=0xC33C, interface=1)
 _D("G815 Mechanical Keyboard", codename="G815", usbid=0xC33F, interface=1)
 _D("diNovo Edge Keyboard", codename="diNovo", protocol=1.0, wpid="C714")
-_D("K845 Mechanical Keyboard", codename="K845", usbid=0xC341, interface=3)
+_D("K845 Mechanical Keyboard", codename="K845", usbid=0xC341, interface=1)
 
 # Mice
 
