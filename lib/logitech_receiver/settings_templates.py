@@ -2673,12 +2673,15 @@ class RGBPowerManager:
 
         feat = _F.PER_KEY_LIGHTING_V2
         remaining = list(unset_zones)
-        while remaining:
-            batch = remaining[:13]
-            remaining = remaining[13:]
-            data = bytes([r, g, b]) + bytes(batch)
-            self._device.feature_request(feat, 0x60, data)
-        self._device.feature_request(feat, 0x70, b"\x00\x00\x00\x00\x00")
+        try:
+            while remaining:
+                batch = remaining[:13]
+                remaining = remaining[13:]
+                data = bytes([r, g, b]) + bytes(batch)
+                self._device.feature_request(feat, 0x60, data)
+            self._device.feature_request(feat, 0x70, b"\x00\x00\x00\x00\x00")
+        except exceptions.FeatureCallError as e:
+            logger.warning("%s: per-key zone init failed (device busy?): %s", self._device, e)
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(
