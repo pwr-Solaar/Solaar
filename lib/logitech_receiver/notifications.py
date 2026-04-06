@@ -34,6 +34,7 @@ from . import diversion
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
+from . import settings
 from . import settings_templates
 from .common import Alert
 from .common import BatteryStatus
@@ -321,7 +322,9 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             reason = "powered on" if notification.data[2] == 1 else None
             if notification.data[1] == 1:  # device is asking for software reconfiguration so need to change status
                 alert = Alert.NONE
-                device.changed(active=True, alert=alert, reason=reason, push=True)
+                device.changed(active=True, alert=alert, reason=reason)
+                settings.apply_all_settings(device)
+                device.signal_configuration_complete()
         else:
             logger.warning("%s: unknown WIRELESS %s", device, notification)
 
