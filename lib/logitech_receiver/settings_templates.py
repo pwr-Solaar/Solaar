@@ -20,11 +20,13 @@ import logging
 import socket
 import struct
 import traceback
+
 from time import time
 from typing import Callable
 from typing import Protocol
 
 from solaar.i18n import _
+
 from . import base
 from . import common
 from . import descriptors
