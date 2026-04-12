@@ -808,6 +808,13 @@ class Device:
             return None
         return reply_data[7:]  # response data after sub_cpl, sub_feat_idx, sub_func_sw
 
+    def _record_ping_protocol(self, handle, protocol):
+        """Record a successful ping's protocol version, including raw Centurion (major, minor)."""
+        self._protocol = protocol
+        cent_ver = base._centurion_protocol_versions.get(int(handle))
+        if cent_ver:
+            self._centurion_protocol = cent_ver
+
     def ping(self):
         """Checks if the device is online and present, returns True of False.
         Some devices are integral with their receiver but may not be present even if the receiver responds to ping."""
@@ -820,11 +827,7 @@ class Device:
                 self.online = False
                 return False
             if protocol:
-                self._protocol = protocol
-                # Pick up raw Centurion protocol version from ping response
-                cent_ver = base._centurion_protocol_versions.get(int(handle))
-                if cent_ver:
-                    self._centurion_protocol = cent_ver
+                self._record_ping_protocol(handle, protocol)
             # Dongle responded — now check if headset is actually on by probing through bridge.
             # Send ROOT.GetFeature(0x0001) to the sub-device via CentPPBridge.
             bridge_idx = getattr(self, "_centurion_bridge_index", None)
@@ -847,7 +850,7 @@ class Device:
             protocol = None
         self.online = protocol is not None and self.present
         if protocol:
-            self._protocol = protocol
+            self._record_ping_protocol(handle, protocol)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("pinged %s: online %s protocol %s present %s", self.number, self.online, protocol, self.present)
         return self.online
