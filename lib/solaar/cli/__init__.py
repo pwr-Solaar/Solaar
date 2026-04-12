@@ -97,7 +97,27 @@ def _create_parser():
     sp = subparsers.add_parser("unpair", description="Unpair a device from its receiver.  Not all receivers allow unpairing.")
     sp.add_argument(
         "device",
-        help="device to unpair; may be a device number (1..6), a serial number, " "or a substring of a device's name.",
+        nargs="?",
+        help="device to unpair; may be a device number (1..6), a serial number, "
+        "or a substring of a device's name.  Omit when using --slot.",
+    )
+    sp.add_argument(
+        "--receiver",
+        help="select receiver by name substring or serial number when more than one is present; "
+        "required with --slot if multiple receivers are attached.",
+    )
+    sp.add_argument(
+        "--slot",
+        type=int,
+        help="force-unpair a specific slot number directly, even if Solaar has no cached device there "
+        "or the device is currently reachable.  Lightspeed receivers only.  The slot contents are "
+        "printed before the write so you can confirm what is about to be cleared.",
+    )
+    sp.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="with --slot, run all safety checks but do not issue the unpair register write. "
+        "Use to verify the active-device guard before committing to a real write.",
     )
     sp.set_defaults(action="unpair")
 
