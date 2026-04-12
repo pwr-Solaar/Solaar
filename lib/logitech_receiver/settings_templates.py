@@ -1055,10 +1055,15 @@ class ExtendedAdjustableDpi(settings.Setting):
     keys = common.NamedInts(X=0, Y=1, LOD=2)
 
     def write_key_value(self, key, value, save=True):
+        # Force a read to populate the full X/Y/LOD dictionary if it's missing (fixes CLI)
+        if not isinstance(self._value, dict):
+            self.read()
+
         if isinstance(self._value, dict):
             self._value[key] = value
         else:
             self._value = {key: value}
+
         result = self.write(self._value, save)
         return result[key] if isinstance(result, dict) else result
 
@@ -1809,6 +1814,126 @@ class ForceSensing(settings_new.Settings):
             return setting
 
 
+# Analog button tuning settings (actuation point, rapid trigger, haptics)
+
+
+class _AnalogButtonActuationRW(settings.FeatureRW):
+    """RW for analog button actuation point per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x14"  # default mid-point
+        return bytes([res[1]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, data_bytes[0], current[2], current[3])
+
+
+class _AnalogButtonRapidTriggerRW(settings.FeatureRW):
+    """RW for analog button rapid trigger sensitivity per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[2]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], data_bytes[0], current[3])
+
+
+class _AnalogButtonHapticsRW(settings.FeatureRW):
+    """RW for analog button click haptics per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[3]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], data_bytes[0])
+
+
+class AnalogButtonTuning(settings.Setting):
+    """Analog button tuning: actuation point, rapid trigger, and haptics configuration."""
+
+    name = "analog-button-tuning"
+    label = _("Analog Button Tuning")
+    description = _("Configure analog button settings including actuation point, rapid trigger, and haptics.")
+    feature = _F.ANALOG_BUTTONS
+
+    @classmethod
+    def build(cls, device):
+        if cls.feature not in device.features:
+            return None
+        # Get capabilities: [flags, button_count, max_actuation, max_rt, max_haptics, ...]
+        caps = device.feature_request(cls.feature, 0x00)
+        if not caps or len(caps) < 5:
+            return None
+        button_count = min(caps[1], 2)  # Byte 1 is button count, limit to 2 (left/right)
+        max_actuation = caps[2] if caps[2] > 0 else 40  # Byte 2 is max actuation
+        max_rt_level = caps[3] if caps[3] > 0 else 20  # Byte 3 is max RT level
+        max_haptics = caps[4] if caps[4] > 0 else 20  # Byte 4 is max haptics
+
+        if button_count == 0:
+            return None
+
+        button_names = [_("Left Button"), _("Right Button")]
+        all_settings = []
+
+        for i in range(button_count):
+            btn_name = button_names[i] if i < len(button_names) else f"Button {i}"
+
+            rw_act = _AnalogButtonActuationRW(cls.feature, i)
+            val_act = settings_validator.RangeValidator(min_value=1, max_value=max_actuation)
+            s_act = settings.Setting(device, rw_act, val_act)
+            s_act.name = f"analog-button-tuning_actuation-{i}"
+            s_act.label = f"{btn_name} Actuation Point"
+            s_act.description = _("Actuation point depth (raw device value).")
+            all_settings.append(s_act)
+
+            rw_rt = _AnalogButtonRapidTriggerRW(cls.feature, i)
+            val_rt = settings_validator.RangeValidator(min_value=1, max_value=max_rt_level)
+            s_rt = settings.Setting(device, rw_rt, val_rt)
+            s_rt.name = f"analog-button-tuning_rapid-trigger-{i}"
+            s_rt.label = f"{btn_name} Rapid Trigger"
+            s_rt.description = _("Rapid trigger sensitivity (raw device value).")
+            all_settings.append(s_rt)
+
+            rw_haptics = _AnalogButtonHapticsRW(cls.feature, i)
+            val_haptics = settings_validator.RangeValidator(min_value=0, max_value=max_haptics)
+            s_haptics = settings.Setting(device, rw_haptics, val_haptics)
+            s_haptics.name = f"analog-button-tuning_haptics-{i}"
+            s_haptics.label = f"{btn_name} Click Haptics"
+            s_haptics.description = _("Click haptic feedback intensity (raw device value, 0=off).")
+            all_settings.append(s_haptics)
+
+        return all_settings if all_settings else None
+
+
 class HapticLevel(settings.Setting):
     name = "haptic-level"
     label = _("Haptic Feedback Level")
@@ -1932,6 +2057,7 @@ SETTINGS: list[settings.Setting] = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
+    AnalogButtonTuning,
     HapticLevel,
     PlayHapticWaveForm,
     Sidetone,
