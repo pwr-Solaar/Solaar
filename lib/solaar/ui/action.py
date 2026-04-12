@@ -98,6 +98,10 @@ def unpair(window, device):
         device_number = device.number
 
         try:
-            del receiver[device_number]
+            # force=True ensures the unpair register write is issued even on
+            # re_pairs receivers (Lightspeed, Nano); otherwise _unpair_device
+            # short-circuits to cache-invalidation only and the slot stays
+            # bound on the hardware.
+            receiver._unpair_device(device_number, True)
         except Exception:
             common.error_dialog(common.ErrorReason.UNPAIR, device)

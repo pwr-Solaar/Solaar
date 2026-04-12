@@ -123,7 +123,7 @@ def _lightspeed_receiver(product_id: int) -> dict:
         "usb_interface": 2,
         "receiver_kind": "lightspeed",
         "name": _("Lightspeed Receiver"),
-        "may_unpair": False,
+        "may_unpair": True,
         "re_pairs": True,
     }
 
