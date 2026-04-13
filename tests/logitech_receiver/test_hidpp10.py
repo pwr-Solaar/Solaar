@@ -296,6 +296,31 @@ def test_notification_flag_str(flag_bits, expected_names):
     assert flag_names == expected_names
 
 
+@pytest.mark.parametrize(
+    "flags, expected",
+    [
+        (None, []),
+        (hidpp10_constants.NotificationFlag(0x000900), ["software present", "wireless"]),  # composite flag, .name is None on Python < 3.11
+        (hidpp10_constants.NotificationFlag(0x100000), ["battery status"]),
+        (hidpp10_constants.NotificationFlag(0x080000), ["mouse extra buttons"]),
+    ],
+)
+def test_notification_flag_names(flags, expected):
+    result = hidpp10_constants.NotificationFlag.flag_names(flags)
+    assert result == expected
+
+
+def test_notification_flag_names_none_does_not_crash():
+    """Regression test for #3184: flag_names crashes with AttributeError when
+    flags.name is None, which happens with certain receiver firmware versions
+    (e.g. Nano C52F reporting 0x000900)."""
+    flags_with_none_name = hidpp10_constants.NotificationFlag(0x000900)
+    result = hidpp10_constants.NotificationFlag.flag_names(flags_with_none_name)
+    assert "software present" in result
+    assert "wireless" in result
+    assert isinstance(result, list)
+
+
 def test_get_device_features():
     result = _hidpp10.get_device_features(device_standard)
 
