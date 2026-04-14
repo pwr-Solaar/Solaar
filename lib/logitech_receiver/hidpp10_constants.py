@@ -91,6 +91,8 @@ class NotificationFlag(IntFlag):
     @classmethod
     def flag_names(cls, flags) -> List[str]:
         """Extract the names of the flags from the integer."""
+        if flags is None or flags.name is None:
+            return []
         return flags.name.replace("_", " ").lower().split("|")
 
     NUMPAD_NUMERICAL_KEYS = 0x800000
