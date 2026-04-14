@@ -15,7 +15,7 @@ using one of the methods described below.
 
 Solaar runs as a regular user process, albeit with direct access to the Linux interface
 that lets it directly communicate with the Logitech devices it manages using special
-Logitech-proprietary (HID++) commands.
+Logitech-proprietary (HID++ and Centurion) commands.
 Each Logitech device implements a different subset of these commands.
 Solaar is thus only able to make the changes that a particular device supports.
 

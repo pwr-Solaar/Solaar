@@ -21,9 +21,9 @@ Not all such devices supported in Solaar as information needs to be added to Sol
 for each device type that directly connects.
 
 
-## HID++
+## HID++ and Centurion
 
-The devices that Solaar handles use Logitech's HID++ protocol.
+The devices that Solaar handles use Logitech's HID++ and Centurion protocols.
 
 HID++ is a Logitech-proprietary protocol that extends the standard HID
 protocol for interfacing with receivers, keyboards, mice, and so on. It allows
@@ -42,6 +42,8 @@ M510 mouse that use different versions of the HID++ protocol.)
 Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
 same to software as some M310 mice.)
+
+Centurion is closely related to HID++ and is used by some Logitech headsets.
 
 The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software
@@ -82,9 +84,9 @@ that matches the one they were bought with.
 ## Device Settings
 
 Solaar can display quite a few changeable settings of receivers and devices.
-For a list of HID++ features and their support see [the features page](features.md).
+For a list of features and their support see [the features page](features.md).
 
-Solaar does not do much beyond using the HID++ protocol to change the
+Solaar does not do much beyond using the protocols to change the
 behavior of receivers and devices via changing their settings.
 In particular, Solaar cannot change how
 the operating system turns the keycodes that a keyboard produces into
@@ -114,7 +116,7 @@ Solaar keeps track of settings independently on each computer.
 As a result if a device is switched between different computers
 Solaar may apply different settings for it on the different computers.
 
-Querying a device for its current state can require quite a few HID++
+Querying a device for its current state can require quite a few
 interactions. These interactions can temporarily slow down the device, so
 Solaar tries to internally cache information about devices while it is
 running.  If the device
