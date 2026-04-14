@@ -409,6 +409,8 @@ def read(device_handle, bytes_count, timeout_ms=-1):
         data = os.read(device_handle, bytes_count)
         assert data is not None
         assert isinstance(data, bytes), (repr(data), type(data))
+        if not data:  # empty read when select() said readable means EOF (device removed)
+            raise OSError(errno.EIO, f"device disconnected on file descriptor {int(device_handle)}")
         return data
     else:
         return b""
