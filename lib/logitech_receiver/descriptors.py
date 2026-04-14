@@ -465,3 +465,4 @@ _D(
     kind=DEVICE_KIND.headset,
     usbid=0x0ABA,
 )
+# PRO X 2 LIGHTSPEED Gaming Headset (0x0AF7) — fully probed via Centurion transport, no static descriptor needed

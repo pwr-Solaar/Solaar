@@ -536,7 +536,13 @@ def _update_details(button):
                 if device.product_id:
                     yield _("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id
                 hid_version = device.protocol
-                yield _("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown")
+                cent_proto = getattr(device, "_centurion_protocol", None)
+                if cent_proto:
+                    yield _("Protocol"), f"Centurion {cent_proto[0]}.{cent_proto[1]}"
+                elif hid_version:
+                    yield _("Protocol"), f"HID++ {hid_version:1.1f}"
+                else:
+                    yield _("Protocol"), _("Unknown")
                 if read_all and device.polling_rate:
                     yield _("Polling rate"), device.polling_rate
 
