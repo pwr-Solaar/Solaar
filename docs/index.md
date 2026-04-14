@@ -19,6 +19,8 @@ Logitech-proprietary (HID++ and Centurion) commands.
 Each Logitech device implements a different subset of these commands.
 Solaar is thus only able to make the changes that a particular device supports.
 
+Note:  Support for Centurion devices is new and should be considered experimental.
+
 Solaar is not a device driver and does not process normal input from devices.
 It is thus unable to fix problems that arise from incorrect handling of
 mouse movements or keycodes by Linux drivers or other software.
