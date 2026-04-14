@@ -5,7 +5,7 @@ layout: page
 
 # Supported receivers and devices
 
-Solaar only supports Logitech receivers and devices that use the Logitech proprietary HID++ protocol.
+Solaar only supports Logitech receivers and devices that use the Logitech proprietary HID++ and Centurion protocols.
 
 Solaar supports most Logitech Nano, Unifying, and Bolt receivers.
 Solaar supports some Lightspeed receivers.
@@ -14,7 +14,7 @@ See the receiver table below for the list of currently supported receivers.
 Solaar supports all Logitech devices (keyboards, mice, trackballs, touchpads, and headsets)
 that can connect to supported receivers.
 Solaar supports all Logitech devices that can connect via a USB cable or via Bluetooth,
-as long as the device uses the HID++ protocol.
+as long as the device uses the HID++ or Centurion protocol.
 
 The best way to determine whether Solaar supports a device is to run Solaar while the device is connected.
 If the device is supported, it will show up in the Solaar main window.
