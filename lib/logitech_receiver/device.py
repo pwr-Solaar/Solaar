@@ -468,6 +468,15 @@ class Device:
 
     def battery(self):  # None  or  level, next, status, voltage
         if self.protocol < 2.0:
+            if self.centurion:
+                logger.warning(
+                    "%s: battery() dispatching HID++ 1.0 path for a Centurion device "
+                    "(protocol=%s, _protocol=%s) — device_addr probe likely failed, "
+                    "expect INVALID_SUB_ID_COMMAND",
+                    self,
+                    self.protocol,
+                    self._protocol,
+                )
             return _hidpp10.get_battery(self)
         else:
             battery_feature = self.persister.get("_battery", None) if self.persister else None

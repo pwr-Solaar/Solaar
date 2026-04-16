@@ -358,24 +358,58 @@ def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
     if state.report_id != CENTURION_ADDRESSED_REPORT_ID or state.device_addr is not None:
         return False
     ihandle = int(handle)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(
+            "(%s) probing centurion device_addr (report_id=0x%02X, %d iters x %d ms)",
+            handle,
+            state.report_id,
+            _CENTURION_PROBE_READ_ITERATIONS,
+            _CENTURION_PROBE_READ_TIMEOUT_MS,
+        )
     probe = bytes([state.report_id]) + b"\x00" * (CENTURION_FRAME_SIZE - 1)
     try:
         hidapi.write(ihandle, probe)
     except Exception as reason:
         logger.warning("(%s) centurion device_addr probe write failed: %s", handle, reason)
         return False
-    for _ in range(_CENTURION_PROBE_READ_ITERATIONS):
+    for attempt in range(1, _CENTURION_PROBE_READ_ITERATIONS + 1):
         try:
             data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_READ_TIMEOUT_MS)
         except Exception as reason:
             logger.warning("(%s) centurion device_addr probe read failed: %s", handle, reason)
             return False
+        if logger.isEnabledFor(logging.DEBUG):
+            if data:
+                logger.debug(
+                    "(%s) centurion probe attempt %d/%d: got %d bytes, head=%s",
+                    handle,
+                    attempt,
+                    _CENTURION_PROBE_READ_ITERATIONS,
+                    len(data),
+                    common.strhex(data[:4]) if len(data) >= 4 else common.strhex(data),
+                )
+            else:
+                logger.debug(
+                    "(%s) centurion probe attempt %d/%d: read timeout (no data)",
+                    handle,
+                    attempt,
+                    _CENTURION_PROBE_READ_ITERATIONS,
+                )
         if data and len(data) >= 2 and ord(data[:1]) == state.report_id:
             state.device_addr = ord(data[1:2])
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("(%s) probed centurion device addr 0x%02X", handle, state.device_addr)
+                logger.debug(
+                    "(%s) probed centurion device addr 0x%02X on attempt %d",
+                    handle,
+                    state.device_addr,
+                    attempt,
+                )
             return True
-    logger.warning("(%s) centurion device_addr probe timed out, subsequent TX will use 0x00", handle)
+    logger.warning(
+        "(%s) centurion device_addr probe timed out after %d attempts, subsequent TX will use 0x00",
+        handle,
+        _CENTURION_PROBE_READ_ITERATIONS,
+    )
     return False
 
 
