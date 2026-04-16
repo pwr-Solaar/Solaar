@@ -338,18 +338,19 @@ def _centurion_frame_header(state: CenturionHandleState, cpl_length: int, flags:
 
 _CENTURION_REPORT_IDS = (CENTURION_REPORT_ID, CENTURION_ADDRESSED_REPORT_ID)
 
-# Read timeout (ms) for the brute-force device_addr probe below.
-_CENTURION_PROBE_READ_TIMEOUT_MS = 500
-_CENTURION_PROBE_READ_ITERATIONS = 3
+# Per-candidate read timeout (ms) for the device_addr probe.
+# USB round-trip is <1ms; 20ms gives plenty of margin.
+_CENTURION_PROBE_PER_ADDR_TIMEOUT_MS = 20
 
 
 def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
     """Brute-force probe the device address byte for a 0x50-variant Centurion handle.
 
-    Sends a ROOT.GetProtocolVersion request for every possible device_addr
-    (0x00–0xFF). The dongle silently ignores wrong addresses and responds
-    only to the correct one. The response carries the real address at byte[1],
-    which we extract and store on the handle state.
+    Sends a ROOT.GetProtocolVersion request for each candidate device_addr
+    (0x00–0xFF), reading briefly after each write. The dongle silently ignores
+    wrong addresses and responds only to the correct one. Stops on first hit.
+
+    Worst case (addr=0xFF): 256 × 20ms = ~5s. Typical G522 (addr=0x23): ~0.7s.
 
     No-op for 0x51 (no device_addr byte) or when an address is already known.
     Returns True if the address was learned.
@@ -357,40 +358,35 @@ def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
     if state.report_id != CENTURION_ADDRESSED_REPORT_ID or state.device_addr is not None:
         return False
     ihandle = int(handle)
-    logger.info("(%s) probing centurion device_addr: brute-force 0x00-0xFF", handle)
+    logger.info("(%s) probing centurion device_addr: scanning 0x00-0xFF", handle)
 
     # ROOT.GetProtocolVersion: feat_idx=0x00, func=0x10, 3 zero param bytes
     payload = bytes([0x00, 0x10, 0x00, 0x00, 0x00])
     cpl_length = len(payload) + 1  # +1 for flags byte
-    write_failed = 0
+    write_errors = 0
 
-    # Send a ROOT query for every possible device_addr (256 frames).
-    # The dongle ignores frames with the wrong address. Only the matching
-    # one produces a response that we can read back.
     for addr in range(256):
         frame = struct.pack("!BBBB", CENTURION_ADDRESSED_REPORT_ID, addr, cpl_length, 0x00) + payload
         frame = frame + b"\x00" * (CENTURION_FRAME_SIZE - len(frame))
         try:
             hidapi.write(ihandle, frame)
         except Exception:
-            write_failed += 1
-            if write_failed > 3:
+            write_errors += 1
+            if write_errors > 3:
                 logger.warning("(%s) centurion device_addr probe: too many write failures, aborting", handle)
                 return False
-
-    # Read back the response — dongle only replied to the correct address.
-    for _attempt in range(_CENTURION_PROBE_READ_ITERATIONS):
+            continue
         try:
-            data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_READ_TIMEOUT_MS)
+            data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_PER_ADDR_TIMEOUT_MS)
         except Exception as reason:
             logger.warning("(%s) centurion device_addr probe read failed: %s", handle, reason)
             return False
         if data and len(data) >= 2 and ord(data[:1]) == state.report_id:
             state.device_addr = ord(data[1:2])
-            logger.info("(%s) probed centurion device addr 0x%02X", handle, state.device_addr)
+            logger.info("(%s) probed centurion device addr 0x%02X (after %d candidates)", handle, state.device_addr, addr + 1)
             return True
 
-    logger.warning("(%s) centurion device_addr brute-force probe got no response", handle)
+    logger.warning("(%s) centurion device_addr probe: no response from any of 256 candidates", handle)
     return False
 
 

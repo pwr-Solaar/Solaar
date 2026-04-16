@@ -326,28 +326,33 @@ class TestProbeCenturionDeviceAddr:
     def teardown_method(self):
         base._centurion_handles.pop(self.HANDLE, None)
 
-    def test_learns_addr_from_response(self):
+    def test_learns_addr_on_first_hit(self):
+        """Probe finds addr=0x23 on candidate #36 (0-indexed 0x23=35) and stops."""
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
+
+        def read_side_effect(_handle, _size, _timeout):
+            # Return a response only after the write with addr=0x23
+            if mock_write.call_count == 0x24:  # 0x23 is the 36th write (1-indexed)
+                return reply
+            return None
+
         with (
             mock.patch.object(base.hidapi, "write") as mock_write,
-            mock.patch.object(base.hidapi, "read", return_value=reply),
+            mock.patch.object(base.hidapi, "read", side_effect=read_side_effect),
         ):
             result = base.probe_centurion_device_addr(self.HANDLE, state)
         assert result is True
         assert state.device_addr == 0x23
-        # Should have written 256 probe frames (one per candidate addr)
-        assert mock_write.call_count == 256
-        # Each frame should be 64 bytes with report_id 0x50
-        for call in mock_write.call_args_list:
-            _, wdata = call[0]
-            assert len(wdata) == base.CENTURION_FRAME_SIZE
-            assert wdata[0] == CENTURION_ADDRESSED_REPORT_ID
+        # Should have stopped at candidate 0x23 (36 writes), not all 256
+        assert mock_write.call_count == 0x24
 
-    def test_skips_non_matching_frames_until_match(self):
+    def test_skips_non_matching_read_until_match(self):
+        """Non-0x50 frames in the read are ignored; next candidate's read succeeds."""
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         noise = b"\x11\xff" + b"\x00" * 62
         match = bytes([0x50, 0x42, 0x03, 0x00]) + b"\x00" * 60
+        # Reads cycle: noise, noise, match — so addr is found on 3rd candidate
         with (
             mock.patch.object(base.hidapi, "write"),
             mock.patch.object(base.hidapi, "read", side_effect=[noise, noise, match]),
@@ -356,7 +361,7 @@ class TestProbeCenturionDeviceAddr:
         assert result is True
         assert state.device_addr == 0x42
 
-    def test_returns_false_on_timeout(self):
+    def test_returns_false_when_no_response(self):
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         with (
             mock.patch.object(base.hidapi, "write"),
@@ -406,7 +411,7 @@ class TestProbeCenturionDeviceAddr:
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         with (
             mock.patch.object(base.hidapi, "write") as mock_write,
-            mock.patch.object(base.hidapi, "read", return_value=None),
+            mock.patch.object(base.hidapi, "read", return_value=None),  # no response → scans all 256
         ):
             base.probe_centurion_device_addr(self.HANDLE, state)
         assert mock_write.call_count == 256
