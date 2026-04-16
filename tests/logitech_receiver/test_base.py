@@ -316,7 +316,7 @@ class TestUnwrapCenturionFrame:
 
 
 class TestProbeCenturionDeviceAddr:
-    """Test probe_centurion_device_addr: write-then-read dance to learn device_addr."""
+    """Test probe_centurion_device_addr: brute-force write for all 256 addrs, then read."""
 
     HANDLE = 101
 
@@ -326,27 +326,26 @@ class TestProbeCenturionDeviceAddr:
     def teardown_method(self):
         base._centurion_handles.pop(self.HANDLE, None)
 
-    def test_learns_addr_from_first_frame(self):
+    def test_learns_addr_from_response(self):
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
         with (
             mock.patch.object(base.hidapi, "write") as mock_write,
-            mock.patch.object(base.hidapi, "read", return_value=reply) as mock_read,
+            mock.patch.object(base.hidapi, "read", return_value=reply),
         ):
             result = base.probe_centurion_device_addr(self.HANDLE, state)
         assert result is True
         assert state.device_addr == 0x23
-        # probe write is a 64-byte all-zero frame with just the report ID
-        mock_write.assert_called_once()
-        _, wdata = mock_write.call_args[0]
-        assert len(wdata) == base.CENTURION_FRAME_SIZE
-        assert wdata[0] == CENTURION_ADDRESSED_REPORT_ID
-        assert wdata[1:] == b"\x00" * (base.CENTURION_FRAME_SIZE - 1)
-        mock_read.assert_called_once()
+        # Should have written 256 probe frames (one per candidate addr)
+        assert mock_write.call_count == 256
+        # Each frame should be 64 bytes with report_id 0x50
+        for call in mock_write.call_args_list:
+            _, wdata = call[0]
+            assert len(wdata) == base.CENTURION_FRAME_SIZE
+            assert wdata[0] == CENTURION_ADDRESSED_REPORT_ID
 
     def test_skips_non_matching_frames_until_match(self):
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
-        # first two reads return unrelated frames, third returns our 0x50 frame
         noise = b"\x11\xff" + b"\x00" * 62
         match = bytes([0x50, 0x42, 0x03, 0x00]) + b"\x00" * 60
         with (
@@ -391,7 +390,7 @@ class TestProbeCenturionDeviceAddr:
         mock_write.assert_not_called()
         mock_read.assert_not_called()
 
-    def test_handles_write_failure(self):
+    def test_aborts_on_repeated_write_failure(self):
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         with (
             mock.patch.object(base.hidapi, "write", side_effect=OSError("no device")),
@@ -401,3 +400,15 @@ class TestProbeCenturionDeviceAddr:
         assert result is False
         assert state.device_addr is None
         mock_read.assert_not_called()
+
+    def test_write_frames_have_sequential_addrs(self):
+        """Verify each write uses a different device_addr from 0x00 to 0xFF."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", return_value=None),
+        ):
+            base.probe_centurion_device_addr(self.HANDLE, state)
+        assert mock_write.call_count == 256
+        addrs_sent = [mock_write.call_args_list[i][0][1][1] for i in range(256)]
+        assert addrs_sent == list(range(256))

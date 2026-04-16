@@ -338,19 +338,18 @@ def _centurion_frame_header(state: CenturionHandleState, cpl_length: int, flags:
 
 _CENTURION_REPORT_IDS = (CENTURION_REPORT_ID, CENTURION_ADDRESSED_REPORT_ID)
 
-# Per-iteration read timeout (ms) and total iterations for the 0x50 probe below.
+# Read timeout (ms) for the brute-force device_addr probe below.
 _CENTURION_PROBE_READ_TIMEOUT_MS = 500
 _CENTURION_PROBE_READ_ITERATIONS = 3
 
 
 def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
-    """Probe the device address byte for a 0x50-variant Centurion handle.
+    """Brute-force probe the device address byte for a 0x50-variant Centurion handle.
 
-    Sends a 64-byte all-zero frame with the detected report ID and reads back
-    the first response. The device answers with an error/unsolicited frame
-    whose byte[1] holds its device address. Without this probe, the very first
-    real TX ships with device_addr=0x00, which stricter firmware silently
-    drops — breaking dongle feature discovery before it starts.
+    Sends a ROOT.GetProtocolVersion request for every possible device_addr
+    (0x00–0xFF). The dongle silently ignores wrong addresses and responds
+    only to the correct one. The response carries the real address at byte[1],
+    which we extract and store on the handle state.
 
     No-op for 0x51 (no device_addr byte) or when an address is already known.
     Returns True if the address was learned.
@@ -358,58 +357,40 @@ def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
     if state.report_id != CENTURION_ADDRESSED_REPORT_ID or state.device_addr is not None:
         return False
     ihandle = int(handle)
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(
-            "(%s) probing centurion device_addr (report_id=0x%02X, %d iters x %d ms)",
-            handle,
-            state.report_id,
-            _CENTURION_PROBE_READ_ITERATIONS,
-            _CENTURION_PROBE_READ_TIMEOUT_MS,
-        )
-    probe = bytes([state.report_id]) + b"\x00" * (CENTURION_FRAME_SIZE - 1)
-    try:
-        hidapi.write(ihandle, probe)
-    except Exception as reason:
-        logger.warning("(%s) centurion device_addr probe write failed: %s", handle, reason)
-        return False
-    for attempt in range(1, _CENTURION_PROBE_READ_ITERATIONS + 1):
+    logger.info("(%s) probing centurion device_addr: brute-force 0x00-0xFF", handle)
+
+    # ROOT.GetProtocolVersion: feat_idx=0x00, func=0x10, 3 zero param bytes
+    payload = bytes([0x00, 0x10, 0x00, 0x00, 0x00])
+    cpl_length = len(payload) + 1  # +1 for flags byte
+    write_failed = 0
+
+    # Send a ROOT query for every possible device_addr (256 frames).
+    # The dongle ignores frames with the wrong address. Only the matching
+    # one produces a response that we can read back.
+    for addr in range(256):
+        frame = struct.pack("!BBBB", CENTURION_ADDRESSED_REPORT_ID, addr, cpl_length, 0x00) + payload
+        frame = frame + b"\x00" * (CENTURION_FRAME_SIZE - len(frame))
+        try:
+            hidapi.write(ihandle, frame)
+        except Exception:
+            write_failed += 1
+            if write_failed > 3:
+                logger.warning("(%s) centurion device_addr probe: too many write failures, aborting", handle)
+                return False
+
+    # Read back the response — dongle only replied to the correct address.
+    for _attempt in range(_CENTURION_PROBE_READ_ITERATIONS):
         try:
             data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_READ_TIMEOUT_MS)
         except Exception as reason:
             logger.warning("(%s) centurion device_addr probe read failed: %s", handle, reason)
             return False
-        if logger.isEnabledFor(logging.DEBUG):
-            if data:
-                logger.debug(
-                    "(%s) centurion probe attempt %d/%d: got %d bytes, head=%s",
-                    handle,
-                    attempt,
-                    _CENTURION_PROBE_READ_ITERATIONS,
-                    len(data),
-                    common.strhex(data[:4]) if len(data) >= 4 else common.strhex(data),
-                )
-            else:
-                logger.debug(
-                    "(%s) centurion probe attempt %d/%d: read timeout (no data)",
-                    handle,
-                    attempt,
-                    _CENTURION_PROBE_READ_ITERATIONS,
-                )
         if data and len(data) >= 2 and ord(data[:1]) == state.report_id:
             state.device_addr = ord(data[1:2])
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    "(%s) probed centurion device addr 0x%02X on attempt %d",
-                    handle,
-                    state.device_addr,
-                    attempt,
-                )
+            logger.info("(%s) probed centurion device addr 0x%02X", handle, state.device_addr)
             return True
-    logger.warning(
-        "(%s) centurion device_addr probe timed out after %d attempts, subsequent TX will use 0x00",
-        handle,
-        _CENTURION_PROBE_READ_ITERATIONS,
-    )
+
+    logger.warning("(%s) centurion device_addr brute-force probe got no response", handle)
     return False
 
 
