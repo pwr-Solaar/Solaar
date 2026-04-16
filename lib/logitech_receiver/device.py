@@ -242,7 +242,13 @@ class Device:
                 self.ping()
             except exceptions.NoSuchDevice:
                 logger.warning("device %s inaccessible - no protocol set", self)
-        return self._protocol or 0
+        result = self._protocol or 0
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        # Ensure all `protocol < 2.0` gates route through the 2.0 code path.
+        if self.centurion and result < 2.0:
+            return 2.0
+        return result
 
     @property
     def codename(self):

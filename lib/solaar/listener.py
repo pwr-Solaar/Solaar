@@ -152,6 +152,12 @@ class SolaarListener(listener.EventsListener):
             from logitech_receiver.device import CenturionReceiver
 
             if isinstance(self.receiver, CenturionReceiver):
+                if self.receiver._pending:
+                    ihandle = int(self.receiver.handle)
+                    state = base._centurion_handles.get(ihandle)
+                    if state and state.device_addr is not None:
+                        self.receiver._complete_deferred_init()
+                        self._status_changed(self.receiver)
                 self._handle_centurion_notification(n)
                 return
             # a receiver notification

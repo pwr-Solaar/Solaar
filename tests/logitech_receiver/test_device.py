@@ -17,6 +17,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
+from unittest import mock
 
 import pytest
 
@@ -101,8 +102,9 @@ def test_create_centurion_device():
     """Test that a centurion device gets hidpp_long forced to True and centurion flag set."""
     from logitech_receiver import base
 
-    low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
-    test_device = device.create_device(low_level_mock, di_0AF7)
+    with mock.patch.object(base, "probe_centurion_device_addr", return_value=False):
+        low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
+        test_device = device.create_device(low_level_mock, di_0AF7)
 
     assert test_device is not None
     assert test_device.centurion is True
@@ -122,8 +124,9 @@ def test_create_centurion_0x50_device():
     """Test that a 0x50 centurion device gets the correct report ID registered."""
     from logitech_receiver import base
 
-    low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
-    test_device = device.create_device(low_level_mock, di_0B18)
+    with mock.patch.object(base, "probe_centurion_device_addr", return_value=False):
+        low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
+        test_device = device.create_device(low_level_mock, di_0B18)
 
     assert test_device is not None
     assert test_device.centurion is True
