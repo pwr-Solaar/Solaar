@@ -91,9 +91,12 @@ class NotificationFlag(IntFlag):
     @classmethod
     def flag_names(cls, flags) -> List[str]:
         """Extract the names of the flags from the integer."""
-        if flags is None or flags.name is None:
+        if flags is None:
             return []
-        return flags.name.replace("_", " ").lower().split("|")
+        if flags.name is not None:
+            return flags.name.replace("_", " ").lower().split("|")
+        # Python < 3.11: .name is None for composite flags, decompose manually
+        return [m.name.replace("_", " ").lower() for m in cls if m.value and m in flags]
 
     NUMPAD_NUMERICAL_KEYS = 0x800000
     F_LOCK_STATUS = 0x400000
