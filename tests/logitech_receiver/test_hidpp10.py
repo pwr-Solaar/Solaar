@@ -300,7 +300,8 @@ def test_notification_flag_str(flag_bits, expected_names):
     "flags, expected",
     [
         (None, []),
-        (hidpp10_constants.NotificationFlag(0x000900), ["software present", "wireless"]),  # composite flag, .name is None on Python < 3.11
+        # composite flag, .name is None on Python < 3.11
+        (hidpp10_constants.NotificationFlag(0x000900), ["software present", "wireless"]),
         (hidpp10_constants.NotificationFlag(0x100000), ["battery status"]),
         (hidpp10_constants.NotificationFlag(0x080000), ["mouse extra buttons"]),
     ],
