@@ -338,6 +338,46 @@ def _centurion_frame_header(state: CenturionHandleState, cpl_length: int, flags:
 
 _CENTURION_REPORT_IDS = (CENTURION_REPORT_ID, CENTURION_ADDRESSED_REPORT_ID)
 
+# Per-iteration read timeout (ms) and total iterations for the 0x50 probe below.
+_CENTURION_PROBE_READ_TIMEOUT_MS = 500
+_CENTURION_PROBE_READ_ITERATIONS = 3
+
+
+def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
+    """Probe the device address byte for a 0x50-variant Centurion handle.
+
+    Sends a 64-byte all-zero frame with the detected report ID and reads back
+    the first response. The device answers with an error/unsolicited frame
+    whose byte[1] holds its device address. Without this probe, the very first
+    real TX ships with device_addr=0x00, which stricter firmware silently
+    drops — breaking dongle feature discovery before it starts.
+
+    No-op for 0x51 (no device_addr byte) or when an address is already known.
+    Returns True if the address was learned.
+    """
+    if state.report_id != CENTURION_ADDRESSED_REPORT_ID or state.device_addr is not None:
+        return False
+    ihandle = int(handle)
+    probe = bytes([state.report_id]) + b"\x00" * (CENTURION_FRAME_SIZE - 1)
+    try:
+        hidapi.write(ihandle, probe)
+    except Exception as reason:
+        logger.warning("(%s) centurion device_addr probe write failed: %s", handle, reason)
+        return False
+    for _ in range(_CENTURION_PROBE_READ_ITERATIONS):
+        try:
+            data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_READ_TIMEOUT_MS)
+        except Exception as reason:
+            logger.warning("(%s) centurion device_addr probe read failed: %s", handle, reason)
+            return False
+        if data and len(data) >= 2 and ord(data[:1]) == state.report_id:
+            state.device_addr = ord(data[1:2])
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("(%s) probed centurion device addr 0x%02X", handle, state.device_addr)
+            return True
+    logger.warning("(%s) centurion device_addr probe timed out, subsequent TX will use 0x00", handle)
+    return False
+
 
 def _unwrap_centurion_frame(data: bytes, ihandle: int, handle) -> bytes:
     """Unwrap a Centurion CPL frame (0x50 or 0x51) into a standard HID++ long message.

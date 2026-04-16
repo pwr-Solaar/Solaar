@@ -492,7 +492,9 @@ def create_centurion_receiver(low_level, device_info, setting_callback=None):
         handle = low_level.open_path(device_info.path)
         if handle:
             report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
-            base._centurion_handles[int(handle)] = base.CenturionHandleState(report_id=report_id)
+            state = base.CenturionHandleState(report_id=report_id)
+            base._centurion_handles[int(handle)] = state
+            base.probe_centurion_device_addr(handle, state)
             cr = CenturionReceiver(low_level, handle, device_info, setting_callback)
             # Check if any discovered feature is CentPPBridge (0x0003)
             has_bridge = any(feat_id == CenturionCoreFeature.CENT_PP_BRIDGE for _, feat_id, _ in (cr.dongle_features or []))

@@ -313,3 +313,91 @@ class TestUnwrapCenturionFrame:
         assert result[0] == 0x11
         assert result[1] == 0xFF
         assert result[2:63] == payload
+
+
+class TestProbeCenturionDeviceAddr:
+    """Test probe_centurion_device_addr: write-then-read dance to learn device_addr."""
+
+    HANDLE = 101
+
+    def setup_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def teardown_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def test_learns_addr_from_first_frame(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", return_value=reply) as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x23
+        # probe write is a 64-byte all-zero frame with just the report ID
+        mock_write.assert_called_once()
+        _, wdata = mock_write.call_args[0]
+        assert len(wdata) == base.CENTURION_FRAME_SIZE
+        assert wdata[0] == CENTURION_ADDRESSED_REPORT_ID
+        assert wdata[1:] == b"\x00" * (base.CENTURION_FRAME_SIZE - 1)
+        mock_read.assert_called_once()
+
+    def test_skips_non_matching_frames_until_match(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        # first two reads return unrelated frames, third returns our 0x50 frame
+        noise = b"\x11\xff" + b"\x00" * 62
+        match = bytes([0x50, 0x42, 0x03, 0x00]) + b"\x00" * 60
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", side_effect=[noise, noise, match]),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x42
+
+    def test_returns_false_on_timeout(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", return_value=None),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+
+    def test_noop_for_0x51_variant(self):
+        state = CenturionHandleState(report_id=CENTURION_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_noop_when_addr_already_known(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr == 0x23
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_handles_write_failure(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write", side_effect=OSError("no device")),
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_read.assert_not_called()

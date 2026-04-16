@@ -79,7 +79,9 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
         if handle:
             if getattr(device_info, "centurion", False):
                 report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
-                base._centurion_handles[int(handle)] = base.CenturionHandleState(report_id=report_id)
+                state = base.CenturionHandleState(report_id=report_id)
+                base._centurion_handles[int(handle)] = state
+                base.probe_centurion_device_addr(handle, state)
             # a direct connected device might not be online (as reported by user)
             return Device(
                 low_level,
