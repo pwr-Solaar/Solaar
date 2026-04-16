@@ -317,7 +317,7 @@ class CenturionReceiver:
             if feat_id == feature_int:
                 request_id = (index << 8) | (function & 0xFF)
                 return self.request(request_id, *params, no_reply=no_reply)
-        raise exceptions.FeatureNotSupported(feature)
+        raise exceptions.FeatureNotSupported(feature=feature)
 
     def _discover_dongle_features(self):
         """Independently discover features on the dongle hardware."""
@@ -361,7 +361,7 @@ class CenturionReceiver:
 
     @property
     def firmware(self):
-        if self._firmware is None and self.handle:
+        if self._firmware is None and self.handle and not self._pending:
             self._firmware = get_firmware_centurion(self)
         return self._firmware or ()
 
