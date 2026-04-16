@@ -326,8 +326,8 @@ class TestProbeCenturionDeviceAddr:
     def teardown_method(self):
         base._centurion_handles.pop(self.HANDLE, None)
 
-    def test_learns_addr_on_first_hit(self):
-        """Probe finds addr=0x23 on candidate #36 (0-indexed 0x23=35) and stops."""
+    def test_learns_addr_and_sweeps_all(self):
+        """Full sweep finds addr=0x23 and continues to 0xFF, logging all responders."""
         state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
         reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
 
@@ -344,8 +344,8 @@ class TestProbeCenturionDeviceAddr:
             result = base.probe_centurion_device_addr(self.HANDLE, state)
         assert result is True
         assert state.device_addr == 0x23
-        # Should have stopped at candidate 0x23 (36 writes), not all 256
-        assert mock_write.call_count == 0x24
+        # Full sweep — should have written all 256 candidates
+        assert mock_write.call_count == 256
 
     def test_skips_non_matching_read_until_match(self):
         """Non-0x50 frames in the read are ignored; next candidate's read succeeds."""

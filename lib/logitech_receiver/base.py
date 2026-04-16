@@ -348,22 +348,25 @@ def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
 
     Sends a ROOT.GetProtocolVersion request for each candidate device_addr
     (0x00–0xFF), reading briefly after each write. The dongle silently ignores
-    wrong addresses and responds only to the correct one. Stops on first hit.
+    wrong addresses and responds only to the correct one.
 
-    Worst case (addr=0xFF): 256 × 20ms = ~5s. Typical G522 (addr=0x23): ~0.7s.
+    Sweeps ALL 256 candidates and logs every address that responds, so we can
+    discover special addresses (broadcast, etc.) during initial field testing.
+    Uses the first responding address as the device_addr.
 
     No-op for 0x51 (no device_addr byte) or when an address is already known.
-    Returns True if the address was learned.
+    Returns True if at least one address responded.
     """
     if state.report_id != CENTURION_ADDRESSED_REPORT_ID or state.device_addr is not None:
         return False
     ihandle = int(handle)
-    logger.info("(%s) probing centurion device_addr: scanning 0x00-0xFF", handle)
+    logger.info("(%s) probing centurion device_addr: full sweep 0x00-0xFF", handle)
 
     # ROOT.GetProtocolVersion: feat_idx=0x00, func=0x10, 3 zero param bytes
     payload = bytes([0x00, 0x10, 0x00, 0x00, 0x00])
     cpl_length = len(payload) + 1  # +1 for flags byte
     write_errors = 0
+    responding_addrs = []
 
     for addr in range(256):
         frame = struct.pack("!BBBB", CENTURION_ADDRESSED_REPORT_ID, addr, cpl_length, 0x00) + payload
@@ -374,19 +377,30 @@ def probe_centurion_device_addr(handle, state: CenturionHandleState) -> bool:
             write_errors += 1
             if write_errors > 3:
                 logger.warning("(%s) centurion device_addr probe: too many write failures, aborting", handle)
-                return False
+                break
             continue
         try:
             data = hidapi.read(ihandle, CENTURION_FRAME_SIZE, _CENTURION_PROBE_PER_ADDR_TIMEOUT_MS)
         except Exception as reason:
-            logger.warning("(%s) centurion device_addr probe read failed: %s", handle, reason)
-            return False
+            logger.warning("(%s) centurion device_addr probe read failed at addr 0x%02X: %s", handle, addr, reason)
+            break
         if data and len(data) >= 2 and ord(data[:1]) == state.report_id:
-            state.device_addr = ord(data[1:2])
-            logger.info("(%s) probed centurion device addr 0x%02X (after %d candidates)", handle, state.device_addr, addr + 1)
-            return True
+            resp_addr = ord(data[1:2])
+            responding_addrs.append((addr, resp_addr, common.strhex(data[:8])))
+            if state.device_addr is None:
+                state.device_addr = resp_addr
 
-    logger.warning("(%s) centurion device_addr probe: no response from any of 256 candidates", handle)
+    logger.info(
+        "(%s) centurion device_addr probe complete: %d responding, results=%s",
+        handle,
+        len(responding_addrs),
+        responding_addrs,
+    )
+    if state.device_addr is not None:
+        logger.info("(%s) using centurion device addr 0x%02X", handle, state.device_addr)
+        return True
+
+    logger.warning("(%s) centurion device_addr probe: no response from any candidate", handle)
     return False
 
 
