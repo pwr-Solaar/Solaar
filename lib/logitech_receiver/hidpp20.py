@@ -333,6 +333,12 @@ class FeaturesArray(dict):
             index = super().get(feature)
             if index is not None:
                 return index
+            # Centurion devices enumerate all features upfront in _check_centurion().
+            # If the feature isn't in the dict after _check(), it genuinely doesn't
+            # exist — skip the raw ROOT.GetFeature query that the dongle rejects
+            # with LOGITECH_ERROR and that creates cycling log spam during settings init.
+            if getattr(self.device, "centurion", False):
+                return None
             try:
                 response = self.device.request(0x0000, struct.pack("!H", feature))
             except exceptions.FeatureCallError:
