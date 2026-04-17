@@ -222,7 +222,9 @@ class Device:
             self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
             self.registers = self.descriptor.registers if self.descriptor.registers else []
 
-        if self._protocol is not None:
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        if self._protocol is not None and not self.centurion:
             self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
         else:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
