@@ -639,6 +639,18 @@ class Device:
                 # Ensure sub-device features are discovered before routing decision
                 if self.features is not None:
                     self.features._check()
+                # Guard against Centurion/HID++ 2.0 feature ID collisions. IntEnum
+                # members with the same int value hash equal, so a dict lookup for
+                # SupportedFeature.DEVICE_NAME (0x0005) succeeds even when the
+                # device actually has CenturionCoreFeature.MULTI_HOST_CONTROL at
+                # that slot. If the type of the stored enum differs from what the
+                # caller asked for, treat the feature as unsupported.
+                if self.features is not None:
+                    idx = self.features.get(feature)
+                    if idx is not None:
+                        stored = self.features.inverse.get(idx)
+                        if stored is not None and type(stored) is not type(feature):
+                            return None
                 if feature in getattr(self, "_centurion_sub_features", ()):
                     sub_idx = self.features.get(feature)
                     if sub_idx is not None:
