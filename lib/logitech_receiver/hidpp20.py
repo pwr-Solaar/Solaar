@@ -215,8 +215,9 @@ class FeaturesArray(dict):
     def _discover_sub_device_features(self, bridge_index):
         """Phase B: Discover sub-device features via CentPPBridge.
 
-        Uses CenturionFeatureSet bulk query (function 1, index 0) routed through
-        the bridge to get all sub-device features at once.
+        Uses CenturionFeatureSet bulk query (function 1) routed through the bridge.
+        Each response fits only ~13-14 features in a single Centurion frame, so
+        we loop with increasing start_index until we see an empty batch.
         """
         # First, find the sub-device's FeatureSet index via CenturionRoot (sub_feat_idx=0)
         # Query: CenturionRoot.GetFeature(0x0001) to find FeatureSet index on sub-device
@@ -231,39 +232,47 @@ class FeaturesArray(dict):
             logger.warning("Sub-device FeatureSet not found (index=0)")
             return
 
-        # Bulk enumerate: CenturionFeatureSet.GetFeatureId(func=1=0x10, start_index=0)
-        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
-        response = self.device.centurion_bridge_request(sub_fs_index, 0x10, 0x00)
-        if response is None or len(response) < 1:
-            logger.warning("Failed to enumerate sub-device features")
-            return
-
-        entry_count = response[0]
-        entries = response[1:]
+        # Bulk enumerate: CenturionFeatureSet.GetFeatureId(func=1=0x10, start_index=N)
+        # Response per batch: [count, (feat_hi, feat_lo, type, flags) × count]
         sub_feat_idx = 0  # sub-device feature indices start at 0
-        for i in range(entry_count):
-            offset = i * 4
-            if offset + 2 > len(entries):
+        max_batches = 16  # safety bound: 16 × 14 = 224 features max
+        for _batch in range(max_batches):
+            response = self.device.centurion_bridge_request(sub_fs_index, 0x10, sub_feat_idx)
+            if response is None or len(response) < 1:
                 break
-            feat_id = struct.unpack("!H", entries[offset : offset + 2])[0]
-            try:
-                feature = SupportedFeature(feat_id)
-            except ValueError:
-                feature = f"unknown:{feat_id:04X}"
-            # Store sub-device index for ALL features (including parent overlaps)
-            # This enables querying the sub-device's copy of shared features via bridge
-            self.device._centurion_sub_indices[feature] = sub_feat_idx
-            # Only store unique sub-device features in dict (skip parent overlaps like ROOT, FEATURE_SET)
-            # This avoids clobbering parent inverse entries via __setitem__
-            if dict.get(self, feature) is None:
-                dict.__setitem__(self, feature, sub_feat_idx)
-                self.device._centurion_sub_features.add(feature)
-            # Always store in sub_inverse for sub-device enumerate/display
-            self.sub_inverse[sub_feat_idx] = feature
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
-            sub_feat_idx += 1
+            entry_count = response[0]
+            if entry_count == 0:
+                break
+            entries = response[1:]
+            parsed_this_batch = 0
+            for i in range(entry_count):
+                offset = i * 4
+                if offset + 2 > len(entries):
+                    break
+                feat_id = struct.unpack("!H", entries[offset : offset + 2])[0]
+                try:
+                    feature = SupportedFeature(feat_id)
+                except ValueError:
+                    feature = f"unknown:{feat_id:04X}"
+                # Store sub-device index for ALL features (including parent overlaps)
+                # This enables querying the sub-device's copy of shared features via bridge
+                self.device._centurion_sub_indices[feature] = sub_feat_idx
+                # Only store unique sub-device features in dict (skip parent overlaps like ROOT, FEATURE_SET)
+                # This avoids clobbering parent inverse entries via __setitem__
+                if dict.get(self, feature) is None:
+                    dict.__setitem__(self, feature, sub_feat_idx)
+                    self.device._centurion_sub_features.add(feature)
+                # Always store in sub_inverse for sub-device enumerate/display
+                self.sub_inverse[sub_feat_idx] = feature
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
+                sub_feat_idx += 1
+                parsed_this_batch += 1
+            # If this batch was short (device returned fewer than requested), we're done.
+            if parsed_this_batch < entry_count:
+                break
         self._sub_feature_count = sub_feat_idx
+        logger.info("Centurion sub-device: discovered %d features total", sub_feat_idx)
 
     def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)
