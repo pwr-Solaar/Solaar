@@ -413,6 +413,31 @@ class Receiver:
         """Receiver specific unpairing."""
         return self.write_register(Registers.RECEIVER_PAIRING, 0x03, key)
 
+    def force_unpair_slot(self, slot: int) -> bool:
+        """Force-unpair a slot by writing the unpair register, ignoring cache state.
+
+        Intended for clearing stale pairings on receivers (Lightspeed in particular)
+        where Solaar cannot read pairing info for a slot. Bypasses the ``may_unpair``
+        and ``re_pairs`` gates that ``_unpair_device`` applies. Returns True if the
+        register write was acknowledged by the receiver.
+        """
+        if not self.handle:
+            return False
+        slot = int(slot)
+        reply = self._unpair_device_per_receiver(slot)
+        if reply:
+            cached = self._devices.get(slot)
+            if cached:
+                cached.online = False
+                cached.wpid = None
+            if slot in self._devices:
+                del self._devices[slot]
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("%s force-unpaired slot %d", self, slot)
+            return True
+        logger.warning("%s failed to force-unpair slot %d", self, slot)
+        return False
+
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
 
