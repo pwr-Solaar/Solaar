@@ -1931,6 +1931,25 @@ class HeadsetRGBHostMode(settings.Setting):
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     validator_class = settings_validator.BooleanValidator
 
+    def write(self, value, save=True):
+        # Diagnostic wrapper: log what GetHostModeState returns immediately
+        # before AND after the SetHostModeState write, so we can see whether
+        # (a) the write takes effect on the device or (b) our decoding of the
+        # response is wrong. solaar show has been reporting this value as
+        # False even after writes we believed succeeded.
+        try:
+            before = self._device.feature_request(self.feature, 0x70)
+        except Exception as e:
+            before = f"<err:{e}>"
+        logger.info("HeadsetRGBHostMode.write: before=%s requested=%s", before, value)
+        result = super().write(value, save=save)
+        try:
+            after = self._device.feature_request(self.feature, 0x70)
+        except Exception as e:
+            after = f"<err:{e}>"
+        logger.info("HeadsetRGBHostMode.write: after=%s write_returned=%s", after, result)
+        return result
+
 
 class HeadsetRGBColor(settings.Setting):
     """Pick a color from the shared `special_keys.COLORS` palette and apply it
