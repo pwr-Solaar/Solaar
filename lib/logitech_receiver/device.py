@@ -842,9 +842,18 @@ class Device:
         sub_feat_idx = reply_data[5]
         # Error response from sub-device
         if sub_feat_idx == 0xFF:
-            error_code = reply_data[8] if len(reply_data) > 8 else 0
+            # Error frame layout after sub_cpl: [0xFF, orig_feat_idx, orig_func_sw, error_code, ...]
             orig_feat_idx = reply_data[6] if len(reply_data) > 6 else 0
-            logger.debug("bridge sub-device error: feat_idx=%d error=0x%02X", orig_feat_idx, error_code)
+            orig_func_sw = reply_data[7] if len(reply_data) > 7 else 0
+            error_code = reply_data[8] if len(reply_data) > 8 else 0
+            # INFO level so the error is visible without -dd — lets testers see when
+            # the device rejects a write even if they can't get DEBUG logs.
+            logger.info(
+                "bridge sub-device error: orig_feat_idx=%d orig_func=0x%02X error=0x%02X",
+                orig_feat_idx,
+                orig_func_sw,
+                error_code,
+            )
             return None
         return reply_data[7:]  # response data after sub_cpl, sub_feat_idx, sub_func_sw
 
