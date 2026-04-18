@@ -1666,9 +1666,38 @@ class HeadsetMicGain(settings.Setting):
     feature = _F.HEADSET_MIC_GAIN
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = settings_validator.RangeValidator
+    # Fallback range covers int8; build() overrides with device-reported bounds
+    # from GetInfo (fn 0) so SetMicGain doesn't get device-specific
+    # out-of-range NACK (error 0x0B) on devices that use a small signed range
+    # (e.g. G522 reports a narrow window like -12..+12).
     min_value = -128
     max_value = 127
     validator_options = {"byte_count": 1, "signed": True}
+
+    @classmethod
+    def build(cls, device):
+        # GetInfo (function 0) returns [min_gain (int8), max_gain (int8)].
+        # LGHUB caches these once at startup to rescale SetMicGain writes.
+        try:
+            info = device.feature_request(cls.feature, 0x00)
+        except Exception:
+            info = None
+        if info and len(info) >= 2:
+            min_gain = struct.unpack("b", bytes([info[0]]))[0]
+            max_gain = struct.unpack("b", bytes([info[1]]))[0]
+            if max_gain <= min_gain:  # sanity — fall back to class defaults
+                min_gain, max_gain = cls.min_value, cls.max_value
+            else:
+                logger.info(
+                    "HeadsetMicGain: device reports gain range [%d, %d]",
+                    min_gain,
+                    max_gain,
+                )
+        else:
+            min_gain, max_gain = cls.min_value, cls.max_value
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=min_gain, max_value=max_gain, byte_count=1, signed=True)
+        return cls(device, rw, validator)
 
 
 class HeadsetMixBalance(settings.Setting):
