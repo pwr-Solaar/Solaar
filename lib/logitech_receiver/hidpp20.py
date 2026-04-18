@@ -196,13 +196,19 @@ class FeaturesArray(dict):
             response = self.device.request((fs_index << 8) | 0x10, index)
             if response is None or len(response) < 3:
                 continue
-            # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, flags]
+            # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, version]
             feat_id = struct.unpack("!H", response[1:3])[0]
+            feat_type = response[3] if len(response) > 3 else 0
+            feat_version = response[4] if len(response) > 4 else 0
             feature = resolve_feature(feat_id, centurion=True)
             if feature is None:
                 feature = f"unknown:{feat_id:04X}"
             self[feature] = index
             self.inverse[index] = feature
+            # Record version/flags so version-gated settings (sidetone, auto-sleep)
+            # use the correct payload format on direct USB Centurion devices too.
+            self.version[feature] = feat_version
+            self.flags[feature] = feat_type
             if feature is CenturionCoreFeature.CENT_PP_BRIDGE:
                 bridge_index = index
 
