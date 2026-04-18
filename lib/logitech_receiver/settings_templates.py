@@ -1835,29 +1835,48 @@ class HeadsetRGBColor(settings.Setting):
         idx = int(value)
         if not (0 <= idx < len(_HEADSET_RGB_COLORS)):
             return None
-        _name, rgb = _HEADSET_RGB_COLORS[idx]
+        name, rgb = _HEADSET_RGB_COLORS[idx]
         device = self._device
         if not device.online:
+            logger.info("HeadsetRGBColor: device offline, skipping write of %s", name)
             return None
         try:
             if rgb is None:
                 # "Off" → disable host mode, return to firmware control.
-                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x00")
+                logger.info("HeadsetRGBColor: disabling host mode (SetHostModeState 0x00)")
+                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x00")
+                logger.info("HeadsetRGBColor: SetHostModeState resp=%s", resp.hex() if resp else resp)
             else:
                 zone_ids = self._zone_ids(device)
                 if not zone_ids:
-                    logger.warning("HeadsetRGBColor: no zones discovered; cannot set color")
+                    logger.warning("HeadsetRGBColor: no zones available; cannot set color %s", name)
                     return None
-                # Enable host mode first.
-                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
-                # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
                 r, g, b = rgb
+                logger.info(
+                    "HeadsetRGBColor: setting color %s RGB=(%02X,%02X,%02X) on %d zone(s): %s",
+                    name,
+                    r,
+                    g,
+                    b,
+                    len(zone_ids),
+                    [f"0x{z:02X}" for z in zone_ids],
+                )
+                # Enable host mode first.
+                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
+                logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
+                # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
                 payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
-                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
+                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
+                logger.info(
+                    "HeadsetRGBColor: SetRgbZonesSingleValue payload=%s resp=%s",
+                    payload.hex(),
+                    resp.hex() if resp else resp,
+                )
                 # FrameEnd: commit the frame.
-                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
+                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
+                logger.info("HeadsetRGBColor: FrameEnd resp=%s", resp.hex() if resp else resp)
         except Exception as e:
-            logger.warning("HeadsetRGBColor write failed: %s", e)
+            logger.warning("HeadsetRGBColor write failed for %s: %s", name, e)
             return None
         self.update(value, save)
         return value
@@ -1870,17 +1889,34 @@ class HeadsetRGBColor(settings.Setting):
             return cached
         try:
             resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x10)
-        except Exception:
+        except Exception as e:
+            logger.warning("HeadsetRGBColor: GetRGBZoneInfo raised %s", e)
             resp = None
         if not resp or len(resp) < 1:
-            device._headset_rgb_zone_ids = []
-            return []
+            logger.warning(
+                "HeadsetRGBColor: GetRGBZoneInfo returned %s, falling back to zones [0x01, 0x02]",
+                resp,
+            )
+            device._headset_rgb_zone_ids = [0x01, 0x02]
+            return device._headset_rgb_zone_ids
         zone_count = resp[0]
         # Response: [count, 3 reserved, reserved, zone_ids...]
         zone_ids = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
         # Fallback to typical left/right earcup zone IDs if response format differs.
         if not zone_ids:
+            logger.warning(
+                "HeadsetRGBColor: GetRGBZoneInfo unexpected format count=%d resp=%s, falling back to [0x01, 0x02]",
+                zone_count,
+                resp.hex(),
+            )
             zone_ids = [0x01, 0x02]
+        else:
+            logger.info(
+                "HeadsetRGBColor: discovered %d zone(s) %s (raw resp=%s)",
+                len(zone_ids),
+                [f"0x{z:02X}" for z in zone_ids],
+                resp.hex(),
+            )
         device._headset_rgb_zone_ids = zone_ids
         return zone_ids
 
