@@ -242,7 +242,11 @@ class FeaturesArray(dict):
         total_count = count_resp[0]
         logger.info("Centurion sub-device: FeatureSet reports %d features", total_count)
 
-        # Per-index query: GetFeatureId (function 1 = 0x10). Response: [remaining, feat_hi, feat_lo, type, flags].
+        # Per-index query: GetFeatureId (function 1 = 0x10).
+        # Response: [remaining, feat_hi, feat_lo, type, version].
+        # We now also record `type` (flags) and `version` for each feature so
+        # version-gated settings (sidetone, auto-sleep, etc.) can use the
+        # correct payload format instead of defaulting to V0.
         sub_feat_idx = 0
         for idx in range(total_count):
             response = self.device.centurion_bridge_request(sub_fs_index, 0x10, idx)
@@ -250,6 +254,8 @@ class FeaturesArray(dict):
                 logger.debug("Centurion sub-device: no response at index %d", idx)
                 continue
             feat_id = struct.unpack("!H", response[1:3])[0]
+            feat_type = response[3] if len(response) > 3 else 0
+            feat_version = response[4] if len(response) > 4 else 0
             try:
                 feature = SupportedFeature(feat_id)
             except ValueError:
@@ -259,8 +265,18 @@ class FeaturesArray(dict):
                 dict.__setitem__(self, feature, sub_feat_idx)
                 self.device._centurion_sub_features.add(feature)
             self.sub_inverse[sub_feat_idx] = feature
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
+            # Record version/flags so downstream settings can version-gate their
+            # payload format. get_feature_version(feature) reads self.version[feature].
+            self.version[feature] = feat_version
+            self.flags[feature] = feat_type
+            if feat_version > 0 and logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Centurion sub-device feature: %s at sub-index %d, version=%d, flags=0x%02X",
+                    feature,
+                    sub_feat_idx,
+                    feat_version,
+                    feat_type,
+                )
             sub_feat_idx += 1
         self._sub_feature_count = sub_feat_idx
         logger.info("Centurion sub-device: discovered %d features total", sub_feat_idx)

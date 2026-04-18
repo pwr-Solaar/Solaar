@@ -1690,8 +1690,26 @@ class HeadsetAutoSleep(settings.Setting):
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
     validator_class = settings_validator.RangeValidator
     min_value = 0
-    max_value = 255
+    # Timer byte count depends on feature version:
+    #   V<3 : 1 byte (0-255)
+    #   V=3 : 2 bytes (0-65535)
+    #   V>=4: 3 bytes (0-16777215)
+    # build() picks the correct width based on the device's reported version.
+    max_value = 0xFFFFFF
     validator_options = {"byte_count": 1}
+
+    @classmethod
+    def build(cls, device):
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version >= 4:
+            byte_count, max_value = 3, 0xFFFFFF
+        elif version >= 3:
+            byte_count, max_value = 2, 0xFFFF
+        else:
+            byte_count, max_value = 1, 0xFF
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=0, max_value=max_value, byte_count=byte_count)
+        return cls(device, rw, validator)
 
 
 class HeadsetOnboardEQ(settings.RangeFieldSetting):
