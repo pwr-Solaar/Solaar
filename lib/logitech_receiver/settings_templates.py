@@ -2028,12 +2028,24 @@ class HeadsetRGBColor(settings.Setting):
                 resp.hex() if resp else resp,
             )
             # FrameEnd: commit the frame.
-            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent/final
-            # flush. The firmware silently discards frames when byte 0 is 0x00 —
-            # canonical protocol doc was wrong on this point. See
+            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent
+            # (saves to onboard NVS as baseline; survives the firmware's
+            # host-mode self-release window). 0x00 is silently discarded by
+            # firmware — canonical protocol doc was wrong. See
             # HEADSET_RGB_HOSTMODE_WIRE_PROTOCOL.md.
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x01\x00\x00\x00")
-            logger.info("HeadsetRGBColor: FrameEnd resp=%s", resp.hex() if resp else resp)
+            #
+            # Use 0x02 for user-visible color picks so the color sticks even
+            # after the firmware releases host mode. Use 0x01 when setting
+            # black (lights off) — mirroring LGHUB's turn_off_lighting so we
+            # don't overwrite the NVS baseline with all-zeros.
+            is_off = r == 0 and g == 0 and b == 0
+            frame_type = 0x01 if is_off else 0x02
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, bytes([frame_type, 0x00, 0x00, 0x00]))
+            logger.info(
+                "HeadsetRGBColor: FrameEnd frame_type=0x%02X resp=%s",
+                frame_type,
+                resp.hex() if resp else resp,
+            )
         except Exception as e:
             logger.warning("HeadsetRGBColor write failed for %s: %s", name, e)
             return None
