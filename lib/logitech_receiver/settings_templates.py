@@ -1906,6 +1906,11 @@ class HeadsetRGBColor(settings.Setting):
             logger.info("HeadsetRGBColor: device offline, skipping write of %s", name)
             return None
         try:
+            # Order per protocol doc: claim host mode FIRST, then enumerate zones,
+            # then set colors, then commit. GetRGBZoneInfo returns zero counts if
+            # we query before claiming control.
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
+            logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
             zone_ids = self._zone_ids(device)
             if not zone_ids:
                 logger.warning("HeadsetRGBColor: no zones available; cannot set color %s", name)
@@ -1919,9 +1924,6 @@ class HeadsetRGBColor(settings.Setting):
                 len(zone_ids),
                 [f"0x{z:02X}" for z in zone_ids],
             )
-            # Enable host mode first.
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
-            logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
             # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
             payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
             resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
@@ -1941,9 +1943,13 @@ class HeadsetRGBColor(settings.Setting):
 
     @staticmethod
     def _zone_ids(device):
-        """Query GetRGBZoneInfo (function 1) and return list of zone IDs."""
+        """Query GetRGBZoneInfo (function 1) and return list of zone IDs.
+
+        Caller must have enabled host mode first — querying before SetHostModeState
+        has been observed to return all zeros on the G522.
+        """
         cached = getattr(device, "_headset_rgb_zone_ids", None)
-        if cached is not None:
+        if cached:
             return cached
         try:
             resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x10)
@@ -1952,31 +1958,45 @@ class HeadsetRGBColor(settings.Setting):
             resp = None
         if not resp or len(resp) < 1:
             logger.warning(
-                "HeadsetRGBColor: GetRGBZoneInfo returned %s, falling back to zones [0x01, 0x02]",
+                "HeadsetRGBColor: GetRGBZoneInfo returned %s; NOT caching so we retry next write",
                 resp,
             )
-            device._headset_rgb_zone_ids = [0x01, 0x02]
-            return device._headset_rgb_zone_ids
+            return []
         zone_count = resp[0]
-        # Response: [count, 3 reserved, reserved, zone_ids...]
-        zone_ids = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
-        # Fallback to typical left/right earcup zone IDs if response format differs.
-        if not zone_ids:
-            logger.warning(
-                "HeadsetRGBColor: GetRGBZoneInfo unexpected format count=%d resp=%s, falling back to [0x01, 0x02]",
-                zone_count,
-                resp.hex(),
-            )
-            zone_ids = [0x01, 0x02]
-        else:
+        # Tight format observed on G522: [count, zone_ids...] with no reserved gap.
+        # The protocol doc shows 3-byte + 1-byte reserved gaps before zone IDs, but
+        # the G522 sub-device packs them immediately after the count.
+        tight = list(resp[1 : 1 + zone_count]) if 1 <= zone_count <= len(resp) - 1 else []
+        # Filter out zero bytes that are just padding (zone IDs should be non-zero).
+        tight = [z for z in tight if z != 0]
+        if tight and len(tight) == zone_count:
             logger.info(
-                "HeadsetRGBColor: discovered %d zone(s) %s (raw resp=%s)",
-                len(zone_ids),
-                [f"0x{z:02X}" for z in zone_ids],
+                "HeadsetRGBColor: discovered %d zone(s) %s (tight format, raw resp=%s)",
+                len(tight),
+                [f"0x{z:02X}" for z in tight],
                 resp.hex(),
             )
-        device._headset_rgb_zone_ids = zone_ids
-        return zone_ids
+            device._headset_rgb_zone_ids = tight
+            return tight
+        # Try the doc's format (with reserved gap) as fallback
+        gap = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
+        gap = [z for z in gap if z != 0]
+        if gap and len(gap) == zone_count:
+            logger.info(
+                "HeadsetRGBColor: discovered %d zone(s) %s (doc format, raw resp=%s)",
+                len(gap),
+                [f"0x{z:02X}" for z in gap],
+                resp.hex(),
+            )
+            device._headset_rgb_zone_ids = gap
+            return gap
+        # Neither format parsed cleanly; don't cache so next write retries.
+        logger.warning(
+            "HeadsetRGBColor: GetRGBZoneInfo ambiguous count=%d resp=%s; not caching",
+            zone_count,
+            resp.hex(),
+        )
+        return []
 
 
 class BrightnessControl(settings.Setting):
