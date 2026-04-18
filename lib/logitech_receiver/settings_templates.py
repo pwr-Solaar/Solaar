@@ -1768,6 +1768,123 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
         return result
 
 
+class HeadsetRGBHostMode(settings.Setting):
+    """Toggle host control of headset RGB lighting.
+
+    When enabled, solaar drives the LEDs via HeadsetRGBColor. When disabled,
+    firmware-driven onboard/signature effects resume.
+    """
+
+    name = "headset-rgb-hostmode"
+    label = _("Headset RGB Host Control")
+    description = _("Enable software control of headset RGB lighting.")
+    feature = _F.HEADSET_RGB_HOSTMODE
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
+    validator_class = settings_validator.BooleanValidator
+
+
+# Preset RGB colors for headset-rgb-color. Name → (R, G, B).
+# "Off" disables host mode and returns control to firmware.
+_HEADSET_RGB_COLORS = [
+    ("Off", None),
+    ("Red", (0xFF, 0x00, 0x00)),
+    ("Green", (0x00, 0xFF, 0x00)),
+    ("Blue", (0x00, 0x00, 0xFF)),
+    ("White", (0xFF, 0xFF, 0xFF)),
+    ("Yellow", (0xFF, 0xFF, 0x00)),
+    ("Cyan", (0x00, 0xFF, 0xFF)),
+    ("Magenta", (0xFF, 0x00, 0xFF)),
+    ("Orange", (0xFF, 0x80, 0x00)),
+    ("Purple", (0x80, 0x00, 0xFF)),
+]
+
+
+class HeadsetRGBColor(settings.Setting):
+    """Set headset RGB zones to a preset color.
+
+    Drives HeadsetRGBHostmode (0x0620). On write, enables host mode, queries
+    available zones, sets them all to the chosen RGB color, and commits via
+    FrameEnd. "Off" disables host mode to return control to firmware.
+    """
+
+    name = "headset-rgb-color"
+    label = _("Headset RGB Color")
+    description = _("Set headset LED color (zones set to a single preset).")
+    feature = _F.HEADSET_RGB_HOSTMODE
+    choices_universe = common.NamedInts(**{name: idx for idx, (name, _rgb) in enumerate(_HEADSET_RGB_COLORS)})
+    validator_class = settings_validator.ChoicesValidator
+    persist = True
+    # Write-only: we don't read back the current color (host mode just reports on/off).
+    rw_options = {"read_fnid": None, "write_fnid": None}
+
+    @classmethod
+    def build(cls, device):
+        rw = settings.FeatureRW(cls.feature)
+        validator = settings_validator.ChoicesValidator(choices=cls.choices_universe)
+        return cls(device, rw, validator)
+
+    def read(self, cached=True):
+        # Write-only; return persisted/cached value if we have one.
+        if cached and getattr(self, "_value", None) is not None:
+            return self._value
+        return None
+
+    def write(self, value, save=True):
+        if value is None:
+            return None
+        idx = int(value)
+        if not (0 <= idx < len(_HEADSET_RGB_COLORS)):
+            return None
+        _name, rgb = _HEADSET_RGB_COLORS[idx]
+        device = self._device
+        if not device.online:
+            return None
+        try:
+            if rgb is None:
+                # "Off" → disable host mode, return to firmware control.
+                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x00")
+            else:
+                zone_ids = self._zone_ids(device)
+                if not zone_ids:
+                    logger.warning("HeadsetRGBColor: no zones discovered; cannot set color")
+                    return None
+                # Enable host mode first.
+                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
+                # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
+                r, g, b = rgb
+                payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
+                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
+                # FrameEnd: commit the frame.
+                device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
+        except Exception as e:
+            logger.warning("HeadsetRGBColor write failed: %s", e)
+            return None
+        self.update(value, save)
+        return value
+
+    @staticmethod
+    def _zone_ids(device):
+        """Query GetRGBZoneInfo (function 1) and return list of zone IDs."""
+        cached = getattr(device, "_headset_rgb_zone_ids", None)
+        if cached is not None:
+            return cached
+        try:
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x10)
+        except Exception:
+            resp = None
+        if not resp or len(resp) < 1:
+            device._headset_rgb_zone_ids = []
+            return []
+        zone_count = resp[0]
+        # Response: [count, 3 reserved, reserved, zone_ids...]
+        zone_ids = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
+        # Fallback to typical left/right earcup zone IDs if response format differs.
+        if not zone_ids:
+            zone_ids = [0x01, 0x02]
+        device._headset_rgb_zone_ids = zone_ids
+        return zone_ids
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -2258,6 +2375,8 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMixBalance,
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
+    HeadsetRGBHostMode,
+    HeadsetRGBColor,
 ]
 
 
