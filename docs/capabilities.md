@@ -212,6 +212,16 @@ solaar config <device> dpi_extended "{X:1600, Y:1600, LOD:HIGH}"
 
 LOD values are `LOW` and `HIGH`. DPI range depends on the device sensor (up to 32000 DPI on the PRO X 2 Superstrike).
 
+### Haptic Feedback
+
+Some devices, such as the MX Master 4 have  haptic feeback.
+The Solaar CLI can be used to 'play' wave forms, for example
+```
+solaar config 'mx master 4' haptic-play 'HAPPY ALERT'
+```
+Solaar rules can also do this using their `Set` action.
+
+
 ### Extended Report Rate
 
 Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_REPORT_RATE` feature (`0x8061`) which enables sub-millisecond polling rates beyond the standard 1 ms (1000 Hz). This is exposed via the `report_rate_extended` setting:
