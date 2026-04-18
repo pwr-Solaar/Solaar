@@ -172,8 +172,16 @@ class Setting:
                     logger.debug("%s: prepare write(%s) => %r", self.name, value, data_bytes)
 
                 reply = self._rw.write(self._device, data_bytes)
-                if not reply:
-                    # tell whomever is calling that the write failed
+                # HID++ 2.0 "set" operations often return an empty ACK (b"").
+                # Treating empty bytes as failure (`not reply`) would misreport
+                # successful writes as errors to the GUI. Only report failure
+                # when the transport actually returned None (error or timeout).
+                if reply is None:
+                    logger.info(
+                        "%s: write on %s returned no reply (transport error/timeout)",
+                        self.name,
+                        self._device,
+                    )
                     return None
 
             return value
