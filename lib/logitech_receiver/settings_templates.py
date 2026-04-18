@@ -1768,6 +1768,79 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
         return result
 
 
+class HeadsetAdvancedEQ(settings.RangeFieldSetting):
+    """Read-only display of the headset's active AdvancedParaEQ (0x020D) bands.
+
+    Writes are intentionally disabled for now — we want to verify the wire
+    format matches the protocol doc on real hardware before allowing any
+    changes that could misconfigure the device DSP. Once confirmed working
+    we'll wire up write() to call setCustomEQ.
+
+    Bands come from getActiveEQ → getCustomEQ on the playback direction.
+    Each band entry is [freq_hi, freq_lo, gain_db] (3-byte stride). Unlike
+    OnboardEQ (0x0636), the device handles biquad coefficient computation
+    — we just send frequency and gain.
+    """
+
+    name = "headset-advanced-eq"
+    label = _("Headset Advanced EQ (read-only)")
+    description = _("Display the headset's active parametric EQ. Writes are disabled pending verification.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "read_prefix": b"\x00\x00"}
+    keys_universe = []
+
+    class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
+        @classmethod
+        def build(cls, setting_class, device):
+            info = hidpp20.get_advanced_eq_info(device)
+            if not info:
+                return None
+            band_count, _db_range, _caps, db_min, db_max = info
+            # Use the active slot on playback direction so the displayed EQ
+            # matches what the user is actually hearing.
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0) or 0
+            bands = hidpp20.get_advanced_eq_params(device, direction=0, slot=active_slot)
+            if not bands or len(bands) != band_count:
+                return None
+            keys = common.NamedInts()
+            for i, (freq, _gain) in enumerate(bands):
+                keys[i] = str(freq) + _("Hz")
+            v = cls(keys, min_value=db_min, max_value=db_max, count=band_count, byte_count=1)
+            v._band_freqs = [freq for freq, _g in bands]
+            v._active_slot = active_slot
+            return v
+
+        def validate_read(self, reply_bytes):
+            # Response: tight-packed 3-byte entries [freq_hi, freq_lo, gain].
+            if reply_bytes is None:
+                return {}
+            result = {}
+            offset = 0
+            i = 0
+            while offset + 3 <= len(reply_bytes) and i < self.count:
+                freq = struct.unpack(">H", reply_bytes[offset : offset + 2])[0]
+                if freq == 0:
+                    break
+                gain = struct.unpack("b", bytes([reply_bytes[offset + 2]]))[0]
+                result[i] = gain
+                if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                    self._band_freqs[i] = freq
+                offset += 3
+                i += 1
+            return result
+
+        def prepare_write(self, new_values):
+            # Read-only mode: never actually build a write payload.
+            return None
+
+    def write(self, map, save=True):
+        # Read-only for now — log attempted writes but don't transmit anything.
+        logger.info("HeadsetAdvancedEQ: write ignored (read-only mode); requested=%s", map)
+        return None
+
+
 class HeadsetRGBHostMode(settings.Setting):
     """Toggle host control of headset RGB lighting.
 
@@ -2396,6 +2469,7 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMixBalance,
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
+    HeadsetAdvancedEQ,
     HeadsetRGBHostMode,
     HeadsetRGBColor,
 ]

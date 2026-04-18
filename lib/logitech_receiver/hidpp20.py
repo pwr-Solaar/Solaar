@@ -2272,6 +2272,10 @@ class ForceSensingButtonArray(UserDict):
 
 
 # --- OnboardEQ (0x0636) — re-exported from onboard_eq.py ---
+# --- AdvancedParaEQ (0x020D) — re-exported from advanced_para_eq.py ---
+from .advanced_para_eq import get_advanced_eq_active_slot  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_info  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_params  # noqa: E402, F401
 from .onboard_eq import _build_set_eq_payload  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_info  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_params  # noqa: E402, F401
