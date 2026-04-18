@@ -1783,38 +1783,24 @@ class HeadsetRGBHostMode(settings.Setting):
     validator_class = settings_validator.BooleanValidator
 
 
-# Preset RGB colors for headset-rgb-color. Name → (R, G, B).
-# "Off" disables host mode and returns control to firmware.
-_HEADSET_RGB_COLORS = [
-    ("Off", None),
-    ("Red", (0xFF, 0x00, 0x00)),
-    ("Green", (0x00, 0xFF, 0x00)),
-    ("Blue", (0x00, 0x00, 0xFF)),
-    ("White", (0xFF, 0xFF, 0xFF)),
-    ("Yellow", (0xFF, 0xFF, 0x00)),
-    ("Cyan", (0x00, 0xFF, 0xFF)),
-    ("Magenta", (0xFF, 0x00, 0xFF)),
-    ("Orange", (0xFF, 0x80, 0x00)),
-    ("Purple", (0x80, 0x00, 0xFF)),
-]
-
-
 class HeadsetRGBColor(settings.Setting):
-    """Set headset RGB zones to a preset color.
+    """Pick a color from the shared `special_keys.COLORS` palette and apply it
+    to all headset RGB zones via HeadsetRGBHostmode (0x0620).
 
-    Drives HeadsetRGBHostmode (0x0620). On write, enables host mode, queries
-    available zones, sets them all to the chosen RGB color, and commits via
-    FrameEnd. "Off" disables host mode to return control to firmware.
+    On write: enables host mode, queries zone IDs via GetRGBZoneInfo, sets
+    them all to the chosen RGB color via SetRgbZonesSingleValue, commits via
+    FrameEnd. Picking `black` effectively turns the LEDs off; fully disabling
+    host control is done through the separate headset-rgb-hostmode toggle.
     """
 
     name = "headset-rgb-color"
     label = _("Headset RGB Color")
-    description = _("Set headset LED color (zones set to a single preset).")
+    description = _("Set headset LED color (all zones, from the shared color palette).")
     feature = _F.HEADSET_RGB_HOSTMODE
-    choices_universe = common.NamedInts(**{name: idx for idx, (name, _rgb) in enumerate(_HEADSET_RGB_COLORS)})
+    choices_universe = special_keys.COLORS
     validator_class = settings_validator.ChoicesValidator
     persist = True
-    # Write-only: we don't read back the current color (host mode just reports on/off).
+    # Write-only: we don't read back the current color (0x0620 doesn't expose it).
     rw_options = {"read_fnid": None, "write_fnid": None}
 
     @classmethod
@@ -1832,49 +1818,48 @@ class HeadsetRGBColor(settings.Setting):
     def write(self, value, save=True):
         if value is None:
             return None
-        idx = int(value)
-        if not (0 <= idx < len(_HEADSET_RGB_COLORS)):
+        try:
+            color_int = int(value)
+        except (TypeError, ValueError):
             return None
-        name, rgb = _HEADSET_RGB_COLORS[idx]
+        if color_int not in special_keys.COLORS:
+            return None
+        name = str(special_keys.COLORS[color_int])
+        r = (color_int >> 16) & 0xFF
+        g = (color_int >> 8) & 0xFF
+        b = color_int & 0xFF
         device = self._device
         if not device.online:
             logger.info("HeadsetRGBColor: device offline, skipping write of %s", name)
             return None
         try:
-            if rgb is None:
-                # "Off" → disable host mode, return to firmware control.
-                logger.info("HeadsetRGBColor: disabling host mode (SetHostModeState 0x00)")
-                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x00")
-                logger.info("HeadsetRGBColor: SetHostModeState resp=%s", resp.hex() if resp else resp)
-            else:
-                zone_ids = self._zone_ids(device)
-                if not zone_ids:
-                    logger.warning("HeadsetRGBColor: no zones available; cannot set color %s", name)
-                    return None
-                r, g, b = rgb
-                logger.info(
-                    "HeadsetRGBColor: setting color %s RGB=(%02X,%02X,%02X) on %d zone(s): %s",
-                    name,
-                    r,
-                    g,
-                    b,
-                    len(zone_ids),
-                    [f"0x{z:02X}" for z in zone_ids],
-                )
-                # Enable host mode first.
-                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
-                logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
-                # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
-                payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
-                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
-                logger.info(
-                    "HeadsetRGBColor: SetRgbZonesSingleValue payload=%s resp=%s",
-                    payload.hex(),
-                    resp.hex() if resp else resp,
-                )
-                # FrameEnd: commit the frame.
-                resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
-                logger.info("HeadsetRGBColor: FrameEnd resp=%s", resp.hex() if resp else resp)
+            zone_ids = self._zone_ids(device)
+            if not zone_ids:
+                logger.warning("HeadsetRGBColor: no zones available; cannot set color %s", name)
+                return None
+            logger.info(
+                "HeadsetRGBColor: setting color %s RGB=(%02X,%02X,%02X) on %d zone(s): %s",
+                name,
+                r,
+                g,
+                b,
+                len(zone_ids),
+                [f"0x{z:02X}" for z in zone_ids],
+            )
+            # Enable host mode first.
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
+            logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
+            # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
+            payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
+            logger.info(
+                "HeadsetRGBColor: SetRgbZonesSingleValue payload=%s resp=%s",
+                payload.hex(),
+                resp.hex() if resp else resp,
+            )
+            # FrameEnd: commit the frame.
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
+            logger.info("HeadsetRGBColor: FrameEnd resp=%s", resp.hex() if resp else resp)
         except Exception as e:
             logger.warning("HeadsetRGBColor write failed for %s: %s", name, e)
             return None
