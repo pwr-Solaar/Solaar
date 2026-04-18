@@ -1680,12 +1680,19 @@ class HeadsetMicGain(settings.Setting):
         # LGHUB caches these once at startup to rescale SetMicGain writes.
         try:
             info = device.feature_request(cls.feature, 0x00)
-        except Exception:
+        except Exception as e:
+            logger.info("HeadsetMicGain: GetInfo raised %s, using fallback int8 range", e)
             info = None
         if info and len(info) >= 2:
             min_gain = struct.unpack("b", bytes([info[0]]))[0]
             max_gain = struct.unpack("b", bytes([info[1]]))[0]
             if max_gain <= min_gain:  # sanity — fall back to class defaults
+                logger.info(
+                    "HeadsetMicGain: GetInfo returned nonsense range [%d, %d] (hex=%s), using fallback int8 range",
+                    min_gain,
+                    max_gain,
+                    info.hex(),
+                )
                 min_gain, max_gain = cls.min_value, cls.max_value
             else:
                 logger.info(
@@ -1694,6 +1701,10 @@ class HeadsetMicGain(settings.Setting):
                     max_gain,
                 )
         else:
+            logger.info(
+                "HeadsetMicGain: GetInfo returned %s, using fallback int8 range",
+                info.hex() if info else info,
+            )
             min_gain, max_gain = cls.min_value, cls.max_value
         rw = settings.FeatureRW(cls.feature, **cls.rw_options)
         validator = settings_validator.RangeValidator(min_value=min_gain, max_value=max_gain, byte_count=1, signed=True)
