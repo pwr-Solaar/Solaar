@@ -2028,7 +2028,11 @@ class HeadsetRGBColor(settings.Setting):
                 resp.hex() if resp else resp,
             )
             # FrameEnd: commit the frame.
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x00\x00\x00\x00")
+            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent/final
+            # flush. The firmware silently discards frames when byte 0 is 0x00 —
+            # canonical protocol doc was wrong on this point. See
+            # HEADSET_RGB_HOSTMODE_WIRE_PROTOCOL.md.
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, b"\x01\x00\x00\x00")
             logger.info("HeadsetRGBColor: FrameEnd resp=%s", resp.hex() if resp else resp)
         except Exception as e:
             logger.warning("HeadsetRGBColor write failed for %s: %s", name, e)
