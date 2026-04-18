@@ -1591,6 +1591,24 @@ class HeadsetEcoMode(settings.Setting):
     feature = _F.HEADSET_BATTERY_SAVER
     validator_class = settings_validator.BooleanValidator
 
+    @classmethod
+    def build(cls, device):
+        # LGHUB's service layer for 0x0618 HeadsetBatterySaverMode compares
+        # incoming new_state against its cached current_state and SKIPS the
+        # devio SetEcoModeState write when they match (verified in
+        # on_headset_battery_saver_set_handler @ 0x100c21790). The G522
+        # firmware rejects no-op writes with device-specific NACK 0x0B.
+        #
+        # BooleanValidator's prepare_write already has the "skip if same as
+        # current" logic — it just needs needs_current_value=True to make
+        # Setting.write read the device state first. Default-mask (0xFF)
+        # BooleanValidators get needs_current_value=False, so we flip it here
+        # to match LGHUB's guard.
+        rw = settings.FeatureRW(cls.feature)
+        validator = settings_validator.BooleanValidator()
+        validator.needs_current_value = True
+        return cls(device, rw, validator)
+
 
 class HeadsetDoNotDisturb(settings.Setting):
     name = "headset-do-not-disturb"
