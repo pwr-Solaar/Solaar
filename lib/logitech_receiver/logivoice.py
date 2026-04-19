@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import logging
 import struct
+
 from typing import Iterable
 
 from .hidpp20_constants import SupportedFeature

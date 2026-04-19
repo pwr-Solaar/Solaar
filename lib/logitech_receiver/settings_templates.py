@@ -33,6 +33,7 @@ from . import descriptors
 from . import desktop_notifications
 from . import diversion
 from . import exceptions
+from . import headset_rgb
 from . import hidpp20
 from . import hidpp20_constants
 from . import logivoice
@@ -1979,172 +1980,241 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
         return None
 
 
-class HeadsetRGBHostMode(settings.Setting):
-    """Toggle host control of headset RGB lighting.
+_NO_CHANGE_COLOR = int(special_keys.COLORSPLUS["No change"])
 
-    When enabled, solaar drives the LEDs via HeadsetRGBColor. When disabled,
-    firmware-driven onboard/signature effects resume.
+
+def _headset_setting_by_name(device, name):
+    for s in getattr(device, "settings", None) or []:
+        if getattr(s, "name", None) == name:
+            return s
+    return None
+
+
+def _headset_primary_color(device, default=0xFFFFFF):
+    """Resolve the currently-saved Primary color, or `default` if absent."""
+    s = _headset_setting_by_name(device, HeadsetLEDsPrimary.name)
+    if s is None:
+        return default
+    value = getattr(s, "_value", None)
+    color = getattr(value, "color", None) if value is not None else None
+    return int(color) if color is not None else default
+
+
+def _headset_per_zone_overrides(device):
+    """Return `{zone_id: color_int}` for zones with explicit (non-'No change')
+    colors set via the Per-zone Lighting setting, or `None` if the setting
+    isn't built/present."""
+    s = _headset_setting_by_name(device, HeadsetPerZoneLighting.name)
+    if s is None:
+        return None
+    value = getattr(s, "_value", None)
+    if not isinstance(value, dict):
+        return None
+    overrides = {}
+    for zone, color in value.items():
+        try:
+            color_int = int(color)
+        except (TypeError, ValueError):
+            continue
+        if color_int != _NO_CHANGE_COLOR:
+            overrides[int(zone)] = color_int
+    return overrides
+
+
+class _HeadsetStaticEffectOption:
+    """Minimal stand-in for `hidpp20.LEDEffectInfo`.
+
+    `HeteroValidator` only inspects `.ID` and `.index` on its `options`
+    list; we don't need the full device-query machinery here because the
+    headset wire protocol is handled by `headset_rgb.write_zone_map`.
     """
 
-    name = "headset-rgb-hostmode"
-    label = _("Headset RGB Host Control")
-    description = _("Enable software control of headset RGB lighting.")
+    ID = 0x01  # matches hidpp20.LEDEffects[0x01] = Static
+    index = 0x01
+
+
+class HeadsetLEDControl(settings.Setting):
+    """Switch headset LED control between device and Solaar.
+
+    Mirrors the `LEDControl` / `RGBControl` pattern used for keyboards and
+    mice. When set to Solaar, the `LEDs Primary` and `Per-zone Lighting`
+    settings drive the LEDs; when set to Device, firmware-driven onboard
+    and signature effects resume.
+    """
+
+    name = "headset_led_control"
+    label = _("LED Control")
+    description = _("Switch control of LED zones between device and Solaar")
     feature = _F.HEADSET_RGB_HOSTMODE
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    validator_class = settings_validator.BooleanValidator
+    choices_universe = common.NamedInts(Device=0, Solaar=1)
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
 
 
-class HeadsetRGBColor(settings.Setting):
-    """Pick a color from the shared `special_keys.COLORS` palette and apply it
-    to all headset RGB zones via HeadsetRGBHostmode (0x0620).
+class HeadsetLEDsPrimary(settings.Setting):
+    """Primary headset LED color, rendered as a GTK color picker.
 
-    On write: enables host mode, queries zone IDs via GetRGBZoneInfo, sets
-    them all to the chosen RGB color via SetRgbZonesSingleValue, commits via
-    FrameEnd. Picking `black` effectively turns the LEDs off; fully disabling
-    host control is done through the separate headset-rgb-hostmode toggle.
+    Mirrors the `LEDZoneSetting` / `RGBEffectSetting` shape: a
+    `HeteroValidator` with a single "Static" effect whose only visible
+    field is the color. Write applies the chosen color across all zones
+    discovered at build time, then re-applies any per-zone overrides on
+    top so they aren't clobbered.
+
+    Read support is deliberately disabled — the feature exposes no "get
+    current color" function, so we rely on the persister.
     """
 
-    name = "headset-rgb-color"
-    label = _("Headset RGB Color")
-    description = _("Set headset LED color (all zones, from the shared color palette).")
+    name = "headset_leds_primary"
+    label = _("LEDs") + " " + _("Primary")
+    description = _(
+        "Set the primary color applied to every headset LED zone.\n" "LED Control needs to be set to Solaar to be effective."
+    )
     feature = _F.HEADSET_RGB_HOSTMODE
-    choices_universe = special_keys.COLORS
-    validator_class = settings_validator.ChoicesValidator
     persist = True
-    # Write-only: we don't read back the current color (0x0620 doesn't expose it).
     rw_options = {"read_fnid": None, "write_fnid": None}
+
+    # HeteroKeyControl renders exactly these fields; ID is hidden
+    # (`label=None`) but kept so setup_visibles can key off it.
+    color_field = {"name": hidpp20.LEDParam.color, "kind": settings.Kind.COLOR, "label": _("Color")}
+    possible_fields = [
+        {
+            "name": "ID",
+            "kind": settings.Kind.CHOICE,
+            "label": None,
+            "choices": [common.NamedInt(0x01, _("Static"))],
+        },
+        color_field,
+    ]
+    # HeteroKeyControl.setup_visibles looks up fields_map[effect_id][1] to
+    # decide which fields to show — we only expose the color.
+    fields_map = {0x01: [common.NamedInt(0x01, _("Static")), {hidpp20.LEDParam.color: 0}]}
 
     @classmethod
     def build(cls, device):
+        zones = headset_rgb.discover_zones(device)
+        if not zones:
+            return None
         rw = settings.FeatureRW(cls.feature)
-        validator = settings_validator.ChoicesValidator(choices=cls.choices_universe)
+        validator = settings_validator.HeteroValidator(
+            data_class=hidpp20.LEDEffectSetting,
+            options=[_HeadsetStaticEffectOption()],
+            readable=False,
+        )
         return cls(device, rw, validator)
 
     def read(self, cached=True):
-        # Write-only; return persisted/cached value if we have one.
-        if cached and getattr(self, "_value", None) is not None:
+        # Feature 0x0620 doesn't expose a "current primary color" read —
+        # pull from the persister via _pre_read, fall back to white so
+        # the picker opens on a sane starting color.
+        self._pre_read(cached)
+        if self._value is not None:
             return self._value
-        return None
+        self._value = hidpp20.LEDEffectSetting(ID=common.NamedInt(0x01, _("Static")), color=0xFFFFFF)
+        return self._value
 
     def write(self, value, save=True):
-        if value is None:
+        color = getattr(value, "color", None)
+        if color is None:
             return None
-        try:
-            color_int = int(value)
-        except (TypeError, ValueError):
-            return None
-        if color_int not in special_keys.COLORS:
-            return None
-        name = str(special_keys.COLORS[color_int])
-        r = (color_int >> 16) & 0xFF
-        g = (color_int >> 8) & 0xFF
-        b = color_int & 0xFF
         device = self._device
         if not device.online:
-            logger.info("HeadsetRGBColor: device offline, skipping write of %s", name)
             return None
-        try:
-            # Order per protocol doc: claim host mode FIRST, then enumerate zones,
-            # then set colors, then commit. GetRGBZoneInfo returns zero counts if
-            # we query before claiming control.
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x80, b"\x01")
-            logger.info("HeadsetRGBColor: SetHostModeState(1) resp=%s", resp.hex() if resp else resp)
-            zone_ids = self._zone_ids(device)
-            if not zone_ids:
-                logger.warning("HeadsetRGBColor: no zones available; cannot set color %s", name)
+        zones = headset_rgb.discover_zones(device)
+        if not zones:
+            return None
+        primary = int(color)
+        zone_map = {int(z): primary for z in zones}
+        # Re-apply any non-"No change" per-zone overrides on top of the
+        # fresh Primary baseline so the user's explicit zone choices stick
+        # when they change the bulk color.
+        overrides = _headset_per_zone_overrides(device) or {}
+        zone_map.update(overrides)
+        if headset_rgb.write_zone_map(device, zone_map):
+            self.update(value, save)
+            return value
+        return None
+
+
+class HeadsetPerZoneLighting(settings.Settings):
+    """Per-zone LED color overrides.
+
+    Mirrors `PerKeyLighting`'s `Settings` + `ChoicesMapValidator` style —
+    one dropdown per discovered zone with the `COLORSPLUS` palette. The
+    "No change" entry means "inherit the current `LEDs Primary` color",
+    so users can paint individual zones without losing the base setup.
+    """
+
+    name = "headset_per_zone_lighting"
+    label = _("Per-zone Lighting")
+    description = _(
+        "Override individual zone colors. 'No change' inherits the LEDs Primary color.\n"
+        "LED Control needs to be set to Solaar to be effective."
+    )
+    feature = _F.HEADSET_RGB_HOSTMODE
+    persist = True
+    choices_universe = special_keys.COLORSPLUS
+
+    class rw_class(settings.FeatureRWMap):
+        pass
+
+    class validator_class(settings_validator.ChoicesMapValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            zones = headset_rgb.discover_zones(device)
+            if not zones:
                 return None
-            logger.info(
-                "HeadsetRGBColor: setting color %s RGB=(%02X,%02X,%02X) on %d zone(s): %s",
-                name,
-                r,
-                g,
-                b,
-                len(zone_ids),
-                [f"0x{z:02X}" for z in zone_ids],
-            )
-            # SetRgbZonesSingleValue: [R, G, B, count, zone_ids...]
-            payload = bytes([r, g, b, len(zone_ids)]) + bytes(zone_ids)
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x50, payload)
-            logger.info(
-                "HeadsetRGBColor: SetRgbZonesSingleValue payload=%s resp=%s",
-                payload.hex(),
-                resp.hex() if resp else resp,
-            )
-            # FrameEnd: commit the frame.
-            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent.
-            # G522 firmware rejects 0x02 with LOGITECH_INTERNAL (0x05) — the
-            # persistent commit path may require additional state (e.g. onboard
-            # profile activation) that isn't mapped yet. Stick with 0x01 so the
-            # LEDs refresh visually; revisit persistence once the preconditions
-            # are known.
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, bytes([0x01, 0x00, 0x00, 0x00]))
-            frame_type = 0x01
-            logger.info(
-                "HeadsetRGBColor: FrameEnd frame_type=0x%02X resp=%s",
-                frame_type,
-                resp.hex() if resp else resp,
-            )
-        except Exception as e:
-            logger.warning("HeadsetRGBColor write failed for %s: %s", name, e)
+            choices_map = {
+                common.NamedInt(int(z), _("Zone") + " " + str(int(z))): setting_class.choices_universe for z in zones
+            }
+            return cls(choices_map) if choices_map else None
+
+    def read(self, cached=True):
+        self._pre_read(cached)
+        if cached and self._value is not None:
+            return self._value
+        # Device doesn't expose current per-zone state; default every
+        # zone to "No change" so the primary color shows through.
+        reply_map = {int(key): _NO_CHANGE_COLOR for key in self._validator.choices}
+        self._value = reply_map
+        return reply_map
+
+    def _resolve_zone_map(self, map_, primary):
+        """Substitute 'No change' entries with the primary color."""
+        resolved = {}
+        for key, value in map_.items():
+            try:
+                v = int(value)
+            except (TypeError, ValueError):
+                continue
+            resolved[int(key)] = primary if v == _NO_CHANGE_COLOR else v
+        return resolved
+
+    def write(self, map_, save=True):
+        device = self._device
+        if not device.online:
             return None
-        self.update(value, save)
-        return value
+        self.update(map_, save)
+        primary = _headset_primary_color(device)
+        zone_map = self._resolve_zone_map(map_, primary)
+        if not zone_map:
+            return None
+        if headset_rgb.write_zone_map(device, zone_map):
+            return map_
+        return None
 
-    @staticmethod
-    def _zone_ids(device):
-        """Query GetRGBZoneInfo (function 1) and return list of zone IDs.
-
-        Caller must have enabled host mode first — querying before SetHostModeState
-        has been observed to return all zeros on the G522.
-        """
-        cached = getattr(device, "_headset_rgb_zone_ids", None)
-        if cached:
-            return cached
+    def write_key_value(self, key, value, save=True):
+        result = super().write_key_value(int(key), value, save)
+        device = self._device
+        if not device.online:
+            return result
         try:
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x10)
-        except Exception as e:
-            logger.warning("HeadsetRGBColor: GetRGBZoneInfo raised %s", e)
-            resp = None
-        if not resp or len(resp) < 1:
-            logger.warning(
-                "HeadsetRGBColor: GetRGBZoneInfo returned %s; NOT caching so we retry next write",
-                resp,
-            )
-            return []
-        zone_count = resp[0]
-        # Tight format observed on G522: [count, zone_ids...] with no reserved gap.
-        # The protocol doc shows 3-byte + 1-byte reserved gaps before zone IDs, but
-        # the G522 sub-device packs them immediately after the count.
-        # Don't filter zone_id==0 — on some devices 0 is a valid zone ID. We trust
-        # the device to report sane zone IDs and let the device reject nonsense.
-        tight = list(resp[1 : 1 + zone_count]) if 1 <= zone_count <= len(resp) - 1 else []
-        if tight and len(tight) == zone_count:
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    "HeadsetRGBColor: discovered %d zone(s) %s (tight format)",
-                    len(tight),
-                    [f"0x{z:02X}" for z in tight],
-                )
-            device._headset_rgb_zone_ids = tight
-            return tight
-        # Try the doc's format (with reserved gap) as fallback
-        gap = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
-        if gap and len(gap) == zone_count:
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    "HeadsetRGBColor: discovered %d zone(s) %s (doc format)",
-                    len(gap),
-                    [f"0x{z:02X}" for z in gap],
-                )
-            device._headset_rgb_zone_ids = gap
-            return gap
-        # Neither format parsed cleanly; don't cache so next write retries.
-        logger.warning(
-            "HeadsetRGBColor: GetRGBZoneInfo ambiguous count=%d resp=%s; not caching",
-            zone_count,
-            resp.hex(),
-        )
-        return []
+            v = int(value)
+        except (TypeError, ValueError):
+            return result
+        effective = _headset_primary_color(device) if v == _NO_CHANGE_COLOR else v
+        headset_rgb.write_zone_map(device, {int(key): int(effective)})
+        return result
 
 
 # ----------------------------------------------------------------------------
@@ -2822,8 +2892,9 @@ SETTINGS: list[settings.Setting] = [
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
     HeadsetAdvancedEQ,
-    HeadsetRGBHostMode,
-    HeadsetRGBColor,
+    HeadsetLEDControl,
+    HeadsetLEDsPrimary,
+    HeadsetPerZoneLighting,
     *_LOGIVOICE_SETTINGS,
 ]
 
