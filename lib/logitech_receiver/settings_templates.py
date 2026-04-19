@@ -35,6 +35,7 @@ from . import diversion
 from . import exceptions
 from . import hidpp20
 from . import hidpp20_constants
+from . import logivoice
 from . import settings
 from . import settings_new
 from . import settings_validator
@@ -2146,6 +2147,190 @@ class HeadsetRGBColor(settings.Setting):
         return []
 
 
+# ----------------------------------------------------------------------------
+# LogiVoice (0x0900 + 0x0901..0x0907) — read-only presentation pass.
+#
+# Per module we auto-generate two settings:
+#   1. A flat State toggle — reads GetState (fn 1), renders as a boolean.
+#      Top-level so users see a direct on/off indicator at a glance.
+#   2. A collapsible "Parameters" panel — one MULTIPLE_RANGE-kind setting
+#      that reads GetParameters (fn 3) once and distributes the bytes to
+#      per-field sliders. The existing MultipleRangeControl widget is
+#      collapsible by default, so the field-level clutter stays folded.
+#
+# Writes are disabled — the Parameters struct carries fields whose wire
+# encodings are still ambiguous (see logivoice.py) and a SetParameters
+# write must bundle all fields at once. A write pass can be added once
+# each field's encoding is confirmed live.
+# ----------------------------------------------------------------------------
+
+
+class _LogiVoiceStateSetting(settings.Setting):
+    """Base for per-module State read (GetState fn 1). Read-only display."""
+
+    rw_options = {"read_fnid": logivoice.FN_GET_STATE, "write_fnid": logivoice.FN_SET_STATE}
+    validator_class = settings_validator.BooleanValidator
+    persist = False
+
+    @classmethod
+    def build(cls, device):
+        # Corpus probe runs here (once per module) so -dd users get a full
+        # snapshot of state + raw Parameters + raw Info for future decoding.
+        try:
+            logivoice.probe_module(device, cls.feature)
+        except Exception as e:
+            logger.info("LogiVoice probe_module(%s) raised %s", cls.feature, e)
+        return super().build(device)
+
+    def write(self, value, save=True):
+        logger.info("LogiVoice state write ignored (read-only pass): %s requested=%s", self.name, value)
+        return None
+
+
+class _LogiVoiceModuleItem:
+    """Top-level MULTIPLE_RANGE item representing one LogiVoice module.
+
+    One `item` per setting — the module itself. `__int__` returns the feature
+    id so the Setting's reply dict is keyed predictably.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        self._feature = feature
+        self.id = logivoice.MODULE_SLUGS.get(feature, f"0x{int(feature):04X}")
+        self.index = 0
+
+    def __int__(self):
+        return int(self._feature)
+
+    def __str__(self):
+        return logivoice.MODULE_NAMES.get(self._feature, f"0x{int(self._feature):04X}")
+
+
+class _LogiVoiceFieldSubItem:
+    """MULTIPLE_RANGE sub-item wrapping one decoded Parameters field.
+
+    MultipleRangeControl reads minimum/maximum/length/widget/str(). We pick
+    SpinButton for wide ranges (0..65535) where a 64k-step slider is useless,
+    and Scale for small ranges (e.g. signed int8 thresholds).
+    """
+
+    def __init__(self, field: logivoice.Field):
+        self._field = field
+        self.id = field.name
+        self.minimum = field.min_value
+        self.maximum = field.max_value
+        self.length = field.byte_count
+        self.widget = "SpinButton" if (field.max_value - field.min_value) > 512 else "Scale"
+
+    def __int__(self):
+        return hash(self.id) & 0xFFFFFF
+
+    def __str__(self):
+        return self._field.label + (" (raw)" if self._field.opaque else "")
+
+
+class _LogiVoiceParametersValidator(settings_validator.MultipleRangeValidator):
+    """Reads the whole GetParameters struct once and distributes bytes to fields.
+
+    MULTIPLE_RANGE's default read loop fires prepare_read_item once per top-
+    level item; we have exactly one item (the module), so this issues a single
+    GetParameters call. validate_read_item parses the shared reply into a
+    {field_name: value} dict. Writes are blocked.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        fields = logivoice.PARAMETERS_FIELDS.get(feature, [])
+        self._fields = list(fields)
+        item = _LogiVoiceModuleItem(feature)
+        sub_items = {item: [_LogiVoiceFieldSubItem(f) for f in fields]}
+        super().__init__(items=[item], sub_items=sub_items)
+
+    def prepare_read_item(self, item):
+        return b""  # GetParameters takes no wire arguments
+
+    def validate_read_item(self, reply_bytes, item):
+        parsed = {}
+        for f in self._fields:
+            end = f.offset + f.byte_count
+            if end > len(reply_bytes):
+                continue
+            chunk = reply_bytes[f.offset : end]
+            if f.byte_count == 1:
+                v = struct.unpack("b" if f.signed else "B", chunk)[0]
+            elif f.byte_count == 2:
+                v = struct.unpack(">h" if f.signed else ">H", chunk)[0]
+            else:
+                v = int.from_bytes(chunk, "big", signed=f.signed)
+            parsed[f.name] = v
+        return parsed
+
+    def prepare_write_item(self, item, value):
+        return None
+
+    def prepare_write(self, value):
+        return None
+
+
+class _LogiVoiceParametersSetting(settings.Setting):
+    """Collapsible read-only display of one module's GetParameters struct."""
+
+    rw_options = {"read_fnid": logivoice.FN_GET_PARAMETERS}
+    persist = False
+    kind = settings.Kind.MULTIPLE_RANGE
+
+    @classmethod
+    def build(cls, device):
+        if not logivoice.PARAMETERS_FIELDS.get(cls.feature):
+            return None
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = _LogiVoiceParametersValidator(cls.feature)
+        return cls(device, rw, validator)
+
+    def write(self, map, save=True):
+        return None
+
+
+def _logivoice_make_state_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug:
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-state",
+        "label": f"LogiVoice {module_name}: State (read-only)",
+        "description": f"Current on/off state of the headset {module_name} processing block.",
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_State", (_LogiVoiceStateSetting,), attrs)
+
+
+def _logivoice_make_parameters_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug or not logivoice.PARAMETERS_FIELDS.get(feature):
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-parameters",
+        "label": f"LogiVoice {module_name}: Parameters (read-only)",
+        "description": (
+            f"Decoded {module_name} GetParameters fields. "
+            "Opaque raw values shown where the wire encoding isn't confirmed yet."
+        ),
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_Parameters", (_LogiVoiceParametersSetting,), attrs)
+
+
+_LOGIVOICE_SETTINGS: list[type] = []
+for _feature in logivoice.PARAMETERS_FIELDS:
+    _state_cls = _logivoice_make_state_class(_feature)
+    if _state_cls is not None:
+        _LOGIVOICE_SETTINGS.append(_state_cls)
+    _params_cls = _logivoice_make_parameters_class(_feature)
+    if _params_cls is not None:
+        _LOGIVOICE_SETTINGS.append(_params_cls)
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -2639,6 +2824,7 @@ SETTINGS: list[settings.Setting] = [
     HeadsetAdvancedEQ,
     HeadsetRGBHostMode,
     HeadsetRGBColor,
+    *_LOGIVOICE_SETTINGS,
 ]
 
 
