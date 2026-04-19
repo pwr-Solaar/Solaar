@@ -1855,15 +1855,15 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
 class HeadsetAdvancedEQ(settings.RangeFieldSetting):
     """Read-only display of the headset's active AdvancedParaEQ (0x020D) bands.
 
-    Writes are intentionally disabled for now — we want to verify the wire
-    format matches the protocol doc on real hardware before allowing any
-    changes that could misconfigure the device DSP. Once confirmed working
-    we'll wire up write() to call setCustomEQ.
+    Writes are intentionally disabled for now — V2's frequency and Q encodings
+    are still opaque u16 round-trip values (confirmed via LGHUB RE, see
+    HEADSET_ADVANCED_PARA_EQ_WIRE_PROTOCOL.md), so we can show the current
+    EQ but can't safely author a write until we have a LGHUB pcap that pins
+    down the u16→Hz and u16→Q mappings.
 
-    Bands come from getActiveEQ → getCustomEQ on the playback direction.
-    Each band entry is [freq_hi, freq_lo, gain_db] (3-byte stride). Unlike
-    OnboardEQ (0x0636), the device handles biquad coefficient computation
-    — we just send frequency and gain.
+    V0/V1: 3-byte band stride [freq_hi, freq_lo, gain_i8], gain is whole dB.
+    V2:    5-byte band stride [freq_hi, freq_lo, gain_i8, q_hi, q_lo], gain
+           is `signed_byte × step_db` where step_db comes from getEQInfos.
     """
 
     name = "headset-advanced-eq"
@@ -1882,40 +1882,80 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             if not info:
                 logger.info("HeadsetAdvancedEQ.build: getEQInfos failed, no panel will be built")
                 return None
-            band_count, _db_range, _caps, db_min, db_max = info
-            # Use the active slot on playback direction so the displayed EQ
-            # matches what the user is actually hearing.
+            # Cache so get_advanced_eq_params can look up step_db.
+            device._advanced_eq_info = info
+            version = info["version"]
+            gain_min = info["gain_min_db"]
+            gain_max = info["gain_max_db"]
+            step_db = info["step_db"]
+
             active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0) or 0
             bands = hidpp20.get_advanced_eq_params(device, direction=0, slot=active_slot)
             if not bands:
                 logger.info("HeadsetAdvancedEQ.build: getCustomEQ returned no bands, no panel will be built")
                 return None
-            if len(bands) != band_count:
+            band_count = len(bands)
+            # V0/V1 advertises band_count in getEQInfos — cross-check if we have it.
+            expected = info.get("band_count")
+            if expected is not None and expected != band_count:
                 logger.info(
-                    "HeadsetAdvancedEQ.build: band count mismatch — EQInfos=%d getCustomEQ=%d; skipping",
+                    "HeadsetAdvancedEQ.build: V%d band count mismatch — EQInfos=%d getCustomEQ=%d; " "trusting getCustomEQ",
+                    version,
+                    expected,
                     band_count,
-                    len(bands),
                 )
-                return None
+
             keys = common.NamedInts()
-            for i, (freq, _gain) in enumerate(bands):
-                keys[i] = str(freq) + _("Hz")
-            v = cls(keys, min_value=db_min, max_value=db_max, count=band_count, byte_count=1)
-            v._band_freqs = [freq for freq, _g in bands]
+            for i, band in enumerate(bands):
+                freq = band[0]
+                if version >= 2:
+                    # V2 freq is an opaque u16 bin index — Hz mapping unconfirmed.
+                    keys[i] = _("Band ") + str(i + 1)
+                else:
+                    keys[i] = str(freq) + _("Hz")
+            v = cls(
+                keys,
+                min_value=int(round(gain_min)),
+                max_value=int(round(gain_max)),
+                count=band_count,
+                byte_count=1,
+            )
+            v._version = version
+            v._step_db = step_db
+            v._band_freqs = [band[0] for band in bands]
+            v._band_qs = [band[2] if len(band) >= 3 else 0 for band in bands]
             v._active_slot = active_slot
             logger.info(
-                "HeadsetAdvancedEQ.build: panel built with %d band(s), slot=%d, range=[%d,%d]",
+                "HeadsetAdvancedEQ.build: panel built V%d with %d band(s), slot=%d, range=[%d,%d], step_db=%.4f",
+                version,
                 band_count,
                 active_slot,
-                db_min,
-                db_max,
+                gain_min,
+                gain_max,
+                step_db,
             )
             return v
 
         def validate_read(self, reply_bytes):
-            # Response: tight-packed 3-byte entries [freq_hi, freq_lo, gain].
             if reply_bytes is None:
                 return {}
+            version = getattr(self, "_version", 0)
+            step_db = getattr(self, "_step_db", 1.0)
+            if version >= 2:
+                bands, _header_len = hidpp20.parse_v2_bands(reply_bytes, step_db)
+                if bands is None:
+                    return {}
+                result = {}
+                for i, (freq, gain_db, q_u16) in enumerate(bands):
+                    if i >= self.count:
+                        break
+                    result[i] = int(round(gain_db))
+                    if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                        self._band_freqs[i] = freq
+                    if hasattr(self, "_band_qs") and i < len(self._band_qs):
+                        self._band_qs[i] = q_u16
+                return result
+            # V0/V1: 3-byte stride.
             result = {}
             offset = 0
             i = 0

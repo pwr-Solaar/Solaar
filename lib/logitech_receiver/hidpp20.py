@@ -2307,6 +2307,7 @@ class ForceSensingButtonArray(UserDict):
 from .advanced_para_eq import get_advanced_eq_active_slot  # noqa: E402, F401
 from .advanced_para_eq import get_advanced_eq_info  # noqa: E402, F401
 from .advanced_para_eq import get_advanced_eq_params  # noqa: E402, F401
+from .advanced_para_eq import parse_v2_bands  # noqa: E402, F401
 from .onboard_eq import _build_set_eq_payload  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_info  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_params  # noqa: E402, F401
