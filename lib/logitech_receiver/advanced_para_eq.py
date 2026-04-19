@@ -193,6 +193,125 @@ def parse_v2_bands(result: bytes, step_db: float):
     return bands, header_len
 
 
+def get_advanced_eq_defaults(device, direction=DIRECTION_PLAYBACK, slot=0):
+    """Query getEQDefaults (function 5). Same per-band layout as getCustomEQ.
+
+    Factory presets, read-only. Reading them across all factory slots gives
+    us a corpus of (name, freq_u16[], q_u16[]) tuples that may reveal the
+    u16->Hz and u16->Q scaling without needing a pcap. Returns list of
+    (freq_u16, gain_db, q_u16) or None.
+    """
+    version = _get_version(device)
+    result = device.feature_request(SupportedFeature.HEADSET_ADVANCED_PARA_EQ, 0x50, direction, slot)
+    if result is None:
+        logger.info(
+            "AdvancedParaEQ getEQDefaults V%d (dir=%d slot=%d): feature_request returned None",
+            version,
+            direction,
+            slot,
+        )
+        return None
+    if version >= 2:
+        info = getattr(device, "_advanced_eq_info", None)
+        step_db = info["step_db"] if info and "step_db" in info else 1.0
+        bands, header_len = parse_v2_bands(result, step_db)
+        if bands is None:
+            logger.info(
+                "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): couldn't locate band payload raw=%s",
+                direction,
+                slot,
+                result.hex(),
+            )
+            return None
+        logger.info(
+            "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): %d band(s) header_len=%d raw=%s",
+            direction,
+            slot,
+            len(bands),
+            header_len,
+            result.hex(),
+        )
+        return bands
+    # V0/V1: 3-byte stride, gain is whole dB, no Q.
+    bands = []
+    offset = 0
+    while offset + 3 <= len(result):
+        freq = struct.unpack(">H", result[offset : offset + 2])[0]
+        if freq == 0:
+            break
+        gain_db = struct.unpack("b", bytes([result[offset + 2]]))[0]
+        bands.append((freq, float(gain_db), 0))
+        offset += 3
+    logger.info(
+        "AdvancedParaEQ getEQDefaults V%d (dir=%d slot=%d): %d band(s) raw=%s",
+        version,
+        direction,
+        slot,
+        len(bands),
+        result.hex(),
+    )
+    return bands
+
+
+def get_advanced_eq_friendly_name(device, direction=DIRECTION_PLAYBACK, slot=0):
+    """Query getEQFriendlyName (function 6). Returns the UTF-8 preset name or None."""
+    result = device.feature_request(SupportedFeature.HEADSET_ADVANCED_PARA_EQ, 0x60, direction, slot)
+    if result is None or len(result) < 1:
+        return None
+    name_len = result[0]
+    if 1 + name_len > len(result):
+        name_len = len(result) - 1
+    try:
+        name = bytes(result[1 : 1 + name_len]).decode("utf-8", errors="replace")
+    except Exception:
+        name = result[1 : 1 + name_len].hex()
+    return name
+
+
+def probe_all_presets(device, direction=DIRECTION_PLAYBACK):
+    """Read every factory and custom preset slot's name + band data and log it.
+
+    Diagnostic probe — intended to run once at HeadsetAdvancedEQ.build() time
+    so we accumulate a corpus of (name, freq_u16[], q_u16[]) tuples across
+    presets. Patterns in that corpus should reveal the u16->Hz and u16->Q
+    mappings without needing a live pcap from LGHUB.
+    """
+    info = getattr(device, "_advanced_eq_info", None)
+    if not info:
+        return
+    ro_count = info.get("onboard_ro_preset_count", 0)
+    custom_count = info.get("onboard_custom_preset_count", 0)
+    # Factory presets: read via getEQDefaults
+    for slot in range(ro_count):
+        name = get_advanced_eq_friendly_name(device, direction=direction, slot=slot)
+        bands = get_advanced_eq_defaults(device, direction=direction, slot=slot)
+        if bands is None:
+            continue
+        logger.info(
+            "AdvancedParaEQ factory preset %d/%d (dir=%d) name=%r: %s",
+            slot,
+            ro_count,
+            direction,
+            name,
+            [(f"0x{f:04X}", round(g, 3), f"0x{q:04X}") for f, g, q in bands],
+        )
+    # Custom preset slots: via getCustomEQ. Most will be empty/default, but
+    # any user-authored slots could give additional freq/Q samples.
+    for slot in range(custom_count):
+        name = get_advanced_eq_friendly_name(device, direction=direction, slot=slot)
+        bands = get_advanced_eq_params(device, direction=direction, slot=slot)
+        if bands is None:
+            continue
+        logger.info(
+            "AdvancedParaEQ custom preset %d/%d (dir=%d) name=%r: %s",
+            slot,
+            custom_count,
+            direction,
+            name,
+            [(f"0x{f:04X}", round(g, 3), f"0x{q:04X}") for f, g, q in bands],
+        )
+
+
 def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
     """Query getCustomEQ (function 1). Returns list of (freq, gain_db, q) or None.
 

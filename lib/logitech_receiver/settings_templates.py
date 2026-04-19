@@ -1934,6 +1934,15 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
                 gain_max,
                 step_db,
             )
+            # One-shot corpus probe: read every factory/custom preset's name
+            # and band data. Comparing freq_u16 and q_u16 values across named
+            # presets ("Flat" vs "Bass Boost" etc.) may reveal the u16->Hz
+            # and u16->Q scalings without requiring a LGHUB pcap.
+            if version >= 2:
+                try:
+                    hidpp20.probe_advanced_eq_presets(device, direction=0)
+                except Exception as e:
+                    logger.info("HeadsetAdvancedEQ.build: preset corpus probe failed: %s", e)
             return v
 
         def validate_read(self, reply_bytes):
