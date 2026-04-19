@@ -1855,15 +1855,15 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
 class HeadsetAdvancedEQ(settings.RangeFieldSetting):
     """Read-only display of the headset's active AdvancedParaEQ (0x020D) bands.
 
-    Writes are intentionally disabled for now — V2's frequency and Q encodings
-    are still opaque u16 round-trip values (confirmed via LGHUB RE, see
-    HEADSET_ADVANCED_PARA_EQ_WIRE_PROTOCOL.md), so we can show the current
-    EQ but can't safely author a write until we have a LGHUB pcap that pins
-    down the u16→Hz and u16→Q mappings.
+    Writes are intentionally disabled for now. We now know the V2 wire format
+    (see HEADSET_ADVANCED_PARA_EQ_WIRE_PROTOCOL.md) so a write path is
+    buildable, but we still want a round-trip test on real hardware before
+    enabling user-facing writes that could misconfigure the DSP.
 
     V0/V1: 3-byte band stride [freq_hi, freq_lo, gain_i8], gain is whole dB.
-    V2:    5-byte band stride [freq_hi, freq_lo, gain_i8, q_hi, q_lo], gain
-           is `signed_byte × step_db` where step_db comes from getEQInfos.
+    V2:    5-byte band stride [filter_type, freq_hi, freq_lo, gain_hi, gain_lo],
+           filter_type 0x00=HP 0x78=peaking, freq is raw Hz, gain is signed
+           int16 × step_db (step_db from getEQInfos).
     """
 
     name = "headset-advanced-eq"
@@ -1882,7 +1882,6 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             if not info:
                 logger.info("HeadsetAdvancedEQ.build: getEQInfos failed, no panel will be built")
                 return None
-            # Cache so get_advanced_eq_params can look up step_db.
             device._advanced_eq_info = info
             version = info["version"]
             gain_min = info["gain_min_db"]
@@ -1895,24 +1894,21 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
                 logger.info("HeadsetAdvancedEQ.build: getCustomEQ returned no bands, no panel will be built")
                 return None
             band_count = len(bands)
-            # V0/V1 advertises band_count in getEQInfos — cross-check if we have it.
             expected = info.get("band_count")
             if expected is not None and expected != band_count:
                 logger.info(
-                    "HeadsetAdvancedEQ.build: V%d band count mismatch — EQInfos=%d getCustomEQ=%d; " "trusting getCustomEQ",
+                    "HeadsetAdvancedEQ.build: V%d band count mismatch — EQInfos=%d getCustomEQ=%d; trusting getCustomEQ",
                     version,
                     expected,
                     band_count,
                 )
 
             keys = common.NamedInts()
-            for i, band in enumerate(bands):
-                freq = band[0]
-                if version >= 2:
-                    # V2 freq is an opaque u16 bin index — Hz mapping unconfirmed.
-                    keys[i] = _("Band ") + str(i + 1)
+            for i, (filter_type, freq_hz, _gain_db) in enumerate(bands):
+                if filter_type == hidpp20.FILTER_TYPE_HP:
+                    keys[i] = "HP " + str(freq_hz) + _("Hz")
                 else:
-                    keys[i] = str(freq) + _("Hz")
+                    keys[i] = str(freq_hz) + _("Hz")
             v = cls(
                 keys,
                 min_value=int(round(gain_min)),
@@ -1922,8 +1918,8 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             )
             v._version = version
             v._step_db = step_db
-            v._band_freqs = [band[0] for band in bands]
-            v._band_qs = [band[2] if len(band) >= 3 else 0 for band in bands]
+            v._band_types = [band[0] for band in bands]
+            v._band_freqs = [band[1] for band in bands]
             v._active_slot = active_slot
             logger.info(
                 "HeadsetAdvancedEQ.build: panel built V%d with %d band(s), slot=%d, range=[%d,%d], step_db=%.4f",
@@ -1934,10 +1930,9 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
                 gain_max,
                 step_db,
             )
-            # One-shot corpus probe: read every factory/custom preset's name
-            # and band data. Comparing freq_u16 and q_u16 values across named
-            # presets ("Flat" vs "Bass Boost" etc.) may reveal the u16->Hz
-            # and u16->Q scalings without requiring a LGHUB pcap.
+            # One-shot corpus probe — logs every factory + custom preset's
+            # band data at INFO. Useful diagnostic if a device turns up with
+            # filter types beyond the observed 0x00/0x78 pair.
             if version >= 2:
                 try:
                     hidpp20.probe_advanced_eq_presets(device, direction=0)
@@ -1951,18 +1946,18 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             version = getattr(self, "_version", 0)
             step_db = getattr(self, "_step_db", 1.0)
             if version >= 2:
-                bands, _header_len = hidpp20.parse_v2_bands(reply_bytes, step_db)
+                bands = hidpp20.parse_v2_bands(reply_bytes, step_db)
                 if bands is None:
                     return {}
                 result = {}
-                for i, (freq, gain_db, q_u16) in enumerate(bands):
+                for i, (filter_type, freq_hz, gain_db) in enumerate(bands):
                     if i >= self.count:
                         break
                     result[i] = int(round(gain_db))
+                    if hasattr(self, "_band_types") and i < len(self._band_types):
+                        self._band_types[i] = filter_type
                     if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
-                        self._band_freqs[i] = freq
-                    if hasattr(self, "_band_qs") and i < len(self._band_qs):
-                        self._band_qs[i] = q_u16
+                        self._band_freqs[i] = freq_hz
                 return result
             # V0/V1: 3-byte stride.
             result = {}

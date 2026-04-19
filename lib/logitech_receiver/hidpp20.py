@@ -2304,6 +2304,8 @@ class ForceSensingButtonArray(UserDict):
 
 # --- OnboardEQ (0x0636) — re-exported from onboard_eq.py ---
 # --- AdvancedParaEQ (0x020D) — re-exported from advanced_para_eq.py ---
+from .advanced_para_eq import FILTER_TYPE_HP  # noqa: E402, F401
+from .advanced_para_eq import FILTER_TYPE_PEAKING  # noqa: E402, F401
 from .advanced_para_eq import get_advanced_eq_active_slot  # noqa: E402, F401
 from .advanced_para_eq import get_advanced_eq_defaults  # noqa: E402, F401
 from .advanced_para_eq import get_advanced_eq_friendly_name  # noqa: E402, F401
