@@ -2052,19 +2052,14 @@ class HeadsetRGBColor(settings.Setting):
                 resp.hex() if resp else resp,
             )
             # FrameEnd: commit the frame.
-            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent
-            # (saves to onboard NVS as baseline; survives the firmware's
-            # host-mode self-release window). 0x00 is silently discarded by
-            # firmware — canonical protocol doc was wrong. See
-            # HEADSET_RGB_HOSTMODE_WIRE_PROTOCOL.md.
-            #
-            # Use 0x02 for user-visible color picks so the color sticks even
-            # after the firmware releases host mode. Use 0x01 when setting
-            # black (lights off) — mirroring LGHUB's turn_off_lighting so we
-            # don't overwrite the NVS baseline with all-zeros.
-            is_off = r == 0 and g == 0 and b == 0
-            frame_type = 0x01 if is_off else 0x02
-            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, bytes([frame_type, 0x00, 0x00, 0x00]))
+            # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent.
+            # G522 firmware rejects 0x02 with LOGITECH_INTERNAL (0x05) — the
+            # persistent commit path may require additional state (e.g. onboard
+            # profile activation) we haven't mapped yet. Stick with 0x01 for
+            # now so the LEDs at least refresh visually; we can revisit 0x02
+            # once a wireshark capture of the LGHUB sequence is available.
+            resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, bytes([0x01, 0x00, 0x00, 0x00]))
+            frame_type = 0x01
             logger.info(
                 "HeadsetRGBColor: FrameEnd frame_type=0x%02X resp=%s",
                 frame_type,
@@ -2767,34 +2762,46 @@ def check_feature_settings(device, already_known) -> bool:
     for sclass in SETTINGS:
         if sclass.feature:
             known_present = device.persister and sclass.name in device.persister
-            if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
-                try:
-                    setting = check_feature(device, sclass)
-                except Exception as err:
-                    # on an internal HID++ error, assume offline and stop further checking
-                    if (
-                        isinstance(err, exceptions.FeatureCallError)
-                        and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR
-                    ):
-                        logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
-                        device.online = False
-                        device.present = False
-                        return False
-                    else:
-                        logger.warning(f"ignore feature {sclass.name} because of error {err}")
+            already = any(s.name == sclass.name for s in already_known)
+            if already:
+                continue
+            if not known_present and sclass.name in absent:
+                # Silent-skip cache from an earlier run's failed build(). Log at
+                # INFO so field diagnostics reveal when a setting is suppressed
+                # this way — users can clear stale entries by deleting their
+                # solaar config or we can add retry logic later.
+                if sclass.feature in device.features:
+                    logger.info(
+                        "check_feature_settings: skipping %s — cached in _absent despite feature %s being present; "
+                        "delete the setting from ~/.config/solaar/config.yaml to retry",
+                        sclass.name,
+                        sclass.feature,
+                    )
+                continue
+            try:
+                setting = check_feature(device, sclass)
+            except Exception as err:
+                # on an internal HID++ error, assume offline and stop further checking
+                if isinstance(err, exceptions.FeatureCallError) and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR:
+                    logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
+                    device.online = False
+                    device.present = False
+                    return False
+                else:
+                    logger.warning(f"ignore feature {sclass.name} because of error {err}")
 
-                if isinstance(setting, list):
-                    for s in setting:
-                        already_known.append(s)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting:
-                    already_known.append(setting)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting is None:
-                    if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
-                        new_absent.append(sclass.name)
+            if isinstance(setting, list):
+                for s in setting:
+                    already_known.append(s)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting:
+                already_known.append(setting)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting is None:
+                if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
+                    new_absent.append(sclass.name)
     if device.persister and new_absent:
         absent.extend(new_absent)
         device.persister["_absent"] = absent
