@@ -1748,25 +1748,23 @@ class HeadsetAutoSleep(settings.Setting):
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
     validator_class = settings_validator.RangeValidator
     min_value = 0
-    # Timer byte count depends on feature version:
-    #   V<3 : 1 byte (0-255)
-    #   V=3 : 2 bytes (0-65535)
-    #   V>=4: 3 bytes (0-16777215)
-    # build() picks the correct width based on the device's reported version.
-    max_value = 0xFFFFFF
+    # Wire format byte count depends on feature version (V<3: 1B, V=3: 2B, V>=4: 3B).
+    # UI slider is capped at 240 min regardless — firmware accepts larger values, but
+    # a 31-year slider (24-bit max) is not useful.
+    max_value = 240
     validator_options = {"byte_count": 1}
 
     @classmethod
     def build(cls, device):
         version = device.features.get_feature_version(cls.feature) or 0
         if version >= 4:
-            byte_count, max_value = 3, 0xFFFFFF
+            byte_count = 3
         elif version >= 3:
-            byte_count, max_value = 2, 0xFFFF
+            byte_count = 2
         else:
-            byte_count, max_value = 1, 0xFF
+            byte_count = 1
         rw = settings.FeatureRW(cls.feature, **cls.rw_options)
-        validator = settings_validator.RangeValidator(min_value=0, max_value=max_value, byte_count=byte_count)
+        validator = settings_validator.RangeValidator(min_value=0, max_value=cls.max_value, byte_count=byte_count)
         return cls(device, rw, validator)
 
 
@@ -1785,10 +1783,19 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
         def build(cls, setting_class, device):
             info = hidpp20.get_onboard_eq_info(device)
             if not info:
+                logger.info("HeadsetOnboardEQ.build: getEQInfo failed, no panel will be built")
                 return None
             _has_hw_eq, num_bands = info
             bands = hidpp20.get_onboard_eq_params(device, slot=0x00)
-            if not bands or len(bands) != num_bands:
+            if not bands:
+                logger.info("HeadsetOnboardEQ.build: getEQParameters returned no bands, no panel will be built")
+                return None
+            if len(bands) != num_bands:
+                logger.info(
+                    "HeadsetOnboardEQ.build: band count mismatch — EQInfo=%d getEQParameters=%d; skipping",
+                    num_bands,
+                    len(bands),
+                )
                 return None
             keys = common.NamedInts()
             for i, (freq, _gain, _q) in enumerate(bands):
@@ -1796,6 +1803,7 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
             v = cls(keys, min_value=-12, max_value=12, count=num_bands, byte_count=1)
             v._band_freqs = [freq for freq, _g, _q in bands]
             v._band_qs = [q for _f, _g, q in bands]
+            logger.info("HeadsetOnboardEQ.build: panel built with %d band(s)", num_bands)
             return v
 
         def validate_read(self, reply_bytes):
@@ -1872,13 +1880,22 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
         def build(cls, setting_class, device):
             info = hidpp20.get_advanced_eq_info(device)
             if not info:
+                logger.info("HeadsetAdvancedEQ.build: getEQInfos failed, no panel will be built")
                 return None
             band_count, _db_range, _caps, db_min, db_max = info
             # Use the active slot on playback direction so the displayed EQ
             # matches what the user is actually hearing.
             active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0) or 0
             bands = hidpp20.get_advanced_eq_params(device, direction=0, slot=active_slot)
-            if not bands or len(bands) != band_count:
+            if not bands:
+                logger.info("HeadsetAdvancedEQ.build: getCustomEQ returned no bands, no panel will be built")
+                return None
+            if len(bands) != band_count:
+                logger.info(
+                    "HeadsetAdvancedEQ.build: band count mismatch — EQInfos=%d getCustomEQ=%d; skipping",
+                    band_count,
+                    len(bands),
+                )
                 return None
             keys = common.NamedInts()
             for i, (freq, _gain) in enumerate(bands):
@@ -1886,6 +1903,13 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             v = cls(keys, min_value=db_min, max_value=db_max, count=band_count, byte_count=1)
             v._band_freqs = [freq for freq, _g in bands]
             v._active_slot = active_slot
+            logger.info(
+                "HeadsetAdvancedEQ.build: panel built with %d band(s), slot=%d, range=[%d,%d]",
+                band_count,
+                active_slot,
+                db_min,
+                db_max,
+            )
             return v
 
         def validate_read(self, reply_bytes):
@@ -2697,8 +2721,22 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
     if settings_class.feature not in device.features:
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
+        logger.info(
+            "check_feature %s [%s]: min_version=%d > device feature version=%d; skipping",
+            settings_class.name,
+            settings_class.feature,
+            settings_class.min_version,
+            device.features.get_feature_version(settings_class.feature) or 0,
+        )
         return
     if device.features.get_hidden(settings_class.feature):
+        flags = device.features.flags.get(settings_class.feature, 0)
+        logger.info(
+            "check_feature %s [%s]: feature has INTERNAL flag set (flags=0x%02X); skipping",
+            settings_class.name,
+            settings_class.feature,
+            flags,
+        )
         return
     try:
         detected = settings_class.build(device)

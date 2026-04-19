@@ -785,7 +785,17 @@ class Device:
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
-                        # Unsolicited notification, skip it
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(
+                                "bridge skipping reply (pre-ACK): got sub_cpl=0x%02X sub_idx=0x%02X func_sw=0x%02X"
+                                " (expected idx=0x%02X func_sw=0x%02X) data=%s",
+                                reply_data[4] if len(reply_data) > 4 else 0,
+                                reply_data[5] if len(reply_data) > 5 else 0,
+                                reply_data[6] if len(reply_data) > 6 else 0,
+                                sub_feat_idx,
+                                expected_sub_func_sw,
+                                reply_data.hex(),
+                            )
             if not ack_received:
                 logger.warning("centurion_bridge_request: no ACK received")
                 return None
@@ -803,7 +813,17 @@ class Device:
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
-                        # Unsolicited notification for a different feature, skip it
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(
+                                "bridge skipping reply (post-ACK): got sub_cpl=0x%02X sub_idx=0x%02X func_sw=0x%02X"
+                                " (expected idx=0x%02X func_sw=0x%02X) data=%s",
+                                reply_data[4] if len(reply_data) > 4 else 0,
+                                reply_data[5] if len(reply_data) > 5 else 0,
+                                reply_data[6] if len(reply_data) > 6 else 0,
+                                sub_feat_idx,
+                                expected_sub_func_sw,
+                                reply_data.hex(),
+                            )
             logger.warning("centurion_bridge_request: no MessageEvent received")
             return None
 
