@@ -24,16 +24,11 @@ gain is whole dB; getEQInfos returns 5 bytes [bandCount, dbRange,
 caps, dbMin, dbMax].
 
 V2 wire format: 5-byte band stride [filter_type, freq_hi, freq_lo,
-gain_hi, gain_lo] with NO header. Filter types are 0x00=HP (cutoff),
+gain_hi, gain_lo] with no header. Filter types are 0x00=HP (cutoff),
 0x78=peaking. Frequency is raw BE u16 in Hz. Gain is signed BE int16
 × step_db (step_db from getEQInfos). No Q on the wire — firmware-fixed
 per filter type. getEQInfos returns 13 bytes with gain bounds + step
 count, format enum, XY-support flag, and onboard preset counts.
-
-Authoritative source: HEADSET_ADVANCED_PARA_EQ_WIRE_PROTOCOL.md (the
-V2 layout was confirmed via live G522 probe — the default EQ is one
-HP filter at 20 Hz plus nine peaking filters at ISO centers 50, 125,
-250, 500, 1000, 2500, 5000, 10000, 20000 Hz with all gains at zero).
 """
 
 from __future__ import annotations

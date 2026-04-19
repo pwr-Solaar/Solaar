@@ -27,11 +27,9 @@ import struct
 
 from .hidpp20_constants import SupportedFeature
 
-# Mystery bytes observed in every LGHUB pcap EQ write between band params
-# and coefficient header.  Purpose not fully understood — possibly a null-band
-# terminator for DSPs that support >5 bands (advanced 10-band mode).
-# First byte matches band_count; bytes 2-3 look like LE16 coeff blob size.
-# Hardcoded from pcap for initial bring-up; revisit once device-tested.
+# Opaque bytes observed between band params and coefficient header. First
+# byte matches band_count; bytes 2-3 look like LE16 coeff blob size. Keep
+# verbatim until a device counter-example forces a re-derivation.
 _EQ_MYSTERY_BYTES = b"\x05\x5a\xe3\x00"
 
 
@@ -85,7 +83,7 @@ def _build_coeff_section(bands, sample_rate, section_type=1):
     coefficients (a1, a2) are left unchanged. The DSP multiplies the output by
     rescale to restore correct gain.
     """
-    _HEADROOM = 1.19  # 19% headroom margin (matches LGHUB)
+    _HEADROOM = 1.19  # 19% headroom margin before quantization
     num_bands = len(bands)
     all_words = [num_bands]  # first uint16 = num_bands
 

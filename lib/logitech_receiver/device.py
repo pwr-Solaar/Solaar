@@ -658,13 +658,13 @@ class Device:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
     # Max sub-message bytes in the first bridge fragment (for 0x51):
-    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57
-    # LGHUB uses 56 for first fragment (60 byte payload - 4 bridge overhead)
-    # For 0x50, subtract 1 more for the device_addr byte.
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57;
+    # one byte of conservative margin gives 56. For 0x50 the device_addr byte
+    # eats one more, so first_chunk = 55 (handled dynamically below).
     _BRIDGE_FIRST_CHUNK = 56
     # Continuation fragments carry raw sub_msg data (no bridge prefix/hdr):
-    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61, but LGHUB uses 60
-    # For 0x50, subtract 1 more for the device_addr byte.
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61; one byte of margin
+    # gives 60.
     _BRIDGE_CONT_CHUNK = 60
 
     def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
@@ -735,9 +735,8 @@ class Device:
                 # Fragments 1+: raw sub_msg continuation data (no bridge overhead)
                 # CPL flags = (frag_index << 1) | (1 if more_fragments else 0)
                 # All fragments are sent back-to-back without waiting for
-                # intermediate ACKs (verified via LGHUB pcap).  The device
-                # reassembles internally and sends a single ACK + MessageEvent
-                # after the last fragment.
+                # intermediate ACKs. The device reassembles internally and
+                # sends a single ACK + MessageEvent after the last fragment.
                 frag_index = 0
                 offset = 0
                 while offset < sub_len:

@@ -1593,17 +1593,10 @@ class HeadsetEcoMode(settings.Setting):
 
     @classmethod
     def build(cls, device):
-        # LGHUB's service layer for 0x0618 HeadsetBatterySaverMode compares
-        # incoming new_state against its cached current_state and SKIPS the
-        # devio SetEcoModeState write when they match (verified in
-        # on_headset_battery_saver_set_handler @ 0x100c21790). The G522
-        # firmware rejects no-op writes with device-specific NACK 0x0B.
-        #
-        # BooleanValidator's prepare_write already has the "skip if same as
-        # current" logic — it just needs needs_current_value=True to make
-        # Setting.write read the device state first. Default-mask (0xFF)
-        # BooleanValidators get needs_current_value=False, so we flip it here
-        # to match LGHUB's guard.
+        # G522 firmware rejects no-op writes with device-specific NACK 0x0B.
+        # BooleanValidator.prepare_write already skips writes that match the
+        # current value when needs_current_value=True; default-mask (0xFF)
+        # BooleanValidators get needs_current_value=False, so flip it here.
         rw = settings.FeatureRW(cls.feature)
         validator = settings_validator.BooleanValidator()
         validator.needs_current_value = True
@@ -1695,7 +1688,8 @@ class HeadsetMicGain(settings.Setting):
     @classmethod
     def build(cls, device):
         # GetInfo (function 0) returns [min_gain (int8), max_gain (int8)].
-        # LGHUB caches these once at startup to rescale SetMicGain writes.
+        # Query once at build time so the slider range reflects the device's
+        # actual supported range rather than a generic int8 window.
         try:
             info = device.feature_request(cls.feature, 0x00)
         except Exception as e:
@@ -1855,10 +1849,9 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
 class HeadsetAdvancedEQ(settings.RangeFieldSetting):
     """Read-only display of the headset's active AdvancedParaEQ (0x020D) bands.
 
-    Writes are intentionally disabled for now. We now know the V2 wire format
-    (see HEADSET_ADVANCED_PARA_EQ_WIRE_PROTOCOL.md) so a write path is
-    buildable, but we still want a round-trip test on real hardware before
-    enabling user-facing writes that could misconfigure the DSP.
+    Writes are intentionally disabled for now. The V2 wire format is known
+    (see advanced_para_eq.py) but we want a round-trip test on real hardware
+    before enabling user-facing writes that could misconfigure the DSP.
 
     V0/V1: 3-byte band stride [freq_hi, freq_lo, gain_i8], gain is whole dB.
     V2:    5-byte band stride [filter_type, freq_hi, freq_lo, gain_hi, gain_lo],
@@ -2099,9 +2092,9 @@ class HeadsetRGBColor(settings.Setting):
             # Byte 0 is frame_type: 0x01 = transient commit, 0x02 = persistent.
             # G522 firmware rejects 0x02 with LOGITECH_INTERNAL (0x05) — the
             # persistent commit path may require additional state (e.g. onboard
-            # profile activation) we haven't mapped yet. Stick with 0x01 for
-            # now so the LEDs at least refresh visually; we can revisit 0x02
-            # once a wireshark capture of the LGHUB sequence is available.
+            # profile activation) that isn't mapped yet. Stick with 0x01 so the
+            # LEDs refresh visually; revisit persistence once the preconditions
+            # are known.
             resp = device.feature_request(_F.HEADSET_RGB_HOSTMODE, 0x60, bytes([0x01, 0x00, 0x00, 0x00]))
             frame_type = 0x01
             logger.info(
