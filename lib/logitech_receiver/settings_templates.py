@@ -2077,9 +2077,9 @@ class HeadsetRGBColor(settings.Setting):
         # Tight format observed on G522: [count, zone_ids...] with no reserved gap.
         # The protocol doc shows 3-byte + 1-byte reserved gaps before zone IDs, but
         # the G522 sub-device packs them immediately after the count.
+        # Don't filter zone_id==0 — on some devices 0 is a valid zone ID. We trust
+        # the device to report sane zone IDs and let the device reject nonsense.
         tight = list(resp[1 : 1 + zone_count]) if 1 <= zone_count <= len(resp) - 1 else []
-        # Filter out zero bytes that are just padding (zone IDs should be non-zero).
-        tight = [z for z in tight if z != 0]
         if tight and len(tight) == zone_count:
             logger.info(
                 "HeadsetRGBColor: discovered %d zone(s) %s (tight format, raw resp=%s)",
@@ -2091,7 +2091,6 @@ class HeadsetRGBColor(settings.Setting):
             return tight
         # Try the doc's format (with reserved gap) as fallback
         gap = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
-        gap = [z for z in gap if z != 0]
         if gap and len(gap) == zone_count:
             logger.info(
                 "HeadsetRGBColor: discovered %d zone(s) %s (doc format, raw resp=%s)",

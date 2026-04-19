@@ -758,6 +758,13 @@ class Device:
             if no_reply:
                 return None
 
+            # The device echoes our exact sub-device function+swid byte in
+            # MessageEvent responses. Match on that to reject cross-contamination
+            # from late-arriving responses to other function calls on the same
+            # feature (e.g. GetRGBZoneInfo response showing up on a later
+            # GetHostModeState read).
+            expected_sub_func_sw = (sub_function & 0xF0) | sw_id
+
             # Read ACK + MessageEvent response
             request_started = time.time()
             ack_received = False
@@ -774,7 +781,7 @@ class Device:
                         break
                     if (func_sw >> 4) == 0x01 and (func_sw & 0x0F) == 0:
                         # MessageEvent arrived before ACK — validate it's for our request
-                        if self._is_bridge_response_for(reply_data, sub_feat_idx):
+                        if self._is_bridge_response_for(reply_data, sub_feat_idx, expected_sub_func_sw):
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
@@ -792,7 +799,7 @@ class Device:
                 if len(reply_data) >= 2 and reply_data[0] == bridge_idx:
                     func_sw = reply_data[1]
                     if (func_sw >> 4) == 0x01 and (func_sw & 0x0F) == 0:
-                        if self._is_bridge_response_for(reply_data, sub_feat_idx):
+                        if self._is_bridge_response_for(reply_data, sub_feat_idx, expected_sub_func_sw):
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
@@ -816,12 +823,19 @@ class Device:
         return False
 
     @staticmethod
-    def _is_bridge_response_for(reply_data, expected_sub_feat_idx):
+    def _is_bridge_response_for(reply_data, expected_sub_feat_idx, expected_sub_func_sw=None):
         """Check if a bridge MessageEvent is a response for our specific sub-feature request.
 
         Accepts both normal responses (sub_feat_idx matches) and error responses
         (sub_feat_idx=0xFF with original feat_idx in next byte).
         Unsolicited notifications (sub_cpl=0xFF) are rejected.
+
+        If `expected_sub_func_sw` is provided, also matches on the echoed
+        sub-device function byte (`(function << 4) | sw_id`). This prevents
+        cross-talk between different function calls on the SAME feature, which
+        can happen when a late-arriving response for one function gets picked
+        up by a later request on the same feature (observed on G522 where a
+        GetRGBZoneInfo response contaminated a subsequent GetHostModeState).
         """
         if len(reply_data) < 6:
             return False
@@ -831,9 +845,15 @@ class Device:
         if sub_cpl != 0x00:
             return False
         if sub_feat_idx == expected_sub_feat_idx:
+            if expected_sub_func_sw is not None and len(reply_data) >= 7:
+                if reply_data[6] != expected_sub_func_sw:
+                    return False
             return True
         # Error response: sub_feat_idx=0xFF, next byte is the original feat_idx that errored
         if sub_feat_idx == 0xFF and len(reply_data) >= 7 and reply_data[6] == expected_sub_feat_idx:
+            if expected_sub_func_sw is not None and len(reply_data) >= 8:
+                if reply_data[7] != expected_sub_func_sw:
+                    return False
             return True
         return False
 
