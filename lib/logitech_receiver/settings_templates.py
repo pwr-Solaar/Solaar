@@ -1706,8 +1706,8 @@ class HeadsetMicGain(settings.Setting):
                     info.hex(),
                 )
                 min_gain, max_gain = cls.min_value, cls.max_value
-            else:
-                logger.info(
+            elif logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
                     "HeadsetMicGain: device reports gain range [%d, %d]",
                     min_gain,
                     max_gain,
@@ -1992,25 +1992,6 @@ class HeadsetRGBHostMode(settings.Setting):
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     validator_class = settings_validator.BooleanValidator
 
-    def write(self, value, save=True):
-        # Diagnostic wrapper: log what GetHostModeState returns immediately
-        # before AND after the SetHostModeState write, so we can see whether
-        # (a) the write takes effect on the device or (b) our decoding of the
-        # response is wrong. solaar show has been reporting this value as
-        # False even after writes we believed succeeded.
-        try:
-            before = self._device.feature_request(self.feature, 0x70)
-        except Exception as e:
-            before = f"<err:{e}>"
-        logger.info("HeadsetRGBHostMode.write: before=%s requested=%s", before, value)
-        result = super().write(value, save=save)
-        try:
-            after = self._device.feature_request(self.feature, 0x70)
-        except Exception as e:
-            after = f"<err:{e}>"
-        logger.info("HeadsetRGBHostMode.write: after=%s write_returned=%s", after, result)
-        return result
-
 
 class HeadsetRGBColor(settings.Setting):
     """Pick a color from the shared `special_keys.COLORS` palette and apply it
@@ -2137,23 +2118,23 @@ class HeadsetRGBColor(settings.Setting):
         # the device to report sane zone IDs and let the device reject nonsense.
         tight = list(resp[1 : 1 + zone_count]) if 1 <= zone_count <= len(resp) - 1 else []
         if tight and len(tight) == zone_count:
-            logger.info(
-                "HeadsetRGBColor: discovered %d zone(s) %s (tight format, raw resp=%s)",
-                len(tight),
-                [f"0x{z:02X}" for z in tight],
-                resp.hex(),
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "HeadsetRGBColor: discovered %d zone(s) %s (tight format)",
+                    len(tight),
+                    [f"0x{z:02X}" for z in tight],
+                )
             device._headset_rgb_zone_ids = tight
             return tight
         # Try the doc's format (with reserved gap) as fallback
         gap = list(resp[5 : 5 + zone_count]) if len(resp) >= 5 + zone_count else []
         if gap and len(gap) == zone_count:
-            logger.info(
-                "HeadsetRGBColor: discovered %d zone(s) %s (doc format, raw resp=%s)",
-                len(gap),
-                [f"0x{z:02X}" for z in gap],
-                resp.hex(),
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "HeadsetRGBColor: discovered %d zone(s) %s (doc format)",
+                    len(gap),
+                    [f"0x{z:02X}" for z in gap],
+                )
             device._headset_rgb_zone_ids = gap
             return gap
         # Neither format parsed cleanly; don't cache so next write retries.

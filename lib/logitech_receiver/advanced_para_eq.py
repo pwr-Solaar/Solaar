@@ -108,7 +108,7 @@ def get_advanced_eq_info(device):
         }
         logger.info(
             "AdvancedParaEQ getEQInfos V2: gain=[%d,%d] steps=%d step_db=%.4f format=%d xy=%s "
-            "presets_ro=%d presets_custom=%d raw=%s",
+            "presets_ro=%d presets_custom=%d",
             gain_min,
             gain_max,
             gain_steps,
@@ -117,7 +117,6 @@ def get_advanced_eq_info(device):
             supports_xy,
             ro_presets,
             custom_presets,
-            result.hex(),
         )
         return info
 
@@ -140,14 +139,13 @@ def get_advanced_eq_info(device):
         "step_db": 1.0,
     }
     logger.info(
-        "AdvancedParaEQ getEQInfos V%d: bands=%d dbRange=%d caps=0x%02X gain=[%d,%d] raw=%s",
+        "AdvancedParaEQ getEQInfos V%d: bands=%d dbRange=%d caps=0x%02X gain=[%d,%d]",
         version,
         band_count,
         db_range,
         caps,
         gain_min,
         gain_max,
-        result.hex(),
     )
     return info
 
@@ -161,7 +159,7 @@ def get_advanced_eq_active_slot(device, direction=DIRECTION_PLAYBACK):
     if len(result) < 1:
         logger.info("AdvancedParaEQ getActiveEQ(dir=%d): empty response", direction)
         return None
-    logger.info("AdvancedParaEQ getActiveEQ(dir=%d): slot=%d raw=%s", direction, result[0], result.hex())
+    logger.info("AdvancedParaEQ getActiveEQ(dir=%d): slot=%d", direction, result[0])
     return result[0]
 
 
@@ -224,12 +222,11 @@ def get_advanced_eq_defaults(device, direction=DIRECTION_PLAYBACK, slot=0):
             )
             return None
         logger.info(
-            "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): %d band(s) %s raw=%s",
+            "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): %d band(s) %s",
             direction,
             slot,
             len(bands),
             [_band_label(t, f) + f" {round(g, 2)}dB" for t, f, g in bands],
-            result.hex(),
         )
         return bands
     # V0/V1 legacy 3-byte stride.
@@ -243,12 +240,11 @@ def get_advanced_eq_defaults(device, direction=DIRECTION_PLAYBACK, slot=0):
         bands.append((FILTER_TYPE_PEAKING, freq, float(gain_db)))
         offset += 3
     logger.info(
-        "AdvancedParaEQ getEQDefaults V%d (dir=%d slot=%d): %d band(s) raw=%s",
+        "AdvancedParaEQ getEQDefaults V%d (dir=%d slot=%d): %d band(s)",
         version,
         direction,
         slot,
         len(bands),
-        result.hex(),
     )
     return bands
 
@@ -346,13 +342,12 @@ def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
             )
             return None
         logger.info(
-            "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): %d band(s) step_db=%.4f %s raw=%s",
+            "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): %d band(s) step_db=%.4f %s",
             direction,
             slot,
             len(bands),
             step_db,
             [f"{_band_label(t, f)} {round(g, 2)}dB" for t, f, g in bands],
-            result.hex(),
         )
         return bands
 
@@ -367,12 +362,11 @@ def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
         bands.append((FILTER_TYPE_PEAKING, freq, float(gain_db)))
         offset += 3
     logger.info(
-        "AdvancedParaEQ getCustomEQ V%d (dir=%d slot=%d): parsed %d band(s) %s raw=%s",
+        "AdvancedParaEQ getCustomEQ V%d (dir=%d slot=%d): parsed %d band(s) %s",
         version,
         direction,
         slot,
         len(bands),
         bands,
-        result.hex(),
     )
     return bands

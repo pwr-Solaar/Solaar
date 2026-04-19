@@ -209,13 +209,14 @@ class FeaturesArray(dict):
             # use the correct payload format on direct USB Centurion devices too.
             self.version[feature] = feat_version
             self.flags[feature] = feat_type
-            logger.info(
-                "Centurion parent feature: %s at index %d, version=%d, flags=0x%02X",
-                feature,
-                index,
-                feat_version,
-                feat_type,
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Centurion parent feature: %s at index %d, version=%d, flags=0x%02X",
+                    feature,
+                    index,
+                    feat_version,
+                    feat_type,
+                )
             if feature is CenturionCoreFeature.CENT_PP_BRIDGE:
                 bridge_index = index
 
@@ -253,7 +254,8 @@ class FeaturesArray(dict):
             logger.warning("Failed to read Centurion sub-device feature count")
             return
         total_count = count_resp[0]
-        logger.info("Centurion sub-device: FeatureSet reports %d features", total_count)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Centurion sub-device: FeatureSet reports %d features", total_count)
 
         # Per-index query: GetFeatureId (function 1 = 0x10).
         # Response: [remaining, feat_hi, feat_lo, type, version].
@@ -282,19 +284,18 @@ class FeaturesArray(dict):
             # payload format. get_feature_version(feature) reads self.version[feature].
             self.version[feature] = feat_version
             self.flags[feature] = feat_type
-            # Log every sub-device feature at INFO so field diagnostics can see
-            # both the version (V-gated payload formats) and flags (INTERNAL/HIDDEN
-            # bits silently suppress settings panels in check_feature).
-            logger.info(
-                "Centurion sub-device feature: %s at sub-index %d, version=%d, flags=0x%02X",
-                feature,
-                sub_feat_idx,
-                feat_version,
-                feat_type,
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Centurion sub-device feature: %s at sub-index %d, version=%d, flags=0x%02X",
+                    feature,
+                    sub_feat_idx,
+                    feat_version,
+                    feat_type,
+                )
             sub_feat_idx += 1
         self._sub_feature_count = sub_feat_idx
-        logger.info("Centurion sub-device: discovered %d features total", sub_feat_idx)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Centurion sub-device: discovered %d features total", sub_feat_idx)
 
     def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)

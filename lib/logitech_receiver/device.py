@@ -714,11 +714,8 @@ class Device:
 
         timeout = base.DEFAULT_TIMEOUT
         with base.acquire_timeout(base.handle_lock(handle), handle, timeout):
-            # Log the outgoing sub-message at INFO so field diagnostics can
-            # correlate bridge NACKs with the exact payload we sent (e.g. to
-            # verify mic-gain byte landed in the device's accepted range).
-            if logger.isEnabledFor(logging.INFO):
-                logger.info(
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
                     "bridge TX: sub_idx=%d func=0x%02X sw_id=%d payload=%s",
                     sub_feat_idx,
                     sub_function,
