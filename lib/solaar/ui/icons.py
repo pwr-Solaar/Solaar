@@ -30,10 +30,11 @@ TRAY_ATTENTION = "solaar-attention"
 
 _default_theme = None
 _has_level_icons = False
+_has_padded_level_icons = False
 
 
 def _init_icon_paths():
-    global _default_theme, _has_level_icons
+    global _default_theme, _has_level_icons, _has_padded_level_icons
     if _default_theme:
         return
     _default_theme = Gtk.IconTheme.get_default()
@@ -50,7 +51,8 @@ def _init_icon_paths():
             gtk.battery_icons_style = "solaar"
     suffix = "-symbolic" if gtk.battery_icons_style == "symbolic" else ""
     _has_level_icons = _default_theme.has_icon(f"battery-level-50{suffix}")
-    logger.debug("battery level icons available: %s", _has_level_icons)
+    _has_padded_level_icons = not _has_level_icons and _default_theme.has_icon(f"battery-050{suffix}")
+    logger.debug("battery level icons available: %s (padded scheme: %s)", _has_level_icons, _has_padded_level_icons)
 
 
 def battery(level=None, charging=False):
@@ -77,20 +79,23 @@ def _battery_icon_name(level, charging):
 
     rounded = min(100, max(0, round(level / 10) * 10))
 
-    # Try precise level icons first (battery-level-N[-charging|-charged][-symbolic])
-    if _has_level_icons:
+    # Try precise level icons (battery-level-N or battery-0N0 naming scheme)
+    if _has_level_icons or _has_padded_level_icons:
         if charging and rounded == 100:
             charging_str = "-charged"
         elif charging:
             charging_str = "-charging"
         else:
             charging_str = ""
-        icon_name = f"battery-level-{rounded}{charging_str}{suffix}"
+        if _has_level_icons:
+            icon_name = f"battery-level-{rounded}{charging_str}{suffix}"
+        else:
+            icon_name = f"battery-{rounded:03}{charging_str}{suffix}"
         if _default_theme.has_icon(icon_name):
             logger.debug("battery level icon for %s:%s = %s", level, charging, icon_name)
             return icon_name
 
-    # Fall back to semantic names with corrected thresholds
+    # Fall back to semantic names
     level_name = _first_res(level, ((90, "full"), (60, "good"), (20, "low"), (5, "caution"), (0, "empty")))
     if level_name:
         if charging:
