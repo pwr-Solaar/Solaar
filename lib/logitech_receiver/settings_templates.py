@@ -2051,6 +2051,21 @@ class HeadsetLEDControl(settings.Setting):
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
+    def write(self, value, save=True):
+        # After switching to Solaar control, the firmware drops whatever
+        # colors we'd programmed — so reassert the saved Primary + per-zone
+        # overrides immediately. Otherwise the LEDs stay on whatever
+        # device-driven effect was last shown until the user edits a color.
+        result = super().write(value, save)
+        if result is not None and int(value) == 1 and self._device.online:
+            primary = _headset_primary_color(self._device)
+            zones = headset_rgb.discover_zones(self._device)
+            if zones:
+                zone_map = {int(z): primary for z in zones}
+                zone_map.update(_headset_per_zone_overrides(self._device) or {})
+                headset_rgb.write_zone_map(self._device, zone_map)
+        return result
+
 
 class HeadsetLEDsPrimary(settings.Setting):
     """Primary headset LED color, rendered as a GTK color picker.
@@ -2236,11 +2251,15 @@ class HeadsetPerZoneLighting(settings.Settings):
 
 
 class _LogiVoiceStateSetting(settings.Setting):
-    """Base for per-module State read (GetState fn 1). Read-only display."""
+    """Per-module State toggle. Reads GetState (fn 1) and writes SetState (fn 0).
+
+    State wire format is unambiguous (one byte: 0 = off, 1 = on), so this is
+    the one piece of the LogiVoice surface we enable for writes. The per-module
+    Parameters struct stays read-only until each field's encoding is confirmed.
+    """
 
     rw_options = {"read_fnid": logivoice.FN_GET_STATE, "write_fnid": logivoice.FN_SET_STATE}
     validator_class = settings_validator.BooleanValidator
-    persist = False
 
     @classmethod
     def build(cls, device):
@@ -2251,10 +2270,6 @@ class _LogiVoiceStateSetting(settings.Setting):
         except Exception as e:
             logger.info("LogiVoice probe_module(%s) raised %s", cls.feature, e)
         return super().build(device)
-
-    def write(self, value, save=True):
-        logger.info("LogiVoice state write ignored (read-only pass): %s requested=%s", self.name, value)
-        return None
 
 
 class _LogiVoiceModuleItem:
@@ -2377,8 +2392,8 @@ def _logivoice_make_state_class(feature: hidpp20_constants.SupportedFeature):
     module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
     attrs = {
         "name": f"logivoice-{slug}-state",
-        "label": f"LogiVoice {module_name}: State (read-only)",
-        "description": f"Current on/off state of the headset {module_name} processing block.",
+        "label": f"LogiVoice {module_name}",
+        "description": f"Enable the headset {module_name} processing block.",
         "feature": feature,
     }
     return type(f"LogiVoice_{slug}_State", (_LogiVoiceStateSetting,), attrs)
