@@ -188,6 +188,8 @@ def test_ping_errors(simulated_error: Hidpp10Error, expected_result):
     with mock.patch(
         "logitech_receiver.base._read",
         return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error])),
+    ), mock.patch("logitech_receiver.base._read_input_buffer"), mock.patch(
+        "logitech_receiver.base.write", return_value=None
     ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if isinstance(expected_result, type) and issubclass(expected_result, Exception):
             with pytest.raises(expected_result) as context:

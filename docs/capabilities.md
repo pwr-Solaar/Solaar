@@ -21,9 +21,9 @@ Not all such devices supported in Solaar as information needs to be added to Sol
 for each device type that directly connects.
 
 
-## HID++
+## HID++ and Centurion
 
-The devices that Solaar handles use Logitech's HID++ protocol.
+The devices that Solaar handles use Logitech's HID++ and Centurion protocols.
 
 HID++ is a Logitech-proprietary protocol that extends the standard HID
 protocol for interfacing with receivers, keyboards, mice, and so on. It allows
@@ -42,6 +42,8 @@ M510 mouse that use different versions of the HID++ protocol.)
 Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
 same to software as some M310 mice.)
+
+Centurion is closely related to HID++ and is used by some Logitech headsets.
 
 The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software
@@ -82,9 +84,9 @@ that matches the one they were bought with.
 ## Device Settings
 
 Solaar can display quite a few changeable settings of receivers and devices.
-For a list of HID++ features and their support see [the features page](features.md).
+For a list of features and their support see [the features page](features.md).
 
-Solaar does not do much beyond using the HID++ protocol to change the
+Solaar does not do much beyond using the protocols to change the
 behavior of receivers and devices via changing their settings.
 In particular, Solaar cannot change how
 the operating system turns the keycodes that a keyboard produces into
@@ -114,7 +116,7 @@ Solaar keeps track of settings independently on each computer.
 As a result if a device is switched between different computers
 Solaar may apply different settings for it on the different computers.
 
-Querying a device for its current state can require quite a few HID++
+Querying a device for its current state can require quite a few
 interactions. These interactions can temporarily slow down the device, so
 Solaar tries to internally cache information about devices while it is
 running.  If the device
@@ -187,6 +189,52 @@ Solaar uses the standard US keyboard layout.  This currently only matters for th
 
 This is an experimental feature and may be modified or even eliminated.
 
+
+### HITS Tuning (Hall-Effect Inductive Trigger Switch)
+
+Some gaming mice (such as the PRO X 2 Superstrike) feature hall-effect magnetic switches on their primary buttons instead of traditional mechanical switches. These switches expose tunable parameters via the `SUPERSTRIKE_TUNING` HID++ feature (`0x1B0C`).
+
+Solaar supports three per-button settings for each primary button (left = 0, right = 1):
+
+- **Actuation Point** (`superstrike-tuning_actuation-{0,1}`): How deep the button must be pressed to register a click. Range 1–10, where 1 is the shallowest (hair trigger) and 10 is the deepest (full press). Default is 5.
+- **Rapid Trigger Level** (`superstrike-tuning_rapid-trigger-level-{0,1}`): Sensitivity of rapid re-actuation after partial release. Range 1–5, where 1 is the most sensitive and 5 is the least. This cannot be fully disabled.
+- **Click Haptics** (`superstrike-tuning_haptics-{0,1}`): Intensity of haptic feedback on click. Range 0–5, where 0 disables haptics and 5 is maximum intensity.
+
+These settings are written directly to the device and persist across reconnections regardless of the onboard profile state.
+
+### Extended DPI
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_DPI` feature (`0x2202`) which allows independent X and Y axis DPI configuration as well as lift-off distance (LOD) control. This is exposed via the `dpi_extended` setting:
+
+```bash
+solaar config <device> dpi_extended "{X:1600, Y:1600, LOD:HIGH}"
+```
+
+LOD values are `LOW` and `HIGH`. DPI range depends on the device sensor (up to 32000 DPI on the PRO X 2 Superstrike).
+
+### Haptic Feedback
+
+Some devices, such as the MX Master 4 have  haptic feeback.
+The Solaar CLI can be used to 'play' wave forms, for example
+```
+solaar config 'mx master 4' haptic-play 'HAPPY ALERT'
+```
+Solaar rules can also do this using their `Set` action.
+
+
+### Extended Report Rate
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_REPORT_RATE` feature (`0x8061`) which enables sub-millisecond polling rates beyond the standard 1 ms (1000 Hz). This is exposed via the `report_rate_extended` setting:
+
+| Value   | Polling Rate |
+|---------|-------------|
+| `8ms`   | 125 Hz      |
+| `4ms`   | 250 Hz      |
+| `2ms`   | 500 Hz      |
+| `1ms`   | 1000 Hz     |
+| `500us` | 2000 Hz     |
+| `250us` | 4000 Hz     |
+| `125us` | 8000 Hz     |
 
 ### Onboard Profiles
 

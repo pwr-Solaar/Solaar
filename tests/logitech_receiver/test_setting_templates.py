@@ -638,6 +638,60 @@ key_tests = [
         fake_hidpp.Response("E010", 0x0430, "02E010"),
         fake_hidpp.Response("E018", 0x0430, "02E018"),
     ),
+    Setup(  # HeadsetOnboardEQ: 2 bands, 128Hz/-2dB/Q10 and 256Hz/+3dB/Q10
+        FeatureTest(settings_templates.HeadsetOnboardEQ, {0: -2, 1: 3}, {1: 5}, 2),
+        [-12, 12],
+        fake_hidpp.Response("8000000002", 0x0400),  # GetEQInfos: has_hw_eq, 2 bands
+        fake_hidpp.Response("00020080FE0A0100030A", 0x0410, "00"),  # GetEQParameters
+        fake_hidpp.Response(  # SetEQParameters: write initial values back (slot 0x00)
+            "00",
+            0x0420,
+            "00020080FE0A0100030A"
+            "055AE300"  # mystery bytes (from pcap)
+            "030E00020000000100170002"
+            "007A6B00D69D94008C516B00C82380005DC27F0075"
+            "906B0022B6940002226B00B44080007EA37F00C1C3040044"
+            "0200170002"
+            "00506B00900F95006ED56A00D185800060477F00CA"
+            "906B00229D950052496A00A12E810085EC7E0075C40400AC",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: persist initial values (slot 0x80)
+            "00",
+            0x0420,
+            "80020080FE0A0100030A"
+            "055AE300"
+            "030E00020000000100170002"
+            "007A6B00D69D94008C516B00C82380005DC27F0075"
+            "906B0022B6940002226B00B44080007EA37F00C1C3040044"
+            "0200170002"
+            "00506B00900F95006ED56A00D185800060477F00CA"
+            "906B00229D950052496A00A12E810085EC7E0075C40400AC",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: write updated band 1 gain=5 (slot 0x00)
+            "00",
+            0x0420,
+            "00020080FE0A0100050A"
+            "055AE300"
+            "030E00020000000100170002"
+            "006F6B00F5A894006A466B00EB2380005DC27F0075"
+            "906B0022BC9400AA156B00613B80007CAD7F00C6C30400BF"
+            "0200170002"
+            "00306B00272F9500BAB56A008C85800060477F00CA"
+            "906B0022B1950002226A000E1F8100AB0A7F004FC604001D",
+        ),
+        fake_hidpp.Response(  # SetEQParameters: persist updated values (slot 0x80)
+            "00",
+            0x0420,
+            "80020080FE0A0100050A"
+            "055AE300"
+            "030E00020000000100170002"
+            "006F6B00F5A894006A466B00EB2380005DC27F0075"
+            "906B0022BC9400AA156B00613B80007CAD7F00C6C30400BF"
+            "0200170002"
+            "00306B00272F9500BAB56A008C85800060477F00CA"
+            "906B0022B1950002226A000E1F8100AB0A7F004FC604001D",
+        ),
+    ),
     Setup(
         FeatureTest(settings_templates.PerKeyLighting, {1: -1, 2: -1, 9: -1, 10: -1, 113: -1}, {2: 0xFF0000}, 4, 4, 0, 1),
         {

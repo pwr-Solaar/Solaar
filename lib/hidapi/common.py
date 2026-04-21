@@ -18,3 +18,4 @@ class DeviceInfo:
     isDevice: bool
     hidpp_short: str | None
     hidpp_long: str | None
+    centurion: bool = False

@@ -1055,10 +1055,15 @@ class ExtendedAdjustableDpi(settings.Setting):
     keys = common.NamedInts(X=0, Y=1, LOD=2)
 
     def write_key_value(self, key, value, save=True):
+        # Force a read to populate the full X/Y/LOD dictionary if it's missing (fixes CLI)
+        if not isinstance(self._value, dict):
+            self.read()
+
         if isinstance(self._value, dict):
             self._value[key] = value
         else:
             self._value = {key: value}
+
         result = self.write(self._value, save)
         return result[key] if isinstance(result, dict) else result
 
@@ -1579,6 +1584,190 @@ class ADCPower(settings.Setting):
     validator_options = {"byte_count": 1}
 
 
+class HeadsetEcoMode(settings.Setting):
+    name = "headset-eco-mode"
+    label = _("Eco Mode")
+    description = _("Battery saver mode.")
+    feature = _F.HEADSET_BATTERY_SAVER
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetDoNotDisturb(settings.Setting):
+    name = "headset-do-not-disturb"
+    label = _("Do Not Disturb")
+    description = _("Suppress notification sounds.")
+    feature = _F.HEADSET_DO_NOT_DISTURB
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetMicMute(settings.Setting):
+    name = "headset-mic-mute"
+    label = _("Mic Mute")
+    description = _("Mute the microphone.")
+    feature = _F.HEADSET_MIC_MUTE
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetMicSNR(settings.Setting):
+    name = "headset-mic-snr"
+    label = _("Mic SNR")
+    description = _("Microphone signal-to-noise ratio enhancement.")
+    feature = _F.HEADSET_MIC_SNR
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetAINR(settings.Setting):
+    name = "headset-ai-nr"
+    label = _("AI Noise Reduction")
+    description = _("Enable AI noise reduction.")
+    feature = _F.HEADSET_AI_NOISE_REDUCTION
+    validator_class = settings_validator.BooleanValidator
+
+
+class HeadsetAINRLevel(settings.Setting):
+    name = "headset-ai-nr-level"
+    label = _("AI Noise Reduction Level")
+    description = _("AI noise reduction intensity.")
+    feature = _F.HEADSET_AI_NOISE_REDUCTION
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
+    validator_class = settings_validator.ChoicesValidator
+    choices_universe = common.NamedInts(Off=0, Low=1, Medium=2, High=3)
+
+
+class HeadsetSidetone(settings.Setting):
+    name = "headset-sidetone"
+    label = _("Headset Sidetone")
+    description = _("Sidetone level (0 = off, 100 = max).")
+    feature = _F.HEADSET_AUDIO_SIDETONE
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 100
+
+    @classmethod
+    def build(cls, device):
+        # Version <= 1: GetSidetone returns [mic_count, mic_id, level]; SetSidetone takes [mic_id, level]
+        # Version > 1: GetSidetone returns [mic_count, mic_id, reserved, level]; SetSidetone takes [mic_id, 0xFF, level]
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version > 1:
+            skip, prefix = 3, b"\x01\xff"
+        else:
+            skip, prefix = 2, b"\x01"
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = cls.validator_class.build(cls, device, read_skip_byte_count=skip, write_prefix_bytes=prefix)
+        if validator:
+            return cls(device, rw, validator)
+
+
+class HeadsetMicGain(settings.Setting):
+    name = "headset-mic-gain"
+    label = _("Mic Gain")
+    description = _("Microphone gain level.")
+    feature = _F.HEADSET_MIC_GAIN
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_class = settings_validator.RangeValidator
+    min_value = -128
+    max_value = 127
+    validator_options = {"byte_count": 1, "signed": True}
+
+
+class HeadsetMixBalance(settings.Setting):
+    name = "headset-mix-balance"
+    label = _("Audio Mix Balance")
+    description = _("Balance between game and chat audio.")
+    feature = _F.HEADSET_MIX
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 255
+    validator_options = {"byte_count": 1}
+
+
+class HeadsetAutoSleep(settings.Setting):
+    name = "headset-auto-sleep"
+    label = _("Auto Sleep Timeout")
+    description = _("Idle time in minutes before the headset enters sleep mode (0 = disabled).")
+    feature = _F.CENTURION_AUTO_SLEEP
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 255
+    validator_options = {"byte_count": 1}
+
+
+class HeadsetOnboardEQ(settings.RangeFieldSetting):
+    name = "headset-onboard-eq"
+    label = _("Headset Equalizer")
+    description = _("Set equalizer levels.")
+    feature = _F.HEADSET_ONBOARD_EQ
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "read_prefix": b"\x00"}
+    keys_universe = []
+
+    class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
+        @classmethod
+        def build(cls, setting_class, device):
+            info = hidpp20.get_onboard_eq_info(device)
+            if not info:
+                return None
+            _has_hw_eq, num_bands = info
+            bands = hidpp20.get_onboard_eq_params(device, slot=0x00)
+            if not bands or len(bands) != num_bands:
+                return None
+            keys = common.NamedInts()
+            for i, (freq, _gain, _q) in enumerate(bands):
+                keys[i] = str(freq) + _("Hz")
+            v = cls(keys, min_value=-12, max_value=12, count=num_bands, byte_count=1)
+            v._band_freqs = [freq for freq, _g, _q in bands]
+            v._band_qs = [q for _f, _g, q in bands]
+            return v
+
+        def validate_read(self, reply_bytes):
+            if reply_bytes is None or len(reply_bytes) < 2:
+                return {}
+            band_count = reply_bytes[1]
+            result = {}
+            offset = 2
+            for i in range(band_count):
+                if offset + 4 > len(reply_bytes):
+                    break
+                freq = struct.unpack(">H", reply_bytes[offset : offset + 2])[0]
+                gain = struct.unpack("b", bytes([reply_bytes[offset + 2]]))[0]
+                q = reply_bytes[offset + 3]
+                result[i] = gain
+                # Update stored freq/Q arrays if they exist
+                if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                    self._band_freqs[i] = freq
+                if hasattr(self, "_band_qs") and i < len(self._band_qs):
+                    self._band_qs[i] = q
+                offset += 4
+            return result
+
+        def prepare_write(self, new_values):
+            if not hasattr(self, "_band_freqs") or not hasattr(self, "_band_qs"):
+                return None
+            bands = []
+            for i in range(self.count):
+                freq = self._band_freqs[i] if i < len(self._band_freqs) else 1000
+                q = self._band_qs[i] if i < len(self._band_qs) else 10
+                gain = new_values.get(i, 0)
+                bands.append((freq, gain, q))
+            self._pending_bands = bands  # stash for persist step
+            return hidpp20._build_set_eq_payload(0x00, bands)
+
+    def write(self, map, save=True):
+        result = super().write(map, save)
+        # Also persist to device flash (slot 0x80) so EQ survives power cycle
+        if result is not None and hasattr(self._validator, "_pending_bands"):
+            bands = self._validator._pending_bands
+            del self._validator._pending_bands
+            try:
+                self._device.feature_request(_F.HEADSET_ONBOARD_EQ, 0x20, hidpp20._build_set_eq_payload(0x80, bands))
+            except Exception:
+                logger.warning("HeadsetOnboardEQ: failed to persist EQ to slot 0x80")
+        return result
+
+
 class BrightnessControl(settings.Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -1809,6 +1998,126 @@ class ForceSensing(settings_new.Settings):
             return setting
 
 
+# Analog button tuning settings (actuation point, rapid trigger, haptics)
+
+
+class _AnalogButtonActuationRW(settings.FeatureRW):
+    """RW for analog button actuation point per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x14"  # default mid-point
+        return bytes([res[1]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, data_bytes[0], current[2], current[3])
+
+
+class _AnalogButtonRapidTriggerRW(settings.FeatureRW):
+    """RW for analog button rapid trigger sensitivity per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[2]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], data_bytes[0], current[3])
+
+
+class _AnalogButtonHapticsRW(settings.FeatureRW):
+    """RW for analog button click haptics per button."""
+
+    def __init__(self, feature, button_index):
+        super().__init__(feature, read_fnid=0x20, write_fnid=0x10)
+        self.button_index = button_index
+
+    def read(self, device, data_bytes=b""):
+        res = device.feature_request(self.feature, 0x20, self.button_index)
+        if not res:
+            return b"\x0a"  # default mid-point
+        return bytes([res[3]])
+
+    def write(self, device, data_bytes):
+        current = device.feature_request(self.feature, 0x20, self.button_index)
+        if not current:
+            return None
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], data_bytes[0])
+
+
+class AnalogButtonTuning(settings.Setting):
+    """Analog button tuning: actuation point, rapid trigger, and haptics configuration."""
+
+    name = "analog-button-tuning"
+    label = _("Analog Button Tuning")
+    description = _("Configure analog button settings including actuation point, rapid trigger, and haptics.")
+    feature = _F.ANALOG_BUTTONS
+
+    @classmethod
+    def build(cls, device):
+        if cls.feature not in device.features:
+            return None
+        # Get capabilities: [flags, button_count, max_actuation, max_rt, max_haptics, ...]
+        caps = device.feature_request(cls.feature, 0x00)
+        if not caps or len(caps) < 5:
+            return None
+        button_count = min(caps[1], 2)  # Byte 1 is button count, limit to 2 (left/right)
+        max_actuation = caps[2] if caps[2] > 0 else 40  # Byte 2 is max actuation
+        max_rt_level = caps[3] if caps[3] > 0 else 20  # Byte 3 is max RT level
+        max_haptics = caps[4] if caps[4] > 0 else 20  # Byte 4 is max haptics
+
+        if button_count == 0:
+            return None
+
+        button_names = [_("Left Button"), _("Right Button")]
+        all_settings = []
+
+        for i in range(button_count):
+            btn_name = button_names[i] if i < len(button_names) else f"Button {i}"
+
+            rw_act = _AnalogButtonActuationRW(cls.feature, i)
+            val_act = settings_validator.RangeValidator(min_value=1, max_value=max_actuation)
+            s_act = settings.Setting(device, rw_act, val_act)
+            s_act.name = f"analog-button-tuning_actuation-{i}"
+            s_act.label = f"{btn_name} Actuation Point"
+            s_act.description = _("Actuation point depth (raw device value).")
+            all_settings.append(s_act)
+
+            rw_rt = _AnalogButtonRapidTriggerRW(cls.feature, i)
+            val_rt = settings_validator.RangeValidator(min_value=1, max_value=max_rt_level)
+            s_rt = settings.Setting(device, rw_rt, val_rt)
+            s_rt.name = f"analog-button-tuning_rapid-trigger-{i}"
+            s_rt.label = f"{btn_name} Rapid Trigger"
+            s_rt.description = _("Rapid trigger sensitivity (raw device value).")
+            all_settings.append(s_rt)
+
+            rw_haptics = _AnalogButtonHapticsRW(cls.feature, i)
+            val_haptics = settings_validator.RangeValidator(min_value=0, max_value=max_haptics)
+            s_haptics = settings.Setting(device, rw_haptics, val_haptics)
+            s_haptics.name = f"analog-button-tuning_haptics-{i}"
+            s_haptics.label = f"{btn_name} Click Haptics"
+            s_haptics.description = _("Click haptic feedback intensity (raw device value, 0=off).")
+            all_settings.append(s_haptics)
+
+        return all_settings if all_settings else None
+
+
 class HapticLevel(settings.Setting):
     name = "haptic-level"
     label = _("Haptic Feedback Level")
@@ -1932,11 +2241,23 @@ SETTINGS: list[settings.Setting] = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
+    AnalogButtonTuning,
     HapticLevel,
     PlayHapticWaveForm,
     Sidetone,
     Equalizer,
     ADCPower,
+    HeadsetEcoMode,
+    HeadsetDoNotDisturb,
+    HeadsetMicMute,
+    HeadsetMicSNR,
+    HeadsetAINR,
+    HeadsetAINRLevel,
+    HeadsetSidetone,
+    HeadsetMicGain,
+    HeadsetMixBalance,
+    HeadsetAutoSleep,
+    HeadsetOnboardEQ,
 ]
 
 
