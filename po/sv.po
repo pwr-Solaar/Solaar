@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-01 21:43+0300\n"
-"PO-Revision-Date: 2025-12-13 08:04+0100\n"
-"Last-Translator: Daniel Nylander <github@danielnylander.se>\n"
+"PO-Revision-Date: 2026-04-21 21:46+0300\n"
+"Last-Translator: Karl Jonatan Nyberg\n"
 "Language-Team: none\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Basepath: /pwr/Solaar/po\n"
+"X-Generator: Poedit 3.6\n"
 "X-Poedit-SearchPath-0: /pwr/Solaar/po\n"
 
 #: lib/logitech_receiver/base_usb.py:52
@@ -38,7 +39,7 @@ msgstr "Lightspeed-mottagare"
 
 #: lib/logitech_receiver/base_usb.py:135
 msgid "EX100 Receiver 27 Mhz"
-msgstr "EX100-mottagare 27 Mhz"
+msgstr "EX100-mottagare 27 MHz"
 
 #: lib/logitech_receiver/common.py:649
 #, python-format
@@ -281,7 +282,7 @@ msgstr "Mus gestknapp"
 
 #: lib/logitech_receiver/i18n.py:65
 msgid "Smart Shift"
-msgstr "Smart skift"
+msgstr "Smart Shift"
 
 #: lib/logitech_receiver/i18n.py:66
 msgid "DPI Switch"
@@ -631,7 +632,7 @@ msgstr "Frekvens för rapporter om enhetsrörelser"
 #: lib/logitech_receiver/settings_templates.py:1452
 msgid "May need Onboard Profiles set to Disable to be effective."
 msgstr ""
-"Kan behöva inbyggda profiler inställda på Inaktivera för att vara effektiva."
+"Kan kräva att inbyggda profiler är inställt på inaktiverad för att fungera."
 
 #: lib/logitech_receiver/settings_templates.py:612
 msgid "Divert crown events"
@@ -662,8 +663,8 @@ msgid ""
 "Make G and M keys send HID++ notifications (which trigger Solaar rules but "
 "are otherwise ignored)."
 msgstr ""
-"Gör så att tangenterna G och M skickar HID++-meddelanden (som aktiverar "
-"Solaar-regler men annars ignoreras)."
+"Få tangenterna G och M att skicka HID++-meddelanden (som aktiverar Solaar-"
+"regler men annars ignoreras)."
 
 #: lib/logitech_receiver/settings_templates.py:645
 msgid "Scroll Wheel Ratcheted"
