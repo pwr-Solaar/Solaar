@@ -632,7 +632,7 @@ msgstr "Frekvens för rapporter om enhetsrörelser"
 #: lib/logitech_receiver/settings_templates.py:1452
 msgid "May need Onboard Profiles set to Disable to be effective."
 msgstr ""
-"Kan kräva att inbyggda profiler är inställt på inaktiverad för att fungera."
+"Kan kräva att inbyggda profiler är inställda på inaktiverade för att fungera."
 
 #: lib/logitech_receiver/settings_templates.py:612
 msgid "Divert crown events"
