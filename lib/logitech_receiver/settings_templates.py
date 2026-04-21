@@ -2318,9 +2318,19 @@ class _LogiVoiceParametersValidator(settings_validator.MultipleRangeValidator):
     def prepare_read_item(self, item):
         return b""  # GetParameters takes no wire arguments
 
+    def validate_read(self, reply_bytes):
+        # Setting.read() calls validate_read with the raw GetParameters reply.
+        # MultipleRangeValidator only defines validate_read_item, so wrap that
+        # call — we have a single item (the module) so one call suffices.
+        item = self.items[0]
+        return {int(item): self.validate_read_item(reply_bytes, item)}
+
     def validate_read_item(self, reply_bytes, item):
         parsed = {}
-        for f in self._fields:
+        # Key by str(sub_item) so MultipleRangeControl.set_value can look up
+        # values via v[str(sub_item)] — the UI uses the label as the dict key.
+        for sub in self.sub_items[item]:
+            f = sub._field
             end = f.offset + f.byte_count
             if end > len(reply_bytes):
                 continue
@@ -2331,7 +2341,7 @@ class _LogiVoiceParametersValidator(settings_validator.MultipleRangeValidator):
                 v = struct.unpack(">h" if f.signed else ">H", chunk)[0]
             else:
                 v = int.from_bytes(chunk, "big", signed=f.signed)
-            parsed[f.name] = v
+            parsed[str(sub)] = v
         return parsed
 
     def prepare_write_item(self, item, value):
@@ -3041,18 +3051,21 @@ def check_feature_settings(device, already_known) -> bool:
             if already:
                 continue
             if not known_present and sclass.name in absent:
-                # Silent-skip cache from an earlier run's failed build(). Log at
-                # INFO so field diagnostics reveal when a setting is suppressed
-                # this way — users can clear stale entries by deleting their
-                # solaar config or we can add retry logic later.
+                # Silent-skip cache from an earlier run's failed build(). If the
+                # feature is actually present on this device now, the cache is
+                # stale (e.g. from a prior build that returned None for a
+                # feature that currently works) — drop it and retry the probe.
                 if sclass.feature in device.features:
                     logger.info(
-                        "check_feature_settings: skipping %s — cached in _absent despite feature %s being present; "
-                        "delete the setting from ~/.config/solaar/config.yaml to retry",
+                        "check_feature_settings: retrying %s — cached in _absent but feature %s is present now",
                         sclass.name,
                         sclass.feature,
                     )
-                continue
+                    absent.remove(sclass.name)
+                    if device.persister:
+                        device.persister["_absent"] = absent
+                else:
+                    continue
             try:
                 setting = check_feature(device, sclass)
             except Exception as err:
