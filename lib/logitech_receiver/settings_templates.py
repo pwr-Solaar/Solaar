@@ -37,6 +37,7 @@ from . import headset_rgb
 from . import hidpp20
 from . import hidpp20_constants
 from . import logivoice
+from . import rgb_effects_probe
 from . import settings
 from . import settings_new
 from . import settings_validator
@@ -2050,6 +2051,17 @@ class HeadsetLEDControl(settings.Setting):
     choices_universe = common.NamedInts(Device=0, Solaar=1)
     validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
+
+    @classmethod
+    def build(cls, device):
+        # One-shot read-only probe of 0x0621 / 0x0622 — logs the data the RE
+        # pass needs to pin down RGB onboard/signature effect structures.
+        # Skip cleanly if neither feature is exposed.
+        try:
+            rgb_effects_probe.probe(device)
+        except Exception as e:
+            logger.info("RGB effects probe raised %r", e)
+        return super().build(device)
 
     def write(self, value, save=True):
         # After switching to Solaar control, the firmware drops whatever
