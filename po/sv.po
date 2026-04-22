@@ -282,7 +282,7 @@ msgstr "Mus gestknapp"
 
 #: lib/logitech_receiver/i18n.py:65
 msgid "Smart Shift"
-msgstr "Smart Shift"
+msgstr "Smart skift"
 
 #: lib/logitech_receiver/i18n.py:66
 msgid "DPI Switch"
