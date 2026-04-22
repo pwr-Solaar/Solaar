@@ -301,6 +301,8 @@ class FeaturesArray(dict):
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
+        if index >= 0x100:
+            return self.sub_inverse.get(index - 0x100)
         elif self._check():
             feature = self.inverse.get(index)
             if feature is not None:
