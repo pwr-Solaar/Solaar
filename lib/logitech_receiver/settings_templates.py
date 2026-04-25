@@ -1621,6 +1621,17 @@ class HeadsetMicMute(settings.Setting):
     feature = _F.HEADSET_MIC_MUTE
     validator_class = settings_validator.BooleanValidator
 
+    @classmethod
+    def build(cls, device):
+        # G522 advertises 0x0601 in its FeatureSet but the firmware returns
+        # 0x0A UNSUPPORTED for both GetState and SetState. The physical mute
+        # switch doesn't drive this feature anyway — G HUB attempts and
+        # silently ignores failures. Hide the toggle on G522 PIDs (0x0B18
+        # wireless, 0x0B19 wired) so users don't see a permanently-broken UI.
+        if getattr(device, "product_id", None) in (0x0B18, 0x0B19):
+            return None
+        return super().build(device)
+
 
 class HeadsetMicSNR(settings.Setting):
     name = "headset-mic-snr"

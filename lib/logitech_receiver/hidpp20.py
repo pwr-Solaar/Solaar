@@ -301,7 +301,7 @@ class FeaturesArray(dict):
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
-        # Sub-device index; bridge unwrap offsets by 0x100 (see listener). 
+        # Sub-device index; bridge unwrap offsets by 0x100 (see listener).
         if index >= 0x100:
             return self.sub_inverse.get(index - 0x100)
         elif self._check():
