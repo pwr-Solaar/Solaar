@@ -19,21 +19,19 @@
 Each LogiVoice processing module exposes the same 5-function API:
 
   fn 0 SetState
-  fn 1 GetState       -> u8 state
+  fn 1 GetState       -> u8 state (boolean)
   fn 2 SetParameters
-  fn 3 GetParameters  -> module-specific payload
-  fn 4 GetInfo        -> device capability / bounds (opaque here)
+  fn 3 GetParameters  -> module-specific payload (see PARAMETERS_FIELDS)
+  fn 4 GetInfo        -> per-field [min, max] bounds (see parse_info)
 
-All multi-byte integers on the wire are big-endian. Parameters layouts
-are module-specific; PARAMETERS_FIELDS below encodes the per-field
-offset/width/signedness/range metadata we display read-only. Some
-fields are intentionally flagged `opaque=True` because their scale
-factor or bit layout isn't pinned down yet — we still expose the raw
-value so users/screenshots can build a corpus.
+All multi-byte integers on the wire are big-endian. Parameters layouts are
+module-specific; PARAMETERS_FIELDS encodes per-field offset / width /
+signedness / range / label metadata. The first field is at offset 0 — there
+is no leading "state" byte (the state toggle is on fn 0/1 only).
 
-Writes are NOT implemented yet. This is a read-only pass for data
-collection and visibility; write support can be added per-field once
-each encoding is verified live.
+Writes are NOT implemented yet. State toggles via fn 0x00/0x10 are
+shipping as boolean settings; per-field Parameters writes need a live
+round-trip verification before they're safe to expose.
 """
 
 from __future__ import annotations
@@ -102,57 +100,67 @@ class Field:
         self.opaque = opaque
 
 
-# Per-module field layout for GetParameters response. Table-driven so adding
-# a new module or adjusting a field is a one-line change. Fields flagged
-# opaque=True have unknown scale / bit layout; we expose the raw bytes so a
-# future pass can pin them down from live data.
+# Per-module field layout for GetParameters / SetParameters payload. Each
+# module's struct is the union of named fields below; there is no separate
+# "state" byte at offset 0 — that toggle is only on fn 0x00/0x10. Field
+# encodings (signedness, byte order, units) and value ranges come from the
+# device's GetInfo response (see parse_info) and are confirmed against
+# captured bring-up bytes; ranges hardcoded here are the bounds the device
+# reports and the values it ships as factory defaults.
+#
+# `opaque=True` is reserved for fields whose unit scale isn't pinned down
+# (currently width_q on De-esser / De-popper — the host-side scale constant
+# is loaded at runtime and not statically resolvable). Treat opaque values
+# as monotonic raw integers until a live probe anchors the units.
 PARAMETERS_FIELDS: dict[SupportedFeature, list[Field]] = {
     SupportedFeature.LOGIVOICE_NOISE_REDUCTION: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("sensitivity", 2, 2, False, 0, 65535, "Sensitivity"),
-        # NR serializer emits 5 bytes; byte 4 is a single-byte release surrogate.
-        Field("release_byte", 4, 1, False, 0, 255, "Release (raw)", opaque=True),
+        Field("sensitivity", 0, 1, False, 0, 40, "Sensitivity"),
+        Field("release", 1, 2, False, 1, 1000, "Release (ms)"),
+        Field("bias", 3, 1, False, 0, 5, "Bias"),
+        Field("attenuation", 4, 1, True, -20, 0, "Attenuation (dB)"),
     ],
     SupportedFeature.LOGIVOICE_NOISE_GATE: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("threshold", 1, 1, True, -128, 127, "Threshold (raw)", opaque=True),
-        Field("attenuation", 2, 2, False, 0, 65535, "Attenuation (raw)", opaque=True),
-        Field("attack", 4, 2, False, 0, 65535, "Attack (raw)", opaque=True),
-        Field("hold", 6, 2, False, 0, 65535, "Hold (raw)", opaque=True),
+        Field("threshold", 0, 1, True, -60, -35, "Threshold (dB)"),
+        Field("attenuation", 1, 1, True, -50, -3, "Attenuation (dB)"),
+        Field("attack", 2, 2, False, 1, 200, "Attack (ms)"),
+        Field("hold", 4, 2, False, 1, 1000, "Hold (ms)"),
+        Field("release", 6, 2, False, 1, 1000, "Release (ms)"),
     ],
     SupportedFeature.LOGIVOICE_COMPRESSOR: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("threshold", 2, 2, True, -32768, 32767, "Threshold (raw)", opaque=True),
-        Field("attack", 4, 2, False, 0, 65535, "Attack (raw)", opaque=True),
-        Field("post_gain", 6, 1, True, -128, 127, "Post Gain (raw)", opaque=True),
-        # Byte 7 packs pre_gain + ratio; bit layout unknown. Display raw byte.
-        Field("byte7_packed", 7, 1, False, 0, 255, "Byte 7 (pre_gain/ratio packed)", opaque=True),
+        Field("threshold", 0, 1, True, -40, 0, "Threshold (dB)"),
+        Field("attack", 1, 2, False, 1, 200, "Attack (ms)"),
+        Field("release", 3, 2, False, 50, 1000, "Release (ms)"),
+        Field("post_gain", 5, 1, True, -12, 12, "Post Gain (dB)"),
+        Field("pre_gain", 6, 1, True, -12, 12, "Pre Gain (dB)"),
+        # Ratio reports min=1 max=20 from GetInfo; whether the device interprets
+        # it as a literal X:1 ratio or a curve-table index is unconfirmed.
+        Field("ratio", 7, 1, False, 1, 20, "Ratio"),
     ],
     SupportedFeature.LOGIVOICE_DE_ESSER: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("threshold", 1, 2, True, -32768, 32767, "Threshold (raw)", opaque=True),
-        # Frequency compressed from float to u8 with device-specific scale.
-        Field("frequency_raw", 3, 1, False, 0, 255, "Frequency (raw u8)", opaque=True),
-        Field("width_q_raw", 4, 2, False, 0, 65535, "Width/Q (raw u16)", opaque=True),
-        Field("attack", 6, 2, False, 0, 65535, "Attack (raw)", opaque=True),
-        Field("release", 8, 1, True, -128, 127, "Release (raw)", opaque=True),
+        Field("threshold", 0, 1, True, -50, 0, "Threshold (dB)"),
+        Field("frequency", 1, 2, False, 1000, 10000, "Frequency (Hz)"),
+        # width_q is a Q-format quantization with a device-loaded scale we
+        # don't know; range/default come straight from GetInfo.
+        Field("width_q", 3, 1, False, 2, 120, "Width/Q", opaque=True),
+        Field("attack", 4, 2, False, 1, 200, "Attack (ms)"),
+        Field("release", 6, 2, False, 20, 1000, "Release (ms)"),
+        Field("attenuation", 8, 1, True, -40, 0, "Attenuation (dB)"),
     ],
     SupportedFeature.LOGIVOICE_DE_POPPER: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("threshold", 1, 2, True, -32768, 32767, "Threshold (raw)", opaque=True),
-        Field("frequency_raw", 3, 1, False, 0, 255, "Frequency (raw u8)", opaque=True),
-        Field("width_q_raw", 4, 2, False, 0, 65535, "Width/Q (raw u16)", opaque=True),
-        Field("attack", 6, 2, False, 0, 65535, "Attack (raw)", opaque=True),
-        Field("release", 8, 1, True, -128, 127, "Release (raw)", opaque=True),
+        Field("threshold", 0, 1, True, -50, 0, "Threshold (dB)"),
+        Field("frequency", 1, 2, False, 60, 500, "Frequency (Hz)"),
+        Field("width_q", 3, 1, False, 2, 120, "Width/Q", opaque=True),
+        Field("attack", 4, 2, False, 1, 200, "Attack (ms)"),
+        Field("release", 6, 2, False, 20, 1000, "Release (ms)"),
+        Field("attenuation", 8, 1, True, -40, 0, "Attenuation (dB)"),
     ],
     SupportedFeature.LOGIVOICE_LIMITER: [
-        Field("state", 0, 1, False, 0, 255, "State"),
-        Field("boost", 2, 2, True, -32768, 32767, "Boost (raw)", opaque=True),
-        Field("bytes4_5_packed", 4, 2, False, 0, 65535, "Bytes 4-5 (attack/release packed)", opaque=True),
+        Field("boost", 0, 1, True, -128, 127, "Boost (dB)"),
+        Field("attack", 1, 2, False, 1, 65535, "Attack (ms)"),
+        Field("release", 3, 2, False, 1, 65535, "Release (ms)"),
     ],
     SupportedFeature.LOGIVOICE_HIGH_PASS_FILTER: [
-        # HPF has no state byte in Parameters — state lives on fn 0/1 only.
-        Field("frequency", 0, 2, False, 0, 65535, "Cutoff (Hz)"),
+        Field("frequency", 0, 2, False, 60, 300, "Cutoff (Hz)"),
     ],
 }
 
@@ -183,12 +191,49 @@ def get_parameters(device, feature: SupportedFeature):
 def get_info(device, feature: SupportedFeature):
     """Read module capability info via fn 4. Returns raw bytes or None.
 
-    Per-module Info layout isn't decoded yet — we log the raw hex for corpus.
+    Decoded per-field bounds are available via parse_info().
     """
     result = device.feature_request(feature, FN_GET_INFO)
     if result is None:
         return None
     return bytes(result)
+
+
+def _decode_field(chunk: bytes, byte_count: int, signed: bool) -> int:
+    """Decode `byte_count` bytes from `chunk` as an integer per the field's wire
+    encoding. Multi-byte values are big-endian (matches Parameters)."""
+    if byte_count == 1:
+        return struct.unpack("b" if signed else "B", chunk[:1])[0]
+    if byte_count == 2:
+        return struct.unpack(">h" if signed else ">H", chunk[:2])[0]
+    return int.from_bytes(chunk[:byte_count], "big", signed=signed)
+
+
+def parse_info(feature: SupportedFeature, payload: bytes) -> dict:
+    """Decode a GetInfo response into per-field {min, max} bounds.
+
+    Layout: for each field in PARAMETERS_FIELDS in order, the payload carries
+    [min_value, max_value] back-to-back using the field's wire encoding (so
+    a u16 field contributes 4 bytes — 2 for min, 2 for max). Trailing bytes
+    in the response are pad/zero.
+
+    Returns a dict mapping field name to {"min": int, "max": int}. Fields
+    that don't fit in the payload are omitted.
+    """
+    fields = PARAMETERS_FIELDS.get(feature)
+    if not fields or not payload:
+        return {}
+    out = {}
+    offset = 0
+    for f in fields:
+        end = offset + 2 * f.byte_count
+        if end > len(payload):
+            break
+        min_val = _decode_field(payload[offset : offset + f.byte_count], f.byte_count, f.signed)
+        max_val = _decode_field(payload[offset + f.byte_count : end], f.byte_count, f.signed)
+        out[f.name] = {"min": min_val, "max": max_val}
+        offset = end
+    return out
 
 
 def parse_parameters(feature: SupportedFeature, payload: bytes) -> dict:
@@ -217,7 +262,8 @@ def parse_parameters(feature: SupportedFeature, payload: bytes) -> dict:
 
 
 def probe_module(device, feature: SupportedFeature) -> None:
-    """One-shot corpus probe. Logs state + raw parameters + parsed + raw info."""
+    """One-shot corpus probe. Logs state + raw parameters + parsed + raw info
+    + decoded info bounds."""
     name = MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
     state = get_state(device, feature)
     params = get_parameters(device, feature)
@@ -233,6 +279,9 @@ def probe_module(device, feature: SupportedFeature) -> None:
     parsed = parse_parameters(feature, params) if params else {}
     if parsed:
         logger.info("LogiVoice %s parsed: %s", name, parsed)
+    bounds = parse_info(feature, info) if info else {}
+    if bounds:
+        logger.info("LogiVoice %s info bounds: %s", name, bounds)
 
 
 def probe_all_modules(device, features: Iterable[SupportedFeature]) -> None:
