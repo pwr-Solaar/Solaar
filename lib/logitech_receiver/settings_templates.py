@@ -2013,6 +2013,59 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
         return None
 
 
+class HeadsetActiveEQPreset(settings.Setting):
+    """Choose which AdvancedParaEQ slot drives live audio.
+
+    Activation works for any slot — read-only factory presets and
+    user-custom slots alike. The "(factory)" tag in the slot label
+    distinguishes the read-only ones; that distinction matters for
+    band-editing (not supported yet), not for activation today.
+    """
+
+    name = "headset-eq-active-preset"
+    label = _("EQ Preset")
+    description = _("Switch the active EQ preset. Factory presets are read-only.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x30, "write_fnid": 0x40, "prefix": b"\x00"}
+    validator_class = settings_validator.ChoicesValidator
+
+    @classmethod
+    def build(cls, device):
+        info = getattr(device, "_advanced_eq_info", None) or hidpp20.get_advanced_eq_info(device)
+        if not info:
+            return None
+        ro_count = info.get("onboard_ro_preset_count", 0) or 0
+        custom_count = info.get("onboard_custom_preset_count", 0) or 0
+        total = ro_count + custom_count
+        if total == 0:
+            return None
+        choices = common.NamedInts()
+        for slot in range(total):
+            slot_name = hidpp20.get_advanced_eq_friendly_name(device, direction=0, slot=slot)
+            if not slot_name:
+                slot_name = _("Slot") + " " + str(slot)
+            if slot < ro_count:
+                slot_name = slot_name + " " + _("(factory)")
+            choices[slot] = slot_name
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.ChoicesValidator(choices=choices)
+        return cls(device, rw, validator)
+
+    def write(self, value, save=True):
+        result = super().write(value, save)
+        if result is not None:
+            # Drop the AdvancedParaEQ band-display cache so the panel's
+            # next read pulls the new active slot's bands. The visible
+            # values update on the next refresh of that panel (manual
+            # refresh icon, panel reopen, or device reconnect) — pushing
+            # the redraw automatically would need UI-side plumbing we
+            # don't currently expose from the settings layer.
+            eq_panel = _headset_setting_by_name(self._device, HeadsetAdvancedEQ.name)
+            if eq_panel is not None:
+                eq_panel._value = None
+        return result
+
+
 _NO_CHANGE_COLOR = int(special_keys.COLORSPLUS["No change"])
 
 
@@ -2960,6 +3013,7 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMixBalance,
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
+    HeadsetActiveEQPreset,
     HeadsetAdvancedEQ,
     HeadsetLEDControl,
     HeadsetLEDsPrimary,
