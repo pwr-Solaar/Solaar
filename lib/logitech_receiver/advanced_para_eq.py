@@ -23,12 +23,16 @@ V0/V1 wire format: 3-byte band stride [freq_hi, freq_lo, gain_i8],
 gain is whole dB; getEQInfos returns 5 bytes [bandCount, dbRange,
 caps, dbMin, dbMax].
 
-V2 wire format: 5-byte band stride [filter_type, freq_hi, freq_lo,
-gain_hi, gain_lo] with no header. Filter types are 0x00=HP (cutoff),
-0x78=peaking. Frequency is raw BE u16 in Hz. Gain is signed BE int16
-× step_db (step_db from getEQInfos). No Q on the wire — firmware-fixed
-per filter type. getEQInfos returns 13 bytes with gain bounds + step
-count, format enum, XY-support flag, and onboard preset counts.
+V2 wire format: 3-byte header [direction_echo, slot_echo,
+band_count_max], then N × 5-byte band stride [filter_type, gain_hi,
+gain_lo, freq_hi, freq_lo], then 0..2 trailer bytes (opaque, ignored).
+band_count_max is the device's max-bands capacity, NOT how many bands
+are populated — the parser consumes 5-byte chunks until <5 bytes
+remain. Frequency u16 BE in Hz, with freq=0 marking end-of-bands.
+Gain is **offset-binary**: raw 0..(steps-1) maps linearly to
+gain_min..gain_max (so on G522 with steps=241 / gain=[-6..6], raw=120
+= 0 dB). getEQInfos returns 13 bytes with gain bounds + step count,
+format enum, XY-support flag, and onboard preset counts.
 """
 
 from __future__ import annotations
@@ -43,11 +47,16 @@ logger = logging.getLogger(__name__)
 DIRECTION_PLAYBACK = 0
 DIRECTION_CAPTURE = 1
 
-# V2 filter-type taxonomy (byte [+0] of each band).
+# V2 filter-type taxonomy (byte [+0] of each band). 0x16 is observed on
+# G522 for every band of its factory custom slot at ISO third-octave
+# centers, treated as peaking. Other filter kinds (LP, shelf, notch …)
+# need a live probe per device firmware to enumerate.
 FILTER_TYPE_HP = 0x00
+FILTER_TYPE_PEAKING_G522 = 0x16
 FILTER_TYPE_PEAKING = 0x78
 FILTER_TYPE_NAMES = {
     FILTER_TYPE_HP: "HP",
+    FILTER_TYPE_PEAKING_G522: "peaking",
     FILTER_TYPE_PEAKING: "peaking",
 }
 
@@ -163,25 +172,49 @@ def get_advanced_eq_active_slot(device, direction=DIRECTION_PLAYBACK):
     return result[0]
 
 
-def parse_v2_bands(result: bytes, step_db: float):
-    """Parse a V2 getCustomEQ/getEQDefaults response.
+def parse_v2_bands(result: bytes, info: dict | None):
+    """Parse a V2 getCustomEQ / getEQDefaults response.
 
-    Returns list of (filter_type_byte, freq_hz, gain_db) tuples, or None.
-    Response is N × 5 bytes with no header. Each band is
-    [filter_type, freq_hi, freq_lo, gain_hi, gain_lo].
+    Wire layout (see module docstring):
+      [direction_echo, slot_echo, band_count_max]    (3-byte header)
+      N × [filter_type, gain_hi, gain_lo, freq_hi, freq_lo]   (5 bytes)
+      [trailer …]                                     (0..2 bytes, ignored)
+
+    Gain is offset-binary against `info`'s gain bounds:
+      gain_db = gain_min + (gain_max - gain_min) * raw / (steps - 1)
+
+    `info` is the dict returned by `get_advanced_eq_info`. If absent we
+    fall back to step_db=1.0 (and log via the caller, not here) which is
+    wrong but won't crash.
+
+    Returns list of (filter_type_byte, freq_hz, gain_db) tuples, or None
+    if the payload is too short to contain a header. Empty payload with
+    valid header returns []. Bands with freq=0 are treated as the
+    end-of-bands sentinel (matches V0/V1 behavior at lines below).
     """
-    if result is None or len(result) == 0:
+    if result is None or len(result) < 3:
         return None
-    if len(result) % 5 != 0:
-        return None
+    payload = result[3:]  # skip [dir_echo, slot_echo, band_count_max]
+    band_size = 5
+    if info:
+        gain_min = info.get("gain_min_db", -6)
+        gain_max = info.get("gain_max_db", 6)
+        steps = info.get("gain_steps", 241)
+    else:
+        gain_min, gain_max, steps = 0, 0, 1  # produces gain_db=0 for any raw
     bands = []
-    for i in range(len(result) // 5):
-        e = result[i * 5 : (i + 1) * 5]
+    for i in range(len(payload) // band_size):
+        e = payload[i * band_size : (i + 1) * band_size]
         filter_type = e[0]
-        freq_hz = (e[1] << 8) | e[2]
-        gain_int16 = struct.unpack(">h", bytes(e[3:5]))[0]
-        gain_db = gain_int16 * step_db
-        bands.append((filter_type, freq_hz, gain_db))
+        gain_raw = (e[1] << 8) | e[2]
+        freq_hz = (e[3] << 8) | e[4]
+        if freq_hz == 0:
+            break  # disabled band — end-of-bands sentinel
+        if steps > 1:
+            gain_db = gain_min + (gain_max - gain_min) * gain_raw / (steps - 1)
+        else:
+            gain_db = 0.0
+        bands.append((filter_type, freq_hz, float(gain_db)))
     return bands
 
 
@@ -211,11 +244,10 @@ def get_advanced_eq_defaults(device, direction=DIRECTION_PLAYBACK, slot=0):
         return None
     if version >= 2:
         info = getattr(device, "_advanced_eq_info", None)
-        step_db = info["step_db"] if info and "step_db" in info else 1.0
-        bands = parse_v2_bands(result, step_db)
+        bands = parse_v2_bands(result, info)
         if bands is None:
             logger.info(
-                "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): payload not multiple of 5 raw=%s",
+                "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): payload too short raw=%s",
                 direction,
                 slot,
                 result.hex(),
@@ -327,20 +359,18 @@ def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
 
     if version >= 2:
         info = getattr(device, "_advanced_eq_info", None)
-        step_db = info["step_db"] if info and "step_db" in info else 1.0
-        if step_db == 1.0 and not info:
-            logger.warning(
-                "AdvancedParaEQ getCustomEQ V2: no cached getEQInfos — gain values will use step_db=1.0 and be wrong"
-            )
-        bands = parse_v2_bands(result, step_db)
+        if not info:
+            logger.warning("AdvancedParaEQ getCustomEQ V2: no cached getEQInfos — gain values will be wrong")
+        bands = parse_v2_bands(result, info)
         if bands is None:
             logger.info(
-                "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): payload not multiple of 5 raw=%s",
+                "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): payload too short raw=%s",
                 direction,
                 slot,
                 result.hex(),
             )
             return None
+        step_db = info["step_db"] if info and "step_db" in info else 1.0
         logger.info(
             "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): %d band(s) step_db=%.4f %s",
             direction,
