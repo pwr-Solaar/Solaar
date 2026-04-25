@@ -1925,6 +1925,9 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             )
             v._version = version
             v._step_db = step_db
+            v._gain_min = gain_min
+            v._gain_max = gain_max
+            v._gain_steps = info.get("gain_steps", 241)
             v._band_types = [band[0] for band in bands]
             v._band_freqs = [band[1] for band in bands]
             v._active_slot = active_slot
@@ -1951,9 +1954,14 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
             if reply_bytes is None:
                 return {}
             version = getattr(self, "_version", 0)
-            step_db = getattr(self, "_step_db", 1.0)
             if version >= 2:
-                bands = hidpp20.parse_v2_bands(reply_bytes, step_db)
+                info = {
+                    "gain_min_db": getattr(self, "_gain_min", -6),
+                    "gain_max_db": getattr(self, "_gain_max", 6),
+                    "gain_steps": getattr(self, "_gain_steps", 241),
+                    "step_db": getattr(self, "_step_db", 0.05),
+                }
+                bands = hidpp20.parse_v2_bands(reply_bytes, info)
                 if bands is None:
                     return {}
                 result = {}
