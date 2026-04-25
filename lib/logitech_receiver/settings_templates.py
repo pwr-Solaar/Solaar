@@ -1877,8 +1877,21 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
     label = _("Headset Advanced EQ (read-only)")
     description = _("Display the headset's active parametric EQ. Writes are disabled pending verification.")
     feature = _F.HEADSET_ADVANCED_PARA_EQ
-    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "read_prefix": b"\x00\x00"}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     keys_universe = []
+
+    class rw_class(settings.FeatureRW):
+        """getCustomEQ takes [direction, slot]; the slot is the *active*
+        EQ preset, which the device may have switched while we weren't
+        looking (G HUB on another machine, an onboard button, etc.).
+        Re-query it on every read instead of caching slot 0 at build
+        time. Direction is hardcoded to 0 (playback) — mic-side EQ
+        isn't exposed yet."""
+
+        def read(self, device, data_bytes=b""):
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0)
+            self.read_prefix = bytes([0, active_slot if active_slot is not None else 0])
+            return super().read(device, data_bytes)
 
     class validator_class(settings_validator.PackedRangeValidator):
         kind = settings.Kind.GRAPHIC_EQ
