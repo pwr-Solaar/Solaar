@@ -21,15 +21,38 @@ def _hex_or_none(data) -> str | None:
     return data.hex() if data else None
 
 
+def _format_feature(feat) -> str:
+    """Render a feature for the log: 0x{id:04X}{:NAME} when known, else raw."""
+    if feat is None:
+        return "?"
+    try:
+        return f"0x{int(feat):04X}:{feat.name}"
+    except (AttributeError, TypeError):
+        return f"0x{int(feat):04X}" if feat is not None else "?"
+
+
 def _log_feature_table(device) -> None:
     if not device.features:
         return
     try:
-        pairs = []
+        # Parent features live in FeaturesArray.inverse, indexed by their
+        # parent feature-set position. On Centurion devices these are the
+        # ones the dongle itself exposes (typically 5-6 entries).
+        parent = []
         for idx in range(len(device.features)):
-            feat = device.features[idx]
-            pairs.append(f"{idx}:0x{int(feat):04X}" if feat is not None else f"{idx}:?")
-        logger.info("RGB probe: feature table for %s: %s", device, ", ".join(pairs))
+            parent.append(f"{idx}:{_format_feature(device.features[idx])}")
+        logger.info("RGB probe: parent features for %s: %s", device, ", ".join(parent))
+
+        # Centurion sub-device features live in FeaturesArray.sub_inverse,
+        # keyed by sub-device feature index. These are where the actual
+        # headset features (0x0620/0x0621/0x0622, LogiVoice, EQ, mic mute,
+        # …) live — without dumping them the log shows only the dongle's
+        # parent features and gives the wrong impression that the device
+        # has nothing else.
+        sub_inverse = getattr(device.features, "sub_inverse", None)
+        if sub_inverse:
+            sub = [f"{idx}:{_format_feature(feat)}" for idx, feat in sorted(sub_inverse.items())]
+            logger.info("RGB probe: sub-device features for %s: %s", device, ", ".join(sub))
     except Exception as e:
         logger.info("RGB probe: feature-table dump failed: %s", e)
 
