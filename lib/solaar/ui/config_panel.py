@@ -22,8 +22,10 @@ from threading import Timer
 
 import gi
 
+from logitech_receiver import diversion_shortcuts
 from logitech_receiver import hidpp20
 from logitech_receiver import settings
+from logitech_receiver.special_keys import CONTROL
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
@@ -270,7 +272,24 @@ class MapChoiceControl(Gtk.HBox, Control):
         self.valueBox = _create_choice_control(sbox.setting, choices=self.value_choices, delegate=self)
         self.pack_start(self.keyBox, False, False, 0)
         self.pack_end(self.valueBox, False, False, 0)
+        self.shortcutEntry = None
+        self.shortcutRecordButton = None
+        self.shortcutButton = None
+        if sbox.setting.name == "divert-keys" and int(CONTROL["Smart Shift"]) in sbox.setting.choices:
+            self.shortcutEntry = Gtk.Entry()
+            self.shortcutEntry.set_placeholder_text(_("Shortcut, e.g. Control_L+Alt_L+T"))
+            self.shortcutEntry.set_tooltip_text(_("Bind selected diverted key/button to a keyboard shortcut"))
+            self.shortcutRecordButton = Gtk.Button(label=_("Record"))
+            self.shortcutRecordButton.set_tooltip_text(_("Press a shortcut interactively"))
+            self.shortcutRecordButton.connect(GtkSignal.CLICKED.value, self.record_shortcut)
+            self.shortcutButton = Gtk.Button(label=_("Bind Shortcut"))
+            self.shortcutButton.set_tooltip_text(_("Set diversion and add a rule that sends this shortcut on press"))
+            self.shortcutButton.connect(GtkSignal.CLICKED.value, self.bind_shortcut)
+            self.pack_start(self.shortcutEntry, False, False, 0)
+            self.pack_start(self.shortcutRecordButton, False, False, 0)
+            self.pack_start(self.shortcutButton, False, False, 0)
         self.keyBox.connect(GtkSignal.CHANGED.value, self.map_value_notify_key)
+        self.update_shortcut_visibility()
 
     def get_value(self):
         key_choice = int(self.keyBox.get_active_id())
@@ -299,6 +318,71 @@ class MapChoiceControl(Gtk.HBox, Control):
         key_choice = int(self.keyBox.get_active_id())
         if self.keyBox.get_sensitive():
             self.map_populate_value_box(key_choice)
+        self.update_shortcut_visibility()
+
+    def update_shortcut_visibility(self):
+        if not self.shortcutEntry or not self.shortcutRecordButton or not self.shortcutButton:
+            return
+        key_choice = int(self.keyBox.get_active_id())
+        visible = key_choice == int(CONTROL["Smart Shift"])
+        self.shortcutEntry.set_visible(visible)
+        self.shortcutRecordButton.set_visible(visible)
+        self.shortcutButton.set_visible(visible)
+
+    @staticmethod
+    def _event_to_shortcut(event):
+        key_name = Gdk.keyval_name(event.keyval)
+        modifier_keys = ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R", "Super_L", "Super_R")
+        if not key_name or key_name in modifier_keys:
+            return None
+        modifiers = []
+        state = event.state
+        if state & Gdk.ModifierType.CONTROL_MASK:
+            modifiers.append("Control_L")
+        if state & Gdk.ModifierType.MOD1_MASK:
+            modifiers.append("Alt_L")
+        if state & Gdk.ModifierType.MOD4_MASK:
+            modifiers.append("Super_L")
+        if state & Gdk.ModifierType.SHIFT_MASK:
+            modifiers.append("Shift_L")
+        return "+".join(modifiers + [key_name])
+
+    def record_shortcut(self, _button):
+        dialog = Gtk.MessageDialog(
+            transient_for=self.get_toplevel() if isinstance(self.get_toplevel(), Gtk.Window) else None,
+            modal=True,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.CANCEL,
+            text=_("Press the shortcut to bind"),
+        )
+        dialog.format_secondary_text(_("Press Escape to cancel."))
+
+        def on_key_press(widget, event):
+            if event.keyval == Gdk.KEY_Escape:
+                widget.response(Gtk.ResponseType.CANCEL)
+                return True
+            shortcut = self._event_to_shortcut(event)
+            if shortcut:
+                self.shortcutEntry.set_text(shortcut)
+                widget.response(Gtk.ResponseType.OK)
+            return True
+
+        dialog.connect("key-press-event", on_key_press)
+        dialog.run()
+        dialog.destroy()
+
+    def bind_shortcut(self, _button):
+        key_choice = int(self.keyBox.get_active_id())
+        shortcut = self.shortcutEntry.get_text().strip()
+        if not shortcut:
+            self.shortcutEntry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "dialog-warning")
+            return
+        self.shortcutEntry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "")
+        diverted = self.value_choices[1]
+        self.valueBox.set_value(diverted)
+        self.sbox.setting._value[key_choice] = diverted
+        _write_async(self.sbox.setting, diverted, self.sbox, key=key_choice)
+        diversion_shortcuts.set_shortcut_rule(CONTROL[key_choice], shortcut)
 
     def update(self):
         key_choice = int(self.keyBox.get_active_id())
