@@ -46,7 +46,7 @@ class _DataMeta(type):
     This metaclass also does some verification to prevent duplicated data.
     """
 
-    def __new__(mcs, name: str, bases: Tuple[Any], dic: Dict[str, Any]):  # type: ignore  # noqa: C901
+    def __new__(mcs, name: str, bases: Tuple[Any], dic: Dict[str, Any]):  # type: ignore
         dic["_single"] = {}
         dic["_range"] = []
 
@@ -215,7 +215,7 @@ class GenericDesktopControls(_Data):
     Z = 0x32, "Z", UsageTypes.DV
     RX = 0x33, "Rx", UsageTypes.DV
     RY = 0x34, "Ry", UsageTypes.DV
-    RX = 0x35, "Rz", UsageTypes.DV
+    RZ = 0x35, "Rz", UsageTypes.DV
     SLIDER = 0x36, "Slider", UsageTypes.DV
     DIAL = 0x37, "Dial", UsageTypes.DV
     WHEEL = 0x38, "Wheel", UsageTypes.DV
