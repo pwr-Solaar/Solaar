@@ -1623,15 +1623,19 @@ class HeadsetMicMute(settings.Setting):
 
     @classmethod
     def build(cls, device):
-        # G522 advertises 0x0601 in its FeatureSet but the firmware returns
-        # 0x0A UNSUPPORTED for both GetState and SetState. The physical mute
-        # switch doesn't drive this feature anyway — G HUB attempts and
-        # silently ignores failures. Hide the toggle on G522 PIDs (0x0B18
-        # wireless, 0x0B19 wired) so users don't see a permanently-broken UI.
-        # product_id is the uppercase hex string form set by hidapi_impl
-        # (`f"{pid:04X}"`), so compare against strings rather than ints.
+        # G522 firmware uses non-standard fnids for HEADSET_MIC_MUTE:
+        #   fn 0x10 (function 1) emits state-change events from the device
+        #     (physical mute switch + host writes); also serves as GetState.
+        #   fn 0x20 (function 2) is SetState — the standard fn 0x10 SetState
+        #     returns 0x0A UNSUPPORTED on this firmware.
+        # Other headsets are presumably standard so we only override the
+        # rw_options on the known-quirky G522 PIDs (0x0B18 wireless, 0x0B19
+        # wired-mode firmware). product_id is the uppercase hex string set
+        # by hidapi_impl (`f"{pid:04X}"`), so compare against strings.
         if getattr(device, "product_id", None) in ("0B18", "0B19"):
-            return None
+            rw = settings.FeatureRW(cls.feature, read_fnid=0x10, write_fnid=0x20)
+            validator = settings_validator.BooleanValidator()
+            return cls(device, rw, validator)
         return super().build(device)
 
 

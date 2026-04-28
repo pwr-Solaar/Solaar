@@ -214,6 +214,10 @@ class SupportedFeature(IntEnum):
     HEADSET_RGB_HOSTMODE = 0x0620
     HEADSET_RGB_ONBOARD_EFFECTS = 0x0621
     HEADSET_RGB_SIGNATURE_EFFECTS = 0x0622
+    # 0x0623 is present on G522 sub-device but its function set is unmapped;
+    # add probe coverage in rgb_effects_probe so the next bring-up captures
+    # whatever read functions respond.
+    HEADSET_RGB_0623 = 0x0623
     HEADSET_DO_NOT_DISTURB = 0x0631
     CENTURION_ONBOARD_PROFILES = 0x0634
     HEADSET_RGB_STREAMING = 0x0635

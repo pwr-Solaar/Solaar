@@ -1,10 +1,20 @@
-"""Read-only corpus probe for HEADSET_RGB_ONBOARD_EFFECTS (0x0621) and
-HEADSET_RGB_SIGNATURE_EFFECTS (0x0622).
+"""Read-only corpus probe for the headset RGB feature triplet:
+
+  - HEADSET_RGB_ONBOARD_EFFECTS  (0x0621)
+  - HEADSET_RGB_SIGNATURE_EFFECTS (0x0622)
+  - HEADSET_RGB_0623             (0x0623, function set unmapped)
 
 Logs raw response bytes and lengths at INFO so field testers without
 ``-dd`` can still capture the data. All calls are strictly read-side —
-no setters are invoked. If either feature isn't present the probe
+no setters are invoked. If a feature isn't present the probe
 short-circuits cleanly.
+
+Pcap analysis of G HUB's color-set traffic confirmed that on 0x0621,
+``setRGBClusterEffect`` (fn 0x30) takes a 10-byte payload
+``[cluster, effect_id_BE_u16, R, G, B, ...]`` where ``effect_id=0x0000``
+means "Static (with RGB)" — this is also the slot-0 entry in the
+fn 0x10 ``getRGBClusterInfo`` reply, which we decode structurally so
+the test corpus shows effect-id semantics in plaintext.
 """
 
 from __future__ import annotations
@@ -94,6 +104,53 @@ def _call(device, feature: SupportedFeature, fn: int, *params):
     return resp
 
 
+# Names for known effect_ids on the headset RGB cluster. Confirmed via
+# pcap analysis of G HUB color-set traffic: setRGBClusterEffect with
+# effect_id=0x0000 + RGB writes a static color, so 0x0000 is "Static"
+# rather than the "Off / Disabled" we'd guessed from cluster ordering.
+# Other ids haven't been observed on the wire yet — names are placeholder
+# until further pcap traffic confirms them.
+_EFFECT_ID_NAMES = {
+    0x0000: "Static",
+    0x0001: "Effect 0x0001",
+    0x0006: "Effect 0x0006",
+    0x0007: "Effect 0x0007",
+    0x000F: "Effect 0x000F",
+    0x007F: "Effect 0x007F",
+}
+
+
+def _decode_cluster_info(resp) -> str | None:
+    """Decode a 0x0621 fn 0x10 getRGBClusterInfo reply into a readable
+    summary. Best-effort — returns None on unexpected length/shape.
+
+    Observed shape on G522: 4-byte records (effect_id LE u16, slot_idx
+    LE u16). The effect_id at slot 0 is 0x0000 = "Static" (with RGB),
+    confirmed by pcap of G HUB color-set traffic. Records continue
+    until trailing-zero padding.
+
+    Note: most HID++ multi-byte fields are BE, but this particular
+    response uses LE — confirmed against captured factory-default bytes
+    on G522 where the values 0x0001 / 0x000F / 0x007F appear at byte 0
+    of each record with byte 1 = 0x00 (consistent with LE u16).
+    """
+    if not resp or len(resp) < 4:
+        return None
+    effects = []
+    seen_static = False
+    for i in range(0, len(resp) - 3, 4):
+        eid = resp[i] | (resp[i + 1] << 8)
+        slot = resp[i + 2] | (resp[i + 3] << 8)
+        # Skip purely-zero padding once we've seen the (effect=0, slot=0) entry.
+        if eid == 0 and slot == 0:
+            if seen_static:
+                continue
+            seen_static = True
+        name = _EFFECT_ID_NAMES.get(eid, f"0x{eid:04X}")
+        effects.append(f"slot={slot}:{name}")
+    return ", ".join(effects) if effects else None
+
+
 def probe_onboard_effects(device) -> None:
     """Probe 0x0621 RGBOnboardEffects read-side functions."""
     feature = SupportedFeature.HEADSET_RGB_ONBOARD_EFFECTS
@@ -109,6 +166,9 @@ def probe_onboard_effects(device) -> None:
         resp = _call(device, feature, 0x10, cluster_idx)
         if resp is None:
             break
+        decoded = _decode_cluster_info(resp)
+        if decoded:
+            logger.info("RGB probe: 0x0621.fn10(%02X) decoded: %s", cluster_idx, decoded)
 
     # fn 0x20 getRGBClusterEffect — current state per cluster.
     for cluster_idx in range(8):
@@ -118,6 +178,24 @@ def probe_onboard_effects(device) -> None:
 
     # fn 0x40 getRGBCustomEffectName — single call, documented.
     _call(device, feature, 0x40)
+
+
+def probe_unknown_0623(device) -> None:
+    """Probe 0x0623 (purpose unmapped) — present on G522 sub-device.
+
+    Function set unknown. Try a small window of low function indexes to
+    capture whatever responds. Strictly read-side; we don't know what
+    arguments the functions take so we just call each with no payload
+    and let the device 0x0A any function that needs args.
+    """
+    feature = SupportedFeature.HEADSET_RGB_0623
+    if not device.features or feature not in device.features:
+        return
+    logger.info("RGB probe: 0x0623 HEADSET_RGB_0623 present on %s", device)
+    # Functions 0..7 covers the typical "info / get* / get*" range; if
+    # anything responds we'll have first bytes to triangulate against.
+    for fn_idx in range(8):
+        _call(device, feature, fn_idx << 4)
 
 
 def probe_signature_effects(device) -> None:
@@ -158,3 +236,7 @@ def probe(device) -> None:
         probe_signature_effects(device)
     except Exception as e:
         logger.info("RGB probe: signature-effects probe raised %r", e)
+    try:
+        probe_unknown_0623(device)
+    except Exception as e:
+        logger.info("RGB probe: 0x0623 probe raised %r", e)
