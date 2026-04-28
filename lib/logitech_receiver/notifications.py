@@ -422,6 +422,20 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     brightness = struct.unpack("!H", device.feature_request(SupportedFeature.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
 
+    elif feature == SupportedFeature.HEADSET_MIC_MUTE:
+        # G522 emits state-change events on two function indices:
+        #   address == 0x00 (fn 0 swid 0) — physical mute switch press
+        #   address == 0x10 (fn 1 swid 0) — echo following a host-driven
+        #                                   SetState (fn 2) write
+        # Both carry the new state in data[0] (0 = unmuted, 1 = muted).
+        # Push to the UI either way so the toggle tracks reality.
+        if notification.address in (0x00, 0x10) and notification.data:
+            muted = bool(notification.data[0])
+            if device.setting_callback:
+                device.setting_callback(device, settings_templates.HeadsetMicMute, [muted])
+        elif logger.isEnabledFor(logging.INFO):
+            logger.info("%s: unknown HEADSET_MIC_MUTE %s", device, notification)
+
     diversion.process_notification(device, notification, feature)
     return True
 
