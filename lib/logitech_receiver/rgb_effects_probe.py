@@ -22,13 +22,26 @@ def _hex_or_none(data) -> str | None:
 
 
 def _format_feature(feat) -> str:
-    """Render a feature for the log: 0x{id:04X}{:NAME} when known, else raw."""
+    """Render a feature for the log: 0x{id:04X}{:NAME} when known, else raw.
+
+    Unknown features are stored as the string "unknown:HHHH" by the feature
+    discovery code, so handle that shape explicitly — int(feat) on those
+    raises ValueError. Wrap the rest in a broad except so a future unhandled
+    feature shape can't kill the whole table dump.
+    """
     if feat is None:
         return "?"
+    if isinstance(feat, str):
+        if feat.startswith("unknown:") and len(feat) > 8:
+            return f"0x{feat[8:].upper()}"
+        return feat
     try:
         return f"0x{int(feat):04X}:{feat.name}"
-    except (AttributeError, TypeError):
-        return f"0x{int(feat):04X}" if feat is not None else "?"
+    except (AttributeError, TypeError, ValueError):
+        try:
+            return f"0x{int(feat):04X}"
+        except (TypeError, ValueError):
+            return repr(feat)
 
 
 def _log_feature_table(device) -> None:

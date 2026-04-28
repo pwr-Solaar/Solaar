@@ -253,11 +253,16 @@ def get_advanced_eq_defaults(device, direction=DIRECTION_PLAYBACK, slot=0):
                 result.hex(),
             )
             return None
+        # Log raw=... too — getEQDefaults appears to use a different header
+        # framing than getCustomEQ on G522 (decoded values come out shifted
+        # by a byte). Capture the raw bytes so we can pin down the actual
+        # layout difference and adjust the parser accordingly.
         logger.info(
-            "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): %d band(s) %s",
+            "AdvancedParaEQ getEQDefaults V2 (dir=%d slot=%d): %d band(s) raw=%s %s",
             direction,
             slot,
             len(bands),
+            result.hex(),
             [_band_label(t, f) + f" {round(g, 2)}dB" for t, f, g in bands],
         )
         return bands
@@ -296,44 +301,62 @@ def get_advanced_eq_friendly_name(device, direction=DIRECTION_PLAYBACK, slot=0):
     return name
 
 
-def probe_all_presets(device, direction=DIRECTION_PLAYBACK):
-    """Read every factory + custom preset slot and log name + band data at INFO.
+def probe_advanced_eq_slots(device, direction=DIRECTION_PLAYBACK, info=None):
+    """Probe every advertised EQ slot via getCustomEQ and cache which respond.
 
-    Diagnostic probe — intended to run once at HeadsetAdvancedEQ.build() time.
-    The logged corpus is useful for spotting filter-type or frequency pattern
-    differences between named presets.
+    Some firmware (G522) advertises N slots via getEQInfos but only honors a
+    subset for getCustomEQ / setActiveEQ — the rest return 0x0B NOT_SUPPORTED.
+    This iterates 0..total-1 and records which slots actually have data.
+
+    Result is cached on `device._advanced_eq_working_slots` as a list of
+    `(slot_index, name, bands)` tuples. The HeadsetActiveEQPreset selector
+    builds its choices from this list; the HeadsetAdvancedEQ panel uses it
+    to skip dead slots in its diagnostic output.
+
+    Logs each working slot's bands at INFO and a summary line indicating
+    how many of the advertised slots are actually accessible.
     """
-    info = getattr(device, "_advanced_eq_info", None)
+    cached = getattr(device, "_advanced_eq_working_slots", None)
+    if cached is not None:
+        return cached
+    if info is None:
+        info = getattr(device, "_advanced_eq_info", None) or get_advanced_eq_info(device)
     if not info:
-        return
-    ro_count = info.get("onboard_ro_preset_count", 0)
-    custom_count = info.get("onboard_custom_preset_count", 0)
-    for slot in range(ro_count):
-        name = get_advanced_eq_friendly_name(device, direction=direction, slot=slot)
-        bands = get_advanced_eq_defaults(device, direction=direction, slot=slot)
-        if bands is None:
-            continue
-        logger.info(
-            "AdvancedParaEQ factory preset %d/%d (dir=%d) name=%r: %s",
-            slot,
-            ro_count,
-            direction,
-            name,
-            [f"{_band_label(t, f)} {round(g, 2)}dB" for t, f, g in bands],
-        )
-    for slot in range(custom_count):
-        name = get_advanced_eq_friendly_name(device, direction=direction, slot=slot)
+        return []
+    ro_count = info.get("onboard_ro_preset_count", 0) or 0
+    custom_count = info.get("onboard_custom_preset_count", 0) or 0
+    total = ro_count + custom_count
+    if total == 0:
+        return []
+    working = []
+    for slot in range(total):
         bands = get_advanced_eq_params(device, direction=direction, slot=slot)
         if bands is None:
             continue
+        name = get_advanced_eq_friendly_name(device, direction=direction, slot=slot)
+        kind = "factory" if slot < ro_count else "custom"
         logger.info(
-            "AdvancedParaEQ custom preset %d/%d (dir=%d) name=%r: %s",
+            "AdvancedParaEQ %s preset slot=%d (dir=%d) name=%r: %s",
+            kind,
             slot,
-            custom_count,
             direction,
             name,
             [f"{_band_label(t, f)} {round(g, 2)}dB" for t, f, g in bands],
         )
+        working.append((slot, name, bands))
+    device._advanced_eq_working_slots = working
+    logger.info(
+        "AdvancedParaEQ working slots on dir=%d: %d of %d advertised %s",
+        direction,
+        len(working),
+        total,
+        [w[0] for w in working],
+    )
+    return working
+
+
+# Backward-compat alias kept until external callers are migrated.
+probe_all_presets = probe_advanced_eq_slots
 
 
 def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
@@ -371,12 +394,15 @@ def get_advanced_eq_params(device, direction=DIRECTION_PLAYBACK, slot=0):
             )
             return None
         step_db = info["step_db"] if info and "step_db" in info else 1.0
+        # Log raw=... too so we can compare wire shapes across firmware
+        # variants and across get-fns (getCustomEQ vs getEQDefaults).
         logger.info(
-            "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): %d band(s) step_db=%.4f %s",
+            "AdvancedParaEQ getCustomEQ V2 (dir=%d slot=%d): %d band(s) step_db=%.4f raw=%s %s",
             direction,
             slot,
             len(bands),
             step_db,
+            result.hex(),
             [f"{_band_label(t, f)} {round(g, 2)}dB" for t, f, g in bands],
         )
         return bands

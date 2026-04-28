@@ -1628,7 +1628,9 @@ class HeadsetMicMute(settings.Setting):
         # switch doesn't drive this feature anyway — G HUB attempts and
         # silently ignores failures. Hide the toggle on G522 PIDs (0x0B18
         # wireless, 0x0B19 wired) so users don't see a permanently-broken UI.
-        if getattr(device, "product_id", None) in (0x0B18, 0x0B19):
+        # product_id is the uppercase hex string form set by hidapi_impl
+        # (`f"{pid:04X}"`), so compare against strings rather than ints.
+        if getattr(device, "product_id", None) in ("0B18", "0B19"):
             return None
         return super().build(device)
 
@@ -1953,12 +1955,14 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
                 gain_max,
                 step_db,
             )
-            # One-shot corpus probe — logs every factory + custom preset's
-            # band data at INFO. Useful diagnostic if a device turns up with
-            # filter types beyond the observed 0x00/0x78 pair.
+            # One-shot per-slot probe — logs band data for each slot the
+            # firmware actually honors and caches the working-slot list on
+            # `device._advanced_eq_working_slots`. Cheap if HeadsetActiveEQPreset
+            # already populated the cache (it usually has at this point);
+            # otherwise this is the first-time probe.
             if version >= 2:
                 try:
-                    hidpp20.probe_advanced_eq_presets(device, direction=0)
+                    hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
                 except Exception as e:
                     logger.info("HeadsetAdvancedEQ.build: preset corpus probe failed: %s", e)
             return v
@@ -2035,13 +2039,19 @@ class HeadsetActiveEQPreset(settings.Setting):
         if not info:
             return None
         ro_count = info.get("onboard_ro_preset_count", 0) or 0
-        custom_count = info.get("onboard_custom_preset_count", 0) or 0
-        total = ro_count + custom_count
-        if total == 0:
+        # Probe each advertised slot — getEQInfos may report capacity that
+        # the firmware doesn't actually back (G522 advertises 16 slots but
+        # only honors slot 0). Only include slots that responded with band
+        # data; the result is cached on device._advanced_eq_working_slots
+        # so HeadsetAdvancedEQ.build can reuse it without re-probing.
+        working = hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
+        if len(working) <= 1:
+            # One option (or zero) is meaningless as a selector — there's
+            # nothing for the user to choose between. The active EQ is
+            # whatever slot 0 has, no preset switching is available.
             return None
         choices = common.NamedInts()
-        for slot in range(total):
-            slot_name = hidpp20.get_advanced_eq_friendly_name(device, direction=0, slot=slot)
+        for slot, slot_name, _bands in working:
             if not slot_name:
                 slot_name = _("Slot") + " " + str(slot)
             if slot < ro_count:
@@ -2054,15 +2064,20 @@ class HeadsetActiveEQPreset(settings.Setting):
     def write(self, value, save=True):
         result = super().write(value, save)
         if result is not None:
-            # Drop the AdvancedParaEQ band-display cache so the panel's
-            # next read pulls the new active slot's bands. The visible
-            # values update on the next refresh of that panel (manual
-            # refresh icon, panel reopen, or device reconnect) — pushing
-            # the redraw automatically would need UI-side plumbing we
-            # don't currently expose from the settings layer.
+            # After setActiveEQ, repopulate the AdvancedParaEQ band-display
+            # cache so the panel reflects the newly-active slot. Force a
+            # fresh read so _value is a real dict — leaving it as None
+            # would let a UI band-click hit `_value[item]` on None and
+            # crash (config_panel.py:589 'NoneType' is not subscriptable).
+            # The visible widget redraw still waits for a manual refresh /
+            # panel reopen — auto-redraw would need UI-side plumbing.
             eq_panel = _headset_setting_by_name(self._device, HeadsetAdvancedEQ.name)
             if eq_panel is not None:
-                eq_panel._value = None
+                try:
+                    eq_panel._value = None
+                    eq_panel.read(cached=False)
+                except Exception as e:
+                    logger.info("HeadsetActiveEQPreset: failed to refresh EQ panel: %s", e)
         return result
 
 
