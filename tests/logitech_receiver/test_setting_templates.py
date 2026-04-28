@@ -293,7 +293,7 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.RGBControl, 0, 1),
         fake_hidpp.Response("0000", 0x0450),
-        fake_hidpp.Response("010100", 0x0450, "0101"),
+        fake_hidpp.Response("010305", 0x0450, "010305"),
     ),
     Setup(
         FeatureTest(
