@@ -356,6 +356,21 @@ def _cleanup_bluez_dbus(device: Device):
 _all_listeners = {}  # all known receiver listeners, listeners that stop on their own may remain here
 
 
+def _post_attach_device(device):
+    """Shared post-create_device wiring: hook configuration up to the new
+    Device, and if it's BT-paired, install the bluez-dbus connect watcher
+    so disconnect/reconnect events propagate to the UI without a restart.
+
+    Both the Centurion-direct fallback (no-dongle device, e.g. BT-paired
+    G522 / PRO X 2) and the regular non-Centurion device path call this —
+    previously only the latter wired the bluez watcher, so a BT-paired
+    Centurion device wouldn't see reconnect events."""
+    configuration.attach_to(device)
+    if device.bluetooth and device.hid_serial:
+        dbus.watch_bluez_connect(device.hid_serial, partial(_process_bluez_dbus, device))
+        device.cleanups.append(_cleanup_bluez_dbus)
+
+
 def _start(device_info: DeviceInfo):
     assert _status_callback and _setting_callback
 
@@ -364,17 +379,15 @@ def _start(device_info: DeviceInfo):
     elif getattr(device_info, "centurion", False):
         receiver_ = logitech_receiver.device.create_centurion_receiver(base, device_info, _setting_callback)
         if receiver_ is None:
-            # No bridge found — treat as a direct-connected centurion device (e.g., wired headset)
+            # No bridge found — treat as a direct-connected centurion device
+            # (wired headset, or BT-paired headset with no LIGHTSPEED dongle).
             receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
             if receiver_:
-                configuration.attach_to(receiver_)
+                _post_attach_device(receiver_)
     else:
         receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
         if receiver_:
-            configuration.attach_to(receiver_)
-            if receiver_.bluetooth and receiver_.hid_serial:
-                dbus.watch_bluez_connect(receiver_.hid_serial, partial(_process_bluez_dbus, receiver_))
-                receiver_.cleanups.append(_cleanup_bluez_dbus)
+            _post_attach_device(receiver_)
 
     if receiver_:
         rl = SolaarListener(receiver_, _status_callback)

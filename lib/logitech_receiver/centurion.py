@@ -483,8 +483,9 @@ def create_centurion_receiver(low_level, device_info, setting_callback=None):
 
     Creates a CenturionReceiver, discovers its features, then checks if
     CentPPBridge (0x0003) is among them. If not, this is a direct-connected
-    device (wired headset) — close and return None so the caller can fall
-    back to create_device().
+    device — wired headset, or a Bluetooth-paired Centurion headset where
+    there is no separate dongle. Close and return None so the caller can
+    fall back to create_device().
 
     :returns: A CenturionReceiver, or None.
     """
