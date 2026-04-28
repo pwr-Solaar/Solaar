@@ -1620,23 +1620,18 @@ class HeadsetMicMute(settings.Setting):
     description = _("Mute the microphone.")
     feature = _F.HEADSET_MIC_MUTE
     validator_class = settings_validator.BooleanValidator
-
-    @classmethod
-    def build(cls, device):
-        # G522 firmware uses non-standard fnids for HEADSET_MIC_MUTE:
-        #   fn 0x10 (function 1) emits state-change events from the device
-        #     (physical mute switch + host writes); also serves as GetState.
-        #   fn 0x20 (function 2) is SetState — the standard fn 0x10 SetState
-        #     returns 0x0A UNSUPPORTED on this firmware.
-        # Other headsets are presumably standard so we only override the
-        # rw_options on the known-quirky G522 PIDs (0x0B18 wireless, 0x0B19
-        # wired-mode firmware). product_id is the uppercase hex string set
-        # by hidapi_impl (`f"{pid:04X}"`), so compare against strings.
-        if getattr(device, "product_id", None) in ("0B18", "0B19"):
-            rw = settings.FeatureRW(cls.feature, read_fnid=0x10, write_fnid=0x20)
-            validator = settings_validator.BooleanValidator()
-            return cls(device, rw, validator)
-        return super().build(device)
+    # HEADSET_MIC_MUTE (0x0601) doesn't follow the typical fn 0 GetState /
+    # fn 1 SetState pattern that BooleanValidator defaults to. Function
+    # layout (confirmed via G HUB pcap on G522):
+    #   fn 0 — physical-mute-switch state-change events from the device
+    #   fn 1 — state-change events emitted as the device's echo of a
+    #          host-driven SetState; also serves as the host-callable
+    #          GetState read
+    #   fn 2 — host-callable SetState (single byte: 0=unmuted, 1=muted)
+    # The standard fn 0/1 write path returns 0x0A UNSUPPORTED. State-change
+    # events from both fn 0 and fn 1 are handled by _process_feature_notification
+    # so the toggle reflects physical mute presses too.
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
 class HeadsetMicSNR(settings.Setting):
