@@ -2031,7 +2031,26 @@ class Hidpp20:
             SupportedFeature._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
+    def get_configuration_cookie(self, device: Device):
+        """ConfigChange (0x0020) GetCookie — read the device's current configuration cookie."""
+        response = device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x00)
+        return response[:2] if response else None
+
+    def set_configuration_complete(self, device: Device, cookie=None, no_reply=False):
+        """ConfigChange (0x0020) SetComplete — acknowledge host has synced with device configuration.
+
+        If cookie is None, reads the current cookie and increments it to mark
+        a new sync point, so future cookie changes indicate device-side drift."""
+        if cookie is None:
+            cookie = self.get_configuration_cookie(device)
+            if cookie and len(cookie) >= 2:
+                value = (cookie[0] << 8 | cookie[1]) + 1 & 0xFFFF
+                cookie = bytes([value >> 8, value & 0xFF])
+        if cookie and len(cookie) >= 2:
+            return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, cookie[0], cookie[1], no_reply=no_reply)
+
     def config_change(self, device: Device, configuration, no_reply=False):
+        """Deprecated — use set_configuration_complete() instead."""
         return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
 
 

@@ -429,6 +429,11 @@ class Device:
         if self.online and self.protocol >= 2.0:
             _hidpp20.config_change(self, configuration_, no_reply=no_reply)
 
+    def signal_configuration_complete(self):
+        """Read the device's config cookie and echo it back via SetComplete to ack end of configuration."""
+        if self.online and self.protocol >= 2.0:
+            _hidpp20.set_configuration_complete(self)
+
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
 
@@ -533,7 +538,7 @@ class Device:
                     if self.protocol < 2.0:  # Make sure to set notification flags on the device
                         self.notification_flags = self.enable_connection_notifications()
                     else:
-                        self.set_configuration(0x11)  # signal end of configuration
+                        self.signal_configuration_complete()
                     self.read_battery()  # battery information may have changed so try to read it now
             elif was_active and self.receiver and not isinstance(self.receiver, CenturionReceiver):
                 hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
