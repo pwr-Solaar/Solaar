@@ -90,6 +90,8 @@ matched, respectively. Logitech key and button names are shown in the `Key/Butto
 setting. These names are also shown in the output of `solaar show` in the 'Reprogrammable keys'
 section. Only keys or buttons that have 'Divertable' in their report can be diverted.
 Some keyboards have 'Gn', 'Mn', or 'MR' keys, which are diverted using the 'Divert G Keys' setting.
+For a quick command-line binding, use `solaar shortcut <device> <shortcut> --key <key>`.
+The key defaults to `smart-shift`, so `solaar shortcut "MX Master" Control_L+Alt_L+T` diverts the Smart Shift button and adds a rule that sends that shortcut when the button is pressed.
 
 ### Key is down
 `KeyIsDown` conditions are true if the **diverted** key or button that is their string argument is currently down.
