@@ -196,13 +196,27 @@ class FeaturesArray(dict):
             response = self.device.request((fs_index << 8) | 0x10, index)
             if response is None or len(response) < 3:
                 continue
-            # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, flags]
+            # Centurion FeatureSet response: [remaining_count, feat_hi, feat_lo, type, version]
             feat_id = struct.unpack("!H", response[1:3])[0]
+            feat_type = response[3] if len(response) > 3 else 0
+            feat_version = response[4] if len(response) > 4 else 0
             feature = resolve_feature(feat_id, centurion=True)
             if feature is None:
                 feature = f"unknown:{feat_id:04X}"
             self[feature] = index
             self.inverse[index] = feature
+            # Record version/flags so version-gated settings (sidetone, auto-sleep)
+            # use the correct payload format on direct USB Centurion devices too.
+            self.version[feature] = feat_version
+            self.flags[feature] = feat_type
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Centurion parent feature: %s at index %d, version=%d, flags=0x%02X",
+                    feature,
+                    index,
+                    feat_version,
+                    feat_type,
+                )
             if feature is CenturionCoreFeature.CENT_PP_BRIDGE:
                 bridge_index = index
 
@@ -215,8 +229,11 @@ class FeaturesArray(dict):
     def _discover_sub_device_features(self, bridge_index):
         """Phase B: Discover sub-device features via CentPPBridge.
 
-        Uses CenturionFeatureSet bulk query (function 1, index 0) routed through
-        the bridge to get all sub-device features at once.
+        Uses per-index queries: GetCount (func 0) returns total count, then
+        GetFeatureId (func 1) returns one feature per call. Avoids the
+        single-frame truncation of bulk queries — a Centurion frame is 64
+        bytes so a bulk reply can only fit ~13 features regardless of how
+        many the sub-device actually has.
         """
         # First, find the sub-device's FeatureSet index via CenturionRoot (sub_feat_idx=0)
         # Query: CenturionRoot.GetFeature(0x0001) to find FeatureSet index on sub-device
@@ -231,44 +248,62 @@ class FeaturesArray(dict):
             logger.warning("Sub-device FeatureSet not found (index=0)")
             return
 
-        # Bulk enumerate: CenturionFeatureSet.GetFeatureId(func=1=0x10, start_index=0)
-        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
-        response = self.device.centurion_bridge_request(sub_fs_index, 0x10, 0x00)
-        if response is None or len(response) < 1:
-            logger.warning("Failed to enumerate sub-device features")
+        # Query feature count (function 0 = GetCount). Response: [count, ...].
+        count_resp = self.device.centurion_bridge_request(sub_fs_index, 0x00)
+        if count_resp is None or len(count_resp) < 1:
+            logger.warning("Failed to read Centurion sub-device feature count")
             return
+        total_count = count_resp[0]
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Centurion sub-device: FeatureSet reports %d features", total_count)
 
-        entry_count = response[0]
-        entries = response[1:]
-        sub_feat_idx = 0  # sub-device feature indices start at 0
-        for i in range(entry_count):
-            offset = i * 4
-            if offset + 2 > len(entries):
-                break
-            feat_id = struct.unpack("!H", entries[offset : offset + 2])[0]
+        # Per-index query: GetFeatureId (function 1 = 0x10).
+        # Response: [remaining, feat_hi, feat_lo, type, version].
+        # We now also record `type` (flags) and `version` for each feature so
+        # version-gated settings (sidetone, auto-sleep, etc.) can use the
+        # correct payload format instead of defaulting to V0.
+        sub_feat_idx = 0
+        for idx in range(total_count):
+            response = self.device.centurion_bridge_request(sub_fs_index, 0x10, idx)
+            if response is None or len(response) < 3:
+                logger.debug("Centurion sub-device: no response at index %d", idx)
+                continue
+            feat_id = struct.unpack("!H", response[1:3])[0]
+            feat_type = response[3] if len(response) > 3 else 0
+            feat_version = response[4] if len(response) > 4 else 0
             try:
                 feature = SupportedFeature(feat_id)
             except ValueError:
                 feature = f"unknown:{feat_id:04X}"
-            # Store sub-device index for ALL features (including parent overlaps)
-            # This enables querying the sub-device's copy of shared features via bridge
             self.device._centurion_sub_indices[feature] = sub_feat_idx
-            # Only store unique sub-device features in dict (skip parent overlaps like ROOT, FEATURE_SET)
-            # This avoids clobbering parent inverse entries via __setitem__
             if dict.get(self, feature) is None:
                 dict.__setitem__(self, feature, sub_feat_idx)
                 self.device._centurion_sub_features.add(feature)
-            # Always store in sub_inverse for sub-device enumerate/display
             self.sub_inverse[sub_feat_idx] = feature
+            # Record version/flags so downstream settings can version-gate their
+            # payload format. get_feature_version(feature) reads self.version[feature].
+            self.version[feature] = feat_version
+            self.flags[feature] = feat_type
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("Centurion sub-device feature: %s at sub-index %d", feature, sub_feat_idx)
+                logger.debug(
+                    "Centurion sub-device feature: %s at sub-index %d, version=%d, flags=0x%02X",
+                    feature,
+                    sub_feat_idx,
+                    feat_version,
+                    feat_type,
+                )
             sub_feat_idx += 1
         self._sub_feature_count = sub_feat_idx
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Centurion sub-device: discovered %d features total", sub_feat_idx)
 
     def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
+        # Sub-device index; bridge unwrap offsets by 0x100 (see listener).
+        if index >= 0x100:
+            return self.sub_inverse.get(index - 0x100)
         elif self._check():
             feature = self.inverse.get(index)
             if feature is not None:
@@ -333,6 +368,12 @@ class FeaturesArray(dict):
             index = super().get(feature)
             if index is not None:
                 return index
+            # Centurion devices enumerate all features upfront in _check_centurion().
+            # If the feature isn't in the dict after _check(), it genuinely doesn't
+            # exist — skip the raw ROOT.GetFeature query that the dongle rejects
+            # with LOGITECH_ERROR and that creates cycling log spam during settings init.
+            if getattr(self.device, "centurion", False):
+                return None
             try:
                 response = self.device.request(0x0000, struct.pack("!H", feature))
             except exceptions.FeatureCallError:
@@ -2266,6 +2307,17 @@ class ForceSensingButtonArray(UserDict):
 
 
 # --- OnboardEQ (0x0636) — re-exported from onboard_eq.py ---
+# --- AdvancedParaEQ (0x020D) — re-exported from advanced_para_eq.py ---
+from .advanced_para_eq import FILTER_TYPE_HP  # noqa: E402, F401
+from .advanced_para_eq import FILTER_TYPE_PEAKING  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_active_slot  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_defaults  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_friendly_name  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_info  # noqa: E402, F401
+from .advanced_para_eq import get_advanced_eq_params  # noqa: E402, F401
+from .advanced_para_eq import parse_v2_bands  # noqa: E402, F401
+from .advanced_para_eq import probe_advanced_eq_slots  # noqa: E402, F401
+from .advanced_para_eq import probe_all_presets as probe_advanced_eq_presets  # noqa: E402, F401
 from .onboard_eq import _build_set_eq_payload  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_info  # noqa: E402, F401
 from .onboard_eq import get_onboard_eq_params  # noqa: E402, F401

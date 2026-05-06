@@ -102,6 +102,7 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
         from hid_parser import ReportDescriptor
 
         hidpp_short = hidpp_long = centurion = False
+        centurion_report_id = None
         devfile = "/sys" + hid_device.properties.get("DEVPATH") + "/report_descriptor"
         with fileopen(devfile, "rb") as fd:
             with warnings.catch_warnings():
@@ -111,16 +112,22 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             # and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages  # be more permissive
             hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(rd.get_input_report_size(0x11))
             # and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages  # be more permissive
-            # Centurion transport: report ID 0x51, 63-byte reports (usage page 0xFFA0)
-            centurion = (
-                0x51 in rd.input_report_ids and 63 * 8 == int(rd.get_input_report_size(0x51)) and 0x51 in rd.output_report_ids
-            )
+            # Centurion transport: 63-byte reports on usage page 0xFFA0 (both input and output)
+            # 0x51 = PRO X 2 LIGHTSPEED variant, 0x50 = G522 LIGHTSPEED variant (with device address byte)
+            if 0x51 in rd.input_report_ids and 63 * 8 == int(rd.get_input_report_size(0x51)) and 0x51 in rd.output_report_ids:
+                centurion_report_id = 0x51
+            elif (
+                0x50 in rd.input_report_ids and 63 * 8 == int(rd.get_input_report_size(0x50)) and 0x50 in rd.output_report_ids
+            ):
+                centurion_report_id = 0x50
+            centurion = centurion_report_id is not None
         if not hidpp_short and not hidpp_long and not centurion:
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = None
         hidpp_long = None
         centurion = False
+        centurion_report_id = None
         logger.info(
             "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s",
             device.device_node,
@@ -171,6 +178,7 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             hidpp_short=hidpp_short,
             hidpp_long=hidpp_long,
             centurion=centurion if centurion else False,
+            centurion_report_id=centurion_report_id,
         )
         return d_info
 

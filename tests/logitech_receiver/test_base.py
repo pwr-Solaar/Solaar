@@ -8,7 +8,10 @@ import pytest
 
 from logitech_receiver import base
 from logitech_receiver import exceptions
+from logitech_receiver.base import CENTURION_ADDRESSED_REPORT_ID
+from logitech_receiver.base import CENTURION_REPORT_ID
 from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
+from logitech_receiver.base import CenturionHandleState
 from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import BusID
 from logitech_receiver.hidpp10_constants import ErrorCode as Hidpp10Error
@@ -200,3 +203,217 @@ def test_ping_errors(simulated_error: Hidpp10Error, expected_result):
         else:
             result = base.ping(handle=handle, devnumber=device_number)
             assert result == expected_result
+
+
+# --- Centurion transport tests ---
+
+
+class TestCenturionFrameHeader:
+    """Test _centurion_frame_header builds correct headers for both variants."""
+
+    def test_0x51_header(self):
+        state = CenturionHandleState(report_id=CENTURION_REPORT_ID)
+        header = base._centurion_frame_header(state, cpl_length=5, flags=0x00)
+        assert header == bytes([0x51, 5, 0x00])
+
+    def test_0x51_header_with_flags(self):
+        state = CenturionHandleState(report_id=CENTURION_REPORT_ID)
+        header = base._centurion_frame_header(state, cpl_length=10, flags=0x03)
+        assert header == bytes([0x51, 10, 0x03])
+
+    def test_0x50_header_unknown_addr(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=None)
+        header = base._centurion_frame_header(state, cpl_length=5, flags=0x00)
+        # device_addr defaults to 0x00 when unknown
+        assert header == bytes([0x50, 0x00, 5, 0x00])
+
+    def test_0x50_header_known_addr(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        header = base._centurion_frame_header(state, cpl_length=5, flags=0x00)
+        assert header == bytes([0x50, 0x23, 5, 0x00])
+
+    def test_0x50_header_with_flags(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        header = base._centurion_frame_header(state, cpl_length=10, flags=0x07)
+        assert header == bytes([0x50, 0x23, 10, 0x07])
+
+
+class TestUnwrapCenturionFrame:
+    """Test _unwrap_centurion_frame for both 0x51 and 0x50 variants."""
+
+    HANDLE = 99
+
+    def setup_method(self):
+        """Ensure no leftover centurion state between tests."""
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def teardown_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def test_unwrap_0x51_frame(self):
+        """0x51 frame with feat_idx=0x02, func_sw=0x1A, 2 data bytes."""
+        # cpl_length = 1(flags) + 1(feat_idx) + 1(func_sw) + 2(data) = 5
+        raw = bytes([0x51, 5, 0x00, 0x02, 0x1A, 0xAA, 0xBB]) + b"\x00" * 57
+        result = base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+        # Should reconstruct as [0x11, 0xFF, feat_idx, func_sw, data..., pad to 20]
+        assert result[0] == 0x11
+        assert result[1] == 0xFF
+        assert result[2] == 0x02  # feat_idx
+        assert result[3] == 0x1A  # func_sw
+        assert result[4] == 0xAA
+        assert result[5] == 0xBB
+        assert len(result) == 20  # padded to standard long
+
+    def test_unwrap_0x50_frame(self):
+        """0x50 frame with device_addr=0x23, same payload as above."""
+        # Frame: [0x50, device_addr, cpl_length, flags, feat_idx, func_sw, data...]
+        raw = bytes([0x50, 0x23, 5, 0x00, 0x02, 0x1A, 0xAA, 0xBB]) + b"\x00" * 56
+        base._centurion_handles[self.HANDLE] = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        result = base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+        assert result[0] == 0x11
+        assert result[1] == 0xFF
+        assert result[2] == 0x02  # feat_idx
+        assert result[3] == 0x1A  # func_sw
+        assert result[4] == 0xAA
+        assert result[5] == 0xBB
+        assert len(result) == 20
+
+    def test_0x50_learns_device_addr(self):
+        """First RX on a 0x50 handle should learn the device address."""
+        base._centurion_handles[self.HANDLE] = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        assert base._centurion_handles[self.HANDLE].device_addr is None
+
+        raw = bytes([0x50, 0x23, 3, 0x00, 0x02, 0x1A]) + b"\x00" * 58
+        base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+
+        assert base._centurion_handles[self.HANDLE].device_addr == 0x23
+
+    def test_0x50_does_not_overwrite_addr(self):
+        """Once learned, device address should not be overwritten."""
+        base._centurion_handles[self.HANDLE] = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        raw = bytes([0x50, 0xFF, 3, 0x00, 0x02, 0x1A]) + b"\x00" * 58
+        base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+
+        # Should keep the original address, not overwrite with 0xFF
+        assert base._centurion_handles[self.HANDLE].device_addr == 0x23
+
+    def test_non_centurion_frame_passthrough(self):
+        """Non-centurion report IDs should be returned unchanged."""
+        raw = bytes([0x11, 0x01, 0x02, 0x1A]) + b"\x00" * 16
+        result = base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+        assert result == raw
+
+    def test_unwrap_0x51_large_payload(self):
+        """0x51 frame with payload large enough to need 63-byte padding."""
+        # cpl_length covers all 61 payload bytes + flags = 62
+        payload = bytes(range(61))
+        raw = bytes([0x51, 62, 0x00]) + payload
+        result = base._unwrap_centurion_frame(raw, self.HANDLE, self.HANDLE)
+        assert len(result) == 63  # padded to centurion extended
+        assert result[0] == 0x11
+        assert result[1] == 0xFF
+        assert result[2:63] == payload
+
+
+class TestProbeCenturionDeviceAddr:
+    """Test probe_centurion_device_addr: brute-force write for all 256 addrs, then read."""
+
+    HANDLE = 101
+
+    def setup_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def teardown_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def test_learns_addr_on_first_hit(self):
+        """Probe finds addr=0x23 on candidate #36 (0-indexed 0x23=35) and stops."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
+
+        def read_side_effect(_handle, _size, _timeout):
+            # Return a response only after the write with addr=0x23
+            if mock_write.call_count == 0x24:  # 0x23 is the 36th write (1-indexed)
+                return reply
+            return None
+
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", side_effect=read_side_effect),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x23
+        # Short-circuit: stopped at candidate 0x23 (36 writes), not all 256
+        assert mock_write.call_count == 0x24
+
+    def test_skips_non_matching_read_until_match(self):
+        """Non-0x50 frames in the read are ignored; next candidate's read succeeds."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        noise = b"\x11\xff" + b"\x00" * 62
+        match = bytes([0x50, 0x42, 0x03, 0x00]) + b"\x00" * 60
+        # Reads cycle: noise, noise, match — so addr is found on 3rd candidate
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", side_effect=[noise, noise, match]),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x42
+
+    def test_returns_false_when_no_response(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", return_value=None),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+
+    def test_noop_for_0x51_variant(self):
+        state = CenturionHandleState(report_id=CENTURION_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_noop_when_addr_already_known(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr == 0x23
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_aborts_on_repeated_write_failure(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write", side_effect=OSError("no device")),
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_read.assert_not_called()
+
+    def test_write_frames_have_sequential_addrs(self):
+        """Verify each write uses a different device_addr from 0x00 to 0xFF."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", return_value=None),  # no response → scans all 256
+        ):
+            base.probe_centurion_device_addr(self.HANDLE, state)
+        assert mock_write.call_count == 256
+        addrs_sent = [mock_write.call_args_list[i][0][1][1] for i in range(256)]
+        assert addrs_sent == list(range(256))

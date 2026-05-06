@@ -33,8 +33,11 @@ from . import descriptors
 from . import desktop_notifications
 from . import diversion
 from . import exceptions
+from . import headset_rgb
 from . import hidpp20
 from . import hidpp20_constants
+from . import logivoice
+from . import rgb_effects_probe
 from . import settings
 from . import settings_new
 from . import settings_validator
@@ -1591,6 +1594,17 @@ class HeadsetEcoMode(settings.Setting):
     feature = _F.HEADSET_BATTERY_SAVER
     validator_class = settings_validator.BooleanValidator
 
+    @classmethod
+    def build(cls, device):
+        # G522 firmware rejects no-op writes with device-specific NACK 0x0B.
+        # BooleanValidator.prepare_write already skips writes that match the
+        # current value when needs_current_value=True; default-mask (0xFF)
+        # BooleanValidators get needs_current_value=False, so flip it here.
+        rw = settings.FeatureRW(cls.feature)
+        validator = settings_validator.BooleanValidator()
+        validator.needs_current_value = True
+        return cls(device, rw, validator)
+
 
 class HeadsetDoNotDisturb(settings.Setting):
     name = "headset-do-not-disturb"
@@ -1606,6 +1620,18 @@ class HeadsetMicMute(settings.Setting):
     description = _("Mute the microphone.")
     feature = _F.HEADSET_MIC_MUTE
     validator_class = settings_validator.BooleanValidator
+    # HEADSET_MIC_MUTE (0x0601) doesn't follow the typical fn 0 GetState /
+    # fn 1 SetState pattern that BooleanValidator defaults to. Function
+    # layout (confirmed via G HUB pcap on G522):
+    #   fn 0 — physical-mute-switch state-change events from the device
+    #   fn 1 — state-change events emitted as the device's echo of a
+    #          host-driven SetState; also serves as the host-callable
+    #          GetState read
+    #   fn 2 — host-callable SetState (single byte: 0=unmuted, 1=muted)
+    # The standard fn 0/1 write path returns 0x0A UNSUPPORTED. State-change
+    # events from both fn 0 and fn 1 are handled by _process_feature_notification
+    # so the toggle reflects physical mute presses too.
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
 class HeadsetMicSNR(settings.Setting):
@@ -1666,9 +1692,50 @@ class HeadsetMicGain(settings.Setting):
     feature = _F.HEADSET_MIC_GAIN
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = settings_validator.RangeValidator
+    # Fallback range covers int8; build() overrides with device-reported bounds
+    # from GetInfo (fn 0) so SetMicGain doesn't get device-specific
+    # out-of-range NACK (error 0x0B) on devices that use a small signed range
+    # (e.g. G522 reports a narrow window like -12..+12).
     min_value = -128
     max_value = 127
     validator_options = {"byte_count": 1, "signed": True}
+
+    @classmethod
+    def build(cls, device):
+        # GetInfo (function 0) returns [min_gain (int8), max_gain (int8)].
+        # Query once at build time so the slider range reflects the device's
+        # actual supported range rather than a generic int8 window.
+        try:
+            info = device.feature_request(cls.feature, 0x00)
+        except Exception as e:
+            logger.info("HeadsetMicGain: GetInfo raised %s, using fallback int8 range", e)
+            info = None
+        if info and len(info) >= 2:
+            min_gain = struct.unpack("b", bytes([info[0]]))[0]
+            max_gain = struct.unpack("b", bytes([info[1]]))[0]
+            if max_gain <= min_gain:  # sanity — fall back to class defaults
+                logger.info(
+                    "HeadsetMicGain: GetInfo returned nonsense range [%d, %d] (hex=%s), using fallback int8 range",
+                    min_gain,
+                    max_gain,
+                    info.hex(),
+                )
+                min_gain, max_gain = cls.min_value, cls.max_value
+            elif logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "HeadsetMicGain: device reports gain range [%d, %d]",
+                    min_gain,
+                    max_gain,
+                )
+        else:
+            logger.info(
+                "HeadsetMicGain: GetInfo returned %s, using fallback int8 range",
+                info.hex() if info else info,
+            )
+            min_gain, max_gain = cls.min_value, cls.max_value
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=min_gain, max_value=max_gain, byte_count=1, signed=True)
+        return cls(device, rw, validator)
 
 
 class HeadsetMixBalance(settings.Setting):
@@ -1690,8 +1757,24 @@ class HeadsetAutoSleep(settings.Setting):
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
     validator_class = settings_validator.RangeValidator
     min_value = 0
-    max_value = 255
+    # Wire format byte count depends on feature version (V<3: 1B, V=3: 2B, V>=4: 3B).
+    # UI slider is capped at 240 min regardless — firmware accepts larger values, but
+    # a 31-year slider (24-bit max) is not useful.
+    max_value = 240
     validator_options = {"byte_count": 1}
+
+    @classmethod
+    def build(cls, device):
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version >= 4:
+            byte_count = 3
+        elif version >= 3:
+            byte_count = 2
+        else:
+            byte_count = 1
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=0, max_value=cls.max_value, byte_count=byte_count)
+        return cls(device, rw, validator)
 
 
 class HeadsetOnboardEQ(settings.RangeFieldSetting):
@@ -1709,10 +1792,19 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
         def build(cls, setting_class, device):
             info = hidpp20.get_onboard_eq_info(device)
             if not info:
+                logger.info("HeadsetOnboardEQ.build: getEQInfo failed, no panel will be built")
                 return None
             _has_hw_eq, num_bands = info
             bands = hidpp20.get_onboard_eq_params(device, slot=0x00)
-            if not bands or len(bands) != num_bands:
+            if not bands:
+                logger.info("HeadsetOnboardEQ.build: getEQParameters returned no bands, no panel will be built")
+                return None
+            if len(bands) != num_bands:
+                logger.info(
+                    "HeadsetOnboardEQ.build: band count mismatch — EQInfo=%d getEQParameters=%d; skipping",
+                    num_bands,
+                    len(bands),
+                )
                 return None
             keys = common.NamedInts()
             for i, (freq, _gain, _q) in enumerate(bands):
@@ -1720,6 +1812,7 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
             v = cls(keys, min_value=-12, max_value=12, count=num_bands, byte_count=1)
             v._band_freqs = [freq for freq, _g, _q in bands]
             v._band_qs = [q for _f, _g, q in bands]
+            logger.info("HeadsetOnboardEQ.build: panel built with %d band(s)", num_bands)
             return v
 
         def validate_read(self, reply_bytes):
@@ -1766,6 +1859,682 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
             except Exception:
                 logger.warning("HeadsetOnboardEQ: failed to persist EQ to slot 0x80")
         return result
+
+
+class HeadsetAdvancedEQ(settings.RangeFieldSetting):
+    """Read-only display of the headset's active AdvancedParaEQ (0x020D) bands.
+
+    Writes are intentionally disabled for now. The V2 wire format is known
+    (see advanced_para_eq.py) but we want a round-trip test on real hardware
+    before enabling user-facing writes that could misconfigure the DSP.
+
+    V0/V1: 3-byte band stride [freq_hi, freq_lo, gain_i8], gain is whole dB.
+    V2:    5-byte band stride [filter_type, freq_hi, freq_lo, gain_hi, gain_lo],
+           filter_type 0x00=HP 0x78=peaking, freq is raw Hz, gain is signed
+           int16 × step_db (step_db from getEQInfos).
+    """
+
+    name = "headset-advanced-eq"
+    label = _("Headset Advanced EQ (read-only)")
+    description = _("Display the headset's active parametric EQ. Writes are disabled pending verification.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    keys_universe = []
+
+    class rw_class(settings.FeatureRW):
+        """getCustomEQ takes [direction, slot]; the slot is the *active*
+        EQ preset, which the device may have switched while we weren't
+        looking (G HUB on another machine, an onboard button, etc.).
+        Re-query it on every read instead of caching slot 0 at build
+        time. Direction is hardcoded to 0 (playback) — mic-side EQ
+        isn't exposed yet."""
+
+        def read(self, device, data_bytes=b""):
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0)
+            self.read_prefix = bytes([0, active_slot if active_slot is not None else 0])
+            return super().read(device, data_bytes)
+
+    class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
+        @classmethod
+        def build(cls, setting_class, device):
+            info = hidpp20.get_advanced_eq_info(device)
+            if not info:
+                logger.info("HeadsetAdvancedEQ.build: getEQInfos failed, no panel will be built")
+                return None
+            device._advanced_eq_info = info
+            version = info["version"]
+            gain_min = info["gain_min_db"]
+            gain_max = info["gain_max_db"]
+            step_db = info["step_db"]
+
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0) or 0
+            bands = hidpp20.get_advanced_eq_params(device, direction=0, slot=active_slot)
+            if not bands:
+                logger.info("HeadsetAdvancedEQ.build: getCustomEQ returned no bands, no panel will be built")
+                return None
+            band_count = len(bands)
+            expected = info.get("band_count")
+            if expected is not None and expected != band_count:
+                logger.info(
+                    "HeadsetAdvancedEQ.build: V%d band count mismatch — EQInfos=%d getCustomEQ=%d; trusting getCustomEQ",
+                    version,
+                    expected,
+                    band_count,
+                )
+
+            keys = common.NamedInts()
+            for i, (filter_type, freq_hz, _gain_db) in enumerate(bands):
+                if filter_type == hidpp20.FILTER_TYPE_HP:
+                    keys[i] = "HP " + str(freq_hz) + _("Hz")
+                else:
+                    keys[i] = str(freq_hz) + _("Hz")
+            v = cls(
+                keys,
+                min_value=int(round(gain_min)),
+                max_value=int(round(gain_max)),
+                count=band_count,
+                byte_count=1,
+            )
+            v._version = version
+            v._step_db = step_db
+            v._gain_min = gain_min
+            v._gain_max = gain_max
+            v._gain_steps = info.get("gain_steps", 241)
+            v._band_types = [band[0] for band in bands]
+            v._band_freqs = [band[1] for band in bands]
+            v._active_slot = active_slot
+            logger.info(
+                "HeadsetAdvancedEQ.build: panel built V%d with %d band(s), slot=%d, range=[%d,%d], step_db=%.4f",
+                version,
+                band_count,
+                active_slot,
+                gain_min,
+                gain_max,
+                step_db,
+            )
+            # One-shot per-slot probe — logs band data for each slot the
+            # firmware actually honors and caches the working-slot list on
+            # `device._advanced_eq_working_slots`. Cheap if HeadsetActiveEQPreset
+            # already populated the cache (it usually has at this point);
+            # otherwise this is the first-time probe.
+            if version >= 2:
+                try:
+                    hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
+                except Exception as e:
+                    logger.info("HeadsetAdvancedEQ.build: preset corpus probe failed: %s", e)
+            return v
+
+        def validate_read(self, reply_bytes):
+            if reply_bytes is None:
+                return {}
+            version = getattr(self, "_version", 0)
+            if version >= 2:
+                info = {
+                    "gain_min_db": getattr(self, "_gain_min", -6),
+                    "gain_max_db": getattr(self, "_gain_max", 6),
+                    "gain_steps": getattr(self, "_gain_steps", 241),
+                    "step_db": getattr(self, "_step_db", 0.05),
+                }
+                bands = hidpp20.parse_v2_bands(reply_bytes, info)
+                if bands is None:
+                    return {}
+                result = {}
+                for i, (filter_type, freq_hz, gain_db) in enumerate(bands):
+                    if i >= self.count:
+                        break
+                    result[i] = int(round(gain_db))
+                    if hasattr(self, "_band_types") and i < len(self._band_types):
+                        self._band_types[i] = filter_type
+                    if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                        self._band_freqs[i] = freq_hz
+                return result
+            # V0/V1: 3-byte stride.
+            result = {}
+            offset = 0
+            i = 0
+            while offset + 3 <= len(reply_bytes) and i < self.count:
+                freq = struct.unpack(">H", reply_bytes[offset : offset + 2])[0]
+                if freq == 0:
+                    break
+                gain = struct.unpack("b", bytes([reply_bytes[offset + 2]]))[0]
+                result[i] = gain
+                if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                    self._band_freqs[i] = freq
+                offset += 3
+                i += 1
+            return result
+
+        def prepare_write(self, new_values):
+            # Read-only mode: never actually build a write payload.
+            return None
+
+    def write(self, map, save=True):
+        # Read-only for now — log attempted writes but don't transmit anything.
+        logger.info("HeadsetAdvancedEQ: write ignored (read-only mode); requested=%s", map)
+        return None
+
+
+class HeadsetActiveEQPreset(settings.Setting):
+    """Choose which AdvancedParaEQ slot drives live audio.
+
+    Activation works for any slot — read-only factory presets and
+    user-custom slots alike. The "(factory)" tag in the slot label
+    distinguishes the read-only ones; that distinction matters for
+    band-editing (not supported yet), not for activation today.
+    """
+
+    name = "headset-eq-active-preset"
+    label = _("EQ Preset")
+    description = _("Switch the active EQ preset. Factory presets are read-only.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x30, "write_fnid": 0x40, "prefix": b"\x00"}
+    validator_class = settings_validator.ChoicesValidator
+
+    @classmethod
+    def build(cls, device):
+        info = getattr(device, "_advanced_eq_info", None) or hidpp20.get_advanced_eq_info(device)
+        if not info:
+            return None
+        ro_count = info.get("onboard_ro_preset_count", 0) or 0
+        # Probe each advertised slot — getEQInfos may report capacity that
+        # the firmware doesn't actually back (G522 advertises 16 slots but
+        # only honors slot 0). Only include slots that responded with band
+        # data; the result is cached on device._advanced_eq_working_slots
+        # so HeadsetAdvancedEQ.build can reuse it without re-probing.
+        working = hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
+        if len(working) <= 1:
+            # One option (or zero) is meaningless as a selector — there's
+            # nothing for the user to choose between. The active EQ is
+            # whatever slot 0 has, no preset switching is available.
+            return None
+        choices = common.NamedInts()
+        for slot, slot_name, _bands in working:
+            if not slot_name:
+                slot_name = _("Slot") + " " + str(slot)
+            if slot < ro_count:
+                slot_name = slot_name + " " + _("(factory)")
+            choices[slot] = slot_name
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.ChoicesValidator(choices=choices)
+        return cls(device, rw, validator)
+
+    def write(self, value, save=True):
+        result = super().write(value, save)
+        if result is not None:
+            # After setActiveEQ, repopulate the AdvancedParaEQ band-display
+            # cache so the panel reflects the newly-active slot. Force a
+            # fresh read so _value is a real dict — leaving it as None
+            # would let a UI band-click hit `_value[item]` on None and
+            # crash (config_panel.py:589 'NoneType' is not subscriptable).
+            # The visible widget redraw still waits for a manual refresh /
+            # panel reopen — auto-redraw would need UI-side plumbing.
+            eq_panel = _headset_setting_by_name(self._device, HeadsetAdvancedEQ.name)
+            if eq_panel is not None:
+                try:
+                    eq_panel._value = None
+                    eq_panel.read(cached=False)
+                except Exception as e:
+                    logger.info("HeadsetActiveEQPreset: failed to refresh EQ panel: %s", e)
+        return result
+
+
+_NO_CHANGE_COLOR = int(special_keys.COLORSPLUS["No change"])
+
+
+def _headset_setting_by_name(device, name):
+    for s in getattr(device, "settings", None) or []:
+        if getattr(s, "name", None) == name:
+            return s
+    return None
+
+
+def _headset_primary_color(device, default=0xFFFFFF):
+    """Resolve the currently-saved Primary color, or `default` if absent."""
+    s = _headset_setting_by_name(device, HeadsetLEDsPrimary.name)
+    if s is None:
+        return default
+    value = getattr(s, "_value", None)
+    color = getattr(value, "color", None) if value is not None else None
+    return int(color) if color is not None else default
+
+
+def _headset_per_zone_overrides(device):
+    """Return `{zone_id: color_int}` for zones with explicit (non-'No change')
+    colors set via the Per-zone Lighting setting, or `None` if the setting
+    isn't built/present."""
+    s = _headset_setting_by_name(device, HeadsetPerZoneLighting.name)
+    if s is None:
+        return None
+    value = getattr(s, "_value", None)
+    if not isinstance(value, dict):
+        return None
+    overrides = {}
+    for zone, color in value.items():
+        try:
+            color_int = int(color)
+        except (TypeError, ValueError):
+            continue
+        if color_int != _NO_CHANGE_COLOR:
+            overrides[int(zone)] = color_int
+    return overrides
+
+
+class _HeadsetStaticEffectOption:
+    """Minimal stand-in for `hidpp20.LEDEffectInfo`.
+
+    `HeteroValidator` only inspects `.ID` and `.index` on its `options`
+    list; we don't need the full device-query machinery here because the
+    headset wire protocol is handled by `headset_rgb.write_zone_map`.
+    """
+
+    ID = 0x01  # matches hidpp20.LEDEffects[0x01] = Static
+    index = 0x01
+
+
+class HeadsetLEDControl(settings.Setting):
+    """Switch headset LED control between device and Solaar.
+
+    Mirrors the `LEDControl` / `RGBControl` pattern used for keyboards and
+    mice. When set to Solaar, the `LEDs Primary` and `Per-zone Lighting`
+    settings drive the LEDs; when set to Device, firmware-driven onboard
+    and signature effects resume.
+    """
+
+    name = "headset_led_control"
+    label = _("LED Control")
+    description = _("Switch control of LED zones between device and Solaar")
+    feature = _F.HEADSET_RGB_HOSTMODE
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
+    choices_universe = common.NamedInts(Device=0, Solaar=1)
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
+
+    @classmethod
+    def build(cls, device):
+        # One-shot read-only probe of 0x0621 / 0x0622 — logs the data the RE
+        # pass needs to pin down RGB onboard/signature effect structures.
+        # Skip cleanly if neither feature is exposed.
+        try:
+            rgb_effects_probe.probe(device)
+        except Exception as e:
+            logger.info("RGB effects probe raised %r", e)
+        return super().build(device)
+
+    def write(self, value, save=True):
+        # After switching to Solaar control, the firmware drops whatever
+        # colors we'd programmed — so reassert the saved Primary + per-zone
+        # overrides immediately. Otherwise the LEDs stay on whatever
+        # device-driven effect was last shown until the user edits a color.
+        result = super().write(value, save)
+        if result is not None and int(value) == 1 and self._device.online:
+            primary = _headset_primary_color(self._device)
+            zones = headset_rgb.discover_zones(self._device)
+            if zones:
+                zone_map = {int(z): primary for z in zones}
+                zone_map.update(_headset_per_zone_overrides(self._device) or {})
+                headset_rgb.write_zone_map(self._device, zone_map)
+        return result
+
+
+class HeadsetLEDsPrimary(settings.Setting):
+    """Primary headset LED color, rendered as a GTK color picker.
+
+    Mirrors the `LEDZoneSetting` / `RGBEffectSetting` shape: a
+    `HeteroValidator` with a single "Static" effect whose only visible
+    field is the color. Write applies the chosen color across all zones
+    discovered at build time, then re-applies any per-zone overrides on
+    top so they aren't clobbered.
+
+    Read support is deliberately disabled — the feature exposes no "get
+    current color" function, so we rely on the persister.
+    """
+
+    name = "headset_leds_primary"
+    label = _("LEDs") + " " + _("Primary")
+    description = _(
+        "Set the primary color applied to every headset LED zone.\n" "LED Control needs to be set to Solaar to be effective."
+    )
+    feature = _F.HEADSET_RGB_HOSTMODE
+    persist = True
+    rw_options = {"read_fnid": None, "write_fnid": None}
+
+    # HeteroKeyControl renders exactly these fields; ID is hidden
+    # (`label=None`) but kept so setup_visibles can key off it.
+    color_field = {"name": hidpp20.LEDParam.color, "kind": settings.Kind.COLOR, "label": _("Color")}
+    possible_fields = [
+        {
+            "name": "ID",
+            "kind": settings.Kind.CHOICE,
+            "label": None,
+            "choices": [common.NamedInt(0x01, _("Static"))],
+        },
+        color_field,
+    ]
+    # HeteroKeyControl.setup_visibles looks up fields_map[effect_id][1] to
+    # decide which fields to show — we only expose the color.
+    fields_map = {0x01: [common.NamedInt(0x01, _("Static")), {hidpp20.LEDParam.color: 0}]}
+
+    @classmethod
+    def build(cls, device):
+        zones = headset_rgb.discover_zones(device)
+        if not zones:
+            return None
+        rw = settings.FeatureRW(cls.feature)
+        validator = settings_validator.HeteroValidator(
+            data_class=hidpp20.LEDEffectSetting,
+            options=[_HeadsetStaticEffectOption()],
+            readable=False,
+        )
+        return cls(device, rw, validator)
+
+    def read(self, cached=True):
+        # Feature 0x0620 doesn't expose a "current primary color" read —
+        # pull from the persister via _pre_read, fall back to white so
+        # the picker opens on a sane starting color.
+        self._pre_read(cached)
+        if self._value is not None:
+            return self._value
+        self._value = hidpp20.LEDEffectSetting(ID=common.NamedInt(0x01, _("Static")), color=0xFFFFFF)
+        return self._value
+
+    def write(self, value, save=True):
+        color = getattr(value, "color", None)
+        if color is None:
+            return None
+        device = self._device
+        if not device.online:
+            return None
+        zones = headset_rgb.discover_zones(device)
+        if not zones:
+            return None
+        primary = int(color)
+        zone_map = {int(z): primary for z in zones}
+        # Re-apply any non-"No change" per-zone overrides on top of the
+        # fresh Primary baseline so the user's explicit zone choices stick
+        # when they change the bulk color.
+        overrides = _headset_per_zone_overrides(device) or {}
+        zone_map.update(overrides)
+        if headset_rgb.write_zone_map(device, zone_map):
+            self.update(value, save)
+            return value
+        return None
+
+
+class HeadsetPerZoneLighting(settings.Settings):
+    """Per-zone LED color overrides.
+
+    Mirrors `PerKeyLighting`'s `Settings` + `ChoicesMapValidator` style —
+    one dropdown per discovered zone with the `COLORSPLUS` palette. The
+    "No change" entry means "inherit the current `LEDs Primary` color",
+    so users can paint individual zones without losing the base setup.
+    """
+
+    name = "headset_per_zone_lighting"
+    label = _("Per-zone Lighting")
+    description = _(
+        "Override individual zone colors. 'No change' inherits the LEDs Primary color.\n"
+        "LED Control needs to be set to Solaar to be effective."
+    )
+    feature = _F.HEADSET_RGB_HOSTMODE
+    persist = True
+    choices_universe = special_keys.COLORSPLUS
+
+    class rw_class(settings.FeatureRWMap):
+        pass
+
+    class validator_class(settings_validator.ChoicesMapValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            zones = headset_rgb.discover_zones(device)
+            if not zones:
+                return None
+            choices_map = {
+                common.NamedInt(int(z), _("Zone") + " " + str(int(z))): setting_class.choices_universe for z in zones
+            }
+            return cls(choices_map) if choices_map else None
+
+    def read(self, cached=True):
+        self._pre_read(cached)
+        if cached and self._value is not None:
+            return self._value
+        # Device doesn't expose current per-zone state; default every
+        # zone to "No change" so the primary color shows through.
+        reply_map = {int(key): _NO_CHANGE_COLOR for key in self._validator.choices}
+        self._value = reply_map
+        return reply_map
+
+    def _resolve_zone_map(self, map_, primary):
+        """Substitute 'No change' entries with the primary color."""
+        resolved = {}
+        for key, value in map_.items():
+            try:
+                v = int(value)
+            except (TypeError, ValueError):
+                continue
+            resolved[int(key)] = primary if v == _NO_CHANGE_COLOR else v
+        return resolved
+
+    def write(self, map_, save=True):
+        device = self._device
+        if not device.online:
+            return None
+        self.update(map_, save)
+        primary = _headset_primary_color(device)
+        zone_map = self._resolve_zone_map(map_, primary)
+        if not zone_map:
+            return None
+        if headset_rgb.write_zone_map(device, zone_map):
+            return map_
+        return None
+
+    def write_key_value(self, key, value, save=True):
+        result = super().write_key_value(int(key), value, save)
+        device = self._device
+        if not device.online:
+            return result
+        try:
+            v = int(value)
+        except (TypeError, ValueError):
+            return result
+        effective = _headset_primary_color(device) if v == _NO_CHANGE_COLOR else v
+        headset_rgb.write_zone_map(device, {int(key): int(effective)})
+        return result
+
+
+# ----------------------------------------------------------------------------
+# LogiVoice (0x0900 + 0x0901..0x0907) — read-only presentation pass.
+#
+# Per module we auto-generate two settings:
+#   1. A flat State toggle — reads GetState (fn 1), renders as a boolean.
+#      Top-level so users see a direct on/off indicator at a glance.
+#   2. A collapsible "Parameters" panel — one MULTIPLE_RANGE-kind setting
+#      that reads GetParameters (fn 3) once and distributes the bytes to
+#      per-field sliders. The existing MultipleRangeControl widget is
+#      collapsible by default, so the field-level clutter stays folded.
+#
+# Writes are disabled — the Parameters struct carries fields whose wire
+# encodings are still ambiguous (see logivoice.py) and a SetParameters
+# write must bundle all fields at once. A write pass can be added once
+# each field's encoding is confirmed live.
+# ----------------------------------------------------------------------------
+
+
+class _LogiVoiceStateSetting(settings.Setting):
+    """Per-module State toggle. Reads GetState (fn 1) and writes SetState (fn 0).
+
+    State wire format is unambiguous (one byte: 0 = off, 1 = on), so this is
+    the one piece of the LogiVoice surface we enable for writes. The per-module
+    Parameters struct stays read-only until each field's encoding is confirmed.
+    """
+
+    rw_options = {"read_fnid": logivoice.FN_GET_STATE, "write_fnid": logivoice.FN_SET_STATE}
+    validator_class = settings_validator.BooleanValidator
+
+    @classmethod
+    def build(cls, device):
+        # Corpus probe runs here (once per module) so -dd users get a full
+        # snapshot of state + raw Parameters + raw Info for future decoding.
+        try:
+            logivoice.probe_module(device, cls.feature)
+        except Exception as e:
+            logger.info("LogiVoice probe_module(%s) raised %s", cls.feature, e)
+        return super().build(device)
+
+
+class _LogiVoiceModuleItem:
+    """Top-level MULTIPLE_RANGE item representing one LogiVoice module.
+
+    One `item` per setting — the module itself. `__int__` returns the feature
+    id so the Setting's reply dict is keyed predictably.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        self._feature = feature
+        self.id = logivoice.MODULE_SLUGS.get(feature, f"0x{int(feature):04X}")
+        self.index = 0
+
+    def __int__(self):
+        return int(self._feature)
+
+    def __str__(self):
+        return logivoice.MODULE_NAMES.get(self._feature, f"0x{int(self._feature):04X}")
+
+
+class _LogiVoiceFieldSubItem:
+    """MULTIPLE_RANGE sub-item wrapping one decoded Parameters field.
+
+    MultipleRangeControl reads minimum/maximum/length/widget/str(). We pick
+    SpinButton for wide ranges (0..65535) where a 64k-step slider is useless,
+    and Scale for small ranges (e.g. signed int8 thresholds).
+    """
+
+    def __init__(self, field: logivoice.Field):
+        self._field = field
+        self.id = field.name
+        self.minimum = field.min_value
+        self.maximum = field.max_value
+        self.length = field.byte_count
+        self.widget = "SpinButton" if (field.max_value - field.min_value) > 512 else "Scale"
+
+    def __int__(self):
+        return hash(self.id) & 0xFFFFFF
+
+    def __str__(self):
+        return self._field.label + (" (raw)" if self._field.opaque else "")
+
+
+class _LogiVoiceParametersValidator(settings_validator.MultipleRangeValidator):
+    """Reads the whole GetParameters struct once and distributes bytes to fields.
+
+    MULTIPLE_RANGE's default read loop fires prepare_read_item once per top-
+    level item; we have exactly one item (the module), so this issues a single
+    GetParameters call. validate_read_item parses the shared reply into a
+    {field_name: value} dict. Writes are blocked.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        fields = logivoice.PARAMETERS_FIELDS.get(feature, [])
+        self._fields = list(fields)
+        item = _LogiVoiceModuleItem(feature)
+        sub_items = {item: [_LogiVoiceFieldSubItem(f) for f in fields]}
+        super().__init__(items=[item], sub_items=sub_items)
+
+    def prepare_read_item(self, item):
+        return b""  # GetParameters takes no wire arguments
+
+    def validate_read(self, reply_bytes):
+        # Setting.read() calls validate_read with the raw GetParameters reply.
+        # MultipleRangeValidator only defines validate_read_item, so wrap that
+        # call — we have a single item (the module) so one call suffices.
+        item = self.items[0]
+        return {int(item): self.validate_read_item(reply_bytes, item)}
+
+    def validate_read_item(self, reply_bytes, item):
+        parsed = {}
+        # Key by str(sub_item) so MultipleRangeControl.set_value can look up
+        # values via v[str(sub_item)] — the UI uses the label as the dict key.
+        for sub in self.sub_items[item]:
+            f = sub._field
+            end = f.offset + f.byte_count
+            if end > len(reply_bytes):
+                continue
+            chunk = reply_bytes[f.offset : end]
+            if f.byte_count == 1:
+                v = struct.unpack("b" if f.signed else "B", chunk)[0]
+            elif f.byte_count == 2:
+                v = struct.unpack(">h" if f.signed else ">H", chunk)[0]
+            else:
+                v = int.from_bytes(chunk, "big", signed=f.signed)
+            parsed[str(sub)] = v
+        return parsed
+
+    def prepare_write_item(self, item, value):
+        return None
+
+    def prepare_write(self, value):
+        return None
+
+
+class _LogiVoiceParametersSetting(settings.Setting):
+    """Collapsible read-only display of one module's GetParameters struct."""
+
+    rw_options = {"read_fnid": logivoice.FN_GET_PARAMETERS}
+    persist = False
+    kind = settings.Kind.MULTIPLE_RANGE
+
+    @classmethod
+    def build(cls, device):
+        if not logivoice.PARAMETERS_FIELDS.get(cls.feature):
+            return None
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = _LogiVoiceParametersValidator(cls.feature)
+        return cls(device, rw, validator)
+
+    def write(self, map, save=True):
+        return None
+
+
+def _logivoice_make_state_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug:
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-state",
+        "label": f"LogiVoice {module_name}",
+        "description": f"Enable the headset {module_name} processing block.",
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_State", (_LogiVoiceStateSetting,), attrs)
+
+
+def _logivoice_make_parameters_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug or not logivoice.PARAMETERS_FIELDS.get(feature):
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-parameters",
+        "label": f"LogiVoice {module_name}: Parameters (read-only)",
+        "description": (
+            f"Decoded {module_name} GetParameters fields. "
+            "Opaque raw values shown where the wire encoding isn't confirmed yet."
+        ),
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_Parameters", (_LogiVoiceParametersSetting,), attrs)
+
+
+_LOGIVOICE_SETTINGS: list[type] = []
+for _feature in logivoice.PARAMETERS_FIELDS:
+    _state_cls = _logivoice_make_state_class(_feature)
+    if _state_cls is not None:
+        _LOGIVOICE_SETTINGS.append(_state_cls)
+    _params_cls = _logivoice_make_parameters_class(_feature)
+    if _params_cls is not None:
+        _LOGIVOICE_SETTINGS.append(_params_cls)
 
 
 class BrightnessControl(settings.Setting):
@@ -2258,6 +3027,12 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMixBalance,
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
+    HeadsetActiveEQPreset,
+    HeadsetAdvancedEQ,
+    HeadsetLEDControl,
+    HeadsetLEDsPrimary,
+    HeadsetPerZoneLighting,
+    *_LOGIVOICE_SETTINGS,
 ]
 
 
@@ -2353,8 +3128,22 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
     if settings_class.feature not in device.features:
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
+        logger.info(
+            "check_feature %s [%s]: min_version=%d > device feature version=%d; skipping",
+            settings_class.name,
+            settings_class.feature,
+            settings_class.min_version,
+            device.features.get_feature_version(settings_class.feature) or 0,
+        )
         return
     if device.features.get_hidden(settings_class.feature):
+        flags = device.features.flags.get(settings_class.feature, 0)
+        logger.info(
+            "check_feature %s [%s]: feature has INTERNAL flag set (flags=0x%02X); skipping",
+            settings_class.name,
+            settings_class.feature,
+            flags,
+        )
         return
     try:
         detected = settings_class.build(device)
@@ -2385,34 +3174,49 @@ def check_feature_settings(device, already_known) -> bool:
     for sclass in SETTINGS:
         if sclass.feature:
             known_present = device.persister and sclass.name in device.persister
-            if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
-                try:
-                    setting = check_feature(device, sclass)
-                except Exception as err:
-                    # on an internal HID++ error, assume offline and stop further checking
-                    if (
-                        isinstance(err, exceptions.FeatureCallError)
-                        and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR
-                    ):
-                        logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
-                        device.online = False
-                        device.present = False
-                        return False
-                    else:
-                        logger.warning(f"ignore feature {sclass.name} because of error {err}")
+            already = any(s.name == sclass.name for s in already_known)
+            if already:
+                continue
+            if not known_present and sclass.name in absent:
+                # Silent-skip cache from an earlier run's failed build(). If the
+                # feature is actually present on this device now, the cache is
+                # stale (e.g. from a prior build that returned None for a
+                # feature that currently works) — drop it and retry the probe.
+                if sclass.feature in device.features:
+                    logger.info(
+                        "check_feature_settings: retrying %s — cached in _absent but feature %s is present now",
+                        sclass.name,
+                        sclass.feature,
+                    )
+                    absent.remove(sclass.name)
+                    if device.persister:
+                        device.persister["_absent"] = absent
+                else:
+                    continue
+            try:
+                setting = check_feature(device, sclass)
+            except Exception as err:
+                # on an internal HID++ error, assume offline and stop further checking
+                if isinstance(err, exceptions.FeatureCallError) and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR:
+                    logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
+                    device.online = False
+                    device.present = False
+                    return False
+                else:
+                    logger.warning(f"ignore feature {sclass.name} because of error {err}")
 
-                if isinstance(setting, list):
-                    for s in setting:
-                        already_known.append(s)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting:
-                    already_known.append(setting)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting is None:
-                    if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
-                        new_absent.append(sclass.name)
+            if isinstance(setting, list):
+                for s in setting:
+                    already_known.append(s)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting:
+                already_known.append(setting)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting is None:
+                if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
+                    new_absent.append(sclass.name)
     if device.persister and new_absent:
         absent.extend(new_absent)
         device.persister["_absent"] = absent

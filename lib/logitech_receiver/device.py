@@ -78,7 +78,10 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
         handle = low_level.open_path(device_info.path)
         if handle:
             if getattr(device_info, "centurion", False):
-                base._centurion_handles.add(int(handle))
+                report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
+                state = base.CenturionHandleState(report_id=report_id)
+                base._centurion_handles[int(handle)] = state
+                base.probe_centurion_device_addr(handle, state)
             # a direct connected device might not be online (as reported by user)
             return Device(
                 low_level,
@@ -219,7 +222,9 @@ class Device:
             self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
             self.registers = self.descriptor.registers if self.descriptor.registers else []
 
-        if self._protocol is not None:
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        if self._protocol is not None and not self.centurion:
             self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
         else:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
@@ -239,7 +244,13 @@ class Device:
                 self.ping()
             except exceptions.NoSuchDevice:
                 logger.warning("device %s inaccessible - no protocol set", self)
-        return self._protocol or 0
+        result = self._protocol or 0
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        # Ensure all `protocol < 2.0` gates route through the 2.0 code path.
+        if self.centurion and result < 2.0:
+            return 2.0
+        return result
 
     @property
     def codename(self):
@@ -465,6 +476,15 @@ class Device:
 
     def battery(self):  # None  or  level, next, status, voltage
         if self.protocol < 2.0:
+            if self.centurion:
+                logger.warning(
+                    "%s: battery() dispatching HID++ 1.0 path for a Centurion device "
+                    "(protocol=%s, _protocol=%s) — device_addr probe likely failed, "
+                    "expect INVALID_SUB_ID_COMMAND",
+                    self,
+                    self.protocol,
+                    self._protocol,
+                )
             return _hidpp10.get_battery(self)
         else:
             battery_feature = self.persister.get("_battery", None) if self.persister else None
@@ -619,26 +639,40 @@ class Device:
                 # Ensure sub-device features are discovered before routing decision
                 if self.features is not None:
                     self.features._check()
+                # Guard against Centurion/HID++ 2.0 feature ID collisions. IntEnum
+                # members with the same int value hash equal, so a dict lookup for
+                # SupportedFeature.DEVICE_NAME (0x0005) succeeds even when the
+                # device actually has CenturionCoreFeature.MULTI_HOST_CONTROL at
+                # that slot. If the type of the stored enum differs from what the
+                # caller asked for, treat the feature as unsupported.
+                if self.features is not None:
+                    idx = self.features.get(feature)
+                    if idx is not None:
+                        stored = self.features.inverse.get(idx)
+                        if stored is not None and type(stored) is not type(feature):
+                            return None
                 if feature in getattr(self, "_centurion_sub_features", ()):
                     sub_idx = self.features.get(feature)
                     if sub_idx is not None:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
-    # Max sub-message bytes in the first bridge fragment:
-    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57
-    # LGHUB uses 56 for first fragment (60 byte payload - 4 bridge overhead)
+    # Max sub-message bytes in the first bridge fragment (for 0x51):
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57;
+    # one byte of conservative margin gives 56. For 0x50 the device_addr byte
+    # eats one more, so first_chunk = 55 (handled dynamically below).
     _BRIDGE_FIRST_CHUNK = 56
     # Continuation fragments carry raw sub_msg data (no bridge prefix/hdr):
-    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61, but LGHUB uses 60
+    # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) = 61; one byte of margin
+    # gives 60.
     _BRIDGE_CONT_CHUNK = 60
 
     def centurion_bridge_request(self, sub_feat_idx, sub_function=0x00, *params, no_reply=False):
         """Send a request to a Centurion sub-device via CentPPBridge.
 
         Builds the 4-layer nested message:
-        Layer 1: [0x51]
-        Layer 2: [cpl_length, flags]
+        Layer 1: [report_id]  (0x51 or 0x50)
+        Layer 2: [device_addr (0x50 only),] cpl_length, flags
         Layer 3: [bridge_idx, sendFragment_func|swid, bridge_hdr...]
         Layer 4: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
 
@@ -659,6 +693,12 @@ class Device:
         if not handle:
             return None
 
+        # Adjust bridge chunk sizes for 0x50 variant (device_addr byte takes 1 frame byte)
+        cent_state = base._centurion_handles.get(int(handle))
+        addr_overhead = 1 if cent_state and cent_state.report_id == base.CENTURION_ADDRESSED_REPORT_ID else 0
+        first_chunk = self._BRIDGE_FIRST_CHUNK - addr_overhead
+        cont_chunk = self._BRIDGE_CONT_CHUNK - addr_overhead
+
         sw_id = base._get_next_sw_id()
 
         # Build sub-device message: [sub_cpl=0x00, sub_feat_idx, sub_func|swid, params...]
@@ -674,7 +714,15 @@ class Device:
 
         timeout = base.DEFAULT_TIMEOUT
         with base.acquire_timeout(base.handle_lock(handle), handle, timeout):
-            if sub_len <= self._BRIDGE_FIRST_CHUNK:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "bridge TX: sub_idx=%d func=0x%02X sw_id=%d payload=%s",
+                    sub_feat_idx,
+                    sub_function,
+                    sw_id,
+                    sub_params.hex() if sub_params else "",
+                )
+            if sub_len <= first_chunk:
                 # Single-frame path
                 layer3 = bridge_prefix + bridge_hdr + sub_msg
                 base.write_centurion_cpl(handle, layer3)
@@ -684,18 +732,17 @@ class Device:
                 # Fragments 1+: raw sub_msg continuation data (no bridge overhead)
                 # CPL flags = (frag_index << 1) | (1 if more_fragments else 0)
                 # All fragments are sent back-to-back without waiting for
-                # intermediate ACKs (verified via LGHUB pcap).  The device
-                # reassembles internally and sends a single ACK + MessageEvent
-                # after the last fragment.
+                # intermediate ACKs. The device reassembles internally and
+                # sends a single ACK + MessageEvent after the last fragment.
                 frag_index = 0
                 offset = 0
                 while offset < sub_len:
                     if frag_index == 0:
-                        chunk_size = self._BRIDGE_FIRST_CHUNK
+                        chunk_size = first_chunk
                         chunk = sub_msg[offset : offset + chunk_size]
                         layer3 = bridge_prefix + bridge_hdr + chunk
                     else:
-                        chunk_size = self._BRIDGE_CONT_CHUNK
+                        chunk_size = cont_chunk
                         chunk = sub_msg[offset : offset + chunk_size]
                         layer3 = chunk
                     has_more = (offset + chunk_size) < sub_len
@@ -706,6 +753,13 @@ class Device:
 
             if no_reply:
                 return None
+
+            # The device echoes our exact sub-device function+swid byte in
+            # MessageEvent responses. Match on that to reject cross-contamination
+            # from late-arriving responses to other function calls on the same
+            # feature (e.g. GetRGBZoneInfo response showing up on a later
+            # GetHostModeState read).
+            expected_sub_func_sw = (sub_function & 0xF0) | sw_id
 
             # Read ACK + MessageEvent response
             request_started = time.time()
@@ -723,11 +777,21 @@ class Device:
                         break
                     if (func_sw >> 4) == 0x01 and (func_sw & 0x0F) == 0:
                         # MessageEvent arrived before ACK — validate it's for our request
-                        if self._is_bridge_response_for(reply_data, sub_feat_idx):
+                        if self._is_bridge_response_for(reply_data, sub_feat_idx, expected_sub_func_sw):
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
-                        # Unsolicited notification, skip it
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(
+                                "bridge skipping reply (pre-ACK): got sub_cpl=0x%02X sub_idx=0x%02X func_sw=0x%02X"
+                                " (expected idx=0x%02X func_sw=0x%02X) data=%s",
+                                reply_data[4] if len(reply_data) > 4 else 0,
+                                reply_data[5] if len(reply_data) > 5 else 0,
+                                reply_data[6] if len(reply_data) > 6 else 0,
+                                sub_feat_idx,
+                                expected_sub_func_sw,
+                                reply_data.hex(),
+                            )
             if not ack_received:
                 logger.warning("centurion_bridge_request: no ACK received")
                 return None
@@ -741,11 +805,21 @@ class Device:
                 if len(reply_data) >= 2 and reply_data[0] == bridge_idx:
                     func_sw = reply_data[1]
                     if (func_sw >> 4) == 0x01 and (func_sw & 0x0F) == 0:
-                        if self._is_bridge_response_for(reply_data, sub_feat_idx):
+                        if self._is_bridge_response_for(reply_data, sub_feat_idx, expected_sub_func_sw):
                             if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug("bridge idx=%d fn=0x%02X -> OK", sub_feat_idx, sub_function)
                             return self._parse_bridge_response(reply_data)
-                        # Unsolicited notification for a different feature, skip it
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(
+                                "bridge skipping reply (post-ACK): got sub_cpl=0x%02X sub_idx=0x%02X func_sw=0x%02X"
+                                " (expected idx=0x%02X func_sw=0x%02X) data=%s",
+                                reply_data[4] if len(reply_data) > 4 else 0,
+                                reply_data[5] if len(reply_data) > 5 else 0,
+                                reply_data[6] if len(reply_data) > 6 else 0,
+                                sub_feat_idx,
+                                expected_sub_func_sw,
+                                reply_data.hex(),
+                            )
             logger.warning("centurion_bridge_request: no MessageEvent received")
             return None
 
@@ -765,12 +839,19 @@ class Device:
         return False
 
     @staticmethod
-    def _is_bridge_response_for(reply_data, expected_sub_feat_idx):
+    def _is_bridge_response_for(reply_data, expected_sub_feat_idx, expected_sub_func_sw=None):
         """Check if a bridge MessageEvent is a response for our specific sub-feature request.
 
         Accepts both normal responses (sub_feat_idx matches) and error responses
         (sub_feat_idx=0xFF with original feat_idx in next byte).
         Unsolicited notifications (sub_cpl=0xFF) are rejected.
+
+        If `expected_sub_func_sw` is provided, also matches on the echoed
+        sub-device function byte (`(function << 4) | sw_id`). This prevents
+        cross-talk between different function calls on the SAME feature, which
+        can happen when a late-arriving response for one function gets picked
+        up by a later request on the same feature (observed on G522 where a
+        GetRGBZoneInfo response contaminated a subsequent GetHostModeState).
         """
         if len(reply_data) < 6:
             return False
@@ -780,9 +861,15 @@ class Device:
         if sub_cpl != 0x00:
             return False
         if sub_feat_idx == expected_sub_feat_idx:
+            if expected_sub_func_sw is not None and len(reply_data) >= 7:
+                if reply_data[6] != expected_sub_func_sw:
+                    return False
             return True
         # Error response: sub_feat_idx=0xFF, next byte is the original feat_idx that errored
         if sub_feat_idx == 0xFF and len(reply_data) >= 7 and reply_data[6] == expected_sub_feat_idx:
+            if expected_sub_func_sw is not None and len(reply_data) >= 8:
+                if reply_data[7] != expected_sub_func_sw:
+                    return False
             return True
         return False
 
@@ -802,18 +889,27 @@ class Device:
         sub_feat_idx = reply_data[5]
         # Error response from sub-device
         if sub_feat_idx == 0xFF:
-            error_code = reply_data[8] if len(reply_data) > 8 else 0
+            # Error frame layout after sub_cpl: [0xFF, orig_feat_idx, orig_func_sw, error_code, ...]
             orig_feat_idx = reply_data[6] if len(reply_data) > 6 else 0
-            logger.debug("bridge sub-device error: feat_idx=%d error=0x%02X", orig_feat_idx, error_code)
+            orig_func_sw = reply_data[7] if len(reply_data) > 7 else 0
+            error_code = reply_data[8] if len(reply_data) > 8 else 0
+            # INFO level so the error is visible without -dd — lets testers see when
+            # the device rejects a write even if they can't get DEBUG logs.
+            logger.info(
+                "bridge sub-device error: orig_feat_idx=%d orig_func=0x%02X error=0x%02X",
+                orig_feat_idx,
+                orig_func_sw,
+                error_code,
+            )
             return None
         return reply_data[7:]  # response data after sub_cpl, sub_feat_idx, sub_func_sw
 
     def _record_ping_protocol(self, handle, protocol):
         """Record a successful ping's protocol version, including raw Centurion (major, minor)."""
         self._protocol = protocol
-        cent_ver = base._centurion_protocol_versions.get(int(handle))
-        if cent_ver:
-            self._centurion_protocol = cent_ver
+        cent_state = base._centurion_handles.get(int(handle))
+        if cent_state and cent_state.protocol_version:
+            self._centurion_protocol = cent_state.protocol_version
 
     def ping(self):
         """Checks if the device is online and present, returns True of False.

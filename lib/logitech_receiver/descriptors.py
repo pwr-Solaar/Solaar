@@ -466,3 +466,4 @@ _D(
     usbid=0x0ABA,
 )
 # PRO X 2 LIGHTSPEED Gaming Headset (0x0AF7) — fully probed via Centurion transport, no static descriptor needed
+# G522 LIGHTSPEED Gaming Headset (0x0B18 dongle, 0x0B19 wired) — Centurion 0x50 variant, no static descriptor needed

@@ -265,6 +265,7 @@ class CenturionReceiver:
         self._devices = {}
         self._firmware = None
         self._dongle_features = None  # independently probed dongle features
+        self._pending = False  # True when device_addr unknown; deferred init completes on first RX
         self.cleanups = []
 
         # Receiver identity
@@ -316,7 +317,7 @@ class CenturionReceiver:
             if feat_id == feature_int:
                 request_id = (index << 8) | (function & 0xFF)
                 return self.request(request_id, *params, no_reply=no_reply)
-        raise exceptions.FeatureNotSupported(feature)
+        raise exceptions.FeatureNotSupported(feature=feature)
 
     def _discover_dongle_features(self):
         """Independently discover features on the dongle hardware."""
@@ -360,14 +361,66 @@ class CenturionReceiver:
 
     @property
     def firmware(self):
-        if self._firmware is None and self.handle:
+        if self._firmware is None and self.handle and not self._pending:
             self._firmware = get_firmware_centurion(self)
         return self._firmware or ()
+
+    def _complete_deferred_init(self):
+        """Re-run feature discovery after device_addr has been learned.
+
+        Called once from the notification handler when the first 0x50 frame
+        arrives on a pending CenturionReceiver.
+        """
+        if not self._pending:
+            return False
+        self._pending = False
+        ihandle = int(self.handle)
+        state = base._centurion_handles.get(ihandle)
+        learned_addr = state.device_addr if state else None
+        logger.info(
+            "CenturionReceiver %s: completing deferred init (device_addr=0x%02X)",
+            self.path,
+            learned_addr or 0,
+        )
+
+        self._dongle_features = None
+        self._discover_dongle_features()
+        logger.info(
+            "CenturionReceiver %s: deferred discovery found %d feature(s): %s",
+            self.path,
+            len(self._dongle_features or []),
+            [(f"{feat_id:#06x}", idx) for _, feat_id, idx in (self._dongle_features or [])],
+        )
+
+        if self.serial is None:
+            try:
+                s = get_serial_centurion(self)
+                if s and s.strip() and s.strip().isprintable():
+                    self.serial = s.strip()
+            except Exception:
+                pass
+
+        has_bridge = any(feat_id == CenturionCoreFeature.CENT_PP_BRIDGE for _, feat_id, _ in (self._dongle_features or []))
+        if has_bridge:
+            self.notify_devices()
+            return True
+        logger.warning(
+            "CenturionReceiver %s: deferred init completed but no bridge found " "(features: %s)",
+            self.path,
+            [f"{feat_id:#06x}" for _, feat_id, _ in (self._dongle_features or [])],
+        )
+        return False
 
     def notify_devices(self):
         """Create child Device for the headset and trigger its initialization."""
         # Import Device locally to avoid circular import (centurion.py ↔ device.py)
         from .device import Device
+
+        if self._pending:
+            # Don't create children yet — feature discovery hasn't succeeded.
+            # Signal receiver to UI so the tray entry exists.
+            self.changed(alert=Alert.NONE)
+            return
 
         # Signal receiver to UI first — tray/window need the receiver entry
         # before a child device can be added under it.
@@ -407,6 +460,13 @@ class CenturionReceiver:
         # Ping to determine online status.
         # Notify UI either way — offline devices show as greyed out (matching receiver behavior).
         online = dev.ping()
+        logger.info(
+            "CenturionReceiver %s: child device created, bridge_idx=%s, online=%s, protocol=%s",
+            self.path,
+            getattr(dev, "_centurion_bridge_index", None),
+            online,
+            dev._protocol,
+        )
         dev.changed(active=online)
         if self.status_callback is not None:
             self.status_callback(dev)
@@ -491,17 +551,33 @@ def create_centurion_receiver(low_level, device_info, setting_callback=None):
     try:
         handle = low_level.open_path(device_info.path)
         if handle:
-            base._centurion_handles.add(int(handle))
+            report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
+            state = base.CenturionHandleState(report_id=report_id)
+            base._centurion_handles[int(handle)] = state
+            base.probe_centurion_device_addr(handle, state)
             cr = CenturionReceiver(low_level, handle, device_info, setting_callback)
             # Check if any discovered feature is CentPPBridge (0x0003)
             has_bridge = any(feat_id == CenturionCoreFeature.CENT_PP_BRIDGE for _, feat_id, _ in (cr.dongle_features or []))
-            if not has_bridge:
-                logger.info("Centurion device %s has no bridge, treating as direct device", device_info.path)
-                base._centurion_handles.discard(int(handle))
-                cr.handle = None  # prevent __del__ from double-closing
-                low_level.close(handle)
-                return None
-            return cr
+            if has_bridge:
+                return cr
+
+            # No bridge found. Distinguish "silent 0x50 dongle" (device_addr
+            # unknown, headset not yet powered on) from "wired 0x50 device"
+            # (responded to probe, features found, but no bridge).
+            is_0x50 = state.report_id == base.CENTURION_ADDRESSED_REPORT_ID
+            if is_0x50 and state.device_addr is None and not cr.dongle_features:
+                logger.info(
+                    "Centurion 0x50 device %s: probe and discovery failed, " "deferring init until first RX frame",
+                    device_info.path,
+                )
+                cr._pending = True
+                return cr
+
+            logger.info("Centurion device %s has no bridge, treating as direct device", device_info.path)
+            base._centurion_handles.pop(int(handle), None)
+            cr.handle = None  # prevent __del__ from double-closing
+            low_level.close(handle)
+            return None
     except OSError as e:
         logger.exception("open %s", device_info)
         if e.errno == errno.EACCES:

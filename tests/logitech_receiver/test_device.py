@@ -17,6 +17,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
+from unittest import mock
 
 import pytest
 
@@ -61,6 +62,7 @@ class DeviceInfoStub:
     bus_id: int = 0x0003  # USB
     serial: str = "aa:aa:aa;aa"
     centurion: bool = False
+    centurion_report_id: int | None = None
 
 
 di_bad_handle = DeviceInfoStub(None, product_id="CCCC")
@@ -100,16 +102,42 @@ def test_create_centurion_device():
     """Test that a centurion device gets hidpp_long forced to True and centurion flag set."""
     from logitech_receiver import base
 
-    low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
-    test_device = device.create_device(low_level_mock, di_0AF7)
+    with mock.patch.object(base, "probe_centurion_device_addr", return_value=False):
+        low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
+        test_device = device.create_device(low_level_mock, di_0AF7)
 
     assert test_device is not None
     assert test_device.centurion is True
     assert test_device.hidpp_long is True
     assert int(test_device.handle) in base._centurion_handles
+    state = base._centurion_handles[int(test_device.handle)]
+    assert state.report_id == base.CENTURION_REPORT_ID  # 0x51 default
 
     # Clean up
-    base._centurion_handles.discard(int(test_device.handle))
+    base._centurion_handles.pop(int(test_device.handle), None)
+
+
+di_0B18 = DeviceInfoStub("11", product_id="0B18", centurion=True, centurion_report_id=0x50)
+
+
+def test_create_centurion_0x50_device():
+    """Test that a 0x50 centurion device gets the correct report ID registered."""
+    from logitech_receiver import base
+
+    with mock.patch.object(base, "probe_centurion_device_addr", return_value=False):
+        low_level_mock = LowLevelInterfaceFake(fake_hidpp.r_empty)
+        test_device = device.create_device(low_level_mock, di_0B18)
+
+    assert test_device is not None
+    assert test_device.centurion is True
+    assert test_device.hidpp_long is True
+    assert int(test_device.handle) in base._centurion_handles
+    state = base._centurion_handles[int(test_device.handle)]
+    assert state.report_id == base.CENTURION_ADDRESSED_REPORT_ID  # 0x50
+    assert state.device_addr is None  # not yet learned
+
+    # Clean up
+    base._centurion_handles.pop(int(test_device.handle), None)
 
 
 @pytest.mark.parametrize(
