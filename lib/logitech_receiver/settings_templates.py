@@ -1999,6 +1999,12 @@ class ForceSensing(settings_new.Settings):
 
 
 # Analog button tuning settings (actuation point, rapid trigger, haptics)
+#
+# Bytes 1 (actuation), 2 (rapid trigger), 3 (haptics) of the 0x1B0C config struct
+# pack a logical value in bits 7..2 (i.e. wire = logical << 2). Byte 2 bit 0 is a
+# firmware-managed sensitivityFlag that must be preserved across writes; all other
+# low-order bits are reserved and must be zero. Sending a wire byte that doesn't
+# match this layout produces INVALID_ARGUMENT — see issue #3202.
 
 
 class _AnalogButtonActuationRW(settings.FeatureRW):
@@ -2011,14 +2017,15 @@ class _AnalogButtonActuationRW(settings.FeatureRW):
     def read(self, device, data_bytes=b""):
         res = device.feature_request(self.feature, 0x20, self.button_index)
         if not res:
-            return b"\x14"  # default mid-point
-        return bytes([res[1]])
+            return b"\x05"  # default mid-point (logical)
+        return bytes([res[1] >> 2])
 
     def write(self, device, data_bytes):
         current = device.feature_request(self.feature, 0x20, self.button_index)
         if not current:
             return None
-        return device.feature_request(self.feature, 0x10, self.button_index, data_bytes[0], current[2], current[3])
+        wire_act = (data_bytes[0] & 0x3F) << 2
+        return device.feature_request(self.feature, 0x10, self.button_index, wire_act, current[2], current[3])
 
 
 class _AnalogButtonRapidTriggerRW(settings.FeatureRW):
@@ -2031,14 +2038,16 @@ class _AnalogButtonRapidTriggerRW(settings.FeatureRW):
     def read(self, device, data_bytes=b""):
         res = device.feature_request(self.feature, 0x20, self.button_index)
         if not res:
-            return b"\x0a"  # default mid-point
-        return bytes([res[2]])
+            return b"\x03"  # default mid-point (logical)
+        return bytes([res[2] >> 2])
 
     def write(self, device, data_bytes):
         current = device.feature_request(self.feature, 0x20, self.button_index)
         if not current:
             return None
-        return device.feature_request(self.feature, 0x10, self.button_index, current[1], data_bytes[0], current[3])
+        # Preserve the firmware-managed sensitivityFlag (byte 2 bit 0).
+        wire_rt = ((data_bytes[0] & 0x3F) << 2) | (current[2] & 0x01)
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], wire_rt, current[3])
 
 
 class _AnalogButtonHapticsRW(settings.FeatureRW):
@@ -2051,14 +2060,46 @@ class _AnalogButtonHapticsRW(settings.FeatureRW):
     def read(self, device, data_bytes=b""):
         res = device.feature_request(self.feature, 0x20, self.button_index)
         if not res:
-            return b"\x0a"  # default mid-point
-        return bytes([res[3]])
+            return b"\x03"  # default mid-point (logical)
+        return bytes([res[3] >> 2])
 
     def write(self, device, data_bytes):
         current = device.feature_request(self.feature, 0x20, self.button_index)
         if not current:
             return None
-        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], data_bytes[0])
+        wire_haptics = (data_bytes[0] & 0x3F) << 2
+        return device.feature_request(self.feature, 0x10, self.button_index, current[1], current[2], wire_haptics)
+
+
+class _AnalogButtonSetting(settings.Setting):
+    """Setting subclass that migrates legacy raw-byte persisted values.
+
+    Solaar 1.1.19 stored the wire byte (logical value × 4) under these names. After
+    the encoding fix, the same key holds the logical value. If a stored value is
+    above the new max but a divide-by-4 lands inside the valid range, treat it as
+    legacy raw and migrate in place — this prevents apply() from raising
+    INVALID_ARGUMENT/ValueError on first run after upgrade.
+    """
+
+    def _pre_read(self, cached, key=None):
+        super()._pre_read(cached, key)
+        if self._value is None or not isinstance(self._value, int):
+            return
+        validator = self._validator
+        if self._value > validator.max_value and (self._value & 0x03) == 0:
+            migrated = self._value >> 2
+            if validator.min_value <= migrated <= validator.max_value:
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info(
+                        "%s: migrating legacy raw value %d to logical %d on %s",
+                        self.name,
+                        self._value,
+                        migrated,
+                        self._device,
+                    )
+                self._value = migrated
+                if getattr(self._device, "persister", None) is not None:
+                    self._device.persister[self.name] = self._value
 
 
 class AnalogButtonTuning(settings.Setting):
@@ -2073,14 +2114,14 @@ class AnalogButtonTuning(settings.Setting):
     def build(cls, device):
         if cls.feature not in device.features:
             return None
-        # Get capabilities: [flags, button_count, max_actuation, max_rt, max_haptics, ...]
+        # Capabilities: [flags, button_count, max_act<<2, max_rt<<2, max_haptics<<2, ...]
         caps = device.feature_request(cls.feature, 0x00)
         if not caps or len(caps) < 5:
             return None
-        button_count = min(caps[1], 2)  # Byte 1 is button count, limit to 2 (left/right)
-        max_actuation = caps[2] if caps[2] > 0 else 40  # Byte 2 is max actuation
-        max_rt_level = caps[3] if caps[3] > 0 else 20  # Byte 3 is max RT level
-        max_haptics = caps[4] if caps[4] > 0 else 20  # Byte 4 is max haptics
+        button_count = min(caps[1], 2)  # firmware reports 3; only L/R are user-accessible
+        max_actuation = (caps[2] >> 2) if caps[2] > 0 else 10
+        max_rt_level = (caps[3] >> 2) if caps[3] > 0 else 5
+        max_haptics = (caps[4] >> 2) if caps[4] > 0 else 5
 
         if button_count == 0:
             return None
@@ -2093,26 +2134,26 @@ class AnalogButtonTuning(settings.Setting):
 
             rw_act = _AnalogButtonActuationRW(cls.feature, i)
             val_act = settings_validator.RangeValidator(min_value=1, max_value=max_actuation)
-            s_act = settings.Setting(device, rw_act, val_act)
+            s_act = _AnalogButtonSetting(device, rw_act, val_act)
             s_act.name = f"analog-button-tuning_actuation-{i}"
             s_act.label = f"{btn_name} Actuation Point"
-            s_act.description = _("Actuation point depth (raw device value).")
+            s_act.description = _("Actuation point depth (1=shallow, %d=deep).") % max_actuation
             all_settings.append(s_act)
 
             rw_rt = _AnalogButtonRapidTriggerRW(cls.feature, i)
             val_rt = settings_validator.RangeValidator(min_value=1, max_value=max_rt_level)
-            s_rt = settings.Setting(device, rw_rt, val_rt)
+            s_rt = _AnalogButtonSetting(device, rw_rt, val_rt)
             s_rt.name = f"analog-button-tuning_rapid-trigger-{i}"
             s_rt.label = f"{btn_name} Rapid Trigger"
-            s_rt.description = _("Rapid trigger sensitivity (raw device value).")
+            s_rt.description = _("Rapid trigger sensitivity (1..%d).") % max_rt_level
             all_settings.append(s_rt)
 
             rw_haptics = _AnalogButtonHapticsRW(cls.feature, i)
             val_haptics = settings_validator.RangeValidator(min_value=0, max_value=max_haptics)
-            s_haptics = settings.Setting(device, rw_haptics, val_haptics)
+            s_haptics = _AnalogButtonSetting(device, rw_haptics, val_haptics)
             s_haptics.name = f"analog-button-tuning_haptics-{i}"
             s_haptics.label = f"{btn_name} Click Haptics"
-            s_haptics.description = _("Click haptic feedback intensity (raw device value, 0=off).")
+            s_haptics.description = _("Click haptic feedback intensity (0=off, %d=max).") % max_haptics
             all_settings.append(s_haptics)
 
         return all_settings if all_settings else None
