@@ -191,7 +191,7 @@ def _print_device(dev, num=None):
         if notification_flags is not None:
             if notification_flags:
                 notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
-                print(f"     Notifications: {', '.join(notification_names)} (0x{notification_flags:06X}).")
+                print(f"     Notifications: {', '.join(notification_names)} (0x{notification_flags.value:06X}).")
             else:
                 print("     Notifications: (none).")
         device_features = _hidpp10.get_device_features(dev)
