@@ -14,29 +14,32 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""ANSI QWERTY keyboard layouts (full 104-key and TKL).
+"""ISO_QWERTY keyboard layouts (UK English ISO + other QWERTY ISO regions).
 
-Cell positions and groupings derived from OpenRGB's KeyboardLayoutManager
-(KeyboardLayoutManager.cpp), Copyright (C) Chris M (Dr_No), licensed under
-GPL-2.0-or-later. This file ports the static ANSI data only; the runtime
-opcode interpreter for regional overlays is intentionally not included.
+Same English keycap legends as ANSI; differs only in shape — the row 2 col 13
+backslash on ANSI doesn't exist on ISO (that position is the upper half of the
+L-shape Enter, addressed by zone 37). Used for UK and any other region whose
+country code maps to "iso_qwerty" without a more specific layout (Spanish,
+Italian, Portuguese, Belgian, Nordic — those keyboards have the same shape
+as UK ISO; only their physical keycap legends differ, which our painter
+doesn't reproduce verbatim).
 """
 
 from __future__ import annotations
 
 from ..layout import Layout
-from ._keyboard_base import MAIN_ANSI
+from ._keyboard_base import MAIN_ISO
 from ._keyboard_base import build_layout
 
 LAYOUT_FULL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=True,
-    description="ANSI QWERTY 104-key full-size",
+    description="ISO QWERTY 103-key full-size",
 )
 
 
 LAYOUT_TKL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=False,
-    description="ANSI QWERTY tenkeyless",
+    description="ISO QWERTY tenkeyless",
 )

@@ -1,4 +1,4 @@
-## Copyright (C) 2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
+## Copyright (C) 2026  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@ from collections.abc import Callable
 
 from ..layout import Layout
 from . import keyboard_ansi
+from . import keyboard_iso_azerty
+from . import keyboard_iso_qwerty
+from . import keyboard_iso_qwertz
+from . import keyboard_jis
 from . import mouse_g502x
 
 # (feature_id, matcher, layout). Matcher receives a `hint` dict the editor
@@ -65,23 +69,74 @@ def _name_contains(*needles: str) -> Callable[[dict], bool]:
     return match
 
 
-# --- Keyboards: distinguish full-size from TKL by presence of a numpad zone.
-# Counting zones is unreliable (G515 reports phantom zones 47, 97, 99-103, 254
-# that diverge from the keycap count).
+# --- Keyboard region routing ---
+# Country code → layout family. Codes from HID++ feature 0x4540 KeyboardLayout.
+_KEYBOARD_FAMILY_BY_COUNTRY: dict[int, str] = {
+    1: "ansi",
+    # ISO QWERTY (UK + ES/IT/PT/BE/Nordic — same shape, different keycap legends)
+    2: "iso_qwerty",
+    5: "iso_qwerty",
+    8: "iso_qwerty",
+    0x0B: "iso_qwerty",
+    0x0D: "iso_qwerty",
+    0x0E: "iso_qwerty",
+    0x0F: "iso_qwerty",
+    0x16: "iso_qwerty",
+    0x1D: "iso_qwerty",
+    0x21: "iso_qwerty",
+    0x24: "iso_qwerty",
+    # ISO QWERTZ (DE/Swiss)
+    3: "iso_qwertz",
+    7: "iso_qwertz",
+    # ISO AZERTY (FR)
+    4: "iso_azerty",
+    # JIS
+    9: "jis",
+    0x3E: "jis",
+}
+
+_FAMILY_LAYOUTS = {
+    "ansi": (keyboard_ansi.LAYOUT_FULL, keyboard_ansi.LAYOUT_TKL),
+    "iso_qwerty": (keyboard_iso_qwerty.LAYOUT_FULL, keyboard_iso_qwerty.LAYOUT_TKL),
+    "iso_qwertz": (keyboard_iso_qwertz.LAYOUT_FULL, keyboard_iso_qwertz.LAYOUT_TKL),
+    "iso_azerty": (keyboard_iso_azerty.LAYOUT_FULL, keyboard_iso_azerty.LAYOUT_TKL),
+    "jis": (keyboard_jis.LAYOUT_FULL, keyboard_jis.LAYOUT_TKL),
+}
+
+
 def _has_numpad(hint: dict) -> bool:
+    """Numpad presence is read from the device's reported zone bitmap rather
+    than counting zones — G515 reports phantom zones (47, 97, 99-103, 254)
+    that diverge from the keycap count.
+    """
     zones = set(hint.get("zones", ()))
     return 80 in zones or 95 in zones
 
 
-def _is_full_keyboard(hint: dict) -> bool:
-    return hint.get("kind") == "keyboard" and _has_numpad(hint)
+def _keyboard_family(hint: dict) -> str:
+    """Pick a layout family from the device's HID++ keyboard layout country
+    code. Defaults to "ansi" when the code is missing or unknown.
+    """
+    code = hint.get("keyboard_layout")
+    if code is None:
+        return "ansi"
+    return _KEYBOARD_FAMILY_BY_COUNTRY.get(int(code), "ansi")
 
 
-def _is_tkl_keyboard(hint: dict) -> bool:
-    return hint.get("kind") == "keyboard" and not _has_numpad(hint)
+def _keyboard_matcher(family: str, full_size: bool) -> Callable[[dict], bool]:
+    def match(hint: dict) -> bool:
+        if hint.get("kind") != "keyboard":
+            return False
+        if _has_numpad(hint) != full_size:
+            return False
+        return _keyboard_family(hint) == family
+
+    return match
 
 
 # PER_KEY_LIGHTING_V2 = 0x8081
-register_layout(0x8081, _is_full_keyboard, keyboard_ansi.LAYOUT_FULL)
-register_layout(0x8081, _is_tkl_keyboard, keyboard_ansi.LAYOUT_TKL)
+for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
+    register_layout(0x8081, _keyboard_matcher(_family, full_size=True), _full)
+    register_layout(0x8081, _keyboard_matcher(_family, full_size=False), _tkl)
+
 register_layout(0x8081, _name_contains("G502 X"), mouse_g502x.LAYOUT)

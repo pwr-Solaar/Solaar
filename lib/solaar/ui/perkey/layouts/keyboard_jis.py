@@ -14,29 +14,39 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""ANSI QWERTY keyboard layouts (full 104-key and TKL).
+"""JIS layout (JP).
 
-Cell positions and groupings derived from OpenRGB's KeyboardLayoutManager
-(KeyboardLayoutManager.cpp), Copyright (C) Chris M (Dr_No), licensed under
-GPL-2.0-or-later. This file ports the static ANSI data only; the runtime
-opcode interpreter for regional overlays is intentionally not included.
+ISO shape with Japanese keycap relabels for the bracket / colon positions.
+Adapted from OpenRGB. JIS keyboards also have additional kana-control keys
+near the spacebar (henkan/muhenkan/kana) that aren't represented here —
+matches OpenRGB's coverage.
 """
 
 from __future__ import annotations
 
 from ..layout import Layout
-from ._keyboard_base import MAIN_ANSI
+from ._keyboard_base import MAIN_ISO
 from ._keyboard_base import build_layout
 
+# zone_id → JIS label
+_OVERRIDES: dict[int, str] = {
+    44: "@",  # row 2 col 11 — bracket-position becomes at-sign
+    45: "[",  # row 2 col 12 — bracket shifts left
+    49: ":",  # row 3 col 11 — quote-position becomes colon
+}
+
+
 LAYOUT_FULL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=True,
-    description="ANSI QWERTY 104-key full-size",
+    label_overrides=_OVERRIDES,
+    description="JIS (JP) full-size",
 )
 
 
 LAYOUT_TKL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=False,
-    description="ANSI QWERTY tenkeyless",
+    label_overrides=_OVERRIDES,
+    description="JIS (JP) tenkeyless",
 )

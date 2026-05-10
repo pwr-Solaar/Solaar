@@ -14,29 +14,44 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""ANSI QWERTY keyboard layouts (full 104-key and TKL).
+"""ISO QWERTZ layout (DE / CH).
 
-Cell positions and groupings derived from OpenRGB's KeyboardLayoutManager
-(KeyboardLayoutManager.cpp), Copyright (C) Chris M (Dr_No), licensed under
-GPL-2.0-or-later. This file ports the static ANSI data only; the runtime
-opcode interpreter for regional overlays is intentionally not included.
+ISO shape plus German label overrides (Y/Z swap, Ü/Ö/Ä/ß placement).
+Adapted from OpenRGB.
 """
 
 from __future__ import annotations
 
 from ..layout import Layout
-from ._keyboard_base import MAIN_ANSI
+from ._keyboard_base import MAIN_ISO
 from ._keyboard_base import build_layout
 
+# zone_id → German label
+_OVERRIDES: dict[int, str] = {
+    50: "^",  # row 1 col 0 — caret/degree (DE keycap)
+    42: "ß",  # row 1 col 11 — eszett
+    43: "´",  # row 1 col 12 — acute accent
+    25: "Z",  # row 2 col 6 — Y/Z swap
+    44: "Ü",  # row 2 col 11
+    45: "+",  # row 2 col 12
+    48: "Ö",  # row 3 col 10
+    49: "Ä",  # row 3 col 11
+    26: "Y",  # row 4 col 2 — Y/Z swap
+    53: "-",  # row 4 col 11
+}
+
+
 LAYOUT_FULL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=True,
-    description="ANSI QWERTY 104-key full-size",
+    label_overrides=_OVERRIDES,
+    description="ISO QWERTZ (DE/CH) full-size",
 )
 
 
 LAYOUT_TKL: Layout = build_layout(
-    MAIN_ANSI,
+    MAIN_ISO,
     include_numpad=False,
-    description="ANSI QWERTY tenkeyless",
+    label_overrides=_OVERRIDES,
+    description="ISO QWERTZ (DE/CH) tenkeyless",
 )

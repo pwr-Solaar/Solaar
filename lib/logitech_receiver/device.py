@@ -156,6 +156,7 @@ class Device:
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
         self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = self._force_buttons = None
+        self._keyboard_layout = None  # lazy: country code from HID++ 0x4540, None if unsupported
         self._profiles = self._backlight = self._settings = None
         self.registers = []
         self.notification_flags = None
@@ -372,6 +373,13 @@ class Device:
             rate = _hidpp20.get_polling_rate(self)
             self._polling_rate = rate if rate else self._polling_rate
         return self._polling_rate
+
+    @property
+    def keyboard_layout(self):
+        if self._keyboard_layout is None and self.online and self.protocol >= 2.0:
+            if SupportedFeature.KEYBOARD_LAYOUT_2 in self.features:
+                self._keyboard_layout = _hidpp20.get_keyboard_layout(self)
+        return self._keyboard_layout
 
     @property
     def led_effects(self):

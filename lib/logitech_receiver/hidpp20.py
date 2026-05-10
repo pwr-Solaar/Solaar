@@ -2031,6 +2031,18 @@ class Hidpp20:
             SupportedFeature._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
+    def get_keyboard_layout(self, device: Device):
+        """Return the device's keyboard layout country code, or None.
+
+        Country code semantics match the HID HUT keyboard country codes that
+        Logitech's KEYBOARD_LAYOUT_2 (0x4540) feature reports in the first byte.
+        Used by the per-key painter to pick the matching regional layout.
+        """
+        result = device.feature_request(SupportedFeature.KEYBOARD_LAYOUT_2, 0x00)
+        if result:
+            return struct.unpack("!B", result[:1])[0]
+        return None
+
     def config_change(self, device: Device, configuration, no_reply=False):
         return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
 

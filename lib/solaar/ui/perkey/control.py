@@ -1,4 +1,4 @@
-## Copyright (C) 2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
+## Copyright (C) 2026  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -243,6 +243,7 @@ class PerKeyControl(Gtk.Box):
             "wpid": getattr(device, "wpid", None),
             "codename": getattr(device, "codename", None),
             "name": getattr(device, "name", None),
+            "keyboard_layout": getattr(device, "keyboard_layout", None),
             "zones": list(self._sink.zones),
             "zone_count": len(self._sink.zones),
         }

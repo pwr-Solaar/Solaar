@@ -1,4 +1,4 @@
-## Copyright (C) 2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
+## Copyright (C) 2026  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
