@@ -16,12 +16,12 @@
 
 """LED layout for the G502 X family (G502 X, G502 X PLUS, G502 X LIGHTSPEED).
 
-Eight LEDs (A..H) reported as zones 1..8 by the firmware. Positions may
-need revision per actual hardware.
+Eight LEDs reported as zones 1..8 by the firmware. Positions may need
+revision per actual hardware.
 
-    Row 0:  C  .  .  .  .  .  B
-    Row 1:  .  D  H  G  F  E  .
-    Row 2:  .  .  .  .  .  .  A
+    Row 0:  3  .  .  .  .  .  2
+    Row 1:  .  4  8  7  6  5  .
+    Row 2:  .  .  .  .  .  .  1
 """
 
 from __future__ import annotations
@@ -30,14 +30,14 @@ from ..layout import Cell
 from ..layout import Layout
 
 _CELLS: tuple[Cell, ...] = (
-    Cell(zone_id=1, row=2, col=6, group="main", label="A"),
-    Cell(zone_id=2, row=0, col=6, group="main", label="B"),
-    Cell(zone_id=3, row=0, col=0, group="main", label="C"),
-    Cell(zone_id=4, row=1, col=1, group="main", label="D"),
-    Cell(zone_id=5, row=1, col=5, group="main", label="E"),
-    Cell(zone_id=6, row=1, col=4, group="main", label="F"),
-    Cell(zone_id=7, row=1, col=3, group="main", label="G"),
-    Cell(zone_id=8, row=1, col=2, group="main", label="H"),
+    Cell(zone_id=1, row=2, col=6, group="main", label="1"),
+    Cell(zone_id=2, row=0, col=6, group="main", label="2"),
+    Cell(zone_id=3, row=0, col=0, group="main", label="3"),
+    Cell(zone_id=4, row=1, col=1, group="main", label="4"),
+    Cell(zone_id=5, row=1, col=5, group="main", label="5"),
+    Cell(zone_id=6, row=1, col=4, group="main", label="6"),
+    Cell(zone_id=7, row=1, col=3, group="main", label="7"),
+    Cell(zone_id=8, row=1, col=2, group="main", label="8"),
 )
 
 
