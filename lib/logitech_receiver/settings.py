@@ -61,6 +61,10 @@ class Setting:
     validator_class = None
     validator_options = {}
     display = True  # display setting in UI
+    # Optional UI editor override as "module.path:ClassName". Resolved by the
+    # config panel before the Kind dispatch. Kept as a string so this module
+    # stays free of GTK imports — the FE/BE seam is preserved.
+    editor_class: str | None = None
 
     def __init__(self, device, rw, validator):
         self._device = device

@@ -1893,7 +1893,7 @@ class PerKeyLighting(settings.Settings):
     description = _("Control per-key lighting.")
     feature = _F.PER_KEY_LIGHTING_V2
     keys_universe = special_keys.KEYCODES
-    choices_universe = special_keys.COLORSPLUS
+    editor_class = "solaar.ui.perkey.control:PerKeyControl"
 
     def read(self, cached=True):
         self._pre_read(cached)
@@ -1950,7 +1950,9 @@ class PerKeyLighting(settings.Settings):
     class rw_class(settings.FeatureRWMap):
         pass
 
-    class validator_class(settings_validator.ChoicesMapValidator):
+    class validator_class(settings_validator.MapRangeValidator):
+        _COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3)
+
         @classmethod
         def build(cls, setting_class, device):
             choices_map = {}
@@ -1964,9 +1966,8 @@ class PerKeyLighting(settings.Settings):
                         if i in setting_class.keys_universe
                         else common.NamedInt(i, f"KEY {str(i)}")
                     )
-                    choices_map[key] = setting_class.choices_universe
-            result = cls(choices_map) if choices_map else None
-            return result
+                    choices_map[key] = cls._COLOR_RANGE
+            return cls(choices_map) if choices_map else None
 
 
 # Allow changes to force sensing buttons

@@ -764,7 +764,24 @@ def _create_sbox(s, _device):
     change.set_sensitive(True)
     change.connect(GtkSignal.CLICKED.value, _change_click, sbox)
 
-    if s.kind == settings.Kind.TOGGLE:
+    editor_path = getattr(s, "editor_class", None)
+    if editor_path:
+        try:
+            mod_name, _sep, cls_name = editor_path.partition(":")
+            import importlib
+
+            mod = importlib.import_module(mod_name)
+            cls = getattr(mod, cls_name)
+            control = cls(sbox)
+        except Exception as e:
+            logger.warning("setting %s editor_class %r failed (%s); falling back to default", s.name, editor_path, repr(e))
+            control = None
+    else:
+        control = None
+
+    if control is not None:
+        pass
+    elif s.kind == settings.Kind.TOGGLE:
         control = ToggleControl(sbox)
     elif s.kind == settings.Kind.RANGE:
         control = SliderControl(sbox)

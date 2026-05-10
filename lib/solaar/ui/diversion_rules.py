@@ -42,6 +42,7 @@ from logitech_receiver.common import UnsortedNamedInts
 from logitech_receiver.settings import Kind
 from logitech_receiver.settings import Setting
 from logitech_receiver.settings_templates import SETTINGS
+from logitech_receiver.settings_validator import Range
 
 from solaar.i18n import _
 from solaar.ui import rule_actions
@@ -1675,6 +1676,15 @@ class _SettingWithValueUI:
         if kind in (Kind.TOGGLE, Kind.MULTIPLE_TOGGLE):
             self.value_field.make_toggle()
         elif kind in (Kind.CHOICE, Kind.MAP_CHOICE):
+            # Open-value-space MAP_CHOICE settings (per-key RGB) have a Range
+            # rather than a NamedInts value list — there's no meaningful value
+            # picker to render in the rule editor, so fall through to unsupported.
+            if kind == Kind.MAP_CHOICE and device_setting:
+                val = device_setting._validator
+                choices = getattr(val, "choices", None)
+                if isinstance(choices, dict) and any(isinstance(v, Range) for v in choices.values()):
+                    self.value_field.make_unsupported()
+                    return
             all_values, extra = self._all_choices(device_setting or setting_name)
             self.value_field.make_choice(all_values, extra)
             supported_values = None

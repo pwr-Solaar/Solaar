@@ -27,9 +27,13 @@ from logitech_receiver import common
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import settings_templates
+from logitech_receiver import settings_validator
 from logitech_receiver import special_keys
 
 from . import fake_hidpp
+
+# Per-key colors: any 24-bit RGB; matches PerKeyLighting.validator_class._COLOR_RANGE.
+_PERKEY_COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3)
 
 # TODO action part of DpiSlidingXY, MouseGesturesXY
 
@@ -695,11 +699,11 @@ key_tests = [
     Setup(
         FeatureTest(settings_templates.PerKeyLighting, {1: -1, 2: -1, 9: -1, 10: -1, 113: -1}, {2: 0xFF0000}, 4, 4, 0, 1),
         {
-            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
-            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
-            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
-            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
-            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
+            common.NamedInt(1, "A"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(2, "B"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(9, "I"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(10, "J"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(113, "KEY 113"): _PERKEY_COLOR_RANGE,
         },
         fake_hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
         fake_hidpp.Response("00000200000000000000000000000000", 0x0400, "0001"),  # second group of keys
@@ -720,11 +724,11 @@ key_tests = [
             1,
         ),
         {
-            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
-            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
-            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
-            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
-            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
+            common.NamedInt(1, "A"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(2, "B"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(9, "I"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(10, "J"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(113, "KEY 113"): _PERKEY_COLOR_RANGE,
         },
         fake_hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
         fake_hidpp.Response("00000200000000000000000000000000", 0x0400, "0001"),  # second group of keys
@@ -749,12 +753,12 @@ key_tests = [
             1,
         ),
         {
-            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
-            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
-            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
-            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
-            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
-            common.NamedInt(114, "KEY 114"): special_keys.COLORSPLUS,
+            common.NamedInt(1, "A"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(2, "B"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(9, "I"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(10, "J"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(113, "KEY 113"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(114, "KEY 114"): _PERKEY_COLOR_RANGE,
         },
         fake_hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
         fake_hidpp.Response("00000600000000000000000000000000", 0x0400, "0001"),  # second group of keys

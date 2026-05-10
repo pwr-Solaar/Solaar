@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import math
 
+from dataclasses import dataclass
 from enum import IntEnum
 
 from logitech_receiver import common
@@ -746,3 +747,91 @@ class MultipleRangeValidator(Validator):
     def compare(self, args, current):
         logger.warning("compare not implemented for multiple range settings")
         return False
+
+
+@dataclass(frozen=True)
+class Range:
+    """Inclusive integer range used as the value side of a MapRangeValidator.
+
+    `byte_count` is the wire encoding width. `signed` selects two's-complement.
+    Settings whose value space is a continuous integer range (e.g. per-key RGB
+    colors as 24-bit ints) use this in place of a NamedInts choice list.
+    """
+
+    min: int
+    max: int
+    byte_count: int = 1
+    signed: bool = False
+
+    def contains(self, value: int) -> bool:
+        return isinstance(value, int) and self.min <= value <= self.max
+
+
+class MapRangeValidator(Validator):
+    """Map of keys → integer in a per-key Range. Open value space (no choice list).
+
+    Reports `kind = Kind.MAP_CHOICE` so the existing config-panel/CLI/rule-engine
+    dispatch keeps routing without new branches; consumers that need to tell
+    "choice list" from "open range" check `isinstance(setting.choices[k], Range)`.
+
+    TODO: complete `Kind.MAP_RANGE` infrastructure (UI dispatch, generic rule-UI
+          handling, generalize `cli/config.py:299`) and migrate this validator's
+          `kind` over. Today MAP_RANGE is only honored by `ForceSensing` via the
+          `settings_new` framework; bridging both frameworks is a separate task.
+    """
+
+    kind = Kind.MAP_CHOICE
+
+    def __init__(self, choices_map, key_byte_count=1, write_prefix_bytes=b""):
+        assert isinstance(choices_map, dict)
+        for k, v in choices_map.items():
+            assert isinstance(k, NamedInt), f"MapRangeValidator key must be NamedInt, got {type(k).__name__}"
+            assert isinstance(v, Range), f"MapRangeValidator value must be Range, got {type(v).__name__}"
+        self.choices = choices_map
+        self.needs_current_value = False
+        self._key_byte_count = key_byte_count
+        self._write_prefix_bytes = write_prefix_bytes
+
+    def to_string(self, value) -> str:
+        if not isinstance(value, dict):
+            return str(value)
+        return "{" + ", ".join(f"{k}:{value[k]}" for k in sorted(value)) + "}"
+
+    def validate_read(self, reply_bytes, key):
+        rng = self.choices.get(key)
+        if rng is None:
+            return None
+        end = self._key_byte_count + rng.byte_count
+        return common.bytes2int(reply_bytes[self._key_byte_count : end], signed=rng.signed)
+
+    def prepare_key(self, key):
+        return int(key).to_bytes(self._key_byte_count, "big")
+
+    def prepare_write(self, key, new_value):
+        rng = self.choices.get(key)
+        if rng is None:
+            logger.error("invalid key %r for map-range setting", key)
+            return None
+        if not rng.contains(new_value):
+            logger.error("value %r out of range [%d, %d] for key %s", new_value, rng.min, rng.max, key)
+            return None
+        return self._write_prefix_bytes + int(new_value).to_bytes(rng.byte_count, "big", signed=rng.signed)
+
+    def acceptable(self, args, current):
+        if not isinstance(args, list) or len(args) != 2:
+            return None
+        key = next((k for k in self.choices if int(k) == int(args[0])), None)
+        if key is None:
+            return None
+        rng = self.choices[key]
+        if not rng.contains(args[1]):
+            return None
+        return [int(key), int(args[1])]
+
+    def compare(self, args, current):
+        if not isinstance(args, list) or len(args) != 2 or not isinstance(current, dict):
+            return False
+        key = next((k for k in self.choices if int(k) == int(args[0])), None)
+        if key is None:
+            return False
+        return current.get(int(key)) == args[1]

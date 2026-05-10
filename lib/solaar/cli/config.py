@@ -20,10 +20,26 @@ from logitech_receiver import settings
 from logitech_receiver import settings_templates
 from logitech_receiver.common import NamedInts
 from logitech_receiver.settings_templates import SettingsProtocol
+from logitech_receiver.settings_validator import Range
 
 from solaar import configuration
 
 APP_ID = "io.github.pwr_solaar.solaar"
+
+
+def _parse_int_or_hex(s) -> int | None:
+    """Parse 0xRRGGBB / #RRGGBB / decimal int. Returns None on bad input."""
+    if not isinstance(s, str):
+        return None
+    s = s.strip()
+    try:
+        if s.startswith("#"):
+            return int(s[1:], 16)
+        if s.lower().startswith("0x"):
+            return int(s, 16)
+        return int(s, 10)
+    except ValueError:
+        return None
 
 
 def _print_setting(s, verbose=True):
@@ -70,7 +86,11 @@ def _print_setting_keyed(s, key, verbose=True):
             if k is None:
                 print(s.name, "=? (key not found)")
             else:
-                print("#   possible values: one of [", ", ".join(str(v) for v in s.choices[k]), "]")
+                value_space = s.choices[k]
+                if isinstance(value_space, Range):
+                    print(f"#   possible values: integer in [{value_space.min}, {value_space.max}] (decimal or 0xHEX)")
+                else:
+                    print("#   possible values: one of [", ", ".join(str(v) for v in value_space), "]")
                 value = s.read(cached=False)
                 if value is None:
                     print(s.name, "= ? (failed to read from device)")
@@ -245,12 +265,21 @@ def set(dev, setting: SettingsProtocol, args, save):
         k = next((k for k in setting.choices.keys() if key == k), None)
         if k is None and ikey is not None:
             k = next((k for k in setting.choices.keys() if ikey == k), None)
-        if k is not None:
-            value = select_choice(args.extra_subkey, setting.choices[k], setting, key)
-            args.extra_subkey = int(value)
-            args.value_key = str(int(k))
-        else:
+        if k is None:
             raise Exception(f"{setting.name}: key '{key}' not in setting")
+        value_space = setting.choices[k]
+        if isinstance(value_space, Range):
+            ivalue = _parse_int_or_hex(args.extra_subkey)
+            if ivalue is None or not value_space.contains(ivalue):
+                raise Exception(
+                    f"{setting.name}: value '{args.extra_subkey}' must be an integer in "
+                    f"[{value_space.min}, {value_space.max}] (decimal or 0xHEX / #HEX)"
+                )
+            value = ivalue
+        else:
+            value = select_choice(args.extra_subkey, value_space, setting, key)
+        args.extra_subkey = int(value)
+        args.value_key = str(int(k))
         message = f"Setting {setting.name} of {dev.name} key {k!r} to {value!r}"
         result = setting.write_key_value(int(k), value, save=save)
 
