@@ -69,15 +69,14 @@ class PerKeyEditorDialog:
         self._wrapper.pack_start(self._editor, True, True, 0)
         self._wrapper.show_all()
         self._window.set_title(_("Per-key Lighting") + " — " + sink.title)
-        # Resize to fit canvas + toolbar. ScrolledWindow's *minimum* is tiny
-        # (one row's worth) regardless of propagate_natural_size, so we have
-        # to compute the target ourselves from the canvas's size_request.
-        canvas_w, canvas_h = self._editor.canvas_size()
-        if canvas_w > 0 and canvas_h > 0:
-            # Toolbar ~50px, wrapper border 8px each side, scrollbar slack ~4.
-            target_w = canvas_w + 32
-            target_h = canvas_h + 80
-            self._window.resize(target_w, target_h)
+        # Ask GTK what the wrapper actually wants to be — the canvas's
+        # size_request propagates up through ScrolledWindow + editor VBox
+        # (toolbar + scrolled canvas) + the wrapper's border, so the
+        # natural size already accounts for every layout contribution
+        # rather than hardcoding "toolbar ~50, border 8 each side".
+        _min, nat = self._wrapper.get_preferred_size()
+        if nat.width > 0 and nat.height > 0:
+            self._window.resize(nat.width, nat.height)
         self._window.present()
 
 

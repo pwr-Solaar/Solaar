@@ -156,12 +156,6 @@ class PerKeyEditor(Gtk.Box):
         except Exception as e:
             logger.debug("palette shutdown failed: %s", e)
 
-    def canvas_size(self) -> tuple[int, int]:
-        """Return the canvas's pixel size_request — what the dialog should
-        size its content area to so the layout fits without scrollbars.
-        """
-        return self._canvas.get_size_request()
-
     def _refresh_layout(self) -> None:
         if self._layout is None:
             # No registered layout: lay out all reported zones as a flat strip.
