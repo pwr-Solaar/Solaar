@@ -211,7 +211,13 @@ class GradientSwatch(Gtk.DrawingArea):
         cr.clip()
         # Top-left (previous, gradient start) → bottom-right (active, end).
         # Matches the directional behavior of dragging the line tool TL → BR.
-        pat = cairo.LinearGradient(3, 3, 21, 21)
+        # Endpoints are shifted inward by the arc inset (corner radius * (1
+        # - 1/sqrt(2)), ~0.586 for r=2) so t=0 lands on the actual visible
+        # TL corner pixel of the rounded rect — without this, the rendered
+        # corners sample at t≈0.033/0.967 and the displayed colors are
+        # ~8 RGB units short of the true endpoint colors.
+        inset = 2 * (1 - 1 / (2**0.5))
+        pat = cairo.LinearGradient(3 + inset, 3 + inset, 21 - inset, 21 - inset)
         pat.add_color_stop_rgb(0.0, *rgb(self._previous))
         pat.add_color_stop_rgb(1.0, *rgb(self._active))
         cr.set_source(pat)
