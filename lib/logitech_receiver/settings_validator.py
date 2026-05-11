@@ -754,6 +754,11 @@ class Range:
     """Inclusive integer range used as the value side of a MapRangeValidator.
 
     `byte_count` is the wire encoding width. `signed` selects two's-complement.
+    `value_type` is the int factory used to wrap values returned from
+    `validate_read` — defaults to `int`, but settings that store RGB colors
+    pass `common.ColorInt` so the values self-format as ``0xrrggbb`` in
+    `solaar show` output and the YAML config file.
+
     Settings whose value space is a continuous integer range (e.g. per-key RGB
     colors as 24-bit ints) use this in place of a NamedInts choice list.
     """
@@ -762,6 +767,7 @@ class Range:
     max: int
     byte_count: int = 1
     signed: bool = False
+    value_type: type = int
 
     def contains(self, value: int) -> bool:
         return isinstance(value, int) and self.min <= value <= self.max
@@ -795,14 +801,31 @@ class MapRangeValidator(Validator):
     def to_string(self, value) -> str:
         if not isinstance(value, dict):
             return str(value)
-        return "{" + ", ".join(f"{k}:{value[k]}" for k in sorted(value)) + "}"
+        # Persisted dicts loaded from YAML come back as plain ints regardless
+        # of the choice's `value_type`. Re-wrap raw ints through the configured
+        # value_type (e.g. ColorInt) so they self-format consistently here and
+        # in `solaar show`. Skip wrapping for NamedInt sentinels / subclasses
+        # (`type(v) is int` is the exact-match guard).
+        rng_by_int_key = {int(k): rng for k, rng in self.choices.items()}
+
+        def _fmt(k):
+            v = value[k]
+            rng = rng_by_int_key.get(int(k))
+            if rng is not None and type(v) is int and rng.value_type is not int:  # noqa: E721
+                try:
+                    v = rng.value_type(v)
+                except Exception:
+                    pass
+            return f"{k}:{v}"
+
+        return "{" + ", ".join(_fmt(k) for k in sorted(value)) + "}"
 
     def validate_read(self, reply_bytes, key):
         rng = self.choices.get(key)
         if rng is None:
             return None
         end = self._key_byte_count + rng.byte_count
-        return common.bytes2int(reply_bytes[self._key_byte_count : end], signed=rng.signed)
+        return rng.value_type(common.bytes2int(reply_bytes[self._key_byte_count : end], signed=rng.signed))
 
     def prepare_key(self, key):
         return int(key).to_bytes(self._key_byte_count, "big")

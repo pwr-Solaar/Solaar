@@ -1177,9 +1177,17 @@ LEDEffects = {
 
 
 class LEDEffectSetting:  # an effect plus its parameters
+    # Params whose value space is an RGB color; wrapped in ColorInt so the
+    # value self-formats as ``0xrrggbb`` in solaar show and the YAML config.
+    _COLOR_PARAMS = (str(LEDParam.color),)
+
     def __init__(self, **kwargs):
         self.ID = None
         for key, val in kwargs.items():
+            # type(val) is int — exact match excludes NamedInt/ColorInt and
+            # any other int subclass; only "raw" ints get wrapped here.
+            if key in self._COLOR_PARAMS and type(val) is int and 0 <= val <= 0xFFFFFF:  # noqa: E721
+                val = common.ColorInt(val)
             setattr(self, key, val)
 
     @classmethod

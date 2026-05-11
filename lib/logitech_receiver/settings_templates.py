@@ -1895,6 +1895,26 @@ class PerKeyLighting(settings.Settings):
     keys_universe = special_keys.KEYCODES
     editor_class = "solaar.ui.perkey.control:PerKeyControl"
 
+    @staticmethod
+    def _wrap_color(value):
+        # Wrap raw 24-bit-range ints in ColorInt so saved configs render as
+        # ``0xrrggbb`` hex literals and `solaar show` prints hex. Sentinels
+        # (NamedInt "No change" = -1) and existing ColorInt values pass
+        # through untouched.
+        # type(value) is int — exact match excludes NamedInt sentinels like
+        # COLORSPLUS["No change"] = -1 and avoids re-wrapping ColorInts.
+        if type(value) is int and 0 <= value <= 0xFFFFFF:  # noqa: E721
+            return common.ColorInt(value)
+        return value
+
+    def update(self, value, save=True):
+        if isinstance(value, dict):
+            value = {k: self._wrap_color(v) for k, v in value.items()}
+        super().update(value, save)
+
+    def update_key_value(self, key, value, save=True):
+        super().update_key_value(key, self._wrap_color(value), save)
+
     def read(self, cached=True):
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -1951,7 +1971,7 @@ class PerKeyLighting(settings.Settings):
         pass
 
     class validator_class(settings_validator.MapRangeValidator):
-        _COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3)
+        _COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3, value_type=common.ColorInt)
 
         @classmethod
         def build(cls, setting_class, device):

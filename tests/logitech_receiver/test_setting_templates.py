@@ -33,7 +33,7 @@ from logitech_receiver import special_keys
 from . import fake_hidpp
 
 # Per-key colors: any 24-bit RGB; matches PerKeyLighting.validator_class._COLOR_RANGE.
-_PERKEY_COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3)
+_PERKEY_COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3, value_type=common.ColorInt)
 
 # TODO action part of DpiSlidingXY, MouseGesturesXY
 

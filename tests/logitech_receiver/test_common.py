@@ -65,6 +65,58 @@ def test_named_int_yaml():
     assert yaml_load == named_int
 
 
+def test_color_int_str_and_repr():
+    c = common.ColorInt(0xFC3300)
+    assert str(c) == "0xfc3300"
+    assert repr(c) == "0xfc3300"
+    assert int(c) == 0xFC3300
+
+
+def test_color_int_equality_with_plain_int():
+    assert common.ColorInt(0xFC3300) == 0xFC3300
+    assert isinstance(common.ColorInt(0), int)
+
+
+def test_color_int_from_hex_string_prefixes():
+    assert common.ColorInt("0xfc3300") == 0xFC3300
+    assert common.ColorInt("0XFC3300") == 0xFC3300
+    assert common.ColorInt("#fc3300") == 0xFC3300
+
+
+def test_color_int_from_int_passes_through():
+    assert common.ColorInt(0) == 0
+    assert common.ColorInt(0xFFFFFF) == 0xFFFFFF
+
+
+def test_color_int_out_of_range_falls_back_to_decimal():
+    # Sentinel values like COLORSPLUS["No change"] = -1 should still render
+    # in their natural form when wrapped (though they normally aren't).
+    assert str(common.ColorInt(-1)) == "-1"
+
+
+def test_color_int_yaml_dumps_as_hex_int_literal():
+    c = common.ColorInt(0xFC3300)
+    dumped = yaml.dump(c).strip()
+    assert dumped == "0xfc3300\n..." or dumped.startswith("0xfc3300")
+
+
+def test_color_int_yaml_roundtrips_to_plain_int():
+    # yaml.safe_load returns a plain int (yaml 1.1 hex literal parsing).
+    # The value matches; type promotion to ColorInt happens lazily at
+    # validator/setting boundaries.
+    c = common.ColorInt(0xFC3300)
+    loaded = yaml.safe_load(yaml.dump(c))
+    assert loaded == 0xFC3300
+
+
+def test_color_int_in_dict_yaml_dumps_each_value_as_hex():
+    data = {1: common.ColorInt(0xFC3300), 2: common.ColorInt(0x00FF00), 3: -1}
+    dumped = yaml.dump(data, default_flow_style=None, width=150).strip()
+    assert "0xfc3300" in dumped
+    assert "0x00ff00" in dumped
+    assert "-1" in dumped  # sentinel preserved
+
+
 def test_named_ints():
     named_ints = common.NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 

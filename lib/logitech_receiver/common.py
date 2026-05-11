@@ -361,6 +361,53 @@ yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
 yaml.add_representer(NamedInt, NamedInt.to_yaml)
 
 
+class ColorInt(int):
+    """A 24-bit RGB color (``0x000000``-``0xFFFFFF``) as an int subclass.
+
+    Renders as ``0xrrggbb`` in ``str()`` / ``repr()`` and as a YAML hex int
+    literal in dumped configs (e.g. ``color: 0xfc3300``), which loads back
+    natively as a plain int via YAML 1.1's hex int parsing — so the value
+    round-trips cleanly with no special loader registration. The constructor
+    accepts both ints and hex strings (``0xfc3300`` or ``#fc3300``) so configs
+    saved before this type existed continue to load unchanged.
+
+    Negative or out-of-range values fall back to plain decimal formatting so
+    sentinels like ``COLORSPLUS["No change"] = -1`` keep their natural display.
+    """
+
+    def __new__(cls, value):
+        if isinstance(value, str):
+            s = value.strip().lower()
+            if s.startswith("#"):
+                value = int(s[1:], 16)
+            elif s.startswith(("0x", "0X")):
+                value = int(s, 16)
+            else:
+                value = int(s)
+        else:
+            value = int(value)
+        return super().__new__(cls, value)
+
+    def __str__(self):
+        v = int(self)
+        if 0 <= v <= 0xFFFFFF:
+            return "0x%06x" % v
+        return str(v)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+def color_int_representer(dumper, data):
+    v = int(data)
+    if 0 <= v <= 0xFFFFFF:
+        return dumper.represent_scalar("tag:yaml.org,2002:int", "0x%06x" % v)
+    return dumper.represent_scalar("tag:yaml.org,2002:int", str(v))
+
+
+yaml.add_representer(ColorInt, color_int_representer)
+
+
 class NamedInts:
     """An ordered set of NamedInt values.
 
