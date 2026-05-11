@@ -375,14 +375,19 @@ def _print_device(dev, num=None):
                     ):
                         v = setting.val_to_string(setting._device.persister.get(setting.name))
                         print(f"            {setting.label} (saved): {v}")
-                    try:
-                        v = setting.read(False)
-                        v = setting.val_to_string(v)
-                    except exceptions.FeatureCallError as e:
-                        v = "HID++ error " + str(e)
-                    except AssertionError as e:
-                        v = "AssertionError " + str(e)
-                    print(f"            {setting.label}        : {v}")
+                    # Settings whose value cannot be read back from the device
+                    # (e.g. PerKeyLighting — 0x8081 has no GetIndividualRgbZones)
+                    # suppress the live-read line; the saved line above is the
+                    # authoritative record. See Setting.live_readable.
+                    if getattr(setting, "live_readable", True):
+                        try:
+                            v = setting.read(False)
+                            v = setting.val_to_string(v)
+                        except exceptions.FeatureCallError as e:
+                            v = "HID++ error " + str(e)
+                        except AssertionError as e:
+                            v = "AssertionError " + str(e)
+                        print(f"            {setting.label}        : {v}")
 
     if dev.online and dev.keys:
         print(f"     Has {len(dev.keys)} reprogrammable keys:")

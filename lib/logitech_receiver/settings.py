@@ -61,6 +61,11 @@ class Setting:
     validator_class = None
     validator_options = {}
     display = True  # display setting in UI
+    # Set False for settings whose value cannot be read back from the device
+    # (e.g. PerKeyLighting — the 0x8081 protocol has no GetIndividualRgbZones).
+    # `solaar show` uses this to suppress the "(live)" output line that would
+    # otherwise print a fabricated value misleadingly.
+    live_readable = True
     # Optional UI editor override as "module.path:ClassName". Resolved by the
     # config panel before the Kind dispatch. Kept as a string so this module
     # stays free of GTK imports — the FE/BE seam is preserved.

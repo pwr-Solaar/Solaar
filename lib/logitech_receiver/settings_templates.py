@@ -1894,6 +1894,11 @@ class PerKeyLighting(settings.Settings):
     feature = _F.PER_KEY_LIGHTING_V2
     keys_universe = special_keys.KEYCODES
     editor_class = "solaar.ui.perkey.control:PerKeyControl"
+    # 0x8081 has no GetIndividualRgbZones — there's no way to ask the device
+    # what colors are currently on the per-key buffer. read() returns the
+    # canonical in-memory map for callers that need a value, but `solaar show`
+    # honors this flag and skips its live-read line to avoid misleading output.
+    live_readable = False
 
     @staticmethod
     def _wrap_color(value):
@@ -1916,12 +1921,20 @@ class PerKeyLighting(settings.Settings):
         super().update_key_value(key, self._wrap_color(value), save)
 
     def read(self, cached=True):
+        # The 0x8081 protocol has no GetIndividualRgbZones — the device cannot
+        # report its current per-key buffer back. So a "live" read is fictional:
+        # we either return what we last wrote (the persisted/in-memory map,
+        # which is the canonical truth for this setting) or, on a fresh device
+        # with no persisted state, fabricate an all-"No change" sentinel map
+        # as the starting point. Returning the cached value unconditionally
+        # also fixes `solaar show` showing every key as "No change" on the
+        # live line — it now matches what's actually on the keyboard.
         self._pre_read(cached)
-        if cached and self._value is not None:
+        if self._value is not None:
             return self._value
         reply_map = {}
         for key in self._validator.choices:
-            reply_map[int(key)] = special_keys.COLORSPLUS["No change"]  # this signals no change
+            reply_map[int(key)] = special_keys.COLORSPLUS["No change"]  # starting state, no per-key write yet
         self._value = reply_map
         return reply_map
 
