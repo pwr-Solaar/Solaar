@@ -159,6 +159,10 @@ class GradientSwatch(Gtk.DrawingArea):
         self._active: int = 0xFF0000
         self._previous: int = 0xFF0000
         self.connect(GtkSignal.DRAW.value, self._on_draw)
+        # Re-render when the GTK theme changes, so the rounded-square
+        # outline (drawn in the theme foreground color) stays in sync
+        # with the tool icons next to it.
+        self.connect("style-updated", lambda w: w.queue_draw())
 
     def update(self, active: int, previous: int) -> None:
         self._active = int(active)
@@ -175,27 +179,51 @@ class GradientSwatch(Gtk.DrawingArea):
         """Return (active, previous) — the colors the gradient tool will paint with."""
         return (self._active, self._previous)
 
+    @staticmethod
+    def _rounded_rect_path(cr, x: float, y: float, w: float, h: float, r: float) -> None:
+        cr.new_sub_path()
+        cr.arc(x + w - r, y + r, r, -1.5708, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, 1.5708)
+        cr.arc(x + r, y + h - r, r, 1.5708, 3.1416)
+        cr.arc(x + r, y + r, r, 3.1416, 4.7124)
+        cr.close_path()
+
     def _on_draw(self, _w, cr) -> None:
         import cairo  # local: keeps the module light when GradientSwatch isn't built
-
-        s = self.SIZE
 
         def rgb(c: int) -> tuple[float, float, float]:
             if c is None or c < 0:
                 return (0.5, 0.5, 0.5)
             return (((c >> 16) & 0xFF) / 255.0, ((c >> 8) & 0xFF) / 255.0, (c & 0xFF) / 255.0)
 
+        # Render in Tabler "square" coordinates (24x24 viewBox, rounded
+        # rect from (3,3) to (21,21), corner radius 2, stroke 2) and let
+        # cairo scale to the swatch's pixel size. Matches the outline
+        # style of the tool icons exactly.
+        cr.save()
+        cr.scale(self.SIZE / 24.0, self.SIZE / 24.0)
+
+        # Build the rounded-square path once, clip+fill the gradient
+        # inside it, then re-build and stroke the outline in the theme
+        # foreground color.
+        self._rounded_rect_path(cr, 3, 3, 18, 18, 2)
+        cr.save()
+        cr.clip()
         # Top-left (previous, gradient start) → bottom-right (active, end).
         # Matches the directional behavior of dragging the line tool TL → BR.
-        pat = cairo.LinearGradient(0, 0, s, s)
+        pat = cairo.LinearGradient(3, 3, 21, 21)
         pat.add_color_stop_rgb(0.0, *rgb(self._previous))
         pat.add_color_stop_rgb(1.0, *rgb(self._active))
         cr.set_source(pat)
-        cr.rectangle(0, 0, s, s)
+        cr.rectangle(3, 3, 18, 18)
         cr.fill()
+        cr.restore()  # drop clip
 
-        # Subtle border so the swatch reads as a control even on similar bg.
-        cr.set_source_rgba(0, 0, 0, 0.45)
-        cr.set_line_width(1.0)
-        cr.rectangle(0.5, 0.5, s - 1, s - 1)
+        self._rounded_rect_path(cr, 3, 3, 18, 18, 2)
+        fg = self.get_style_context().get_color(Gtk.StateFlags.NORMAL)
+        cr.set_source_rgba(fg.red, fg.green, fg.blue, fg.alpha)
+        cr.set_line_width(2)
+        cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.stroke()
+        cr.restore()
