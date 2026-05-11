@@ -24,6 +24,8 @@ itself — see `GradientSwatch` below, used by `editor.py`.
 
 from __future__ import annotations
 
+import logging
+
 from enum import Enum
 
 import gi
@@ -34,6 +36,12 @@ from gi.repository import GObject  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
 
 from solaar.i18n import _  # NOQA: E402
+
+from ._icons import themed_icon_image  # NOQA: E402
+
+logger = logging.getLogger(__name__)
+
+_UNSET_ICON_NAME = "solaar-tool-palette-off-symbolic"
 
 
 class GtkSignal(Enum):
@@ -62,70 +70,6 @@ def _int_to_rgba(c: int) -> Gdk.RGBA:
     return rgba
 
 
-def _draw_hash(cr, x: float, y: float, size: float, base_color: int | None = None) -> None:
-    """Diagonal hash pattern used as the visual for "no change" / unset.
-
-    Background is the zone base color (the color these cells actually display
-    on the keyboard) when known; stripes pick a black or white contrast based
-    on luminance so the texture stays readable on any base.
-    """
-    cr.save()
-    cr.rectangle(x, y, size, size)
-    cr.clip()
-    if base_color is not None and base_color >= 0:
-        r = ((base_color >> 16) & 0xFF) / 255.0
-        g = ((base_color >> 8) & 0xFF) / 255.0
-        b = (base_color & 0xFF) / 255.0
-        cr.set_source_rgba(r, g, b, 1.0)
-    else:
-        r = g = 0.30
-        b = 0.32
-        cr.set_source_rgba(r, g, b, 1.0)
-    cr.rectangle(x, y, size, size)
-    cr.fill()
-    if base_color is not None and base_color >= 0:
-        lum = 0.299 * r + 0.587 * g + 0.114 * b
-        cr.set_source_rgba(0, 0, 0, 0.45) if lum > 0.55 else cr.set_source_rgba(1, 1, 1, 0.35)
-    else:
-        cr.set_source_rgba(0.55, 0.55, 0.60, 1.0)
-    cr.set_line_width(1.2)
-    step = 4
-    d = -int(size)
-    while d <= int(size):
-        cr.move_to(x + d, y + size)
-        cr.line_to(x + d + size, y)
-        cr.stroke()
-        d += step
-    cr.restore()
-
-
-class HashSwatch(Gtk.DrawingArea):
-    """Square showing the diagonal hash pattern; used as the visual on the
-    "unset" toggle button and matches how unset cells render on the canvas.
-    Set the zone base color via `set_base_color` so the swatch reflects what
-    "no change" cells actually display on the keyboard.
-    """
-
-    SIZE = 22
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._base_color: int | None = None
-        self.set_size_request(self.SIZE, self.SIZE)
-        self.connect(GtkSignal.DRAW.value, self._on_draw)
-
-    def set_base_color(self, color: int | None) -> None:
-        self._base_color = None if color is None else int(color)
-        self.queue_draw()
-
-    def _on_draw(self, _w, cr) -> None:
-        _draw_hash(cr, 0, 0, float(self.SIZE), self._base_color)
-        cr.set_source_rgba(0, 0, 0, 0.45)
-        cr.set_line_width(1.0)
-        cr.rectangle(0.5, 0.5, self.SIZE - 1, self.SIZE - 1)
-        cr.stroke()
-
-
 # Sentinel for "no change" / unset paint. Matches special_keys.COLORSPLUS["No change"].
 UNSET_COLOR = -1
 
@@ -151,15 +95,44 @@ class Palette(Gtk.Box):
         self._color_btn.connect(GtkSignal.COLOR_SET.value, self._on_color_set)
         self.pack_start(self._color_btn, False, False, 0)
 
-        self._unset_swatch = HashSwatch()
         self._unset_btn = Gtk.ToggleButton()
         self._unset_btn.set_tooltip_text(_("Paint as 'no change' — clears the cell to the zone base color"))
-        self._unset_btn.add(self._unset_swatch)
+        self._unset_label = _("Unset")
+        self._unset_image = themed_icon_image(_UNSET_ICON_NAME, self._unset_btn)
+        if self._unset_image is not None:
+            self._unset_btn.add(self._unset_image)
+            self._unset_btn.get_accessible().set_name(self._unset_label)
+        else:
+            self._unset_btn.set_label(self._unset_label)
         self._unset_btn.connect(GtkSignal.TOGGLED.value, self._on_unset_toggled)
         self.pack_start(self._unset_btn, False, False, 0)
 
-    def set_zone_base_color(self, color: int | None) -> None:
-        self._unset_swatch.set_base_color(color)
+        # Track theme changes so the unset icon re-renders to match.
+        self._theme_signal_handlers: list[tuple[object, int]] = []
+        if self._unset_image is not None:
+            settings = Gtk.Settings.get_default()
+            for prop in ("notify::gtk-theme-name", "notify::gtk-application-prefer-dark-theme"):
+                hid = settings.connect(prop, self._on_gtk_theme_changed)
+                self._theme_signal_handlers.append((settings, hid))
+
+    def shutdown(self) -> None:
+        for obj, hid in self._theme_signal_handlers:
+            try:
+                obj.disconnect(hid)
+            except Exception as e:
+                logger.debug("palette theme signal disconnect failed: %s", e)
+        self._theme_signal_handlers = []
+
+    def _on_gtk_theme_changed(self, _settings, _pspec) -> None:
+        new_image = themed_icon_image(_UNSET_ICON_NAME, self._unset_btn)
+        if new_image is None:
+            return
+        old = self._unset_btn.get_child()
+        if old is not None:
+            self._unset_btn.remove(old)
+        self._unset_btn.add(new_image)
+        new_image.show()
+        self._unset_image = new_image
 
     def _on_color_set(self, btn: Gtk.ColorButton) -> None:
         c = _rgb_to_int(btn.get_rgba())

@@ -25,18 +25,16 @@ from __future__ import annotations
 import logging
 
 from enum import Enum
-from pathlib import Path
 
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import GdkPixbuf  # NOQA: E402
-from gi.repository import Gio  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
 
 from solaar.i18n import _  # NOQA: E402
 
 from . import binding  # NOQA: E402
+from ._icons import themed_icon_image  # NOQA: E402
 from .canvas import KeyboardCanvas  # NOQA: E402
 from .layout import Layout  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
@@ -65,59 +63,6 @@ _TOOL_ICON_NAMES = {
     "rect": "solaar-tool-rect-symbolic",
     "bucket": "solaar-tool-bucket-symbolic",
 }
-_TOOL_ICON_PIXEL_SIZE = 22
-
-_icon_search_path_added = False
-
-
-def _ensure_tool_icon_path() -> None:
-    """Register share/solaar/icons with the default GtkIconTheme so our
-    custom symbolic tool icons resolve by name. Idempotent."""
-    global _icon_search_path_added
-    if _icon_search_path_added:
-        return
-    theme = Gtk.IconTheme.get_default()
-    existing = set(theme.get_search_path() or [])
-    # Source-tree path: lib/solaar/ui/perkey/editor.py -> parents[4] = repo root
-    candidates = [
-        Path(__file__).resolve().parents[4] / "share" / "solaar" / "icons",
-    ]
-    for c in candidates:
-        if c.is_dir() and str(c) not in existing:
-            theme.append_search_path(str(c))
-    _icon_search_path_added = True
-
-
-def _tool_icon_image(icon_name: str, style_widget: Gtk.Widget) -> Gtk.Image | None:
-    """Load a Solaar tool icon and recolor it to match the given widget's
-    text foreground color, so the icons follow the active GTK theme
-    (light / dark / custom). Returns None if the icon can't be loaded.
-
-    GTK's stock symbolic loader (`load_symbolic_for_context`) only recolors
-    specific palette stand-ins (e.g. fill="#bebebe"); it ignores
-    `stroke="currentColor"`. We bypass it and substitute currentColor
-    ourselves so any SVG using the currentColor convention works.
-    """
-    _ensure_tool_icon_path()
-    theme = Gtk.IconTheme.get_default()
-    icon_info = theme.lookup_icon(icon_name, _TOOL_ICON_PIXEL_SIZE, Gtk.IconLookupFlags.FORCE_SIZE)
-    if icon_info is None:
-        return None
-    path = icon_info.get_filename()
-    if not path:
-        return None
-    fg = style_widget.get_style_context().get_color(Gtk.StateFlags.NORMAL)
-    color = f"#{int(fg.red * 255):02x}{int(fg.green * 255):02x}{int(fg.blue * 255):02x}"
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            svg = f.read()
-        svg = svg.replace("currentColor", color)
-        stream = Gio.MemoryInputStream.new_from_data(svg.encode("utf-8"))
-        pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(stream, _TOOL_ICON_PIXEL_SIZE, _TOOL_ICON_PIXEL_SIZE, True)
-        return Gtk.Image.new_from_pixbuf(pixbuf)
-    except Exception as e:
-        logger.debug("recolor failed for %s: %s", icon_name, e)
-        return None
 
 
 class PerKeyEditor(Gtk.Box):
@@ -148,7 +93,7 @@ class PerKeyEditor(Gtk.Box):
                 icon_name = _TOOL_ICON_NAMES.get(name)
                 btn = Gtk.RadioButton.new_from_widget(first)
                 btn.set_mode(False)  # render as toggle button rather than radio
-                image = _tool_icon_image(icon_name, btn) if icon_name else None
+                image = themed_icon_image(icon_name, btn) if icon_name else None
                 if image is not None:
                     btn.add(image)
                     btn.set_tooltip_text(tip or label)
@@ -209,7 +154,6 @@ class PerKeyEditor(Gtk.Box):
             logger.debug("zone_base_color read failed: %s", e)
             base = None
         self._canvas.set_zone_base_color(base)
-        self._palette.set_zone_base_color(base)
         self._refresh_layout()
         self._sync_from_sink()
         self._unsubscribe = sink.subscribe(self._on_sink_update)
@@ -227,12 +171,16 @@ class PerKeyEditor(Gtk.Box):
             except Exception as e:
                 logger.debug("theme signal disconnect failed: %s", e)
         self._theme_signal_handlers = []
+        try:
+            self._palette.shutdown()
+        except Exception as e:
+            logger.debug("palette shutdown failed: %s", e)
 
     def _on_gtk_theme_changed(self, _settings, _pspec) -> None:
         """Rebuild themed tool icons so they match the new theme's foreground."""
         for btn, icon_name in self._themed_icon_buttons.items():
             old = btn.get_child()
-            new_image = _tool_icon_image(icon_name, btn)
+            new_image = themed_icon_image(icon_name, btn)
             if new_image is None:
                 continue
             if old is not None:

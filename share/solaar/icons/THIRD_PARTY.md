@@ -13,6 +13,7 @@ copyright (c) 2020-2024 Paweł Kuna, distributed under the MIT License:
 - `solaar-tool-brush-symbolic.svg` — from `brush`
 - `solaar-tool-rect-symbolic.svg` — from `paint`
 - `solaar-tool-bucket-symbolic.svg` — from `bucket-droplet`
+- `solaar-tool-palette-off-symbolic.svg` — from `palette-off`
 
 ### MIT License (Tabler Icons)
 
