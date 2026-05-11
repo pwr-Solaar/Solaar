@@ -25,10 +25,13 @@ from __future__ import annotations
 import logging
 
 from enum import Enum
+from pathlib import Path
 
 import gi
 
 gi.require_version("Gtk", "3.0")
+from gi.repository import GdkPixbuf  # NOQA: E402
+from gi.repository import Gio  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
 
 from solaar.i18n import _  # NOQA: E402
@@ -57,6 +60,64 @@ _TOOL_LABELS = {
 _TOOL_TOOLTIPS = {
     "gradient": _("Drag to fade from previous color to active color"),
 }
+_TOOL_ICON_NAMES = {
+    "single": "solaar-tool-brush-symbolic",
+    "rect": "solaar-tool-rect-symbolic",
+    "bucket": "solaar-tool-bucket-symbolic",
+}
+_TOOL_ICON_PIXEL_SIZE = 22
+
+_icon_search_path_added = False
+
+
+def _ensure_tool_icon_path() -> None:
+    """Register share/solaar/icons with the default GtkIconTheme so our
+    custom symbolic tool icons resolve by name. Idempotent."""
+    global _icon_search_path_added
+    if _icon_search_path_added:
+        return
+    theme = Gtk.IconTheme.get_default()
+    existing = set(theme.get_search_path() or [])
+    # Source-tree path: lib/solaar/ui/perkey/editor.py -> parents[4] = repo root
+    candidates = [
+        Path(__file__).resolve().parents[4] / "share" / "solaar" / "icons",
+    ]
+    for c in candidates:
+        if c.is_dir() and str(c) not in existing:
+            theme.append_search_path(str(c))
+    _icon_search_path_added = True
+
+
+def _tool_icon_image(icon_name: str, style_widget: Gtk.Widget) -> Gtk.Image | None:
+    """Load a Solaar tool icon and recolor it to match the given widget's
+    text foreground color, so the icons follow the active GTK theme
+    (light / dark / custom). Returns None if the icon can't be loaded.
+
+    GTK's stock symbolic loader (`load_symbolic_for_context`) only recolors
+    specific palette stand-ins (e.g. fill="#bebebe"); it ignores
+    `stroke="currentColor"`. We bypass it and substitute currentColor
+    ourselves so any SVG using the currentColor convention works.
+    """
+    _ensure_tool_icon_path()
+    theme = Gtk.IconTheme.get_default()
+    icon_info = theme.lookup_icon(icon_name, _TOOL_ICON_PIXEL_SIZE, Gtk.IconLookupFlags.FORCE_SIZE)
+    if icon_info is None:
+        return None
+    path = icon_info.get_filename()
+    if not path:
+        return None
+    fg = style_widget.get_style_context().get_color(Gtk.StateFlags.NORMAL)
+    color = f"#{int(fg.red * 255):02x}{int(fg.green * 255):02x}{int(fg.blue * 255):02x}"
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            svg = f.read()
+        svg = svg.replace("currentColor", color)
+        stream = Gio.MemoryInputStream.new_from_data(svg.encode("utf-8"))
+        pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(stream, _TOOL_ICON_PIXEL_SIZE, _TOOL_ICON_PIXEL_SIZE, True)
+        return Gtk.Image.new_from_pixbuf(pixbuf)
+    except Exception as e:
+        logger.debug("recolor failed for %s: %s", icon_name, e)
+        return None
 
 
 class PerKeyEditor(Gtk.Box):
@@ -81,9 +142,17 @@ class PerKeyEditor(Gtk.Box):
                 btn.set_tooltip_text(_TOOL_TOOLTIPS["gradient"])
             else:
                 label, tip = _TOOL_LABELS.get(name, (name, ""))
-                btn = Gtk.RadioButton.new_with_label_from_widget(first, label)
+                icon_name = _TOOL_ICON_NAMES.get(name)
+                btn = Gtk.RadioButton.new_from_widget(first)
                 btn.set_mode(False)  # render as toggle button rather than radio
-                btn.set_tooltip_text(tip)
+                image = _tool_icon_image(icon_name, btn) if icon_name else None
+                if image is not None:
+                    btn.add(image)
+                    btn.set_tooltip_text(tip or label)
+                    btn.get_accessible().set_name(label)
+                else:
+                    btn.set_label(label)
+                    btn.set_tooltip_text(tip)
             btn.connect(GtkSignal.TOGGLED.value, self._on_tool_toggled, name)
             if first is None:
                 first = btn
