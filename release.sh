@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 repo=pwr-Solaar/Solaar
 
@@ -43,6 +43,8 @@ prerelease=false
 echo $version | grep '.*rc.*' >/dev/null
 [ $? -eq 0 ] && prerelease=true
 
+stable_branch=stable
+
 ref=$(git symbolic-ref HEAD)
 [ $? -ne 0 ] && echo 'Error: Failed current branch' && exit 1
 branch=${ref##*/}
@@ -86,7 +88,7 @@ echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
 # Check if version is in the changelog
-grep '^# '"$version" ChangeLog.md >/dev/null
+grep '^# '"$version" CHANGELOG.md >/dev/null
 [ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
 
 # Check for uncommitted changes
@@ -119,11 +121,11 @@ echo 'Creating tag...'
     echo
     found=no
     while read -r line; do
-        if [[ "$line" == *: ]]; then
-            [ "$line" == "$version:" ] && found=yes || found=no
+        if [[ "$line" == "# "* ]]; then
+            [ "$line" == "# $version" ] && found=yes || found=no
         fi
         [ "$found" == 'yes' ] && [ "${line:0:1}" == '*' ] && echo "$line"
-    done < ChangeLog.md
+    done < CHANGELOG.md
 } > /tmp/solaar-changelog
 [ -z "$DRY_RUN" ] && git tag -s $version -F /tmp/solaar-changelog >/dev/null || true
 [ $? -ne 0 ] && echo -e '\nError: Failed to create tag' && exit 1
@@ -132,6 +134,20 @@ echo 'Creating tag...'
 echo 'Pushing tag...'
 [ -z "$DRY_RUN" ] && git push $remote $version >/dev/null || true
 [ $? -ne 0 ] && echo -e '\nError: Failed to push tag' && exit 1
+
+# Point stable branch to latest version tag
+echo 'Updating stable branch...'
+if [[ -z "$DRY_RUN" && $prerelease == "false" ]]
+then
+    # Check if stable branch does not exist
+    git rev-list --max-count=1 $stable_branch >/dev/null 2>/dev/null
+    [ $? -ne 0 ] && echo -e '\nWarning: Creating stable branch for a first time' && git branch $stable_branch
+    # Fast forward and push stable branch
+    git checkout $stable_branch
+    git merge --ff $version
+    git push $remote $stable_branch >/dev/null || true
+    git checkout $branch
+fi
 
 # Create github release
 body() {

@@ -1,0 +1,22 @@
+[run]
+branch = True
+
+source =
+    hid_parser
+    hidapi
+    keysyms
+    logitech_receiver
+    solaar
+
+omit =
+    */tests/*
+    */setup.py
+    */__main__.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == '__main__':
+    if typing.TYPE_CHECKING
+
+fail_under = 40

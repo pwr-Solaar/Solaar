@@ -1,18 +1,18 @@
-Solaar version 1.1.7
+solaar version 1.1.12rc1
 
   1: G502 Gaming Mouse
-     Device path  : /dev/hidraw4
+     Device path  : /dev/hidraw20
      WPID         : 407F
      Codename     : G502
      Kind         : mouse
      Protocol     : HID++ 4.2
-     Polling rate : 1 ms (1000Hz)
-     Serial number: 1F2DBC7E
+     Report Rate : 1ms
+     Serial number: DDDAADBC
      Model ID:      407FC08D0000
-     Unit ID:       1F2DBC7E
-        Bootloader: BOT 92.00.B0008
-          Firmware: MPM 17.00.B0008
-             Other:
+     Unit ID:       DDDAADBC
+                 1: BOT 92.00.B0008
+                 0: MPM 17.00.B0008
+                 3:
      The power switch is located on the base.
      Supports 30 HID++ 2.0 features:
          0: ROOT                   {0000} V0
@@ -21,28 +21,34 @@ Solaar version 1.1.7
             Firmware: Bootloader BOT 92.00.B0008 AAEF21F1FA5F
             Firmware: Firmware MPM 17.00.B0008 407F21F1FA5F
             Firmware: Other
-            Unit ID: 1F2DBC7E  Model ID: 407FC08D0000  Transport IDs: {'wpid': '407F', 'usbid': 'C08D'}
+            Unit ID: DDDAADBC  Model ID: 407FC08D0000  Transport IDs: {'wpid': '407F', 'usbid': 'C08D'}
          3: DEVICE NAME            {0005} V0
             Name: G502 LIGHTSPEED Wireless Gaming Mouse
             Kind: mouse
          4: WIRELESS DEVICE STATUS {1D4B} V0
-         5: RESET                  {0020} V0
+         5: CONFIG CHANGE          {0020} V0
+            Configuration: 11000000000000000000000000000000
          6: BATTERY VOLTAGE        {1001} V2
-            Battery: 70% 3978mV , discharging.
+            Battery: 90% 4166mV , discharging.
          7: COLOR LED EFFECTS      {8070} V4
+            LED Control (saved): Device
+            LED Control        : Device
+            LEDs Primary (saved): !LEDEffectSetting {ID: 1, color: 16711680, intensity: 0, period: 100, ramp: 0, speed: 0}
+            LEDs Primary        : None
+            LEDs Logo        : None
          8: LED CONTROL            {1300} V0
          9: ONBOARD PROFILES       {8100} V0
             Device Mode: On-Board
-            Onboard Profiles (saved): Enable
-            Onboard Profiles        : Enable
+            Onboard Profiles (saved): Profile 1
+            Onboard Profiles        : Profile 1
         10: MOUSE BUTTON SPY       {8110} V0
         11: REPORT RATE            {8060} V0
-            Polling Rate (ms): 1
-            Polling Rate (ms) (saved): 1
-            Polling Rate (ms)        : 1
+            Report Rate: 1ms
+            Report Rate (saved): 1ms
+            Report Rate        : 1ms
         12: ADJUSTABLE DPI         {2201} V1
-            Sensitivity (DPI) (saved): 800
-            Sensitivity (DPI)        : 800
+            Sensitivity (DPI) (saved): 900
+            Sensitivity (DPI)        : 900
         13: DEVICE RESET           {1802} V0    internal, hidden
         14: unknown:1803           {1803} V0    internal, hidden
         15: OOBSTATE               {1805} V0    internal, hidden
@@ -63,12 +69,12 @@ Solaar version 1.1.7
             Multiplier: 8
             Has invert: Normal wheel motion
             Has ratchet switch: Normal wheel mode
-            Low resolution mode
+            High resolution mode
             HID notification
             Scroll Wheel Direction (saved): False
             Scroll Wheel Direction        : False
-            Scroll Wheel Resolution (saved): False
-            Scroll Wheel Resolution        : False
+            Scroll Wheel Resolution (saved): True
+            Scroll Wheel Resolution        : True
             Scroll Wheel Diversion (saved): False
             Scroll Wheel Diversion        : False
-     Battery: 70% 3978mV , discharging.
+     Battery: 90% 4166mV , discharging.

@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -16,299 +14,442 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logitech_receiver import base as _base
-from logitech_receiver import hidpp10 as _hidpp10
-from logitech_receiver import hidpp20 as _hidpp20
-from logitech_receiver import receiver as _receiver
-from logitech_receiver import settings_templates as _settings_templates
-from logitech_receiver.common import NamedInt as _NamedInt
-from logitech_receiver.common import strhex as _strhex
-from solaar import NAME, __version__
+from logitech_receiver import common
+from logitech_receiver import exceptions
+from logitech_receiver import hidpp10
+from logitech_receiver import hidpp10_constants
+from logitech_receiver import hidpp20
+from logitech_receiver import hidpp20_constants
+from logitech_receiver import receiver
+from logitech_receiver import settings_templates
+from logitech_receiver.common import LOGITECH_VENDOR_ID
+from logitech_receiver.common import NamedInt
+from logitech_receiver.common import strhex
+from logitech_receiver.device import CenturionReceiver
+from logitech_receiver.hidpp20_constants import SupportedFeature
 
-_F = _hidpp20.FEATURE
+from solaar import NAME
+from solaar import __version__
+
+_hidpp10 = hidpp10.Hidpp10()
+_hidpp20 = hidpp20.Hidpp20()
 
 
 def _print_receiver(receiver):
+    is_centurion = isinstance(receiver, CenturionReceiver)
     paired_count = receiver.count()
 
     print(receiver.name)
-    print('  Device path  :', receiver.path)
-    print('  USB id       : 046d:%s' % receiver.product_id)
-    print('  Serial       :', receiver.serial)
+    print("  Device path  :", receiver.path)
+    print(f"  USB id       : {LOGITECH_VENDOR_ID:04x}:{receiver.product_id}")
+    if is_centurion:
+        print("  Protocol     : Centurion")
+    if receiver.serial:
+        print("  Serial       :", receiver.serial)
+    if not is_centurion:
+        pending = hidpp10.get_configuration_pending_flags(receiver)
+        if pending:
+            print(f"  C Pending    : {pending:02x}")
     if receiver.firmware:
         for f in receiver.firmware:
-            print('    %-11s: %s' % (f.kind, f.version))
+            print("    %-11s: %s" % (f.kind, f.version))
 
-    print('  Has', paired_count, 'paired device(s) out of a maximum of %d.' % receiver.max_devices)
-    if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        print('  Has %d successful pairing(s) remaining.' % receiver.remaining_pairings())
+    if is_centurion:
+        print("  Has", paired_count, f"device(s) out of a maximum of {int(receiver.max_devices)}.")
+    else:
+        print("  Has", paired_count, f"paired device(s) out of a maximum of {int(receiver.max_devices)}.")
+        if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
+            print(f"  Has {int(receiver.remaining_pairings())} successful pairing(s) remaining.")
 
-    notification_flags = _hidpp10.get_notification_flags(receiver)
-    if notification_flags is not None:
-        if notification_flags:
-            notification_names = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-            print('  Notifications: %s (0x%06X)' % (', '.join(notification_names), notification_flags))
+    if is_centurion:
+        _print_centurion_dongle_features(receiver)
+    else:
+        notification_flags = _hidpp10.get_notification_flags(receiver)
+        if notification_flags is not None:
+            if notification_flags:
+                notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
+                print(f"  Notifications: {', '.join(notification_names)} (0x{notification_flags.value:06X})")
+            else:
+                print("  Notifications: (none)")
+
+        activity = receiver.read_register(hidpp10_constants.Registers.DEVICES_ACTIVITY)
+        if activity:
+            activity = [(d, ord(activity[d - 1 : d])) for d in range(1, receiver.max_devices)]
+            activity_text = ", ".join(f"{int(d)}={int(a)}" for d, a in activity if a > 0)
+            print("  Device activity counters:", activity_text or "(empty)")
+
+
+def _print_centurion_dongle_features(receiver):
+    """Print dongle-level features, probed independently on the dongle hardware."""
+    features = receiver.dongle_features
+    if not features:
+        return
+    print(f"  Supports {len(features)} dongle features:")
+    for feature, feat_id, index in features:
+        display_name = "CENTPP BRIDGE" if feat_id == 0x0003 else feature
+        feat_bytes = feat_id.to_bytes(2, byteorder="big")
+        try:
+            flags_resp = receiver.request(0x0000, feat_bytes[0], feat_bytes[1])
+        except Exception:
+            flags_resp = None
+        if flags_resp is not None and len(flags_resp) >= 2:
+            flags = flags_resp[1]
+            flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
+            print("      %2d: %-22s {%04X}    %s " % (index, display_name, feat_id, ", ".join(flag_names)))
         else:
-            print('  Notifications: (none)')
+            print("      %2d: %-22s {%04X}" % (index, display_name, feat_id))
+        if feature == SupportedFeature.CENTURION_DEVICE_INFO:
+            fw_list = _hidpp20.get_firmware_centurion(receiver)
+            serial = _hidpp20.get_serial_centurion(receiver)
+            hw_info = _hidpp20.get_hardware_info_centurion(receiver)
+            if fw_list:
+                for fw in fw_list:
+                    print(f"          Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+            if serial and serial.strip() and serial.strip().isprintable():
+                print(f"          Serial: {serial}")
+            if hw_info:
+                model_id, hw_rev, product_id = hw_info
+                print(f"          Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
 
-    activity = receiver.read_register(_hidpp10.REGISTERS.devices_activity)
-    if activity:
-        activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
-        activity_text = ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0)
-        print('  Device activity counters:', activity_text or '(empty)')
 
-
-def _battery_text(level):
+def _battery_text(level) -> str:
     if level is None:
-        return 'N/A'
-    elif isinstance(level, _NamedInt):
+        return "N/A"
+    elif isinstance(level, NamedInt):
         return str(level)
     else:
-        return '%d%%' % level
+        return f"{int(level)}%"
 
 
 def _battery_line(dev):
     battery = dev.battery()
     if battery is not None:
-        level, nextLevel, status, voltage = battery
+        level, nextLevel, status, voltage = battery.level, battery.next_level, battery.status, battery.voltage
         text = _battery_text(level)
         if voltage is not None:
-            text = text + (' %smV ' % voltage)
-        nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
-        print('     Battery: %s, %s%s.' % (text, status, nextText))
+            text = f"{text} {voltage}mV "
+        nextText = "" if nextLevel is None else f", next level {_battery_text(nextLevel)}"
+        print(f"     Battery: {text}, {status}{nextText}.")
     else:
-        print('     Battery status unavailable.')
+        print("     Battery status unavailable.")
 
 
 def _print_device(dev, num=None):
     assert dev is not None
+    is_centurion = getattr(dev, "centurion", False)
+    is_centurion_child = is_centurion and isinstance(getattr(dev, "receiver", None), CenturionReceiver)
     # try to ping the device to see if it actually exists and to wake it up
     try:
-        dev.ping()
-    except _base.NoSuchDevice:
-        print('  %d: Device not found' % num or dev.number)
+        online = dev.ping()
+    except exceptions.NoSuchDevice:
+        print(f"  {num}: Device not found" or dev.number)
         return
 
-    print('  %d: %s' % (num or dev.number, dev.name))
-    print('     Device path  :', dev.path)
-    if dev.wpid:
-        print('     WPID         : %s' % dev.wpid)
-    if dev.product_id:
-        print('     USB id       : 046d:%s' % dev.product_id)
-    print('     Codename     :', dev.codename)
-    print('     Kind         :', dev.kind)
-    if dev.protocol:
-        print('     Protocol     : HID++ %1.1f' % dev.protocol)
+    if num or dev.number < 8:
+        print(f"  {int(num or dev.number)}: {dev.name}")
     else:
-        print('     Protocol     : unknown (device is offline)')
-    if dev.polling_rate:
-        print('     Polling rate :', dev.polling_rate, 'ms (%dHz)' % (1000 // dev.polling_rate))
-    print('     Serial number:', dev.serial)
+        print(f"{dev.name}")
+
+    if not online:
+        print("     Device is offline.")
+        return
+    # Centurion child has no separate hidraw path — show receiver's path
+    device_path = dev.path or (dev.receiver.path if is_centurion_child else None)
+    print("     Device path  :", device_path)
+    if dev.wpid and not is_centurion_child:
+        print(f"     WPID         : {dev.wpid}")
+    if dev.product_id:
+        print(f"     USB id       : {LOGITECH_VENDOR_ID:04x}:{dev.product_id}")
+    print("     Codename     :", dev.codename)
+    print("     Kind         :", dev.kind)
+    if dev.protocol:
+        proto_name = "Centurion" if is_centurion else "HID++"
+        cent_proto = getattr(dev, "_centurion_protocol", None)
+        if cent_proto:
+            print(f"     Protocol     : {proto_name} {cent_proto[0]}.{cent_proto[1]}")
+        else:
+            print(f"     Protocol     : {proto_name} {dev.protocol:1.1f}")
+    else:
+        print("     Protocol     : unknown (device is offline)")
+    if not is_centurion and dev.polling_rate:
+        print("     Report Rate :", dev.polling_rate)
+    print("     Serial number:", dev.serial)
     if dev.modelId:
-        print('     Model ID:     ', dev.modelId)
+        print("     Model ID:     ", dev.modelId)
     if dev.unitId:
-        print('     Unit ID:      ', dev.unitId)
+        print("     Unit ID:      ", dev.unitId)
     if dev.firmware:
         for fw in dev.firmware:
-            print('       %11s:' % fw.kind, (fw.name + ' ' + fw.version).strip())
+            print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
 
     if dev.power_switch_location:
-        print('     The power switch is located on the %s.' % dev.power_switch_location)
+        print(f"     The power switch is located on the {dev.power_switch_location}.")
 
-    if dev.online:
+    # Skip HID++ 1.0 register reads for centurion devices — they don't support these
+    if dev.online and not is_centurion:
         notification_flags = _hidpp10.get_notification_flags(dev)
         if notification_flags is not None:
             if notification_flags:
-                notification_names = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-                print('     Notifications: %s (0x%06X).' % (', '.join(notification_names), notification_flags))
+                notification_names = hidpp10_constants.NotificationFlag.flag_names(notification_flags)
+                print(f"     Notifications: {', '.join(notification_names)} (0x{notification_flags.value:06X}).")
             else:
-                print('     Notifications: (none).')
+                print("     Notifications: (none).")
         device_features = _hidpp10.get_device_features(dev)
         if device_features is not None:
             if device_features:
-                device_features_names = _hidpp10.DEVICE_FEATURES.flag_names(device_features)
-                print('     Features: %s (0x%06X)' % (', '.join(device_features_names), device_features))
+                device_features_names = hidpp10_constants.DeviceFeature.flag_names(device_features)
+                print(f"     Features: {', '.join(device_features_names)} (0x{device_features:06X})")
             else:
-                print('     Features: (none)')
+                print("     Features: (none)")
 
     if dev.online and dev.features:
-        print('     Supports %d HID++ 2.0 features:' % len(dev.features))
+        is_centurion = getattr(dev, "centurion", False)
+        parent_count = dev.features.count
+        sub_count = getattr(dev.features, "_sub_feature_count", 0)
+        # For centurion child devices, dongle features are shown on the receiver —
+        # only show sub-device (headset) features here.
+        if is_centurion_child and sub_count > 0:
+            print(f"     Supports {sub_count} HID++ 2.0 features:")
+        elif is_centurion and sub_count > 0:
+            print(f"     Supports {parent_count} dongle + {sub_count} headset features:")
+        else:
+            print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
         dev_settings = []
-        _settings_templates.check_feature_settings(dev, dev_settings)
+        settings_templates.check_feature_settings(dev, dev_settings)
+        feature_num = 0
+        in_sub_device = False
         for feature, index in dev.features.enumerate():
-            flags = dev.request(0x0000, feature.bytes(2))
-            flags = 0 if flags is None else ord(flags[1:2])
-            flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
-            version = dev.features.get_feature_version(int(feature))
-            version = version if version else 0
-            print('        %2d: %-22s {%04X} V%s    %s ' % (index, feature, feature, version, ', '.join(flags)))
-            if feature == _hidpp20.FEATURE.HIRES_WHEEL:
+            if is_centurion and not in_sub_device and feature_num >= parent_count:
+                in_sub_device = True
+                if not is_centurion_child:
+                    print("       Headset (via CentPPBridge):")
+            feature_num += 1
+            # For centurion child, skip dongle features (already shown on the receiver)
+            if is_centurion_child and not in_sub_device:
+                continue
+            if isinstance(feature, str):
+                feature_bytes = bytes.fromhex(feature[-4:])
+            else:
+                feature_bytes = feature.to_bytes(2, byteorder="little")
+            feature_int = int.from_bytes(feature_bytes, byteorder="little")
+            display_name = feature
+            if is_centurion_child and in_sub_device:
+                # Use cached version — skip slow bridge ROOT queries
+                version = dev.features.get_feature_version(feature_int) or 0
+                print("        %2d: %-22s {%04X} V%s" % (index, display_name, feature_int, version))
+            else:
+                try:
+                    flags = dev.request(0x0000, feature_bytes)
+                except Exception:
+                    flags = None
+                if flags is not None:
+                    flags = ord(flags[1:2])
+                    flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
+                    version = dev.features.get_feature_version(feature_int)
+                    version = version if version else 0
+                    print(
+                        "        %2d: %-22s {%04X} V%s    %s "
+                        % (index, display_name, feature_int, version, ", ".join(flag_names))
+                    )
+                else:
+                    print("        %2d: %-22s {%04X}" % (index, display_name, feature_int))
+            if feature == SupportedFeature.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
-                    print('            Multiplier: %s' % multi)
+                    print(f"            Multiplier: {multi}")
                     if has_invert:
-                        print('            Has invert:', 'Inverse wheel motion' if inv else 'Normal wheel motion')
+                        print("            Has invert:", "Inverse wheel motion" if inv else "Normal wheel motion")
                     if has_switch:
-                        print('            Has ratchet switch:', 'Normal wheel mode' if ratchet else 'Free wheel mode')
+                        print("            Has ratchet switch:", "Normal wheel mode" if ratchet else "Free wheel mode")
                     if res:
-                        print('            High resolution mode')
+                        print("            High resolution mode")
                     else:
-                        print('            Low resolution mode')
+                        print("            Low resolution mode")
                     if target:
-                        print('            HID++ notification')
+                        print("            HID++ notification")
                     else:
-                        print('            HID notification')
-            elif feature == _hidpp20.FEATURE.MOUSE_POINTER:
+                        print("            HID notification")
+            elif feature == SupportedFeature.MOUSE_POINTER:
                 mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
                 if mouse_pointer:
-                    print('            DPI: %s' % mouse_pointer['dpi'])
-                    print('            Acceleration: %s' % mouse_pointer['acceleration'])
-                    if mouse_pointer['suggest_os_ballistics']:
-                        print('            Use OS ballistics')
+                    print(f"            DPI: {mouse_pointer['dpi']}")
+                    print(f"            Acceleration: {mouse_pointer['acceleration']}")
+                    if mouse_pointer["suggest_os_ballistics"]:
+                        print("            Use OS ballistics")
                     else:
-                        print('            Override OS ballistics')
-                    if mouse_pointer['suggest_vertical_orientation']:
-                        print('            Provide vertical tuning, trackball')
+                        print("            Override OS ballistics")
+                    if mouse_pointer["suggest_vertical_orientation"]:
+                        print("            Provide vertical tuning, trackball")
                     else:
-                        print('            No vertical tuning, standard mice')
-            elif feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+                        print("            No vertical tuning, standard mice")
+            elif feature == SupportedFeature.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
-                    print('            Roller type: %s' % vertical_scrolling_info['roller'])
-                    print('            Ratchet per turn: %s' % vertical_scrolling_info['ratchet'])
-                    print('            Scroll lines: %s' % vertical_scrolling_info['lines'])
-            elif feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
+                    print(f"            Roller type: {vertical_scrolling_info['roller']}")
+                    print(f"            Ratchet per turn: {vertical_scrolling_info['ratchet']}")
+                    print(f"            Scroll lines: {vertical_scrolling_info['lines']}")
+            elif feature == SupportedFeature.HI_RES_SCROLLING:
                 scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(dev)
                 if scrolling_mode:
-                    print('            Hi-res scrolling enabled')
+                    print("            Hi-res scrolling enabled")
                 else:
-                    print('            Hi-res scrolling disabled')
+                    print("            Hi-res scrolling disabled")
                 if scrolling_resolution:
-                    print('            Hi-res scrolling multiplier: %s' % scrolling_resolution)
-            elif feature == _hidpp20.FEATURE.POINTER_SPEED:
+                    print(f"            Hi-res scrolling multiplier: {scrolling_resolution}")
+            elif feature == SupportedFeature.POINTER_SPEED:
                 pointer_speed = _hidpp20.get_pointer_speed_info(dev)
                 if pointer_speed:
-                    print('            Pointer Speed: %s' % pointer_speed)
-            elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
+                    print(f"            Pointer Speed: {pointer_speed}")
+            elif feature == SupportedFeature.LOWRES_WHEEL:
                 wheel_status = _hidpp20.get_lowres_wheel_status(dev)
                 if wheel_status:
-                    print('            Wheel Reports: %s' % wheel_status)
-            elif feature == _hidpp20.FEATURE.NEW_FN_INVERSION:
+                    print(f"            Wheel Reports: {wheel_status}")
+            elif feature == SupportedFeature.NEW_FN_INVERSION:
                 inversion = _hidpp20.get_new_fn_inversion(dev)
                 if inversion:
                     inverted, default_inverted = inversion
-                    print('            Fn-swap:', 'enabled' if inverted else 'disabled')
-                    print('            Fn-swap default:', 'enabled' if default_inverted else 'disabled')
-            elif feature == _hidpp20.FEATURE.HOSTS_INFO:
+                    print("            Fn-swap:", "enabled" if inverted else "disabled")
+                    print("            Fn-swap default:", "enabled" if default_inverted else "disabled")
+            elif feature == SupportedFeature.HOSTS_INFO:
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():
-                    print('            Host %s (%s): %s' % (host, 'paired' if paired else 'unpaired', name))
-            elif feature == _hidpp20.FEATURE.DEVICE_NAME:
-                print('            Name: %s' % _hidpp20.get_name(dev))
-                print('            Kind: %s' % _hidpp20.get_kind(dev))
-            elif feature == _hidpp20.FEATURE.DEVICE_FRIENDLY_NAME:
-                print('            Friendly Name: %s' % _hidpp20.get_friendly_name(dev))
-            elif feature == _hidpp20.FEATURE.DEVICE_FW_VERSION:
+                    print(f"            Host {host} ({'paired' if paired else 'unpaired'}): {name}")
+            elif feature == SupportedFeature.DEVICE_NAME:
+                print(f"            Name: {_hidpp20.get_name(dev)}")
+                print(f"            Kind: {_hidpp20.get_kind(dev)}")
+            elif feature == SupportedFeature.DEVICE_FRIENDLY_NAME:
+                print(f"            Friendly Name: {_hidpp20.get_friendly_name(dev)}")
+            elif feature == SupportedFeature.CENTURION_DEVICE_INFO:
+                if in_sub_device:
+                    # Use cached device properties to avoid redundant bridge requests
+                    fw_list = dev.firmware
+                    serial = dev.serial
+                    hw_info = _hidpp20.get_hardware_info_centurion_sub(dev)
+                else:
+                    fw_list = _hidpp20.get_firmware_centurion(dev)
+                    serial = _hidpp20.get_serial_centurion(dev)
+                    hw_info = _hidpp20.get_hardware_info_centurion(dev)
+                if fw_list:
+                    for fw in fw_list:
+                        print(f"            Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+                if serial and serial.strip() and serial.strip().isprintable():
+                    print(f"            Serial: {serial}")
+                if hw_info:
+                    model_id, hw_rev, product_id = hw_info
+                    print(f"            Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
+            elif isinstance(feature, SupportedFeature) and feature == SupportedFeature.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
-                    extras = _strhex(fw.extras) if fw.extras else ''
-                    print('            Firmware: %s %s %s %s' % (fw.kind, fw.name, fw.version, extras))
+                    extras = strhex(fw.extras) if fw.extras else ""
+                    print(f"            Firmware: {fw.kind} {fw.name} {fw.version} {extras}")
                 ids = _hidpp20.get_ids(dev)
                 if ids:
                     unitId, modelId, tid_map = ids
-                    print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
-            elif feature == _hidpp20.FEATURE.REPORT_RATE:
-                print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
-            elif feature == _hidpp20.FEATURE.REMAINING_PAIRING:
-                print('            Remaining Pairings: %d' % _hidpp20.get_remaining_pairing(dev))
-            elif feature == _hidpp20.FEATURE.ONBOARD_PROFILES:
-                if _hidpp20.get_onboard_mode(dev) == _hidpp20.ONBOARD_MODES.MODE_HOST:
-                    mode = 'Host'
+                    print(f"            Unit ID: {unitId}  Model ID: {modelId}  Transport IDs: {tid_map}")
+            elif feature == SupportedFeature.REPORT_RATE or feature == SupportedFeature.EXTENDED_ADJUSTABLE_REPORT_RATE:
+                print(f"            Report Rate: {_hidpp20.get_polling_rate(dev)}")
+            elif feature == SupportedFeature.CONFIG_CHANGE:
+                response = dev.feature_request(SupportedFeature.CONFIG_CHANGE, 0x00)
+                print(f"            Configuration: {response.hex()}")
+            elif feature == SupportedFeature.REMAINING_PAIRING:
+                print(f"            Remaining Pairings: {int(_hidpp20.get_remaining_pairing(dev))}")
+            elif feature == SupportedFeature.ONBOARD_PROFILES:
+                if _hidpp20.get_onboard_mode(dev) == hidpp20_constants.OnboardMode.MODE_HOST:
+                    mode = "Host"
                 else:
-                    mode = 'On-Board'
-                print('            Device Mode: %s' % mode)
-            elif _hidpp20.battery_functions.get(feature, None):
-                print('', end='       ')
+                    mode = "On-Board"
+                print(f"            Device Mode: {mode}")
+            elif feature == SupportedFeature.HEADSET_ONBOARD_EQ:
+                bands = hidpp20.get_onboard_eq_params(dev)
+                if bands:
+                    print(f"            EQ: {', '.join(f'{f}Hz:{g:+d}dB' for f, g, _q in bands)}")
+            elif hidpp20.battery_functions.get(feature, None):
+                print("", end="       ")
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
-                    if setting._device and getattr(setting._device, 'persister', None) and \
-                       setting._device.persister.get(setting.name) is not None:
+                    if (
+                        setting._device
+                        and getattr(setting._device, "persister", None)
+                        and setting._device.persister.get(setting.name) is not None
+                    ):
                         v = setting.val_to_string(setting._device.persister.get(setting.name))
-                        print('            %s (saved): %s' % (setting.label, v))
+                        print(f"            {setting.label} (saved): {v}")
                     try:
-                        v = setting.val_to_string(setting.read(False))
-                    except _hidpp20.FeatureCallError as e:
-                        v = 'HID++ error ' + str(e)
-                    print('            %s        : %s' % (setting.label, v))
+                        v = setting.read(False)
+                        v = setting.val_to_string(v)
+                    except exceptions.FeatureCallError as e:
+                        v = "HID++ error " + str(e)
+                    except AssertionError as e:
+                        v = "AssertionError " + str(e)
+                    print(f"            {setting.label}        : {v}")
 
     if dev.online and dev.keys:
-        print('     Has %d reprogrammable keys:' % len(dev.keys))
+        print(f"     Has {len(dev.keys)} reprogrammable keys:")
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
-            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V2:
-                print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
-            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
-                print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
-                gmask_fmt = ','.join(k.group_mask)
-                gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
-                print('             %s, pos:%d, group:%1d, group mask:%s' % (', '.join(k.flags), k.pos, k.group, gmask_fmt))
-                report_fmt = ', '.join(k.mapping_flags)
-                report_fmt = report_fmt if report_fmt else 'default'
-                print('             reporting: %s' % (report_fmt))
+            if dev.keys.keyversion == SupportedFeature.REPROG_CONTROLS_V2:
+                print("        %2d: %-26s => %-27s   %s" % (k.index, k.key, k.default_task, ", ".join(k.flags)))
+            if dev.keys.keyversion == SupportedFeature.REPROG_CONTROLS_V4:
+                print("        %2d: %-26s, default: %-27s => %-26s" % (k.index, k.key, k.default_task, k.mapped_to))
+                gmask_fmt = ",".join(k.group_mask)
+                gmask_fmt = gmask_fmt if gmask_fmt else "empty"
+                flag_names = list(common.flag_names(hidpp20.KeyFlag, k.flags.value))
+                print(
+                    f"             {', '.join(flag_names)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}"
+                )
+                report_fmt = list(common.flag_names(hidpp20.MappingFlag, k.mapping_flags.value))
+                report_fmt = report_fmt if report_fmt else "default"
+                print(f"             reporting: {report_fmt}")
     if dev.online and dev.remap_keys:
-        print('     Has %d persistent remappable keys:' % len(dev.remap_keys))
+        print(f"     Has {len(dev.remap_keys)} persistent remappable keys:")
         for k in dev.remap_keys:
-            print('        %2d: %-26s => %s%s' % (k.index, k.key, k.action, ' (remapped)' if k.cidStatus else ''))
+            print("        %2d: %-26s => %s%s" % (k.index, k.key, k.action, " (remapped)" if k.cidStatus else ""))
     if dev.online and dev.gestures:
         print(
-            '     Has %d gesture(s), %d param(s) and %d spec(s):' %
-            (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
+            "     Has %d gesture(s), %d param(s) and %d spec(s):"
+            % (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
         )
         for k in dev.gestures.gestures.values():
             print(
-                '        %-26s Enabled(%4s): %-5s  Diverted:(%4s) %s' %
-                (k.gesture, k.index, k.enabled(), k.diversion_index, k.diverted())
+                "        %-26s Enabled(%4s): %-5s  Diverted:(%4s) %s"
+                % (k.gesture, k.index, k.enabled(), k.diversion_index, k.diverted())
             )
         for k in dev.gestures.params.values():
-            print('        %-26s Value  (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
+            print("        %-26s Value  (%4s): %s [Default: %s]" % (k.param, k.index, k.value, k.default_value))
         for k in dev.gestures.specs.values():
-            print('        %-26s Spec   (%4s): %s' % (k.spec, k.id, k.value))
+            print("        %-26s Spec   (%4s): %s" % (k.spec, k.id, k.value))
     if dev.online:
         _battery_line(dev)
     else:
-        print('     Battery: unknown (device is offline).')
+        print("     Battery: unknown (device is offline).")
 
 
 def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
 
-    print('%s version %s' % (NAME, __version__))
-    print('')
+    print(f"{NAME.lower()} version {__version__}")
+    print("")
 
     device_name = args.device.lower()
 
-    if device_name == 'all':
-        dev_num = 1
+    if device_name == "all":
         for d in devices:
-            if isinstance(d, _receiver.Receiver):
+            if isinstance(d, (receiver.Receiver, CenturionReceiver)):
                 _print_receiver(d)
                 count = d.count()
                 if count:
                     for dev in d:
-                        print('')
-                        _print_device(dev)
+                        print("")
+                        _print_device(dev, dev.number)
                         count -= 1
                         if not count:
                             break
-                print('')
+                print("")
             else:
-                if dev_num == 1:
-                    print('USB and Bluetooth Devices')
-                print('')
-                _print_device(d, num=dev_num)
-                dev_num += 1
+                _print_device(d)
+                print("")
         return
 
     dev = find_receiver(devices, device_name)
@@ -318,6 +459,6 @@ def run(devices, args, find_receiver, find_device):
 
     dev = next(find_device(devices, device_name), None)
     if not dev:
-        raise Exception("no device found matching '%s'" % device_name)
+        raise Exception(f"no device found matching '{device_name}'")
 
     _print_device(dev)

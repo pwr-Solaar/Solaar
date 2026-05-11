@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -18,29 +16,23 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import DEBUG as _DEBUG
-from logging import getLogger
-from threading import Thread as _Thread
+import logging
 
-_log = getLogger(__name__)
-del getLogger
+from threading import Thread
+
+logger = logging.getLogger(__name__)
 
 try:
-    from Queue import Queue as _Queue
+    from Queue import Queue
 except ImportError:
-    from queue import Queue as _Queue
-
-#
-#
-#
+    from queue import Queue
 
 
-class TaskRunner(_Thread):
-
+class TaskRunner(Thread):
     def __init__(self, name):
         super().__init__(name=name)
         self.daemon = True
-        self.queue = _Queue(16)
+        self.queue = Queue(16)
         self.alive = False
 
     def __call__(self, function, *args, **kwargs):
@@ -54,8 +46,7 @@ class TaskRunner(_Thread):
     def run(self):
         self.alive = True
 
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('started')
+        logger.debug("started")
 
         while self.alive:
             task = self.queue.get()
@@ -65,7 +56,6 @@ class TaskRunner(_Thread):
                 try:
                     function(*args, **kwargs)
                 except Exception:
-                    _log.exception('calling %s', function)
+                    logger.exception("calling %s", function)
 
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('stopped')
+        logger.debug("stopped")

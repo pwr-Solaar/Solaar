@@ -1,0 +1,32 @@
+site_name: Solaar Documentation
+site_description: Linux Device Manager for Logitech Unifying Receivers and Devices.
+site_author: pwr-Solaar
+repo_url: https://github.com/pwr-Solaar/Solaar
+repo_name: Solaar
+theme:
+  name: readthedocs
+docs_dir: docs
+nav:
+  - Solaar: index.md
+  - Usage: usage.md
+  - Capabilities: capabilities.md
+  - Issues: issues.md
+  - Rules: rules.md
+  - Installation: installation.md
+  - Uninstallation: uninstallation.md
+  - Translation: i18n.md
+  - Features: features.md
+  - Devices: devices.md
+  - Implementation: implementation.md
+  - Debian: debian.md
+
+plugins:
+  - search
+#  - mkdocstrings:
+#      handlers:
+#        python:
+#          setup_commands:
+#            - python -m pip install .
+  - mermaid2
+markdown_extensions:
+  - pymdownx.superfences

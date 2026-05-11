@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -16,17 +14,28 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pkgutil as _pkgutil
-import subprocess as _subprocess
-import sys as _sys
+import pkgutil
+import subprocess
+import sys
 
-NAME = 'solaar'
+NAME = "Solaar"
 
 try:
-    __version__ = _subprocess.check_output(['git', 'describe', '--always'], cwd=_sys.path[0],
-                                           stderr=_subprocess.DEVNULL).strip().decode()
+    __version__ = (
+        subprocess.check_output(
+            [
+                "git",
+                "describe",
+                "--always",
+            ],
+            cwd=sys.path[0],
+            stderr=subprocess.DEVNULL,
+        )
+        .strip()
+        .decode()
+    )
 except Exception:
     try:
-        __version__ = _pkgutil.get_data('solaar', 'commit').strip().decode()
+        __version__ = pkgutil.get_data("solaar", "commit").strip().decode()
     except Exception:
-        __version__ = _pkgutil.get_data('solaar', 'version').strip().decode()
+        __version__ = pkgutil.get_data("solaar", "version").strip().decode()

@@ -21,9 +21,9 @@ Not all such devices supported in Solaar as information needs to be added to Sol
 for each device type that directly connects.
 
 
-## HID++
+## HID++ and Centurion
 
-The devices that Solaar handles use Logitech's HID++ protocol.
+The devices that Solaar handles use Logitech's HID++ and Centurion protocols.
 
 HID++ is a Logitech-proprietary protocol that extends the standard HID
 protocol for interfacing with receivers, keyboards, mice, and so on. It allows
@@ -43,6 +43,8 @@ Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
 same to software as some M310 mice.)
 
+Centurion is closely related to HID++ and is used by some Logitech headsets.
+
 The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software
 identity of a device that connects to a receiver can be determined by
@@ -51,17 +53,17 @@ connect via a USB cable or via bluetooth can be determined by their USB or
 Bluetooth product ID.
 
 
-# Pairing and Unpairing
+## Pairing and Unpairing
 
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
 
-For Unifying receivers, pairing adds a new paired device, but
+For Unifying and Bolt receivers, pairing adds a new paired device, but
 only if there is an open slot on the receiver. So these receivers need to
 be able to unpair devices that they have been paired with or else they will
-not have any open slots for pairing. Some other receivers, like the
-Nano receiver with USB ID `046d:c534`, can only pair with particular kinds of
-devices and pairing a new device replaces whatever device of that kind was
+not have any open slots for pairing. Some Nano and Lightspeed receivers, like the
+Nano receiver with USB ID `046d:c534`, can only pair with one keyboard and one mouse
+and pairing a new device replaces whatever device of that kind was
 previously paired to the receiver. These receivers cannot unpair. Further,
 some receivers can pair an unlimited number of times but others can only
 pair a limited number of times.
@@ -69,20 +71,22 @@ pair a limited number of times.
 Bolt receivers add an authentication phase to pairing,
 where the user has type a passcode or click some buttons to authenticate the device.
 
-Only some connections between receivers and devices are possible. In should
+Only some connections between receivers and devices are possible. It should
 be possible to connect any device with a Unifying logo on it to any receiver
-with a Unifying logo on it. Receivers without the Unifying logo probably
-can connect only to the kind of devices they were bought with and devices
-without the Unifying logo can probably only connect to the kind of receiver
-that they were bought with.
+with a Unifying logo on it and any device with a Bolt logo on it to any receiver
+with a Bolt logo on it.
 
+Many receivers without the Unifying or Bolt logo
+can connect only to the model of devices they were bought with and many devices
+without the Unifying or Bolt logo can only connect to a receiver
+that matches the one they were bought with.
 
 ## Device Settings
 
 Solaar can display quite a few changeable settings of receivers and devices.
-For a list of HID++ features and their support see [the features page](features).
+For a list of features and their support see [the features page](features.md).
 
-Solaar does not do much beyond using the HID++ protocol to change the
+Solaar does not do much beyond using the protocols to change the
 behavior of receivers and devices via changing their settings.
 In particular, Solaar cannot change how
 the operating system turns the keycodes that a keyboard produces into
@@ -112,7 +116,7 @@ Solaar keeps track of settings independently on each computer.
 As a result if a device is switched between different computers
 Solaar may apply different settings for it on the different computers.
 
-Querying a device for its current state can require quite a few HID++
+Querying a device for its current state can require quite a few
 interactions. These interactions can temporarily slow down the device, so
 Solaar tries to internally cache information about devices while it is
 running.  If the device
@@ -173,6 +177,154 @@ When the button is released a `MOUSE_GESTURE` notification with the mouse moveme
 is sent to the Solaar rule system so that rules can detect these notifications.
 For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
+### Keyboard Key Names and Locations
+
+Solaar uses the standard Logitech names for keyboard keys.  Some Logitech keyboards have different icons on some of their keys and have different functionality than suggested by these names.
+
+Solaar uses the standard US keyboard layout.  This currently only matters for the `Per-key Lighting` setting.  Users who want to have the key names for this setting reflect the keyboard layout that they use can create and edit `~/.config/solaar/keys.yaml` which contains a YAML dictionary of key names and locations.  For example, switching the `Y` and `Z` keys can be done  as:
+
+	Z: 25
+	Y: 26
+
+This is an experimental feature and may be modified or even eliminated.
+
+
+### HITS Tuning (Hall-Effect Inductive Trigger Switch)
+
+Some gaming mice (such as the PRO X 2 Superstrike) feature hall-effect magnetic switches on their primary buttons instead of traditional mechanical switches. These switches expose tunable parameters via the `SUPERSTRIKE_TUNING` HID++ feature (`0x1B0C`).
+
+Solaar supports three per-button settings for each primary button (left = 0, right = 1):
+
+- **Actuation Point** (`superstrike-tuning_actuation-{0,1}`): How deep the button must be pressed to register a click. Range 1–10, where 1 is the shallowest (hair trigger) and 10 is the deepest (full press). Default is 5.
+- **Rapid Trigger Level** (`superstrike-tuning_rapid-trigger-level-{0,1}`): Sensitivity of rapid re-actuation after partial release. Range 1–5, where 1 is the most sensitive and 5 is the least. This cannot be fully disabled.
+- **Click Haptics** (`superstrike-tuning_haptics-{0,1}`): Intensity of haptic feedback on click. Range 0–5, where 0 disables haptics and 5 is maximum intensity.
+
+These settings are written directly to the device and persist across reconnections regardless of the onboard profile state.
+
+### Extended DPI
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_DPI` feature (`0x2202`) which allows independent X and Y axis DPI configuration as well as lift-off distance (LOD) control. This is exposed via the `dpi_extended` setting:
+
+```bash
+solaar config <device> dpi_extended "{X:1600, Y:1600, LOD:HIGH}"
+```
+
+LOD values are `LOW` and `HIGH`. DPI range depends on the device sensor (up to 32000 DPI on the PRO X 2 Superstrike).
+
+### Haptic Feedback
+
+Some devices, such as the MX Master 4 have  haptic feeback.
+The Solaar CLI can be used to 'play' wave forms, for example
+```
+solaar config 'mx master 4' haptic-play 'HAPPY ALERT'
+```
+Solaar rules can also do this using their `Set` action.
+
+
+### Extended Report Rate
+
+Some gaming mice (such as the PRO X 2 Superstrike) support the `EXTENDED_ADJUSTABLE_REPORT_RATE` feature (`0x8061`) which enables sub-millisecond polling rates beyond the standard 1 ms (1000 Hz). This is exposed via the `report_rate_extended` setting:
+
+| Value   | Polling Rate |
+|---------|-------------|
+| `8ms`   | 125 Hz      |
+| `4ms`   | 250 Hz      |
+| `2ms`   | 500 Hz      |
+| `1ms`   | 1000 Hz     |
+| `500us` | 2000 Hz     |
+| `250us` | 4000 Hz     |
+| `125us` | 8000 Hz     |
+
+### Onboard Profiles
+
+Some mice store one or more profiles onboard.  An onboard profile controls certain aspects of the behavior of the mouse, including the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, LED effects, and maybe more.  Solaar has a setting that switches between profiles or disables all profiles.
+
+When an onboard profile is active it may not be possible to change the aspects that the profile controls.  This is often seen for the Report Rate setting.   For some devices it is possible to make changes to the Sensitivity setting and to LED settings.  These changes are likely to only be temporary and may be overridden when the device reconnects or when Solaar is restarted.  This is in keeping with the intent of Onboard Profiles as controlling the device behavior.  To make the changes to these settings permanent it is necessary to disable onboard profiles.  Alternatively, multiple profiles can be set up as described below and these settings controlled by switching between the profiles.
+
+Solaar can dump the entire set of profiles into a YAML file and can load the entire set of profiles from a file.  Users can edit the file to effect changes to the profiles.
+
+A profile file has some bookkeeping information, including profile version and the name of the device, and a sequence of profiles.
+
+Each profile has the following fields:
+- enabled: Whether the profile is enabled.
+- sector: Where the profile is stored in device memory.  Sectors greater than 0xFF are in ROM and cannot be written (use the low byte as the sector to write to Flash).
+- name: A memonic name for the profile.
+- report_rate: A report rate in milliseconds from 1 to 8.
+- resolutions: A sequence of five sensor resolutions in DPI.
+- resolution_default_index: The index of the default sensor resolution (0 to 4).
+- resolution_shift_index: The index of the sensor resolution used when the DPI Shift button is pressed (0 to 4).
+- buttons: The action for each button on the mouse in normal mode.
+- gbuttons: The action for each button on the mouse in G-Shift mode.
+- angle_snap: Enable angle snapping for devices.
+- red, blue, green: Color indicator for the profile.
+- lighting: Lighting information for logo and side LEDs in normal mode, then for power saving mode.
+- ps_timeout: Delay in ms to go into power saving mode.
+- po_timeout: Delay in ms to go from power saving mode to fully off.
+- power_mode: Unknown purpose.
+- write count: Unknown purpose.
+Missing or unused parts of a profile are often a sequence of 0xFF bytes.
+
+Button actions can either perform a function (behavior: 9) or send a button click or key press (behaviour: 8).
+Functions are:
+- 0: No Action - do nothing
+- 1: Tilt Left
+- 2: Tilt Right
+- 3: Next DPI - change device resolution to the next DPI
+- 4: Previous DPI - change device resolution to the previous DPI
+- 5: Cycle DPI - change device resolution to the next DPI considered as a cycle
+- 6: Default_DPI - change device resolution to the default resolution
+- 7: Shift_DPI - change device resolution to the shift resolution
+- 8: Next Profile - change to the next enabled profile
+- 9: Previous Profile - change to the previous enabled profile
+- 10: Cycle Profile - change to the next enabled profile considered as a cycle
+- 11: G-Shift - change all buttons to their G-Shift state
+- 12: Battery Status - show battery status on the device LEDs
+- 13: Profile Select - select the n'th enabled profile
+- 14: Mode Switch
+- 15: Host Button - switch between hosts (unverified)
+- 16: Scroll Down
+- 17: Scroll Up
+Some devices might not be able to perform all functions.
+
+Buttons can send (type):
+- 0: Don't send anything.
+- 1: A button click (value) as a 16-bit bitmap, i.e., 1 is left click, 2 is right, 4 is middle, etc.
+- 2: An 8-bit USB HID keycode (value) plus an 8-bit modifier bitmap (modifiers), i.e., 0 for no modifiers, 1 for control, 2 for shift, etc.
+- 3: A 16-bit HID Consumer keycode (value).
+
+See USB_HID_KEYCODES and HID_CONSUMERCODES in lib/logitech_receiver/special_keys.py for values to use for keycodes.
+
+Buttons can also execute macros but Solaar does not provide any support for macros.
+
+Lighting information is a sequence of lighting effects, with the first usually for the logo LEDs and the second usually for the side LEDs.
+
+The fields possible in an effect are:
+- ID: The kind of effect:
+- color: A color parameter for the effect as a 24-bit RGB value.
+- intensity: How intense to make the color (1%-100%), 0 for the default (usually 100%).
+- speed: How fast to pulse in ms (one byte).
+- ramp: How to change to the color (0=default, 1=ramp up/down, 2=no ramping).
+- period: How fast to perform the effect in ms (two bytes).
+- form: The form of the breathe effect.
+- bytes: The raw bytes of other effects.
+
+The possible effects and the fields the use are:
+- 0x0: Disable - No fields.
+- 0x1: Fixed color - color, whether to ramp.
+- 0x2: Pulse a color - color, speed.
+- 0x3 Cycle through the spectrum - period, intensity, form.
+- 0x8; A boot effect - No fields.
+- 0x9: A demo effect - NO fields.
+- 0xa: breathe a color (like pulse) - color, period.
+- 0xb: Ripple - color, period.
+- null: An unknown effect.
+Only effects supported by the device can be used.
+
+To set up profiles, first run `solaar profiles <device name>`, which will output a YAML dump of the profiles on the device. Then store the YAML dump into a file and edit the file to make changes. Finally run `solaar profiles <device name> <file name>` to load the profiles back onto the device. Profiles are stored in flash memory and persist when the device is inactive or turned off. When loading profiles Solaar is careful to only write the flash memory sectors that need to be changed. Solaar also checks for correct profile version and device name before loading a profile into a device.
+
+Keep a copy of the initial dump of profiles so that it can be loaded back to the device if problems are encountered with the edited profiles. The safest changes are to take an unused or unenabled profile sector and create a new profile in it, likely mostly copying parts of another profile.
+
 
 ## System Tray
 

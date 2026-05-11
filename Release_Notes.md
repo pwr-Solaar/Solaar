@@ -1,5 +1,61 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.18
+
+* Solaar is only guaranteed to work in Python 3.13 or later.
+
+## Version 1.1.17
+
+* Several new features have been added related to the MX Master 4
+  * The scroll ratchet force can be adjusted
+  * The force required to click the button under your thumb can be adjusted
+  * The haptic force can be adjusted
+  * Haptic feeback can be triggered by commands like `solaar config 'mx master 4' haptic-play 'HAPPY ALER'`
+
+## Version 1.1.16
+
+* Two bugs that were affecting users in 1.1.15 are fixed.
+
+## Version 1.1.15
+
+* Some key names have been changed to match Logitech names.  Rules that use removed names will no longer work and will end up with a key of 0.
+* Device and Action rule conditions match on device codename and name
+* Solaar supports configuration of Bluetooth devices on macOS.
+
+## Version 1.1.13
+
+* Solaar will drop support for Python 3.7 immediately after version 1.1.13.
+
+* Version 1.1.12 does not push settings to many devices after a resume resulting in the device reverting to its default behaviour.  This is fixed in 1.1.13.
+
+## Version 1.1.12
+
+* Solaar now processes DBus disconnection and connection messages from Bluez and re-initializes devices when they reconnect, to handle to a change introduced in Bluez 5.73. The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling. Until the issue is resolved having Scroll Wheel Resolution set to true (and not ignored) may be helpful.
+
+* The credits for translations have not been kept up to date.  Translators who are not listed can update docs/i18n.ml and lib/solaar/ui/about.py.
+
+* Solaar now has settings for features BRIGHTNESS_CONTROL, RGB_EFFECTS, and PER_KEY_LIGHTING features.  The names of keys in the Per-key Lighting setting are for the standard US keyboard.  Users who wish to modify these names should look at the section Keyboard Key Names and Locations in `https://pwr-solaar.github.io/Solaar/capabilities`
+
+* A unit test test suite is being constructed using pytest.
+
+* The Solaar code for communicating with receivers and devices has been significantly modified to improve testability and organization.  Errors may have been introduced for uncommon hardware.
+
+* The Later rule action uses precision timing for delays of less than one second.
+
+* Solaar now indentifies supported devices by whether they support the HID protocols that Solaar needs.  If a device does not show up at all when running Solaar, it almost certainly cannot be supported by Solaar.
+
+## Version 1.1.11
+
+* Solaar can dump device profiles in YAMLfor devices that support profiles and load profiles back from an edited file.  See [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities) for more information.
+
+* Solaar has settings for each LED Zone that a device supports under feature Color LED Effects.
+
+* Solaar has settings for extended report rate, backlight levels, durations, and profile selection.
+
+* Solaar now partly works in MacOS.  Please open new issues for problems.  Solaar may work in Windows.   Please open new issues for problems.  See https://github.com/pwr-Solaar/Solaar/pull/1971 for more information.  Fixing problems in MacOS or Windows may take considerable time.
+
+* Solaar works better when the Python package hid-parser is available.   Distriubtions should try have this package installed.
+
 ## Version 1.1.10
 
 * The mouse click rule action can now just simulate depressing or releasing the button.

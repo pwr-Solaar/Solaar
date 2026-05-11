@@ -1,0 +1,137 @@
+solaar version 1.1.10
+
+  1: MX Keys S
+     Device path  : None
+     WPID         : B378
+     Codename     : MX KEYS S
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Serial number: 48548420
+     Model ID:      B37800000000
+     Unit ID:       48548420
+        Bootloader: BL1 88.00.B0013
+          Firmware: RBK 81.00.B0013
+             Other:
+     The power switch is located on the (unknown).
+     Supports 34 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BL1 88.00.B0013 B37851DB9520
+            Firmware: Firmware RBK 81.00.B0013 B37851DB9520
+            Firmware: Other
+            Unit ID: 48548420  Model ID: B37800000000  Transport IDs: {'btleid': 'B378'}
+         3: DEVICE NAME            {0005} V0
+            Name: MX Keys S
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: MX KEYS S
+         7: unknown:0011           {0011} V0
+         8: UNIFIED BATTERY        {1004} V3
+            Battery: 75%, discharging.
+         9: REPROG CONTROLS V4     {1B04} V5
+            Key/Button Diversion (saved): {Calculator:Regular, Lock PC:Regular, Brightness Down:Regular, Brightness Up:Regular, Backlight Down:Regular, Backlight Up:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, App Contextual Menu/Right Click:Regular, Voice Dictation:Regular, Open Emoji Panel:Regular, Snipping Tool:Diverted, Mute Microphone:Regular}
+            Key/Button Diversion        : {Calculator:Regular, Lock PC:Regular, Brightness Down:Regular, Brightness Up:Regular, Backlight Down:Regular, Backlight Up:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, App Contextual Menu/Right Click:Regular, Voice Dictation:Regular, Open Emoji Panel:Regular, Snipping Tool:Diverted, Mute Microphone:Regular}
+        10: CHANGE HOST            {1814} V1
+            Change Host        : 1:vs
+        11: HOSTS INFO             {1815} V2
+            Host 0 (paired): vs
+            Host 1 (paired): DEV
+            Host 2 (unpaired):
+        12: BACKLIGHT2             {1982} V3
+            Backlight (saved): False
+            Backlight        : True
+        13: K375S FN INVERSION     {40A3} V0
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+        14: LOCK KEY STATE         {4220} V0
+        15: KEYBOARD DISABLE KEYS  {4521} V0
+            Disable keys (saved): {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+        16: MULTIPLATFORM          {4531} V1
+            Set OS (saved): Linux
+            Set OS        : Linux
+        17: KEYBOARD LAYOUT 2      {4540} V0
+        18: DFUCONTROL             {00C3} V0
+        19: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        20: unknown:1803           {1803} V0    internal, hidden, unknown:000010
+        21: unknown:1807           {1807} V0    internal, hidden, unknown:000010
+        22: unknown:1816           {1816} V0    internal, hidden, unknown:000010
+        23: OOBSTATE               {1805} V0    internal, hidden
+        24: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        25: unknown:1891           {1891} V7    internal, hidden, unknown:000008
+        26: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        27: unknown:1E00           {1E00} V0    hidden
+        28: unknown:1E02           {1E02} V0    internal, hidden
+        29: unknown:1602           {1602} V0
+        30: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        31: unknown:1861           {1861} V1    internal, hidden, unknown:000010
+        32: unknown:1A20           {1A20} V1    internal, hidden, unknown:000010
+        33: unknown:18B0           {18B0} V1    internal, hidden, unknown:000010
+     Has 21 reprogrammable keys:
+         0: Brightness Down           , default: Brightness Down             => Brightness Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Brightness Up             , default: Brightness Up               => Brightness Up
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Backlight Down            , default: Backlight Down              => Backlight Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:3, group:0, group mask:empty
+             reporting: default
+         3: Backlight Up              , default: Backlight Up                => Backlight Up
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:4, group:0, group mask:empty
+             reporting: default
+         4: Voice Dictation           , default: Voice Dictation             => Voice Dictation
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:5, group:0, group mask:empty
+             reporting: default
+         5: Open Emoji Panel          , default: Open Emoji Panel            => Open Emoji Panel
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:6, group:0, group mask:empty
+             reporting: default
+         6: Mute Microphone           , default: Mute Microphone             => Mute Microphone
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:7, group:0, group mask:empty
+             reporting: default
+         7: Previous Fn               , default: Previous                    => Previous
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:8, group:0, group mask:empty
+             reporting: default
+         8: Play/Pause Fn             , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:9, group:0, group mask:empty
+             reporting: default
+         9: Next Fn                   , default: Next                        => Next
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:10, group:0, group mask:empty
+             reporting: default
+        10: Mute Fn                   , default: Mute                        => Mute
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:11, group:0, group mask:empty
+             reporting: default
+        11: Volume Down Fn            , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:12, group:0, group mask:empty
+             reporting: default
+        12: Volume Up Fn              , default: Volume Up                   => Volume Up
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        13: Calculator                , default: Calculator                  => Calculator
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Snipping Tool             , default: Snipping Tool               => Snipping Tool
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: diverted
+        15: App Contextual Menu/Right Click, default: Right Click/App Contextual Menu => Right Click/App Contextual Menu
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        16: Lock PC                   , default: WindowsLock                 => WindowsLock
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        18: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        19: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        20: F Lock                    , default: Do Nothing One              => Do Nothing One
+             analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+     Battery: 75%, discharging.

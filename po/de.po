@@ -1519,7 +1519,7 @@ msgstr  "Das Gerät ist aktiv und die Einstellungen können geändert werden."
 
 #: lib/solaar/ui/diversion_rules.py:2266
 msgid   "Device that originated the current notification."
-msgstr  "Gerät, von dem die aktuelle Be­nach­rich­ti­gung stammt."
+msgstr  "Gerät, von dem die aktuelle Benachrichtigung stammt."
 
 #: lib/solaar/ui/diversion_rules.py:2280
 msgid   "Name of host computer."

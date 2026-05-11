@@ -10,13 +10,14 @@ def init_paths():
     import os.path as _path
     import sys
 
-    src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..', 'lib'))
-    init_py = _path.join(src_lib, 'hidapi', '__init__.py')
+    src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), "..", "lib"))
+    init_py = _path.join(src_lib, "hidapi", "__init__.py")
     if _path.exists(init_py):
         sys.path[0] = src_lib
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_paths()
     from hidapi import hidconsole
+
     hidconsole.main()

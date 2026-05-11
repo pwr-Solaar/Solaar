@@ -1,0 +1,64 @@
+solaar show
+rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed
+solaar version 1.1.14-2
+
+Unifying Receiver
+  Device path  : /dev/hidraw1
+  USB id       : 046d:C52B
+  Serial       : EC219AC2
+  C Pending    : ff
+    0          : 12.11.B0032
+    1          : 04.16
+    3          : AA.AA
+  Has 2 paired device(s) out of a maximum of 6.
+  Notifications: wireless (0x000100)
+  Device activity counters: 1=195, 2=74
+
+  1: Wireless Mouse M175
+     Device path  : /dev/hidraw2
+     WPID         : 4008
+     Codename     : M175
+     Kind         : mouse
+     Protocol     : HID++ 2.0
+     Report Rate : 8ms
+     Serial number: 16E46E8C
+     Model ID:      000000000000
+     Unit ID:       00000000
+                 0: RQM 40.00.B0016
+     The power switch is located on the base.
+     Supports 21 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V0
+            Firmware: 0 RQM 40.00.B0016 4008
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005} V0
+            Name: Wireless Mouse M185
+            Kind: mouse
+         4: BATTERY STATUS         {1000} V0
+            Battery: 70%, 0, next level 5%.
+         5: unknown:1830           {1830} V0    internal, hidden
+         6: unknown:1850           {1850} V0    internal, hidden
+         7: unknown:1860           {1860} V0    internal, hidden
+         8: unknown:1890           {1890} V0    internal, hidden
+         9: unknown:18A0           {18A0} V0    internal, hidden
+        10: unknown:18C0           {18C0} V0    internal, hidden
+        11: WIRELESS DEVICE STATUS {1D4B} V0
+        12: unknown:1DF3           {1DF3} V0    internal, hidden
+        13: REPROG CONTROLS        {1B00} V0
+        14: REMAINING PAIRING      {1DF0} V0    hidden
+            Remaining Pairings: 117
+        15: unknown:1E00           {1E00} V0    hidden
+        16: unknown:1E80           {1E80} V0    internal, hidden
+        17: unknown:1E90           {1E90} V0    internal, hidden
+        18: unknown:1F03           {1F03} V0    internal, hidden
+        19: VERTICAL SCROLLING     {2100} V0
+            Roller type: standard
+            Ratchet per turn: 24
+            Scroll lines: 0
+        20: MOUSE POINTER          {2200} V0
+            DPI: 1000
+            Acceleration: low
+            Override OS ballistics
+            No vertical tuning, standard mice
+     Battery: 70%, 0, next level 5%.

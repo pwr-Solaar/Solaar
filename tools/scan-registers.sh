@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 if test -z "$1"; then
 	echo "Use: $0 <device number 1..6> [<receiver device>]"

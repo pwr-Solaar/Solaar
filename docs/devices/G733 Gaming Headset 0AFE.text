@@ -1,0 +1,42 @@
+solaar version 1.1.11
+
+G733 Gaming Headset
+     Device path  : /dev/hidraw3
+     USB id       : 046d:0AFE
+     Codename     : G733 Headset New
+     Kind         : headset
+     Protocol     : HID++ 4.2
+     Serial number:
+     Model ID:      0AFE00000000
+     Unit ID:       FFFFFFFF
+          Firmware: U2  00.06
+     Supports 9 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Firmware U2  00.06 0AFE
+            Unit ID: FFFFFFFF  Model ID: 0AFE00000000  Transport IDs: {'usbid': '0AFE'}
+         3: DEVICE NAME            {0005} V0
+            Name: G733 Gaming Headset
+            Kind: None
+         4: COLOR LED EFFECTS      {8070} V3
+            LED Control (saved): Device
+            LED Control        : Device
+            LEDs Logo (saved): !LEDEffectSetting {ID: 0x0}
+            LEDs Logo        : !LEDEffectSetting {ID: 0}
+            LEDs Primary (saved): !LEDEffectSetting {ID: 0x1, color: 0x0, ramp: 0x0}
+            LEDs Primary        : !LEDEffectSetting {ID: 1, color: 0x10000, ramp: 0x0}
+         5: GKEY                   {8010} V0
+            Divert G and M Keys (saved): False
+            Divert G and M Keys        : False
+         6: EQUALIZER              {8310} V1
+            Equalizer (saved): {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+            Equalizer        : {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+         7: SIDETONE               {8300} V0
+            Sidetone (saved): 0
+            Sidetone        : 0
+         8: ADC MEASUREMENT        {1F20} V4
+            Battery: 60% 3867mV , discharging.
+            Power Management (saved): 0
+            Power Management        : 0
+     Battery: 60% 3867mV , discharging.

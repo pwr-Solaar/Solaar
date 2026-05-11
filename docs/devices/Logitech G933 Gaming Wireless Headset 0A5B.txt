@@ -1,0 +1,41 @@
+solaar version 1.1.19-25-g7520c9cc
+
+Logitech G933 Gaming Wireless Headset
+     Device path  : /dev/hidraw4
+     USB id       : 046d:0A5B
+     Codename     : Logitech
+     Kind         : ?
+     Protocol     : HID++ 4.2
+     Serial number:
+     Model ID:      000000000A5B
+     Unit ID:       FFFFFFFF
+                 0: U   98.03.B0027
+     Supports 9 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: 0 U   98.03.B0027 0A5B
+            Unit ID: FFFFFFFF  Model ID: 000000000A5B  Transport IDs: {'btid': '0000', 'btleid': '0000'}
+         3: DEVICE NAME            {0005} V0
+            Name: Logitech G933 Gaming Wireless Headset
+            Kind: None
+         4: COLOR LED EFFECTS      {8070} V3
+            LED Control        : HID++ error {'number': 255, 'request': 1147, 'error': 7, 'params': b''}
+            LEDs None (saved): !LEDEffectSetting {ID: 0}
+            LEDs None        : !LEDEffectSetting {ID: 0}
+            LEDs None (saved): !LEDEffectSetting {ID: 0, color: 9519532, intensity: 0, period: 100, ramp: 0, speed: 0}
+            LEDs None        : !LEDEffectSetting {ID: 1, color: 0, ramp: 0}
+         5: GKEY                   {8010} V0
+            Divert G and M Keys (saved): False
+            Divert G and M Keys        : False
+         6: EQUALIZER              {8310} V1
+            Equalizer (saved): {0: 8, 1: 8, 2: 4, 3: 2, 4: 1, 5: 4, 6: 7, 7: 10, 8: 5, 9: 11}
+            Equalizer        : {0: 8, 1: 8, 2: 4, 3: 2, 4: 1, 5: 4, 6: 7, 7: 10, 8: 5, 9: 11}
+         7: SIDETONE               {8300} V0
+            Sidetone (saved): 30
+            Sidetone        : 30
+         8: ADC MEASUREMENT        {1F20} V3
+            Battery: 100% 4183mV , BatteryStatus.RECHARGING.
+            Power Management (saved): 30
+            Power Management        : 30
+     Battery: 100% 4183mV , BatteryStatus.RECHARGING.

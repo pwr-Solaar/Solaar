@@ -1,6 +1,5 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -16,57 +15,52 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
 import os
 
-from logging import DEBUG as _DEBUG
-from logging import getLogger
-from time import time as _timestamp
+from enum import Enum
+from time import time
+
+import gi
+
+from gi.repository import GLib
+from gi.repository import Gtk
+from gi.repository.Gdk import ScrollDirection
 
 import solaar.gtk as gtk
 
-from gi.repository import GLib, Gtk
-from gi.repository.Gdk import ScrollDirection
-from logitech_receiver.status import KEYS as _K
 from solaar import NAME
 from solaar.i18n import _
 
-from . import icons as _icons
-from .about import show_window as _show_about_window
-from .window import popup as _window_popup
-from .window import toggle as _window_toggle
+from . import action
+from . import icons
+from . import window
+from .about import about
 
-_log = getLogger(__name__)
-del getLogger
-
-#
-# constants
-#
+logger = logging.getLogger(__name__)
 
 _TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 
-#
-#
-#
+
+class GtkSignal(Enum):
+    ACTIVATE = "activate"
+    SCROLL_EVENT = "scroll-event"
 
 
 def _create_menu(quit_handler):
+    # per-device menu entries will be generated as-needed
     menu = Gtk.Menu()
 
-    # per-device menu entries will be generated as-needed
-
-    no_receiver = Gtk.MenuItem.new_with_label(_('No supported device found'))
+    no_receiver = Gtk.MenuItem.new_with_label(_("No supported device found"))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    from .action import make
-    menu.append(make('help-about', _('About %s') % NAME, _show_about_window, stock_id='help-about').create_menu_item())
-    menu.append(make('application-exit', _('Quit %s') % NAME, quit_handler, stock_id='application-exit').create_menu_item())
-    del make
+    menu.append(action.make_image_menu_item(_("About %s") % NAME, "help-about", about.show))
+    menu.append(action.make_image_menu_item(_("Quit %s") % NAME, "application-exit", quit_handler))
 
     menu.show_all()
-
     return menu
 
 
@@ -84,19 +78,16 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
+    # don't bother even trying to scroll if less than two devices
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:
         return
 
-    # scroll events come way too fast (at least 5-6 at once)
-    # so take a little break between them
+    # scroll events come way too fast (at least 5-6 at once) so take a little break between them
     global _last_scroll
-    now = now or _timestamp()
+    now = now or time()
     if now - _last_scroll < 0.33:  # seconds
         return
     _last_scroll = now
-
-    # if _log.isEnabledFor(_DEBUG):
-    #     _log.debug("scroll direction %s", direction)
 
     global _picked_device
     candidate = None
@@ -141,28 +132,27 @@ def _scroll(tray_icon, event, direction=None):
             _picked_device = None
 
     _picked_device = candidate or _picked_device
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('scroll: picked %s', _picked_device)
+    logger.debug("scroll: picked %s", _picked_device)
     _update_tray_icon()
 
 
 try:
-    import gi
     try:
-        gi.require_version('AyatanaAppIndicator3', '0.1')
+        gi.require_version("AyatanaAppIndicator3", "0.1")
         from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+
         ayatana_appindicator_found = True
     except ValueError:
         try:
-            gi.require_version('AppIndicator3', '0.1')
+            gi.require_version("AppIndicator3", "0.1")
             from gi.repository import AppIndicator3
-            ayatana_appindicator_found = False
-        except ValueError:
-            # treat unavailable versions the same as unavailable packages
-            raise ImportError
 
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('using %sAppIndicator3' % ('Ayatana ' if ayatana_appindicator_found else ''))
+            ayatana_appindicator_found = False
+        except ValueError as exc:
+            # treat unavailable versions the same as unavailable packages
+            raise ImportError from exc
+
+    logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
@@ -176,17 +166,17 @@ try:
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
-        _icons._init_icon_paths()
+        icons._init_icon_paths()
         ind = AppIndicator3.Indicator.new(
-            'indicator-solaar', _icon_file(_icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE
+            "indicator-solaar", _icon_file(icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE
         )
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-        # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
-        # ind.set_label(NAME, NAME)
+        # ind.set_attention_icon_full(_icon_file(icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
+        # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
-        ind.connect('scroll-event', _scroll)
+        ind.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
 
         return ind
 
@@ -197,48 +187,42 @@ try:
         indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
     def _update_tray_icon():
-        if _picked_device and gtk.battery_icons_style != 'solaar':
-            _ignore, _ignore, name, device_status = _picked_device
-            battery_level = device_status.get(_K.BATTERY_LEVEL)
-            battery_charging = device_status.get(_K.BATTERY_CHARGING)
-            tray_icon_name = _icons.battery(battery_level, battery_charging)
-
-            description = '%s: %s' % (name, device_status.to_string())
+        if _picked_device and gtk.battery_icons_style != "solaar":
+            _ignore, _ignore, name, device = _picked_device
+            battery_level = device.battery_info.level if device.battery_info is not None else None
+            battery_charging = device.battery_info.charging() if device.battery_info is not None else None
+            tray_icon_name = icons.battery(battery_level, battery_charging)
+            description = f"{name}: {device.status_string()}"
         else:
             # there may be a receiver, but no peripherals
-            tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
+            tray_icon_name = icons.TRAY_OKAY if _devices_info else icons.TRAY_INIT
 
             description_lines = _generate_description_lines()
-            description = '\n'.join(description_lines).rstrip('\n')
+            description = "\n".join(description_lines).rstrip("\n")
 
-        # icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
+        # icon_file = icons.icon_file(icon_name, _TRAY_ICON_SIZE)
         _icon.set_icon_full(_icon_file(tray_icon_name), description)
-
-    def _update_menu_icon(image_widget, icon_name):
-        image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
-        # icon_file = _icons.icon_file(icon_name, _MENU_ICON_SIZE)
-        # image_widget.set_from_file(icon_file)
-        # image_widget.set_pixel_size(_TRAY_ICON_SIZE)
 
     def attention(reason=None):
         if _icon.get_status() != AppIndicator3.IndicatorStatus.ATTENTION:
-            # _icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
+            # _icon.set_attention_icon_full(_icon_file(icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
             _icon.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
             GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
 except ImportError:
-
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('using StatusIcon')
+    logger.debug("using StatusIcon")
 
     def _create(menu):
-        icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
-        icon.set_name(NAME)
+        icon = Gtk.StatusIcon.new_from_icon_name(icons.TRAY_INIT)
+        icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
-        icon.connect('activate', _window_toggle)
-        icon.connect('scroll-event', _scroll)
-        icon.connect('popup-menu', lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
+        icon.connect(GtkSignal.ACTIVATE.value, window.toggle)
+        icon.connect(GtkSignal.SCROLL_EVENT.value, _scroll)
+        icon.connect(
+            "popup-menu",
+            lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time),
+        )
 
         return icon
 
@@ -250,28 +234,25 @@ except ImportError:
 
     def _update_tray_icon():
         tooltip_lines = _generate_tooltip_lines()
-        tooltip = '\n'.join(tooltip_lines).rstrip('\n')
+        tooltip = "\n".join(tooltip_lines).rstrip("\n")
         _icon.set_tooltip_markup(tooltip)
 
-        if _picked_device and gtk.battery_icons_style != 'solaar':
-            _ignore, _ignore, name, device_status = _picked_device
-            battery_level = device_status.get(_K.BATTERY_LEVEL)
-            battery_charging = device_status.get(_K.BATTERY_CHARGING)
-            tray_icon_name = _icons.battery(battery_level, battery_charging)
+        if _picked_device and gtk.battery_icons_style != "solaar":
+            _ignore, _ignore, name, device = _picked_device
+            battery_level = device.battery_info.level if device.battery_info is not None else None
+            battery_charging = device.battery_info.charging() if device.battery_info is not None else None
+            tray_icon_name = icons.battery(battery_level, battery_charging)
         else:
             # there may be a receiver, but no peripherals
-            tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_ATTENTION
+            tray_icon_name = icons.TRAY_OKAY if _devices_info else icons.TRAY_ATTENTION
         _icon.set_from_icon_name(tray_icon_name)
-
-    def _update_menu_icon(image_widget, icon_name):
-        image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
 
     _icon_before_attention = None
 
     def _blink(count):
         global _icon_before_attention
         if count % 2:
-            _icon.set_from_icon_name(_icons.TRAY_ATTENTION)
+            _icon.set_from_icon_name(icons.TRAY_ATTENTION)
         else:
             _icon.set_from_icon_name(_icon_before_attention)
 
@@ -287,14 +268,9 @@ except ImportError:
             GLib.idle_add(_blink, 9)
 
 
-#
-#
-#
-
-
 def _generate_tooltip_lines():
     if not _devices_info:
-        yield '<b>%s</b>: ' % NAME + _('no receiver')
+        yield f"<b>{NAME}</b>: " + _("no receiver")
         return
 
     yield from _generate_description_lines()
@@ -302,25 +278,25 @@ def _generate_tooltip_lines():
 
 def _generate_description_lines():
     if not _devices_info:
-        yield _('no receiver')
+        yield _("no receiver")
         return
 
-    for _ignore, number, name, status in _devices_info:
+    for _ignore, number, name, device in _devices_info:
         if number is None:  # receiver
             continue
 
-        p = status.to_string()
+        p = device.status_string()
         if p:  # does it have any properties to print?
-            yield '<b>%s</b>' % name
-            if status:
-                yield '\t%s' % p
+            yield f"<b>{name}</b>"
+            if device.online:
+                yield f"\t{p}"
             else:
-                yield '\t%s <small>(' % p + _('offline') + ')</small>'
+                yield f"\t{p} <small>(" + _("offline") + ")</small>"
         else:
-            if status:
-                yield '<b>%s</b> <small>(' % name + _('no status') + ')</small>'
+            if device.online:
+                yield f"<b>{name}</b> <small>(" + _("no status") + ")</small>"
             else:
-                yield '<b>%s</b> <small>(' % name + _('offline') + ')</small>'
+                yield f"<b>{name}</b> <small>(" + _("offline") + ")</small>"
 
 
 def _pick_device_with_lowest_battery():
@@ -333,21 +309,14 @@ def _pick_device_with_lowest_battery():
     for info in _devices_info:
         if info[1] is None:  # is receiver
             continue
-        level = info[-1].get(_K.BATTERY_LEVEL)
-        # print ("checking %s -> %s", info, level)
+        level = info[-1].battery_info.level if info[-1].battery_info is not None else None
         if level is not None and picked_level > level:
             picked = info
             picked_level = level or 0
 
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('picked device with lowest battery: %s', picked)
+    logger.debug("picked device with lowest battery: %s", picked)
 
     return picked
-
-
-#
-#
-#
 
 
 def _add_device(device):
@@ -369,14 +338,11 @@ def _add_device(device):
                 break
             index = index + 1
 
-    new_device_info = (receiver_path, device.number, device.name, device.status)
+    new_device_info = (receiver_path, device.number, device.name, device)
     _devices_info.insert(index, new_device_info)
 
-    label_prefix = '   '
-    new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else '') + device.name)
-    new_menu_item.set_image(Gtk.Image())
-    new_menu_item.show_all()
-    new_menu_item.connect('activate', _window_popup, receiver_path, device.number)
+    label = ("   " if device.number else "") + device.name
+    new_menu_item = action.make_image_menu_item(label, None, window.popup, receiver_path, device.number)
     _menu.insert(new_menu_item, index)
 
     return index
@@ -397,17 +363,11 @@ def _remove_device(index):
 
 def _add_receiver(receiver):
     index = len(_devices_info)
-
     new_receiver_info = (receiver.path, None, receiver.name, None)
     _devices_info.insert(index, new_receiver_info)
-
-    new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
-    icon_set = _icons.device_icon_set(receiver.name)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_set.names[0], _MENU_ICON_SIZE))
-    new_menu_item.show_all()
-    new_menu_item.connect('activate', _window_popup, receiver.path)
+    icon_name = icons.device_icon_name(receiver.name, receiver.kind)
+    new_menu_item = action.make_image_menu_item(receiver.name, icon_name, window.popup, receiver.path)
     _menu.insert(new_menu_item, index)
-
     return 0
 
 
@@ -423,33 +383,26 @@ def _remove_receiver(receiver):
 
 
 def _update_menu_item(index, device):
-    if device is None or device.status is None:
-        _log.warn('updating an inactive device %s, assuming disconnected', device)
+    if device is None:
+        logger.warning("updating an inactive device %s, assuming disconnected", device)
         return None
-
     menu_items = _menu.get_children()
     menu_item = menu_items[index]
-
-    level = device.status.get(_K.BATTERY_LEVEL)
-    charging = device.status.get(_K.BATTERY_CHARGING)
-    icon_name = _icons.battery(level, charging)
-
-    menu_item.set_label(('  ' if 0 < device.number <= 6 else '') + device.name + ': ' + device.status.to_string())
-    image_widget = menu_item.get_image()
+    level = device.battery_info.level if device.battery_info is not None else None
+    charging = device.battery_info.charging() if device.battery_info is not None else None
+    icon_name = icons.battery(level, charging)
+    menu_item.label.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
+    image_widget = menu_item.icon
     image_widget.set_sensitive(bool(device.online))
-    _update_menu_icon(image_widget, icon_name)
+    image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
 
-
-#
-#
-#
 
 # for which device to show the battery info in systray, if more than one
 # it's actually an entry in _devices_info
 _picked_device = None
 
 # cached list of devices and some of their properties
-# contains tuples of (receiver path, device number, name, status)
+# contains tuples of (receiver path, device number, name, device)
 _devices_info = []
 
 _menu = None

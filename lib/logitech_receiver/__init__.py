@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -15,35 +13,12 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-"""Low-level interface for devices connected through a Logitech Universal
-Receiver (UR).
+"""Low-level interface for devices using Logitech HID++ protocol.
 
-Uses the HID api exposed through hidapi.py, a Python thin layer over a native
+Uses the HID api exposed through hidapi_impl.py, a Python thin layer over a native
 implementation.
-
-Incomplete. Based on a bit of documentation, trial-and-error, and guesswork.
-
-References:
-http://julien.danjou.info/blog/2012/logitech-k750-linux-support
-http://6xq.net/git/lars/lshidpp.git/plain/doc/
 """
 
 import logging
 
-from . import listener, status  # noqa: F401
-from .base import DeviceUnreachable, NoReceiver, NoSuchDevice  # noqa: F401
-from .common import strhex  # noqa: F401
-from .device import Device  # noqa: F401
-from .hidpp20 import FeatureCallError, FeatureNotSupported  # noqa: F401
-from .receiver import Receiver  # noqa: F401
-
-_DEBUG = logging.DEBUG
-_log = logging.getLogger(__name__)
-_log.setLevel(logging.root.level)
-# if logging.root.level > logging.DEBUG:
-#     _log.addHandler(logging.NullHandler())
-#     _log.propagate = 0
-
-del logging
-
-__version__ = '0.9'
+logger = logging.getLogger(__name__)

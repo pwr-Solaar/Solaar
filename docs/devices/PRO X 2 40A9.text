@@ -1,0 +1,68 @@
+solaar version 1.1.10
+
+Receiver
+  Device path  : /dev/hidraw3
+  USB id       : 046d:C54D
+  Serial       : 8FF3BF7B
+    Firmware   : 07.00.B0008
+    Bootloader : 00.08
+    Other      : C1.53
+  Has 1 paired device(s) out of a maximum of 2.
+  Notifications: (none)
+  Device activity counters: 1=51
+
+  1: PRO X 2
+     Device path  : None
+     WPID         : 40A9
+     Codename     : PRO X 2
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 8 ms (125Hz)
+     Serial number: <nope>
+     Model ID:      40A9C09B0000
+     Unit ID:       <nope>
+        Bootloader: BL1 71.00.B0012
+          Firmware: MPM 32.00.B0012
+     Supports 32 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BL1 71.00.B0012 AB1CDBC0A7D9
+            Firmware: Firmware MPM 32.00.B0012 40A9DBC0A7D9
+            Unit ID: <nope>  Model ID: 40A9C09B0000  Transport IDs: {'wpid': '40A9', 'usbid': 'C09B'}
+         3: DEVICE NAME            {0005} V2
+            Name: PRO X 2
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: UNIFIED BATTERY        {1004} V3
+            Battery: 96%, discharging.
+         7: XY STATS               {2250} V1
+         8: WHEEL STATS            {2251} V0
+         9: unknown:2202           {2202} V0		EXTENDED_ADJUSTABLE_DPI
+        10: MODE STATUS            {8090} V2
+        11: unknown:8061           {8061} V0		EXTENDED_ADJUSTABLE_REPORT_RATE
+        12: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Onboard Profiles (saved): Enable
+            Onboard Profiles        : Enable
+        13: MOUSE BUTTON SPY       {8110} V0
+        14: unknown:1500           {1500} V0		FORCE_PAIRING
+        15: unknown:1801           {1801} V0    internal, hidden, unknown:000010
+        16: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        17: unknown:1803           {1803} V0    internal, hidden, unknown:000010
+        18: CONFIG DEVICE PROPS    {1806} V8    internal, hidden, unknown:000010
+        19: unknown:1817           {1817} V0    internal, hidden, unknown:000010
+        20: OOBSTATE               {1805} V0    internal, hidden
+        21: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        22: unknown:1875           {1875} V0    internal, hidden, unknown:000010
+        23: unknown:1861           {1861} V1    internal, hidden, unknown:000010
+        24: unknown:1890           {1890} V9    internal, hidden, unknown:000008
+        25: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        26: unknown:1E00           {1E00} V0    hidden
+        27: unknown:1E02           {1E02} V0    internal, hidden
+        28: unknown:1E22           {1E22} V1    internal, hidden, unknown:000010
+        29: unknown:1602           {1602} V0
+        30: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        31: unknown:18B1           {18B1} V0    internal, hidden, unknown:000010
+     Battery: 96%, discharging.

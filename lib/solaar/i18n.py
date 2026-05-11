@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -16,47 +14,60 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import gettext as _gettext
+import gettext
 import locale
+import logging
+import os
+import sys
 
-from solaar import NAME as _NAME
+from glob import glob
 
-#
-#
-#
+from solaar import NAME
+
+_LOCALE_DOMAIN = NAME.lower()
+
+logger = logging.getLogger(__name__)
 
 
-def _find_locale_path(lc_domain):
-    import os.path as _path
-    import sys as _sys
-    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
-    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
-    del _sys
-
-    from glob import glob as _glob
+def _find_locale_path(locale_domain: str) -> str:
+    prefix_share = os.path.normpath(os.path.join(os.path.realpath(sys.path[0]), ".."))
+    src_share = os.path.normpath(os.path.join(os.path.realpath(sys.path[0]), "..", "share"))
 
     for location in prefix_share, src_share:
-        mo_files = _glob(_path.join(location, 'locale', '*', 'LC_MESSAGES', lc_domain + '.mo'))
+        mo_files = glob(os.path.join(location, "locale", "*", "LC_MESSAGES", f"{locale_domain}.mo"))
         if mo_files:
-            return _path.join(location, 'locale')
+            return os.path.join(location, "locale")
+    raise FileNotFoundError(f"Could not find locale path for {locale_domain}")
 
-    # del _path
+
+def set_locale_to_system_default() -> None:
+    """Sets locale for translations to the system default.
+
+    If locale is unsupported, fallback to standard English without
+    translation 'C'.
+
+    Set LC_ALL environment variable to enforce a locale setting e.g.
+    'de_DE.UTF-8'. Run Solaar with your desired localization, for German
+    use:
+    'LC_ALL=de_DE.UTF-8 solaar'
+    """
+    try:
+        locale.setlocale(locale.LC_ALL, "")  # system default
+    except locale.Error:
+        logger.error("User locale not supported by system, using no translation.")
+        locale.setlocale(locale.LC_ALL, "C")  # untranslated (English)
+        return
+
+    try:
+        path = _find_locale_path(_LOCALE_DOMAIN)
+    except FileNotFoundError:
+        path = None
+    gettext.bindtextdomain(_LOCALE_DOMAIN, path)
+    gettext.textdomain(_LOCALE_DOMAIN)
+    gettext.install(_LOCALE_DOMAIN)
 
 
-try:
-    locale.setlocale(locale.LC_ALL, '')
-except Exception:
-    pass
+set_locale_to_system_default()
 
-language, encoding = locale.getlocale()
-del locale
-
-_LOCALE_DOMAIN = _NAME.lower()
-path = _find_locale_path(_LOCALE_DOMAIN)
-
-_gettext.bindtextdomain(_LOCALE_DOMAIN, path)
-_gettext.textdomain(_LOCALE_DOMAIN)
-_gettext.install(_LOCALE_DOMAIN)
-
-_ = _gettext.gettext
-ngettext = _gettext.ngettext
+_ = gettext.gettext
+ngettext = gettext.ngettext

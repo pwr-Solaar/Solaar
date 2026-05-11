@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 127
+target-version = "py37"
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "B", # flake8-bugbear
+    "I", # isort
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+lines-between-types = 1

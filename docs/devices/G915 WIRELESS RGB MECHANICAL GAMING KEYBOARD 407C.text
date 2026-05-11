@@ -1,0 +1,103 @@
+solaar version 1.1.12rc1
+
+  1: G915 WIRELESS RGB MECHANICAL GAMING KEYBOARD
+     Device path  : None
+     WPID         : 407C
+     Codename     : G915 KEYBOARD
+     Kind         : keyboard
+     Protocol     : HID++ 4.2
+     Report Rate : 1ms
+     Serial number: A502B0E1
+     Model ID:      B354407CC33E
+     Unit ID:       A502B0E1
+                 1: BOT 77.02.B0039
+                 3:
+                 0: MPK 09.03.B0041
+                 3:
+                 3:
+     The power switch is located on the top left corner.
+     Supports 38 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BOT 77.02.B0039 0000EC44D534
+            Firmware: Other
+            Firmware: Firmware MPK 09.03.B0041 407C3791543D
+            Firmware: Other
+            Firmware: Other
+            Unit ID: A502B0E1  Model ID: B354407CC33E  Transport IDs: {'btleid': 'B354', 'wpid': '407C', 'usbid': 'C33E'}
+         3: DEVICE NAME            {0005} V0
+            Name: G915 WIRELESS RGB MECHANICAL GAMING KEYBOARD
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+            Configuration: 11000000000000000000000000000000
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: G915 KEYBOARD�
+         7: BATTERY VOLTAGE        {1001} V3
+            Battery: 80% 3998mV , discharging.
+         8: CHANGE HOST            {1814} V1
+            Change Host        : 1:Yon
+         9: HOSTS INFO             {1815} V1
+            Host 0 (paired): Yon
+            Host 1 (paired):
+        10: RGB EFFECTS            {8071} V0
+            RGB Control (saved): Device
+            RGB Control        : Device
+            LEDs Logo (saved): !LEDEffectSetting {ID: 1, color: 11546720, intensity: 0, period: 100, ramp: 0, speed: 0}
+            LEDs Logo        : HID++ error {'number': 1, 'request': 2799, 'error': 7, 'params': b'\x00'}
+            LEDs Primary (saved): !LEDEffectSetting {ID: 1, color: 16776960, intensity: 0, period: 100, ramp: 0, speed: 0}
+            LEDs Primary        : HID++ error {'number': 1, 'request': 2796, 'error': 7, 'params': b'\x01'}
+        11: PER KEY LIGHTING V2    {8081} V2
+            Per-key Lighting (saved): {A:white, B:red, C:white, D:white, E:white, F:white, G:white, H:white, I:white, J:white, K:white, L:white, M:white, N:white, O:white, P:white, Q:white, R:white, S:white, T:white, U:white, V:white, W:white, X:white, Y:white, Z:white, 1:white, 2:white, 3:white, 4:white, 5:white, 6:white, 7:white, 8:white, 9:white, 0:white, ENTER:white, ESC:white, BACKSPACE:white, TAB:white, SPACE:white, -:white, =:white, [:white, \:white, KEY 46:white, ~:white, ;:white, ':white, `:white, ,:white, .:white, /:white, CAPS LOCK:white, F1:white, F2:white, F3:white, F4:white, F5:white, F6:white, F7:white, F8:white, F9:white, F10:white, F11:white, F12:white, PRINT:white, SCROLL LOCK:white, PASTE:white, INSERT:white, HOME:white, PAGE UP:white, DELETE:white, END:white, PAGE DOWN:white, RIGHT:white, LEFT:white, DOWN:white, UP:white, NUMLOCK:white, KEYPAD /:white, KEYPAD *:white, KEYPAD -:white, KEYPAD +:white, KEYPAD ENTER:white, KEYPAD 1:white, KEYPAD 2:white, KEYPAD 3:white, KEYPAD 4:white, KEYPAD 5:white, KEYPAD 6:white, KEYPAD 7:white, KEYPAD 8:white, KEYPAD 9:white, KEYPAD 0:white, KEYPAD .:white, KEY 97:white, COMPOSE:white, POWER:white, KEY 100:white, KEY 101:white, KEY 102:white, KEY 103:white, LEFT CTRL:white, LEFT SHIFT:white, LEFT ALT:white, LEFT WINDOWS:white, RIGHT CTRL:white, RIGHT SHIFT:white, RIGHT ALTGR:white, RIGHT WINDOWS:white, BRIGHTNESS:white, PAUSE:white, MUTE:white, NEXT:white, PREVIOUS:white, G1:white, G2:white, G3:white, G4:white, G5:white, LOGO:white}
+            Per-key Lighting        : {A:white, B:white, C:white, D:white, E:white, F:white, G:white, H:white, I:white, J:white, K:white, L:white, M:white, N:white, O:white, P:white, Q:white, R:white, S:white, T:white, U:white, V:white, W:white, X:white, Y:white, Z:white, 1:white, 2:white, 3:white, 4:white, 5:white, 6:white, 7:white, 8:white, 9:white, 0:white, ENTER:white, ESC:white, BACKSPACE:white, TAB:white, SPACE:white, -:white, =:white, [:white, \:white, KEY 46:white, ~:white, ;:white, ':white, `:white, ,:white, .:white, /:white, CAPS LOCK:white, F1:white, F2:white, F3:white, F4:white, F5:white, F6:white, F7:white, F8:white, F9:white, F10:white, F11:white, F12:white, PRINT:white, SCROLL LOCK:white, PASTE:white, INSERT:white, HOME:white, PAGE UP:white, DELETE:white, END:white, PAGE DOWN:white, RIGHT:white, LEFT:white, DOWN:white, UP:white, NUMLOCK:white, KEYPAD /:white, KEYPAD *:white, KEYPAD -:white, KEYPAD +:white, KEYPAD ENTER:white, KEYPAD 1:white, KEYPAD 2:white, KEYPAD 3:white, KEYPAD 4:white, KEYPAD 5:white, KEYPAD 6:white, KEYPAD 7:white, KEYPAD 8:white, KEYPAD 9:white, KEYPAD 0:white, KEYPAD .:white, KEY 97:white, COMPOSE:white, POWER:white, KEY 100:white, KEY 101:white, KEY 102:white, KEY 103:white, LEFT CTRL:white, LEFT SHIFT:white, LEFT ALT:white, LEFT WINDOWS:white, RIGHT CTRL:white, RIGHT SHIFT:white, RIGHT ALTGR:white, RIGHT WINDOWS:white, BRIGHTNESS:white, PAUSE:white, MUTE:white, NEXT:white, PREVIOUS:white, G1:white, G2:white, G3:white, G4:white, G5:white, LOGO:white}
+        12: REPROG CONTROLS V4     {1B04} V4
+            Key/Button Diversion (saved): {Host Switch Channel 1:Regular, Host Switch Channel 2:Regular}
+            Key/Button Diversion        : {Host Switch Channel 1:Regular, Host Switch Channel 2:Regular}
+        13: REPORT HID USAGE       {1BC0} V1
+        14: ENCRYPTION             {4100} V0
+        15: KEYBOARD DISABLE BY USAGE {4522} V0
+        16: KEYBOARD LAYOUT 2      {4540} V0
+        17: GKEY                   {8010} V0
+            Divert G and M Keys (saved): False
+            Divert G and M Keys        : False
+        18: MKEYS                  {8020} V0
+            M-Key LEDs (saved): {M1:False, M2:False, M3:False}
+            M-Key LEDs        : {M1:False, M2:False, M3:False}
+        19: MR                     {8030} V0
+            MR-Key LED (saved): False
+            MR-Key LED        : False
+        20: BRIGHTNESS CONTROL     {8040} V0
+            Brightness Control (saved): 12
+            Brightness Control        : 12
+        21: ONBOARD PROFILES       {8100} V0
+            Device Mode: Host
+            Onboard Profiles (saved): Disabled
+            Onboard Profiles        : Disabled
+        22: REPORT RATE            {8060} V0
+            Report Rate: 1ms
+            Report Rate (saved): 1ms
+            Report Rate        : 1ms
+        23: DFUCONTROL SIGNED      {00C2} V0
+        24: DFU                    {00D0} V3
+        25: DEVICE RESET           {1802} V0    internal, hidden
+        26: unknown:1803           {1803} V0    internal, hidden
+        27: CONFIG DEVICE PROPS    {1806} V8    internal, hidden
+        28: unknown:1813           {1813} V0    internal, hidden
+        29: OOBSTATE               {1805} V0    internal, hidden
+        30: unknown:1830           {1830} V0    internal, hidden
+        31: unknown:1890           {1890} V5    internal, hidden
+        32: unknown:1891           {1891} V5    internal, hidden
+        33: unknown:18A1           {18A1} V0    internal, hidden
+        34: unknown:1E00           {1E00} V0    hidden
+        35: unknown:1EB0           {1EB0} V0    internal, hidden
+        36: unknown:1861           {1861} V0    internal, hidden
+        37: unknown:18B0           {18B0} V0    internal, hidden
+     Has 2 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             divertable, persistently divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             divertable, persistently divertable, pos:2, group:0, group mask:empty
+             reporting: default
+     Battery: 80% 3998mV , discharging.

@@ -5,7 +5,7 @@
 # because they could perform firmware updates.
 KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
 
-ACTION != "add", GOTO="solaar_end"
+ACTION == "remove", GOTO="solaar_end"
 SUBSYSTEM != "hidraw", GOTO="solaar_end"
 
 # USB-connected Logitech receivers and devices
