@@ -248,5 +248,17 @@ class PerKeyControl(Gtk.Box):
             "zone_count": len(self._sink.zones),
         }
         layout = layout_for(feature_int, hint)
-        dlg = dialog_mod.get_dialog()
+        # Stable per-device key so the same physical device on USB and on
+        # the receiver shares a single dialog. unitId is read from the
+        # device firmware (via DeviceInformation) and is the same across
+        # transports; serial is per-pairing-slot. id(self._sink) is a
+        # last-resort fallback that should never be hit in practice.
+        key = (
+            getattr(device, "unitId", None)
+            or getattr(device, "serial", None)
+            or getattr(device, "hid_serial", None)
+            or getattr(device, "codename", None)
+            or id(self._sink)
+        )
+        dlg = dialog_mod.get_dialog(key)
         dlg.present(self._sink, layout)

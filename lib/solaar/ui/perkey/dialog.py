@@ -14,11 +14,18 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Singleton dialog hosting a PerKeyEditor for one sink at a time."""
+"""Per-device dialogs hosting a PerKeyEditor.
+
+One dialog instance is kept per device key (firmware unit-id, falling
+back to other stable identifiers — see ``get_dialog``). The same
+physical device on different transports (receiver vs direct USB) shares
+a key so it doesn't open two windows.
+"""
 
 from __future__ import annotations
 
 from enum import Enum
+from typing import Hashable
 
 import gi
 
@@ -36,51 +43,77 @@ class GtkSignal(Enum):
     DELETE_EVENT = "delete-event"
 
 
-class PerKeyEditorDialog:
-    _instance: "PerKeyEditorDialog | None" = None
+_dialogs: dict[Hashable, "PerKeyEditorDialog"] = {}
 
-    def __init__(self) -> None:
-        self._window = Gtk.Window()
-        self._window.set_title(_("Per-key Lighting"))
-        # No default size or geometry hints — the editor's content size
-        # (driven by KeyboardCanvas's size_request) determines the window size
-        # via the ScrolledWindow's propagate_natural_size. Wide keyboards open
-        # large; small mice open small.
-        self._window.connect(GtkSignal.DELETE_EVENT.value, self._on_delete)
+
+class PerKeyEditorDialog:
+    def __init__(self, key: Hashable) -> None:
+        self._key = key
+        self._window: Gtk.Window | None = None
+        self._wrapper: Gtk.Box | None = None
         self._editor: PerKeyEditor | None = None
+        self._sink: PerKeyColorSink | None = None
+
+    def _on_delete(self, _w, _e) -> bool:
+        self._destroy()
+        _dialogs.pop(self._key, None)
+        return True
+
+    def _destroy(self) -> None:
+        if self._editor is not None:
+            self._editor.shutdown()
+            self._editor = None
+        if self._window is not None:
+            self._window.destroy()
+            self._window = None
+            self._wrapper = None
+        self._sink = None
+
+    def present(self, sink: PerKeyColorSink, layout: Layout | None) -> None:
+        # Re-opening for the same sink while the window is already open:
+        # just raise it (no rebuild flicker, preserves any in-progress
+        # interaction state).
+        if self._window is not None and self._sink is sink:
+            self._window.present()
+            return
+        # Otherwise build a fresh window. We always recreate rather than
+        # swap content in place because Gtk.Window.resize() after first
+        # show is unreliable across X11/Wayland WMs — the WM often keeps
+        # the original geometry — and a new window picks up the layout's
+        # natural size cleanly on first show.
+        self._destroy()
+        self._sink = sink
+        self._window = Gtk.Window()
+        self._window.set_title(_("Per-key Lighting") + " — " + sink.title)
+        self._window.connect(GtkSignal.DELETE_EVENT.value, self._on_delete)
         self._wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self._wrapper.set_border_width(8)
         self._window.add(self._wrapper)
-
-    def _on_delete(self, _w, _e) -> bool:
-        self._window.hide()
-        if self._editor is not None:
-            self._editor.shutdown()
-            self._wrapper.remove(self._editor)
-            self._editor = None
-        return True
-
-    def present(self, sink: PerKeyColorSink, layout: Layout | None) -> None:
-        if self._editor is not None:
-            self._editor.shutdown()
-            self._wrapper.remove(self._editor)
-            self._editor = None
         self._editor = PerKeyEditor(sink, layout)
         self._wrapper.pack_start(self._editor, True, True, 0)
         self._wrapper.show_all()
-        self._window.set_title(_("Per-key Lighting") + " — " + sink.title)
         # Ask GTK what the wrapper actually wants to be — the canvas's
         # size_request propagates up through ScrolledWindow + editor VBox
         # (toolbar + scrolled canvas) + the wrapper's border, so the
-        # natural size already accounts for every layout contribution
-        # rather than hardcoding "toolbar ~50, border 8 each side".
+        # natural size already accounts for every layout contribution.
         _min, nat = self._wrapper.get_preferred_size()
         if nat.width > 0 and nat.height > 0:
             self._window.resize(nat.width, nat.height)
         self._window.present()
 
 
-def get_dialog() -> PerKeyEditorDialog:
-    if PerKeyEditorDialog._instance is None:
-        PerKeyEditorDialog._instance = PerKeyEditorDialog()
-    return PerKeyEditorDialog._instance
+def get_dialog(key: Hashable) -> PerKeyEditorDialog:
+    """Return the dialog for `key`, creating one if none is open.
+
+    `key` should be a stable per-device identifier. The caller (control.py)
+    builds it from `device.unitId` first — that's read from the device
+    firmware via the DeviceInformation feature and is the same regardless
+    of whether the device is on a receiver or plugged directly via USB,
+    so the same physical device doesn't open two windows when its
+    transport changes.
+    """
+    d = _dialogs.get(key)
+    if d is None:
+        d = PerKeyEditorDialog(key)
+        _dialogs[key] = d
+    return d

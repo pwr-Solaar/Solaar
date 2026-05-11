@@ -126,6 +126,9 @@ class PerKeyEditor(Gtk.Box):
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.set_propagate_natural_width(True)
         scroll.set_propagate_natural_height(True)
+        # Inset frame around the keyboard so it reads as a distinct panel
+        # rather than floating flat against the dialog background.
+        scroll.set_shadow_type(Gtk.ShadowType.IN)
         self._canvas = KeyboardCanvas()
         self._canvas.connect(GtkSignal.PAINT.value, self._on_canvas_paint)
         scroll.add(self._canvas)
