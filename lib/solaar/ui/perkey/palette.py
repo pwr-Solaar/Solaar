@@ -24,8 +24,6 @@ itself — see `GradientSwatch` below, used by `editor.py`.
 
 from __future__ import annotations
 
-import logging
-
 from enum import Enum
 
 import gi
@@ -37,9 +35,7 @@ from gi.repository import Gtk  # NOQA: E402
 
 from solaar.i18n import _  # NOQA: E402
 
-from ._icons import themed_icon_image  # NOQA: E402
-
-logger = logging.getLogger(__name__)
+from ._icons import attach_themed_icon  # NOQA: E402
 
 _UNSET_ICON_NAME = "solaar-tool-palette-off-symbolic"
 
@@ -97,42 +93,19 @@ class Palette(Gtk.Box):
 
         self._unset_btn = Gtk.ToggleButton()
         self._unset_btn.set_tooltip_text(_("Paint as 'no change' — clears the cell to the zone base color"))
-        self._unset_label = _("Unset")
-        self._unset_image = themed_icon_image(_UNSET_ICON_NAME, self._unset_btn)
-        if self._unset_image is not None:
-            self._unset_btn.add(self._unset_image)
-            self._unset_btn.get_accessible().set_name(self._unset_label)
+        unset_label = _("Unset")
+        if attach_themed_icon(self._unset_btn, _UNSET_ICON_NAME) is not None:
+            self._unset_btn.get_accessible().set_name(unset_label)
         else:
-            self._unset_btn.set_label(self._unset_label)
+            self._unset_btn.set_label(unset_label)
         self._unset_btn.connect(GtkSignal.TOGGLED.value, self._on_unset_toggled)
         self.pack_start(self._unset_btn, False, False, 0)
 
-        # Track theme changes so the unset icon re-renders to match.
-        self._theme_signal_handlers: list[tuple[object, int]] = []
-        if self._unset_image is not None:
-            settings = Gtk.Settings.get_default()
-            for prop in ("notify::gtk-theme-name", "notify::gtk-application-prefer-dark-theme"):
-                hid = settings.connect(prop, self._on_gtk_theme_changed)
-                self._theme_signal_handlers.append((settings, hid))
-
     def shutdown(self) -> None:
-        for obj, hid in self._theme_signal_handlers:
-            try:
-                obj.disconnect(hid)
-            except Exception as e:
-                logger.debug("palette theme signal disconnect failed: %s", e)
-        self._theme_signal_handlers = []
-
-    def _on_gtk_theme_changed(self, _settings, _pspec) -> None:
-        new_image = themed_icon_image(_UNSET_ICON_NAME, self._unset_btn)
-        if new_image is None:
-            return
-        old = self._unset_btn.get_child()
-        if old is not None:
-            self._unset_btn.remove(old)
-        self._unset_btn.add(new_image)
-        new_image.show()
-        self._unset_image = new_image
+        # attach_themed_icon connects to the button's own style-updated
+        # signal; GTK disconnects it automatically when the button is
+        # destroyed, so there is nothing to clean up here.
+        pass
 
     def _on_color_set(self, btn: Gtk.ColorButton) -> None:
         c = _rgb_to_int(btn.get_rgba())

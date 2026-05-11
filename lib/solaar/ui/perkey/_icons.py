@@ -86,3 +86,48 @@ def themed_icon_image(icon_name: str, style_widget: Gtk.Widget) -> Gtk.Image | N
     except Exception as e:
         logger.debug("recolor failed for %s: %s", icon_name, e)
         return None
+
+
+def _fg_color_key(widget: Gtk.Widget) -> tuple[float, float, float]:
+    fg = widget.get_style_context().get_color(Gtk.StateFlags.NORMAL)
+    return (round(fg.red, 3), round(fg.green, 3), round(fg.blue, 3))
+
+
+def attach_themed_icon(button: Gtk.Container, icon_name: str) -> int | None:
+    """Add a themed icon to `button` and re-render it whenever the active
+    GTK theme changes the button's foreground color. Returns the
+    style-updated signal handler ID, or None if the icon couldn't be
+    loaded (in which case the button is left unchanged so the caller can
+    fall back to a text label).
+
+    Listening to the button's own ``style-updated`` signal — instead of
+    ``Gtk.Settings notify::gtk-theme-name`` — means we read the
+    foreground color *after* GTK has re-resolved CSS for the new theme.
+    Subscribing to the Settings notify fires too early; it returns the
+    stale (pre-switch) color and produces icons that all settle on the
+    previous theme's tone. We guard the rebuild with a per-button color
+    key so unrelated style updates (hover, focus, active) don't trigger
+    needless re-renders.
+    """
+    image = themed_icon_image(icon_name, button)
+    if image is None:
+        return None
+    button.add(image)
+    image.show()
+    state = {"color_key": _fg_color_key(button)}
+
+    def _refresh(_widget) -> None:
+        new_key = _fg_color_key(button)
+        if new_key == state["color_key"]:
+            return
+        state["color_key"] = new_key
+        new_image = themed_icon_image(icon_name, button)
+        if new_image is None:
+            return
+        old = button.get_child()
+        if old is not None:
+            button.remove(old)
+        button.add(new_image)
+        new_image.show()
+
+    return button.connect("style-updated", _refresh)

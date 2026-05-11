@@ -34,7 +34,7 @@ from gi.repository import Gtk  # NOQA: E402
 from solaar.i18n import _  # NOQA: E402
 
 from . import binding  # NOQA: E402
-from ._icons import themed_icon_image  # NOQA: E402
+from ._icons import attach_themed_icon  # NOQA: E402
 from .canvas import KeyboardCanvas  # NOQA: E402
 from .layout import Layout  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
@@ -75,9 +75,6 @@ class PerKeyEditor(Gtk.Box):
         # toolbar row
         toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self._tool_buttons: dict[str, Gtk.RadioButton] = {}
-        # Track which buttons display a themed icon, so we can re-render them
-        # when the active GTK theme switches (light <-> dark, theme name).
-        self._themed_icon_buttons: dict[Gtk.RadioButton, str] = {}
         self._gradient_swatch: GradientSwatch | None = None
         first: Gtk.RadioButton | None = None
         supported = layout.supported_tools if layout else ("single", "rect", "bucket", "gradient")
@@ -93,12 +90,9 @@ class PerKeyEditor(Gtk.Box):
                 icon_name = _TOOL_ICON_NAMES.get(name)
                 btn = Gtk.RadioButton.new_from_widget(first)
                 btn.set_mode(False)  # render as toggle button rather than radio
-                image = themed_icon_image(icon_name, btn) if icon_name else None
-                if image is not None:
-                    btn.add(image)
+                if icon_name and attach_themed_icon(btn, icon_name) is not None:
                     btn.set_tooltip_text(tip or label)
                     btn.get_accessible().set_name(label)
-                    self._themed_icon_buttons[btn] = icon_name
                 else:
                     btn.set_label(label)
                     btn.set_tooltip_text(tip)
@@ -107,14 +101,6 @@ class PerKeyEditor(Gtk.Box):
                 first = btn
             toolbar.pack_start(btn, False, False, 0)
             self._tool_buttons[name] = btn
-
-        # Re-render themed icons when the GTK theme changes at runtime.
-        self._theme_signal_handlers: list[tuple[object, int]] = []
-        if self._themed_icon_buttons:
-            settings = Gtk.Settings.get_default()
-            for prop in ("notify::gtk-theme-name", "notify::gtk-application-prefer-dark-theme"):
-                hid = settings.connect(prop, self._on_gtk_theme_changed)
-                self._theme_signal_handlers.append((settings, hid))
 
         initial_active, initial_previous = 0xFF0000, 0xFF0000
         try:
@@ -165,28 +151,10 @@ class PerKeyEditor(Gtk.Box):
             except Exception as e:
                 logger.debug("perkey sink unsubscribe failed: %s", e)
             self._unsubscribe = None
-        for obj, hid in self._theme_signal_handlers:
-            try:
-                obj.disconnect(hid)
-            except Exception as e:
-                logger.debug("theme signal disconnect failed: %s", e)
-        self._theme_signal_handlers = []
         try:
             self._palette.shutdown()
         except Exception as e:
             logger.debug("palette shutdown failed: %s", e)
-
-    def _on_gtk_theme_changed(self, _settings, _pspec) -> None:
-        """Rebuild themed tool icons so they match the new theme's foreground."""
-        for btn, icon_name in self._themed_icon_buttons.items():
-            old = btn.get_child()
-            new_image = themed_icon_image(icon_name, btn)
-            if new_image is None:
-                continue
-            if old is not None:
-                btn.remove(old)
-            btn.add(new_image)
-            new_image.show()
 
     def canvas_size(self) -> tuple[int, int]:
         """Return the canvas's pixel size_request — what the dialog should
