@@ -229,9 +229,12 @@ class KeyboardCanvas(Gtk.DrawingArea):
             logger.debug("text rendering failed for %r: %s", label, e)
 
     def _fill_checker(self, cr, x, y, w, h) -> None:
-        # Diagonal hash for "no change" cells. Background uses the zone base
-        # color (what these cells actually display on the keyboard); stripes
-        # pick a black or white contrast based on luminance.
+        # Diagonal hash for "no change" cells. The background is the zone
+        # base color (what these cells actually display on the keyboard).
+        # Stripes alternate darker / lighter than base in equal measure so
+        # the cell's perceived average stays at the base color, instead of
+        # being uniformly biased toward black or white as a single-overlay
+        # stripe would.
         cr.save()
         self._round_rect(cr, x, y, w, h, 4)
         cr.clip()
@@ -240,26 +243,61 @@ class KeyboardCanvas(Gtk.DrawingArea):
             r = ((base >> 16) & 0xFF) / 255.0
             g = ((base >> 8) & 0xFF) / 255.0
             b = (base & 0xFF) / 255.0
+            cr.set_source_rgba(r, g, b, 1.0)
+            cr.rectangle(x, y, w, h)
+            cr.fill()
+            # Per-channel ±offset. When a channel is too close to 0 or 1 to
+            # fit the full offset, halve the offset on the constrained side
+            # (per spec: average drifts at the limits, but stays centered on
+            # base elsewhere).
+            offset = 0.22
+
+            def _shift(v: float) -> tuple[float, float]:
+                down_off = offset if (v - offset) >= 0.0 else offset / 2.0
+                up_off = offset if (v + offset) <= 1.0 else offset / 2.0
+                return max(0.0, v - down_off), min(1.0, v + up_off)
+
+            rd, ru = _shift(r)
+            gd, gu = _shift(g)
+            bd, bu = _shift(b)
+            # Interleave darker and lighter stripes (period = step per set,
+            # other-color set offset by step/2). Equal coverage of the two
+            # colors keeps the perceived average at base.
+            cr.set_line_width(1.5)
+            step = 6
+            half = step // 2
+            d_max = int(w + h)
+            cr.set_source_rgba(rd, gd, bd, 1.0)
+            d = -int(h)
+            while d <= d_max:
+                cr.move_to(x + d, y + h)
+                cr.line_to(x + d + h, y)
+                cr.stroke()
+                d += step
+            cr.set_source_rgba(ru, gu, bu, 1.0)
+            d = -int(h) + half
+            while d <= d_max:
+                cr.move_to(x + d, y + h)
+                cr.line_to(x + d + h, y)
+                cr.stroke()
+                d += step
         else:
-            r = g = 0.30
-            b = 0.32
-        cr.set_source_rgba(r, g, b, 1.0)
-        cr.rectangle(x, y, w, h)
-        cr.fill()
-        if base is not None and base >= 0:
-            lum = 0.299 * r + 0.587 * g + 0.114 * b
-            cr.set_source_rgba(0, 0, 0, 0.45) if lum > 0.55 else cr.set_source_rgba(1, 1, 1, 0.35)
-        else:
+            # No zone base color known — fall back to a neutral dark bg with
+            # medium-gray stripes; "average = base" doesn't apply since there
+            # is no expected color to preserve.
+            cr.set_source_rgba(0.30, 0.30, 0.32, 1.0)
+            cr.rectangle(x, y, w, h)
+            cr.fill()
             cr.set_source_rgba(0.55, 0.55, 0.60, 1.0)
-        cr.set_line_width(1.5)
-        step = 5
-        d_max = int(w + h)
-        d = -int(h)
-        while d <= d_max:
-            cr.move_to(x + d, y + h)
-            cr.line_to(x + d + h, y)
-            cr.stroke()
-            d += step
+            cr.set_line_width(1.5)
+            step = 5
+            d_max = int(w + h)
+            d = -int(h)
+            while d <= d_max:
+                cr.move_to(x + d, y + h)
+                cr.line_to(x + d + h, y)
+                cr.stroke()
+                d += step
         cr.restore()
 
     def _round_rect(self, cr, x, y, w, h, r) -> None:
