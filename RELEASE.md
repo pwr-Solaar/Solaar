@@ -11,7 +11,7 @@ Release routine:
 - Add release changes to `CHANGELOG.md`
 - Add release information to `share/solaar/io.github.pwr_solaar.solaar.metainfo.xml`
 - Create a commit that starts with `release VERSION`
-- Push commit to Solaar repository
+- Push commit to Solaar repository and merge it
 - Invoke `./release.sh`
   - Git tags are signed so you must have GPG set up
   - You are required to have a github token with `public_repo` access
