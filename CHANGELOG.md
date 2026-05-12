@@ -1,5 +1,48 @@
-# 1.1.20rc1
+# 1.1.20rc2
 
+* Mock libnotify to not perform notifications when doing tests
+* Isolate testing from real configuration file
+* Update handling of headset RGB controls
+* Update equalizer processing
+* Hide read-only paramaters from the UI
+* Better support for G522 Lightspeed headset
+* Use mostly full names for direct-USB codenames
+* Use correct icon for CENTURION devices
+* rgb_control: honor the off state — don't auto-claim, init, or shutdown LEDs
+* base: fix sw_id at 0x0B instead of rotating 0x2..0xF (#3218)
+* perkey/canvas: allow rect/gradient anchors in grid gaps
+* config_panel: don't show failed-write alert for unreadable settings
+* listener: share bluez-watch wiring across Centurion-direct and standard device paths
+* rgb_power.perkey_has_paint: gate on IGNORE only, not on != True
+* about: add Ken Sanislo to Additional Programming credits
+* Add RGB lighting persistence and software LED power management for G515
+* ui: Show offline status for receiver-paired device batteries (#3217)
+* LEDControl / RGBControl: render as Gtk.Switch instead of a 2-option combo (#3215)
+* device: Fix operator precedence bug and end-of-configuration timing in device.changed() (#3173)
+* PerKeyLighting: drop misleading live-read output in solaar show
+* perkey: label G502 X LEDs by zone id, not letter
+* PerKey gradient swatch: align gradient endpoints to visible corners
+* PerKey gradient swatch: Tabler "square" outline around the gradient
+* PerKey dialog: one window per device, keyed by firmware unit-id
+* PerKey dialog: size window from measured natural size
+* PerKey icons: read theme fg from style-updated, not Settings notify
+* PerKey canvas: symmetric hash stripes for unset cells
+* PerKey palette: replace hashed unset swatch with palette-off icon
+* PerKeyEditor: rebuild tool icons on GTK theme change
+* PerKeyEditor: replace tool button labels with icons
+* common: render RGB color values as 0xrrggbb in config and solaar show
+* Better display of LED effects for some devices in solaar show.
+* Fix bug affecting using solaar config to change range-based settings.
+* Add regional keyboard layouts
+* Use per-key RGB color painter
+* Fix bug in notification flag handling
+* Fix bug in HID parser
+* Update Swedish, German, Polish, Chinese translations
+* Use battery-level-N icons when available
+* Document haptic capabilities
+* Support per-slot unpair on Lightspeed receivers
+* Fix bugs related to integer flags in older versions of Python
+* Add mention of Centurion protocol support
 * Treat empty hidraw read as device removal (EOF) (#3174)
 * fix interface for K845
 * support PRO X 2 LIGHTSPEED headphones Centurion features (#3150)

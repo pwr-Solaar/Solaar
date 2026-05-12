@@ -8,12 +8,19 @@ layout: page
 - Some internal structures in Solaar have been updated to use more standard Python language features.
   This has caused some problems and introduced bugs are still being found.
 
-- Onboard Profiles, when active, can prevent changes to other settings, such as Polling Rate, DPI, and various LED settings. Which settings are affected depends on the device.  To make changes to affected settings, disable Onboard Profiles.  If Onboard Profiles are later enabled the affected settings may change to the value in the profile.
+- Some devices, such as the G515 Lightspeed TLK, have multiple ways of controlling their LEDs,
+  for example one way controls each LED individually and another controls multiple LEDs at once.
+  For these devices the settings for one way should be set to ignore.
+  Having multiple ways that are not set to ignore may result in unusual behavior.
 
-- Bluez 5.73 does not remove Bluetooth devices when they disconnect.
-  Solaar 1.1.12 processes the DBus disconnection and connection messages from Bluez and does re-initialize devices when they reconnect.
-  The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling.
-  Until the problem is resolved having Scroll Wheel Resolution set to true (and not ignored) may be helpful.
+- Onboard Profiles, when active, can prevent changes to other settings, such as Polling Rate, DPI,
+  and various LED settings. Which settings are affected depends on the device.  To make changes
+  to affected settings, disable Onboard Profiles.  If Onboard Profiles are later enabled the affected
+  settings may change to the value in the profile.
+
+- Solaar expects that it has exclusive control over settings that are not ignored.
+  Running other programs that modify these settings, such as logiops,
+  will likely result in unexpected device behavior.
 
 - The Linux HID++ driver modifies the Scroll Wheel Resolution setting to
   implement smooth scrolling.  If Solaar changes this setting, scrolling
@@ -22,15 +29,11 @@ layout: page
   "Ignore this setting", which is the default for new devices.
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
-- Solaar expects that it has exclusive control over settings that are not ignored.
-  Running other programs that modify these settings, such as logiops,
-  will likely result in unexpected device behavior.
-
-- The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
+- The Linux  HID++ driver sets the scrolling direction to its normal setting when implementing smooth scrolling.
   This can interfere with the Scroll Wheel Direction setting, requiring flipping this setting back and forth
   to restore reversed scrolling.
 
-- The driver sends messages to devices that do not conform with the Logitech HID++ specification
+- The Linux  HID++ driver sends messages to devices that do not conform with the Logitech HID++ specification
   resulting in responses being sent back that look like other messages.  For some devices this causes
   Solaar to report incorrect battery levels.
 

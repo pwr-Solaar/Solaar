@@ -2,7 +2,8 @@
 
 ## Version 1.1.20
 
-* Solaar now supports the Centurion protocol, a variation of the HIDP++ protocol that is used by several headsets
+* Solaar has much better support for the LEDs on some newer devices, such as the G515 Lightspeed TKL.
+* Solaar now supports the Centurion protocol, a variation of the HIDP++ protocol that is used by several headsets.
 * Solaar now uses uinput for all simulated input, even in X11.  As a result there is no need for a separate udev rule for Wayland, and it may be removed in future.
 
 ## Version 1.1.18
