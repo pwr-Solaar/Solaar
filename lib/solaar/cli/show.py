@@ -112,6 +112,17 @@ def _print_centurion_dongle_features(receiver):
                 print(f"          Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
 
 
+_LED_CAPS_BITS = ((0x0001, "color"), (0x0002, "fade"), (0x0004, "period"), (0x0010, "direction"), (0xC000, "fw"))
+
+
+def _decode_led_caps(caps):
+    names = [name for mask, name in _LED_CAPS_BITS if caps & mask]
+    other = caps & ~sum(m for m, _ in _LED_CAPS_BITS)
+    if other:
+        names.append(f"+{other:#06x}")
+    return f"0x{caps:04x}=" + ("+".join(names) if names else "none")
+
+
 def _battery_text(level) -> str:
     if level is None:
         return "N/A"
@@ -363,6 +374,24 @@ def _print_device(dev, num=None):
                 bands = hidpp20.get_onboard_eq_params(dev)
                 if bands:
                     print(f"            EQ: {', '.join(f'{f}Hz:{g:+d}dB' for f, g, _q in bands)}")
+            elif feature == SupportedFeature.RGB_EFFECTS or feature == SupportedFeature.COLOR_LED_EFFECTS:
+                try:
+                    infos = dev.led_effects
+                except Exception as e:
+                    print(f"            Effect enumeration failed: {e}")
+                    infos = None
+                if infos and infos.zones:
+                    for zone in infos.zones:
+                        print(f"            Zone {int(zone.index)} ({zone.location}): {len(zone.effects)} effect(s)")
+                        for e in zone.effects:
+                            entry = hidpp20.LEDEffects.get(e.ID)
+                            name = entry[0].name if entry else f"Unknown(0x{e.ID:02x})"
+                            caps = _decode_led_caps(e.capabilities)
+                            params = ", ".join(str(p) for p in entry[1]) if entry and entry[1] else "—"
+                            print(
+                                f"              [{e.index}] 0x{e.ID:02x} {name:<14} "
+                                f"caps {caps:<28} default {e.period}ms  params: {params}"
+                            )
             elif hidpp20.battery_functions.get(feature, None):
                 print("", end="       ")
                 _battery_line(dev)
