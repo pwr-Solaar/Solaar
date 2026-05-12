@@ -565,7 +565,7 @@ class RangeValidator(Validator):
     def acceptable(self, args, current):
         arg = args[0]
         #  None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args)
-        return None if len(args) != 1 or isinstance(arg, int) or arg < self.min_value or arg > self.max_value else args
+        return None if len(args) != 1 or not isinstance(arg, int) or arg < self.min_value or arg > self.max_value else args
 
     def compare(self, args, current):
         if len(args) == 1:
