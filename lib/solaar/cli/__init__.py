@@ -94,6 +94,23 @@ def _create_parser():
     )
     sp.set_defaults(action="pair")
 
+    sp = subparsers.add_parser(
+        "shortcut",
+        description="Bind a Logitech key/button to an arbitrary keyboard shortcut using diversion rules.",
+        epilog="Example: solaar shortcut 'MX Master' Control_L+Alt_L+T --key smart-shift",
+    )
+    sp.add_argument(
+        "device",
+        help="device to configure; may be a device number (1..6), a serial number, or a substring of a device's name",
+    )
+    sp.add_argument("shortcut", help="X11 keysym or '+'-separated shortcut, e.g. Control_L+Alt_L+T")
+    sp.add_argument(
+        "--key",
+        default="smart-shift",
+        help="Logitech key/button to bind; defaults to smart-shift for the Smart Shift wheel-mode button",
+    )
+    sp.set_defaults(action="shortcut")
+
     sp = subparsers.add_parser("unpair", description="Unpair a device from its receiver.  Not all receivers allow unpairing.")
     sp.add_argument(
         "device",
@@ -232,7 +249,7 @@ def run(cli_args=None, hidraw_path=None):
     assert action in actions
 
     try:
-        if action == "show" or action == "probe" or action == "config" or action == "profiles":
+        if action in ("show", "probe", "config", "profiles", "shortcut"):
             c = list(_receivers_and_devices(hidraw_path))
         else:
             c = list(_receivers(hidraw_path))
