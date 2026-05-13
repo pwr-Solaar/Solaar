@@ -956,29 +956,18 @@ def test_centurion_sub_device_feature_discovery():
     dev = fake_hidpp.Device("CENT_SUB", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
     # Set up bridge responses for sub-device discovery:
     # 1. CenturionRoot.GetFeature(0x0001) -> FeatureSet at sub-index 1
-    # 2. CenturionFeatureSet.GetFeatureId(index=0) -> bulk feature list
+    # 2. CenturionFeatureSet.GetCount (func 0) -> total feature count
+    # 3. CenturionFeatureSet.GetFeatureId (func 0x10) per-index -> one feature each
     dev._bridge_responses = {
         # CenturionRoot(idx=0).GetFeature(func=0) with feature_id=0x0001 -> sub_fs_index=1
         (0x00, 0x00, "0001"): bytes([0x01, 0x00, 0x00]),
-        # CenturionFeatureSet(idx=1).GetFeatureId(func=0x10, start=0) -> 3 features
-        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
-        (0x01, 0x10, "00"): bytes(
-            [
-                0x03,  # 3 features
-                0x06,
-                0x04,
-                0x00,
-                0x00,  # HEADSET_AUDIO_SIDETONE (0x0604) at sub-idx 0
-                0x06,
-                0x01,
-                0x00,
-                0x00,  # HEADSET_MIC_MUTE (0x0601) at sub-idx 1
-                0x06,
-                0x11,
-                0x00,
-                0x00,  # HEADSET_MIC_GAIN (0x0611) at sub-idx 2
-            ]
-        ),
+        # CenturionFeatureSet(idx=1).GetCount (func=0) -> 3 features
+        (0x01, 0x00, ""): bytes([0x03, 0x00, 0x00]),
+        # CenturionFeatureSet(idx=1).GetFeatureId (func=0x10, index=N) -> one feature per response.
+        # Response format: [remaining, feat_hi, feat_lo, type, flags]
+        (0x01, 0x10, "00"): bytes([0x02, 0x06, 0x04, 0x00, 0x00]),  # HEADSET_AUDIO_SIDETONE at sub-idx 0
+        (0x01, 0x10, "01"): bytes([0x01, 0x06, 0x01, 0x00, 0x00]),  # HEADSET_MIC_MUTE at sub-idx 1
+        (0x01, 0x10, "02"): bytes([0x00, 0x06, 0x11, 0x00, 0x00]),  # HEADSET_MIC_GAIN at sub-idx 2
     }
     featuresarray = hidpp20.FeaturesArray(dev)
     dev.features = featuresarray
