@@ -940,12 +940,16 @@ class Device:
         pass
 
     def close(self):
-        handle, self.handle = self.handle, None
-        if self in Device.instances:
-            Device.instances.remove(self)
+        # Run device.cleanups before clearing self.handle — cleanup callbacks
+        # typically need to issue final feature_request() writes (e.g. release
+        # SW control, restore device-side state) and feature_request() relies
+        # on self.handle being set.
         if hasattr(self, "cleanups"):
             for cleanup in self.cleanups:
                 cleanup(self)
+        handle, self.handle = self.handle, None
+        if self in Device.instances:
+            Device.instances.remove(self)
         return handle and self.low_level.close(handle)
 
     def __index__(self):

@@ -34,6 +34,7 @@ from . import diversion
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
+from . import rgb_power
 from . import settings_templates
 from .common import Alert
 from .common import BatteryStatus
@@ -426,6 +427,14 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                 if brightness:
                     brightness = struct.unpack("!H", device.feature_request(SupportedFeature.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
+
+    elif feature == SupportedFeature.RGB_EFFECTS:
+        fn = notification.address >> 4
+        if fn == 1:  # onUserActivity: type=0 is IDLE, type!=0 is ACTIVE
+            activity_type = notification.data[0] if notification.data else 0xFF
+            rgb_power.on_user_activity(device, activity_type)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: RGB_EFFECTS notification addr=%02x: %s", device, notification.address, notification)
 
     diversion.process_notification(device, notification, feature)
     return True

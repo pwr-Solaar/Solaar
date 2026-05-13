@@ -584,7 +584,8 @@ class HeteroValidator(Validator):
         return cls(**kwargs)
 
     def __init__(self, data_class=None, options=None, readable=True):
-        assert data_class is not None and options is not None
+        # options=None for purely host-side settings — data_class handles bytes[0] as the ID.
+        assert data_class is not None
         self.data_class = data_class
         self.options = options
         self.readable = readable

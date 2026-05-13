@@ -297,7 +297,27 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.RGBControl, False, True),
         fake_hidpp.Response("0000", 0x0450),
-        fake_hidpp.Response("010100", 0x0450, "0101"),
+        fake_hidpp.Response("010304", 0x0450, "010304"),
+        fake_hidpp.Response("00003C012C", 0x0470, "00"),  # GetRgbPowerModeConfig: idle=60s, sleep=300s
+    ),
+    Setup(  # RGBIdleEffect — software-only, no feature requests for read/write
+        # The setting is a HeteroValidator carrying a LEDEffectSetting.
+        # Default (read with empty persister) = Dim 50%.
+        FeatureTest(
+            settings_templates.RGBIdleEffect,
+            hidpp20.LEDEffectSetting(ID=0x80, intensity=50),
+            hidpp20.LEDEffectSetting(ID=0x80, intensity=75),
+            0,
+        ),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
+    ),
+    Setup(  # RGBIdleTimeout — software-only, no feature requests for read/write
+        FeatureTest(settings_templates.RGBIdleTimeout, 60, 300, 0),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
+    ),
+    Setup(  # RGBSleepTimeout — software-only, no feature requests for read/write
+        FeatureTest(settings_templates.RGBSleepTimeout, 300, 600, 0),
+        fake_hidpp.Response("00", 0xFFFF),  # placeholder — no device requests needed
     ),
     Setup(
         FeatureTest(
@@ -911,3 +931,90 @@ def test_check_feature_setting(test, mocker):
     setting = settings_templates.check_feature_setting(device, tst.sclass.name)
 
     assert setting
+
+
+# --- RGBIdleEffect._pre_read legacy bare-int migration ---------------------
+# Solaar versions before the HeteroValidator refactor stored
+# `rgb_idle_effect` as a bare int (0 / 25 / 50 / 75 / 0x0A / 0x0B).
+# On first read after upgrade, RGBIdleEffect._pre_read should map
+# each to the equivalent LEDEffectSetting and write the upgraded form
+# back to the persister so subsequent reads return it directly.
+
+
+def _idle_setting_with_persisted(value):
+    """Build a minimally-scaffolded RGBIdleEffect with `value` already
+    in the persister and `_value` unread. Returns (setting, device).
+    Avoids RGBIdleEffect.build's led_effects probe (which needs a
+    full device fixture); _pre_read is fully exercised regardless.
+    """
+    from solaar import configuration
+
+    class _Dev:
+        pass
+
+    device = _Dev()
+    device.persister = configuration._DeviceEntry()
+    if value is not None:
+        device.persister[settings_templates.RGBIdleEffect.name] = value
+    setting = settings_templates.RGBIdleEffect.__new__(settings_templates.RGBIdleEffect)
+    setting._device = device
+    setting._value = None
+    return setting, device
+
+
+@pytest.mark.parametrize(
+    "legacy, expected_id, expected_attrs",
+    [
+        (0, 0x00, {}),  # Disabled
+        (25, 0x80, {"intensity": 25}),  # Dim 25%
+        (50, 0x80, {"intensity": 50}),  # Dim 50%
+        (75, 0x80, {"intensity": 75}),  # Dim 75%
+        (0x0A, 0x0A, {"period": 3000, "intensity": 100}),  # Breathe
+        (0x0B, 0x0B, {"period": 3000}),  # Ripple
+    ],
+)
+def test_RGBIdleEffect_legacy_int_migration(legacy, expected_id, expected_attrs):
+    setting, device = _idle_setting_with_persisted(legacy)
+
+    setting._pre_read(cached=True)
+
+    assert isinstance(setting._value, hidpp20.LEDEffectSetting)
+    assert int(setting._value.ID) == expected_id
+    for attr, val in expected_attrs.items():
+        assert getattr(setting._value, attr) == val
+    # Persister was rewritten so subsequent reads return the migrated form.
+    persisted = device.persister[setting.name]
+    assert isinstance(persisted, hidpp20.LEDEffectSetting)
+    assert int(persisted.ID) == expected_id
+
+
+def test_RGBIdleEffect_already_migrated_is_unchanged():
+    """A persisted LEDEffectSetting passes through _pre_read untouched —
+    no double-migration on subsequent reads."""
+    pre_migrated = hidpp20.LEDEffectSetting(ID=0x80, intensity=42)
+    setting, _ = _idle_setting_with_persisted(pre_migrated)
+
+    setting._pre_read(cached=True)
+
+    assert setting._value is pre_migrated  # same instance, no rewrap
+
+
+def test_RGBIdleEffect_none_value_passes_through():
+    """Fresh install / nothing in persister: _pre_read leaves _value as
+    None instead of crashing in the migration branch."""
+    setting, _ = _idle_setting_with_persisted(None)
+
+    setting._pre_read(cached=True)
+
+    assert setting._value is None
+
+
+def test_RGBIdleEffect_unrecognized_int_passes_through():
+    """An int outside the legacy mapping (corrupt config, future value)
+    falls through _pre_read without touching _value or the persister."""
+    setting, device = _idle_setting_with_persisted(999)
+
+    setting._pre_read(cached=True)
+
+    assert setting._value == 999
+    assert device.persister[setting.name] == 999

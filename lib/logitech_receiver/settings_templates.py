@@ -21,9 +21,12 @@ import socket
 import struct
 import traceback
 
+from time import sleep
 from time import time
 from typing import Callable
 from typing import Protocol
+
+import yaml
 
 from solaar.i18n import _
 
@@ -31,10 +34,13 @@ from . import base
 from . import common
 from . import descriptors
 from . import desktop_notifications
+from . import device_quirks
 from . import diversion
 from . import exceptions
+from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
+from . import rgb_power
 from . import settings
 from . import settings_new
 from . import settings_validator
@@ -49,6 +55,42 @@ logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
 _F = hidpp20_constants.SupportedFeature
+
+
+def halving_marks(max_value, step_count):
+    """Halving series from max_value down by powers of two, plus 0.
+
+    For max=100, count=5 → [0, 13, 25, 50, 100], matching the G515 FN-F8 cycle.
+    """
+    if step_count < 2 or max_value <= 0:
+        return []
+    levels = [-(-max_value // (1 << i)) for i in range(step_count - 1)]
+    return sorted({0, *levels})
+
+
+def auto_step_count(max_value, low_pct=10):
+    """Step count for halving_marks that stops before dropping below low_pct of max."""
+    if max_value <= 0:
+        return 0
+    threshold = max(1, max_value * low_pct // 100)
+    n = 0
+    while -(-max_value // (1 << n)) >= threshold:
+        n += 1
+    return n + 1
+
+
+def _possible_fields_with_direction_filter(device, possible_fields, direction_field):
+    """Filter direction_field's choices against the per-device blocklist for
+    Wave directions the firmware accepts but doesn't render."""
+    blocked = hidpp20.LedDirectionBlocklist.get(device.wpid)
+    if not blocked:
+        return possible_fields
+    filtered = common.NamedInts()
+    for v in hidpp20.LedDirectionChoices:
+        if int(v) not in blocked:
+            filtered[int(v)] = str(v)
+    device_direction_field = dict(direction_field, choices=filtered)
+    return [device_direction_field if f is direction_field else f for f in possible_fields]
 
 
 class State(enum.Enum):
@@ -1782,6 +1824,19 @@ class BrightnessControl(settings.Setting):
         rw.min_nonzero_value = validator.min_value
         validator.min_value = 0 if validator.on_off else validator.min_value
 
+    def write(self, value, save=True):
+        # Snap to firmware-driven halving levels (off only at exact 0).
+        steps = getattr(self._validator, "steps", 0)
+        marks = halving_marks(self._validator.max_value, steps)
+        if value is not None and marks:
+            if value <= 0:
+                value = 0
+            else:
+                nonzero = [m for m in marks if m > 0]
+                if nonzero:
+                    value = min(reversed(nonzero), key=lambda m: abs(m - value))
+        return super().write(value, save)
+
     class rw_class(settings.FeatureRW):
         def read(self, device, data_bytes=b""):
             if self.on_off:
@@ -1805,10 +1860,25 @@ class BrightnessControl(settings.Setting):
             assert reply, "Oops, brightness range cannot be retrieved!"
             if reply:
                 max_value = int.from_bytes(reply[0:2], byteorder="big")
+                steps_and_flags = reply[2]
+                caps = reply[3]
                 min_value = int.from_bytes(reply[4:6], byteorder="big")
-                on_off = bool(reply[3] & 0x04)  # separate on/off control
+                on_off = bool(caps & 0x04)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "%s BrightnessControl getInfo: %s — max=%d min=%d steps_and_flags=0x%02x caps=0x%02x on_off=%s",
+                        device,
+                        reply[:8].hex(),
+                        max_value,
+                        min_value,
+                        steps_and_flags,
+                        caps,
+                        on_off,
+                    )
                 validator = cls(min_value=min_value, max_value=max_value, byte_count=2)
                 validator.on_off = on_off
+                validator.steps = steps_and_flags & 0x0F
+                device._brightness_steps = validator.steps  # for sibling settings (e.g. idle Dim)
                 return validator
 
 
@@ -1843,14 +1913,41 @@ class LEDZoneSetting(settings.Setting):
     feature = _F.COLOR_LED_EFFECTS
     color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
-    period_field = {"name": _LEDP.period, "kind": settings.Kind.RANGE, "label": _("Period"), "min": 100, "max": 5000}
+    period_field = {
+        "name": _LEDP.period,
+        "kind": settings.Kind.RANGE,
+        "label": _("Period"),
+        "min": 1000,
+        "max": 20000,
+        "display_seconds": True,
+    }
     intensity_field = {"name": _LEDP.intensity, "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100}
     ramp_field = {"name": _LEDP.ramp, "kind": settings.Kind.CHOICE, "label": _("Ramp"), "choices": hidpp20.LedRampChoice}
-    possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
+    saturation_field = {"name": _LEDP.saturation, "kind": settings.Kind.RANGE, "label": _("Saturation"), "min": 0, "max": 255}
+    form_field = {"name": _LEDP.form, "kind": settings.Kind.CHOICE, "label": _("Waveform"), "choices": hidpp20.LedFormChoices}
+    direction_field = {
+        "name": _LEDP.direction,
+        "kind": settings.Kind.CHOICE,
+        "label": _("Direction"),
+        "choices": hidpp20.LedDirectionChoices,
+    }
+    # Per-widget visibility driven by LEDEffects[ID][1]; RGBEffectSetting
+    # overrides this list to drop ramp/form on 0x8071.
+    possible_fields = [
+        color_field,
+        speed_field,
+        period_field,
+        intensity_field,
+        ramp_field,
+        saturation_field,
+        form_field,
+        direction_field,
+    ]
 
     @classmethod
     def setup(cls, device, read_fnid, write_fnid, suffix):
         infos = device.led_effects
+        possible_fields = cls._device_possible_fields(device)
         settings_ = []
         for zone in infos.zones:
             prefix = common.int2bytes(zone.index, 1)
@@ -1863,10 +1960,14 @@ class LEDZoneSetting(settings.Setting):
             setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
             choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
             ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
-            setting.possible_fields = [ID_field] + cls.possible_fields
+            setting.possible_fields = [ID_field] + possible_fields
             setting.fields_map = hidpp20.LEDEffects
             settings_.append(setting)
         return settings_
+
+    @classmethod
+    def _device_possible_fields(cls, device):
+        return _possible_fields_with_direction_filter(device, cls.possible_fields, cls.direction_field)
 
     @classmethod
     def build(cls, device):
@@ -1880,17 +1981,424 @@ class RGBControl(settings.Setting):
     feature = _F.RGB_EFFECTS
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
     # Two-state setting — render as a Gtk.Switch rather than a 2-option combo.
-    # true_value=1 / false_value=0 are the wire bytes for Solaar / Device mode
-    # returned by GetSWControl after the 1-byte sub-fn echo.
+    # true_value=3 / false_value=0 are the wire bytes for Solaar / Device mode
+    # returned by GetSWControl after the 1-byte sub-fn echo. Mode 3 is the
+    # full SW takeover the claim handshake below expects.
     validator_class = settings_validator.BooleanValidator
-    validator_options = {"true_value": 1, "false_value": 0, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
+    validator_options = {"true_value": 3, "false_value": 0, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
 
     def _pre_read(self, cached, key=None):
-        # Migrate legacy int values (0/1) stored under the old ChoicesValidator
+        # Migrate legacy int values (0/3) stored under the old ChoicesValidator
         # to bool so the switch widget gets a value it can set_state() on.
         super()._pre_read(cached, key)
         if isinstance(self._value, int) and not isinstance(self._value, bool):
             self._value = self._value != 0
+
+    def write(self, value, save=True):
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        assert value is not None
+        device = self._device
+        if not device.online:
+            return None
+        if self._value != value:
+            self.update(value, save)
+        claiming = int(value) != 0  # any non-zero value is a Solaar-side claim
+        if claiming:
+            self._claim_sw_control(device)
+        else:
+            self._release_sw_control(device)
+        return value
+
+    def _claim_sw_control(self, device):
+        # Disable firmware power management via profile management or onboard profiles
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x05")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
+        # Claim LED pipeline: SetSWControl(mode=3, flags=5)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, rgb_power.SW_ACTIVE)
+        # Reset per-key one-shot flags so the first write after this claim
+        # re-fires the prep + double-send.
+        for s in device.settings:
+            if s.name == "per-key-lighting":
+                s._frame_settled = False
+                s._prep_pushed = False
+                break
+        # Start software power management
+        rgb_power.start(device)
+        # Register cleanup for graceful release on device close
+        if rgb_power.cleanup not in device.cleanups:
+            device.cleanups.append(rgb_power.cleanup)
+        # Repaint LEDs with Solaar's saved state. Without this the firmware's
+        # last-active onboard profile keeps showing until the user changes
+        # something — the takeover would look like it did nothing.
+        self._repaint_after_claim(device)
+
+    def _repaint_after_claim(self, device):
+        """Push saved zone effects and (if opted in) per-key buffer to the
+        device after a fresh SW claim. Best-effort: individual failures get
+        logged but don't abort the rest of the repaint."""
+        for s in device.settings:
+            if s.name.startswith("rgb_zone_") and s._value is not None:
+                try:
+                    s.write(s._value, save=False)
+                except Exception as e:
+                    logger.warning("%s: post-claim repaint of %s failed: %s", device, s.name, e)
+        perkey, has_paint = rgb_power.perkey_has_paint(device)
+        if has_paint and perkey._value is not None:
+            try:
+                perkey.write(perkey._value, save=False)
+            except Exception as e:
+                logger.warning("%s: post-claim per-key repaint failed: %s", device, e)
+
+    def _release_sw_control(self, device):
+        # Stop software power management
+        rgb_power.stop(device)
+        # Release LED pipeline: SetSWControl(mode=0, flags=0)
+        device.feature_request(_F.RGB_EFFECTS, 0x50, rgb_power.SW_RELEASE)
+        # Restore firmware power management
+        if device.features and _F.PROFILE_MANAGEMENT in device.features:
+            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x03")
+        elif device.features and _F.ONBOARD_PROFILES in device.features:
+            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
+        # Keep cleanup registered on devices that support the shutdown effect
+        # cap — it also fires the firmware shutdown animation trigger on exit.
+        if not getattr(device, "_rgb_has_shutdown_cap", False):
+            if rgb_power.cleanup in device.cleanups:
+                device.cleanups.remove(rgb_power.cleanup)
+
+
+class RGBIdleTimeout(settings.Setting):
+    name = "rgb_idle_timeout"
+    label = _("Idle Timeout")
+    description = _("Time without input before LED idle effect starts.") + "\n" + _("LED Control needs to be enabled.")
+    feature = _F.RGB_EFFECTS
+    choices_universe = common.NamedInts(
+        **{
+            "Disabled": 0,
+            "15 Seconds": 15,
+            "30 Seconds": 30,
+            "1 Minute": 60,
+            "2 Minutes": 120,
+            "5 Minutes": 300,
+        }
+    )
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return common.int2bytes(60, 2)  # default 1 minute
+
+        def write(self, device, data_bytes):
+            timeout = int.from_bytes(data_bytes, byteorder="big")
+            mgr = rgb_power.get_manager(device)
+            if mgr:
+                mgr.set_idle_timeout(timeout)
+            return True
+
+
+class RGBIdleEffect(settings.Setting):
+    """Idle-effect setting with per-effect sub-widgets. Persisted value is an
+    LEDEffectSetting; legacy bare-int values are migrated in `_pre_read`."""
+
+    name = "rgb_idle_effect"
+    label = _("Idle Effect")
+    description = (
+        _("What happens to LEDs when idle — dim to a percentage, change the base color, or play an animation.")
+        + "\n"
+        + _("LED Control needs to be enabled.")
+    )
+    feature = _F.RGB_EFFECTS
+    # Reuse zone fields so idle controls match the active-zone setup exactly.
+    # Idle-specific intensity override carries the halving marks for Dim.
+    intensity_field = {**LEDZoneSetting.intensity_field, "halving": True}
+    period_field = LEDZoneSetting.period_field
+    saturation_field = LEDZoneSetting.saturation_field
+    speed_field = LEDZoneSetting.speed_field
+    direction_field = LEDZoneSetting.direction_field
+    color_field = LEDZoneSetting.color_field
+    possible_fields = [color_field, speed_field, period_field, intensity_field, saturation_field, direction_field]
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return hidpp20.LEDEffectSetting(ID=0x80, intensity=50).to_bytes()
+
+        def write(self, device, data_bytes):
+            value = hidpp20.LEDEffectSetting.from_bytes(data_bytes)
+            mgr = rgb_power.get_manager(device)
+            if mgr:
+                mgr.set_idle_effect(value)
+            return True
+
+    def _pre_read(self, cached, key=None):
+        """Migrate legacy bare-int values to LEDEffectSetting on first read."""
+        super()._pre_read(cached, key)
+        if self._value is None or isinstance(self._value, hidpp20.LEDEffectSetting):
+            return
+        if not isinstance(self._value, int):
+            return
+        legacy = self._value
+        if legacy == 0:
+            migrated = hidpp20.LEDEffectSetting(ID=0x00)
+        elif legacy in (25, 50, 75):
+            migrated = hidpp20.LEDEffectSetting(ID=0x80, intensity=legacy)
+        elif legacy == 0x0A:
+            migrated = hidpp20.LEDEffectSetting(ID=0x0A, period=3000, intensity=100)
+        elif legacy == 0x0B:
+            migrated = hidpp20.LEDEffectSetting(ID=0x0B, period=3000)
+        else:
+            return  # unrecognized — leave alone, write() will error informatively
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "%s: migrating legacy bare-int %s to LEDEffectSetting on %s",
+                self.name,
+                legacy,
+                self._device,
+            )
+        self._value = migrated
+        if getattr(self._device, "persister", None) is not None:
+            self._device.persister[self.name] = self._value
+
+    # Ripple needs keyboard input to animate so it can't run while idle.
+    # Disabled (0x00) and Dim (0x80) are seeded into choice_ids directly.
+    # Static (0x01) is also seeded so it appears right below Dim regardless
+    # of probe-derived ID ordering.
+    _IDLE_EXCLUDED_IDS = frozenset({0x00, 0x0B, 0x17})
+
+    @classmethod
+    def build(cls, device):
+        rw = cls.rw_class(cls.feature)
+        # No change → Dim → Static, then any probed device-specific effects.
+        choice_ids = [0x00, 0x80, 0x01]
+        probed = set()
+        try:
+            infos = device.led_effects
+            if infos and infos.zones:
+                probed = {int(e.ID) for e in infos.zones[0].effects}
+        except Exception:
+            pass
+        for eid in sorted(probed):
+            if eid in cls._IDLE_EXCLUDED_IDS or eid in choice_ids:
+                continue
+            if eid not in hidpp20.LEDEffects:
+                continue
+            choice_ids.append(eid)
+        idle_disabled = common.NamedInt(0x00, _("No change"))
+        choices = [idle_disabled if i == 0x00 else hidpp20.LEDEffects[i][0] for i in choice_ids]
+        ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
+        fields_map = {
+            0x00: [idle_disabled, {}],
+            0x80: [
+                hidpp20.LEDEffects[0x80][0],
+                {hidpp20.LEDParam.intensity: 0},
+                {hidpp20.LEDParam.intensity: 50},
+            ],
+        }
+        for eid in choice_ids:
+            if eid not in fields_map:
+                fields_map[eid] = hidpp20.LEDEffects[eid]
+        validator = settings_validator.HeteroValidator(data_class=hidpp20.LEDEffectSetting, options=None, readable=True)
+        setting = cls(device, rw, validator)
+        setting.possible_fields = [ID_field] + _possible_fields_with_direction_filter(
+            device, cls.possible_fields, cls.direction_field
+        )
+        setting.fields_map = fields_map
+        return setting
+
+
+class RGBSleepTimeout(settings.Setting):
+    name = "rgb_sleep_timeout"
+    label = _("Sleep Timeout")
+    description = _("Time without input before LEDs fade off completely.") + "\n" + _("LED Control needs to be enabled.")
+    feature = _F.RGB_EFFECTS
+    choices_universe = common.NamedInts(
+        **{
+            "Disabled": 0,
+            "2 Minutes": 120,
+            "5 Minutes": 300,
+            "10 Minutes": 600,
+            "15 Minutes": 900,
+            "30 Minutes": 1800,
+        }
+    )
+    validator_class = settings_validator.ChoicesValidator
+    validator_options = {"choices": choices_universe}
+
+    class rw_class:
+        def __init__(self, feature, **kwargs):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+
+        def read(self, device):
+            return common.int2bytes(300, 2)  # default 5 minutes
+
+        def write(self, device, data_bytes):
+            timeout = int.from_bytes(data_bytes, byteorder="big")
+            mgr = rgb_power.get_manager(device)
+            if mgr:
+                mgr.set_sleep_timeout(timeout)
+            return True
+
+
+class _RgbBootEffect:
+    """NvConfig persistent boot/shutdown effect payload on RGBEffects (0x8071).
+
+    Wire format (7 bytes, NvConfig cap 0x0001 startup / 0x0040 shutdown):
+        [enabled, R1, G1, B1, R2, G2, B2]
+    enabled: 0x01 on, 0x02 off. Colors are kept editable in both states so
+    toggling Off doesn't lose the user's chosen color.
+    """
+
+    _COLOR_ATTRS = ("color1", "color2")
+
+    def __init__(self, ID=1, color1=0, color2=0):
+        self.ID = int(ID)
+        for k, v in (("color1", color1), ("color2", color2)):
+            iv = int(v) & 0xFFFFFF
+            setattr(self, k, common.ColorInt(iv))
+
+    @classmethod
+    def from_bytes(cls, data, options=None):
+        if data is None or len(data) < 7:
+            return cls()
+        c1 = (data[1] << 16) | (data[2] << 8) | data[3]
+        c2 = (data[4] << 16) | (data[5] << 8) | data[6]
+        return cls(ID=data[0], color1=c1, color2=c2)
+
+    def to_bytes(self, options=None):
+        return bytes(
+            [
+                self.ID & 0xFF,
+                (self.color1 >> 16) & 0xFF,
+                (self.color1 >> 8) & 0xFF,
+                self.color1 & 0xFF,
+                (self.color2 >> 16) & 0xFF,
+                (self.color2 >> 8) & 0xFF,
+                self.color2 & 0xFF,
+            ]
+        )
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.to_bytes() == other.to_bytes()
+
+    def __str__(self):
+        return yaml.dump(self, width=float("inf")).rstrip("\n")
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return cls(**loader.construct_mapping(node))
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping("!RgbBootEffect", data.__dict__, flow_style=True)
+
+
+yaml.SafeLoader.add_constructor("!RgbBootEffect", _RgbBootEffect.from_yaml)
+yaml.add_representer(_RgbBootEffect, _RgbBootEffect.to_yaml)
+
+
+class _RgbBootEffectSetting(settings.Setting):
+    """Base for NvConfig persistent effect toggles on RGBEffects (0x8071).
+
+    Subclasses set cap_id (0x0001 startup, 0x0040 shutdown). Build probes the
+    cap once and suppresses the setting if the device doesn't answer — so the
+    setting auto-appears on any 0x8071 device that supports the cap, without
+    needing per-model gating.
+    """
+
+    feature = _F.RGB_EFFECTS
+    cap_id: int = 0
+
+    _ENABLED_CHOICES = common.NamedInts(**{"On": 1, "Off": 2})
+    _COLOR1_FIELD = {"name": "color1", "kind": settings.Kind.COLOR, "label": _("Primary")}
+    _COLOR2_FIELD = {"name": "color2", "kind": settings.Kind.COLOR, "label": _("Secondary")}
+
+    class rw_class:
+        kind = settings.FeatureRW.kind
+
+        def __init__(self, feature, cap_id):
+            self.feature = feature
+            self.cap_id = cap_id
+            self._cap_bytes = bytes([(cap_id >> 8) & 0xFF, cap_id & 0xFF])
+
+        def read(self, device):
+            reply = device.feature_request(self.feature, 0x30, b"\x00" + self._cap_bytes)
+            if reply is None or len(reply) < 10:
+                return None
+            return reply[3:10]  # strip [sub-fn, capHi, capLo] echo
+
+        def write(self, device, data_bytes):
+            return device.feature_request(self.feature, 0x30, b"\x01" + self._cap_bytes + bytes(data_bytes))
+
+    @classmethod
+    def build(cls, device):
+        cap_bytes = bytes([(cls.cap_id >> 8) & 0xFF, cls.cap_id & 0xFF])
+        try:
+            reply = device.feature_request(_F.RGB_EFFECTS, 0x30, b"\x00" + cap_bytes)
+        except exceptions.FeatureCallError:
+            return None  # device rejects this cap — gate the setting off
+        if reply is None or len(reply) < 10:
+            return None
+        rw = cls.rw_class(cls.feature, cls.cap_id)
+        validator = settings_validator.HeteroValidator(data_class=_RgbBootEffect, options=None)
+        setting = cls(device, rw, validator)
+        # Render the enabled byte as a right-aligned Gtk.Switch (like a plain
+        # TOGGLE setting) rather than an inline Off/On combo. on_value/off_value
+        # carry the wire-format byte (0x01 = on, 0x02 = off) through to the
+        # data class without changing the byte semantics.
+        id_field = {"name": "ID", "kind": settings.Kind.TOGGLE, "label": None, "on_value": 1, "off_value": 2}
+        # Keep all color widgets in possible_fields so reads still populate
+        # them and writes still carry their values — the firmware may store
+        # bytes it doesn't visibly use. fields_map controls UI visibility.
+        setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD]
+        # Default-allow: show both color pickers unless this device model is
+        # known to ignore one or both. Most 0x8071 devices honor the bytes.
+        inert = device_quirks.get(device, "rgb_effects_nvconfig_colors_inert", {}).get(cls.cap_id, set())
+        visible = {n: o for n, o in (("color1", 1), ("color2", 4)) if n not in inert}
+        # Both On/Off map to the same visible field set so colors stay editable
+        # when the effect is Off (pre-stages them for next enable).
+        setting.fields_map = {
+            int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
+            int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
+        }
+        # Register the firmware shutdown trigger on cap 0x0040 devices so the
+        # animation plays on Solaar exit. rgb_power.cleanup fires mode 0 at
+        # its end when _rgb_has_shutdown_cap is set. See
+        # solaar_shutdown_effect_trigger_spec.md.
+        if cls.cap_id == 0x0040:
+            device._rgb_has_shutdown_cap = True
+            if rgb_power.cleanup not in device.cleanups:
+                device.cleanups.append(rgb_power.cleanup)
+        return setting
+
+
+class RgbStartupAnimation(_RgbBootEffectSetting):
+    name = "rgb_startup_animation"
+    label = _("Startup Animation")
+    description = _(
+        "Firmware-played animation when the keyboard wakes from deep sleep or powers on.\n"
+        "Setting persists on the device (non-volatile)."
+    )
+    cap_id = 0x0001
+
+
+class RgbShutdownAnimation(_RgbBootEffectSetting):
+    name = "rgb_shutdown_animation"
+    label = _("Shutdown Animation")
+    description = _(
+        "Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile)."
+    )
+    cap_id = 0x0040
 
 
 class RGBEffectSetting(LEDZoneSetting):
@@ -1898,16 +2406,108 @@ class RGBEffectSetting(LEDZoneSetting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.RGB_EFFECTS
+    # 0x8071 firmware-fixes ramp/form bytes; drop those widgets here.
+    possible_fields = [
+        LEDZoneSetting.color_field,
+        LEDZoneSetting.speed_field,
+        LEDZoneSetting.period_field,
+        LEDZoneSetting.intensity_field,
+        LEDZoneSetting.saturation_field,
+        LEDZoneSetting.direction_field,
+    ]
 
     @classmethod
     def build(cls, device):
         return cls.setup(device, None, 0x10, b"\x01")
 
+    def write(self, value, save=True):
+        """Push zone effect to wire unless per-key is the dominant layer.
+
+        Per-key acts as a multi-color sub-mode of Static: when zone is Static
+        and per-key is opted in with paint, per-key owns the visible layer.
+        Non-Static zone effects (animations) always go to the wire — per-key
+        defers to the firmware animation. Transitions into Static still push
+        the Static wire so any running animation stops.
+        """
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        assert value is not None
+        device = self._device
+        if not device.online:
+            return None
+        perkey, has_paint = rgb_power.perkey_has_paint(device)
+        new_is_static = int(getattr(value, "ID", 0) or 0) == rgb_power._EFFECT_STATIC
+        old_value = self._value
+        old_is_static = old_value is None or int(getattr(old_value, "ID", 0) or 0) == rgb_power._EFFECT_STATIC
+        if has_paint and new_is_static and old_is_static:
+            if save:
+                changed = old_value != value
+                self.update(value, save)
+                if changed and perkey._fill_unset_zones_with_base_color():
+                    perkey._send_with_retry(0x70, b"\x00")  # FrameEnd
+                    # Resync the dim ramp's start colors for unset cells.
+                    mgr = rgb_power.get_manager(device)
+                    if mgr is not None:
+                        new_base = int(getattr(value, "color", 0) or 0)
+                        unset_zones = perkey._unset_zone_ids()
+                        if unset_zones:
+                            mgr.notify_perkey_bulk_changed({z: new_base for z in unset_zones})
+            return value
+        # Persist undimmed value first (single source of truth).
+        if self._value != value:
+            self.update(value, save)
+        wire_value = self._translate_for_wire(value)
+        if wire_value is None:  # SLEEPING — _wake() will re-push at full brightness.
+            return value
+        current_value = None
+        if self._validator.needs_current_value:
+            current_value = self._rw.read(device)
+        data_bytes = self._validator.prepare_write(wire_value, current_value)
+        if data_bytes is None:
+            return None
+        reply = self._rw.write(device, data_bytes)
+        if not reply:
+            return None
+        # Animation → Static transition with per-key paint: the Static wire
+        # we just pushed stops the animation; now repaint the per-key
+        # multi-color overlay on top so the user gets a seamless switch.
+        if has_paint and new_is_static and perkey is not None:
+            try:
+                perkey.write(perkey._value, save=False)
+            except Exception as e:
+                logger.warning("%s: per-key repaint after Static restore failed: %s", device, e)
+        # Resync any in-flight dim ramp to the new color.
+        mgr = rgb_power.get_manager(device)
+        if mgr is not None and getattr(value, "color", None) is not None and self._rw.prefix:
+            mgr.notify_zone_changed(self._rw.prefix[0], int(value.color))
+        return value
+
+    def _translate_for_wire(self, value):
+        """Clone `value` with `.color` translated through rgb_power state.
+        Returns None for SLEEPING."""
+        saved_color = getattr(value, "color", None)
+        if saved_color is None:
+            return value
+        wire_color = rgb_power.translate_for_device(self._device, int(saved_color))
+        if wire_color is None:
+            return None
+        if int(wire_color) == int(saved_color):
+            return value  # ACTIVE or no-op translation; reuse original
+        # Build a shallow clone with translated color so the persister and the
+        # in-memory _value keep the undimmed source-of-truth color.
+        wire_attrs = dict(value.__dict__)
+        wire_attrs["color"] = int(wire_color)
+        return hidpp20.LEDEffectSetting(**wire_attrs)
+
 
 class PerKeyLighting(settings.Settings):
     name = "per-key-lighting"
     label = _("Per-key Lighting")
-    description = _("Control per-key lighting.")
+    description = (
+        _("Control per-key lighting.")
+        + "\n"
+        + _("LED Control needs to be enabled and the zone effect set to Static for per-key paint to be visible.")
+    )
     feature = _F.PER_KEY_LIGHTING_V2
     keys_universe = special_keys.KEYCODES
     editor_class = "solaar.ui.perkey.control:PerKeyControl"
@@ -1937,6 +2537,116 @@ class PerKeyLighting(settings.Settings):
     def update_key_value(self, key, value, save=True):
         super().update_key_value(key, self._wrap_color(value), save)
 
+    def _ensure_sw_control(self):
+        """Ensure SW control is claimed before writing per-key colors."""
+        if getattr(self, "_has_rgb_effects", None) is None:
+            self._has_rgb_effects = bool(self._device.features and _F.RGB_EFFECTS in self._device.features)
+        if not self._has_rgb_effects:
+            return  # No autonomous effect engine, no claim needed
+        for s in self._device.settings:
+            if s.name == "rgb_control":
+                # _value may be bool (current) or int (legacy persister value
+                # before BooleanValidator migration); both coerce cleanly.
+                if not s._value:  # Not already claimed by Solaar
+                    s.write(True)  # Triggers full claim sequence in RGBControl
+                return
+
+    # BUSY-retry backoff (ms).
+    _BUSY_BACKOFF_MS = (30, 60, 90)
+
+    def _send_with_retry(self, function, data, retries=3):
+        # Retry on BUSY and timeout (both transient). Other FeatureCallError
+        # codes abort — they're real bugs we shouldn't paper over.
+        busy_attempt = 0
+        max_busy = len(self._BUSY_BACKOFF_MS)
+        for attempt in range(retries + 1):
+            try:
+                reply = self._device.feature_request(self.feature, function, data)
+            except exceptions.FeatureCallError as e:
+                if getattr(e, "error", None) == hidpp20_constants.ErrorCode.BUSY and busy_attempt < max_busy:
+                    delay_ms = self._BUSY_BACKOFF_MS[busy_attempt]
+                    busy_attempt += 1
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug(
+                            "%s: per-key 0x%02x BUSY, retry %d/%d after %dms",
+                            self._device,
+                            function,
+                            busy_attempt,
+                            max_busy,
+                            delay_ms,
+                        )
+                    sleep(delay_ms / 1000.0)
+                    continue
+                logger.warning("%s: per-key 0x%02x rejected by device", self._device, function)
+                return False
+            if reply is not None:
+                if (attempt > 0 or busy_attempt > 0) and logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "%s: per-key 0x%02x succeeded after %d timeout retries, %d BUSY retries",
+                        self._device,
+                        function,
+                        attempt,
+                        busy_attempt,
+                    )
+                return True
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "%s: per-key 0x%02x timed out (attempt %d/%d)",
+                    self._device,
+                    function,
+                    attempt + 1,
+                    retries + 1,
+                )
+        return False
+
+    def _zone_base_color(self):
+        """Color used to fill per-key unset cells. Defers to
+        rgb_power.effective_zone_base_color which returns black when the
+        zone effect is ignored, otherwise the saved zone color."""
+        return rgb_power.effective_zone_base_color(self._device)
+
+    def _send_zone_color(self, zone_id, wire_color):
+        """Emit a single-zone color update (fn 0x10). `wire_color` is the
+        already-translated color that should appear on the device."""
+        r = (wire_color >> 16) & 0xFF
+        g = (wire_color >> 8) & 0xFF
+        b = wire_color & 0xFF
+        return self._send_with_retry(0x10, bytes([zone_id, r, g, b]))
+
+    def _unset_zone_ids(self):
+        """Per-key zone IDs that don't have a user-painted color."""
+        no_change = special_keys.COLORSPLUS["No change"]
+        user_set = set()
+        if self._value:
+            for key, color in self._value.items():
+                if color != no_change and isinstance(color, int) and color >= 0:
+                    user_set.add(int(key))
+        return [int(k) for k in self._validator.choices if int(k) not in user_set]
+
+    def _fill_unset_zones_with_base_color(self):
+        """Push the zone base color (translated for current power state) to
+        any per-key cell the user hasn't painted. Caller commits FrameEnd."""
+        if not self._has_rgb_effects:
+            return True
+        zone_base = self._zone_base_color()
+        wire_base = rgb_power.translate_for_device(self._device, zone_base)
+        if wire_base is None:
+            return True  # SLEEPING — caller defers wire entirely
+        r = (wire_base >> 16) & 0xFF
+        g = (wire_base >> 8) & 0xFF
+        b = wire_base & 0xFF
+        unset_zones = self._unset_zone_ids()
+        if not unset_zones:
+            return True
+        remaining = list(unset_zones)
+        ok = True
+        while remaining:
+            batch = remaining[:13]
+            remaining = remaining[13:]
+            if not self._send_with_retry(0x60, bytes([r, g, b]) + bytes(batch)):
+                ok = False
+        return ok
+
     def read(self, cached=True):
         # The 0x8081 protocol has no GetIndividualRgbZones — the device cannot
         # report its current per-key buffer back. So a "live" read is fictional:
@@ -1955,47 +2665,144 @@ class PerKeyLighting(settings.Settings):
         self._value = reply_map
         return reply_map
 
+    def _send_perkey_frame(self, map, no_change):
+        """Send all per-key sub-packets for `map`, fill unset cells with the
+        zone base color, and commit with FrameEnd. Returns True on success."""
+        # Bucket by color; single-bucket allows the range-update fast path.
+        table = {}
+        for key, value in map.items():
+            if value in table:
+                table[value].append(key)
+            else:
+                table[value] = [key]
+        ok = True
+        if len(table) == 1:  # use range update
+            for value, keys in table.items():  # only one, of course
+                if value != no_change:  # this signals no change, so don't update at all
+                    wire = rgb_power.translate_for_device(self._device, int(value))
+                    data_bytes = keys[0].to_bytes(1, "big") + keys[-1].to_bytes(1, "big") + wire.to_bytes(3, "big")
+                    if not self._send_with_retry(0x50, data_bytes):  # range update command to update all keys
+                        ok = False
+        else:
+            data_bytes = b""
+            for value, keys in table.items():
+                if value != no_change:  # this signals no change, so ignore it
+                    wire = rgb_power.translate_for_device(self._device, int(value))
+                    while len(keys) > 3:  # use an optimized update command that can update up to 13 keys
+                        data = wire.to_bytes(3, "big") + b"".join([key.to_bytes(1, "big") for key in keys[0:13]])
+                        if not self._send_with_retry(0x60, data):  # single-value multiple-keys update
+                            ok = False
+                        keys = keys[13:]
+                    for key in keys:
+                        data_bytes += key.to_bytes(1, "big") + wire.to_bytes(3, "big")
+                        if len(data_bytes) >= 16:  # up to four values are packed into a regular update
+                            if not self._send_with_retry(0x10, data_bytes):
+                                ok = False
+                            data_bytes = b""
+            if len(data_bytes) > 0:  # update any remaining keys
+                if not self._send_with_retry(0x10, data_bytes):
+                    ok = False
+        # Fill unset zones before FrameEnd so the frame commits atomically.
+        if not self._fill_unset_zones_with_base_color():
+            ok = False
+        # Suppress FrameEnd on partial failure to avoid a visibly wrong commit.
+        if ok:
+            if not self._send_with_retry(0x70, b"\x00"):
+                logger.warning("%s: per-key FrameEnd failed; frame not committed", self._device)
+                ok = False
+        else:
+            logger.warning(
+                "%s: per-key frame had failed sub-packets; suppressing FrameEnd to avoid partial commit",
+                self._device,
+            )
+        return ok
+
     def write(self, map, save=True):
         if self._device.online:
+            self._ensure_sw_control()
+            # Persist undimmed (single source of truth).
             self.update(map, save)
-            table = {}
-            for key, value in map.items():
-                if value in table:
-                    table[value].append(key)  # keys will be in order from small to large
-                else:
-                    table[value] = [key]
-            if len(table) == 1:  # use range update
-                for value, keys in table.items():  # only one, of course
-                    if value != special_keys.COLORSPLUS["No change"]:  # this signals no change, so don't update at all
-                        data_bytes = keys[0].to_bytes(1, "big") + keys[-1].to_bytes(1, "big") + value.to_bytes(3, "big")
-                        self._device.feature_request(self.feature, 0x50, data_bytes)  # range update command to update all keys
-                        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
-            else:
-                data_bytes = b""
-                for value, keys in table.items():  # only one, of course
-                    if value != special_keys.COLORSPLUS["No change"]:  # this signals no change, so ignore it
-                        while len(keys) > 3:  # use an optimized update command that can update up to 13 keys
-                            data = value.to_bytes(3, "big") + b"".join([key.to_bytes(1, "big") for key in keys[0:13]])
-                            self._device.feature_request(self.feature, 0x60, data)  # single-value multiple-keys update
-                            keys = keys[13:]
-                        for key in keys:
-                            data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
-                            if len(data_bytes) >= 16:  # up to four values are packed into a regular update
-                                self._device.feature_request(self.feature, 0x10, data_bytes)
-                                data_bytes = b""
-                if len(data_bytes) > 0:  # update any remaining keys
-                    self._device.feature_request(self.feature, 0x10, data_bytes)
-                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+            # Per-key is a sub-mode of Static — when zone is animating, the
+            # firmware engine owns the visible layer.
+            if not rgb_power.zone_effect_is_static(self._device):
+                return map
+            no_change = special_keys.COLORSPLUS["No change"]
+            # SLEEPING — defer wire to wake.
+            for value in map.values():
+                if value != no_change and rgb_power.translate_for_device(self._device, int(value)) is None:
+                    return map
+            # Mouse-only prep, one-shot per claim — keyboards don't need it.
+            if (
+                getattr(self, "_has_rgb_effects", False)
+                and not getattr(self, "_prep_pushed", False)
+                and int(getattr(self._device, "kind", -1) or -1) == int(hidpp10_constants.DEVICE_KIND.mouse)
+            ):
+                if rgb_power.push_artanis_perkey_prep(self._device):
+                    self._prep_pushed = True
+            ok = self._send_perkey_frame(map, no_change)
+            # First frame after a claim sometimes lands before the firmware
+            # has fully transitioned out of onboard mode — replay it once.
+            if ok and not getattr(self, "_frame_settled", False):
+                self._send_perkey_frame(map, no_change)
+                self._frame_settled = True
+            if ok:
+                mgr = rgb_power.get_manager(self._device)
+                if mgr is not None:
+                    mgr.notify_perkey_bulk_changed(map)
         return map
 
     def write_key_value(self, key, value, save=True):
-        if value != special_keys.COLORSPLUS["No change"]:  # this signals no change
-            result = super().write_key_value(int(key), value, save)
-            if self._device.online:
-                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
-            return result
+        self._ensure_sw_control()
+        no_change = special_keys.COLORSPLUS["No change"]
+        zone_id = int(key)
+        if value != no_change:
+            self.update_key_value(zone_id, value, save)
+            if not self._device.online:
+                return value
+            # Per-key is a sub-mode of Static — defer to firmware animation.
+            if not rgb_power.zone_effect_is_static(self._device):
+                return value
+            wire = rgb_power.translate_for_device(self._device, int(value))
+            if wire is None:
+                return value  # SLEEPING — wake re-pushes
+            ok = True
+            # Fill unset zones once so they don't show white-default.
+            if not getattr(self, "_base_filled", False):
+                if self._fill_unset_zones_with_base_color():
+                    self._base_filled = True
+                else:
+                    ok = False
+            if ok and not self._send_zone_color(zone_id, wire):
+                ok = False
+            if ok:
+                mgr = rgb_power.get_manager(self._device)
+                if mgr is not None:
+                    mgr.notify_perkey_changed(zone_id, int(value))
+                if not self._send_with_retry(0x70, b"\x00"):
+                    logger.warning("%s: per-key FrameEnd failed; frame not committed", self._device)
+            else:
+                logger.warning("%s: per-key write failed; suppressing FrameEnd", self._device)
+            return value
         else:
-            return True
+            # Un-set: store "No change", push the zone base color to that cell.
+            self.update_key_value(zone_id, no_change, save)
+            if not self._device.online:
+                return no_change
+            if not rgb_power.zone_effect_is_static(self._device):
+                return no_change
+            zone_base = self._zone_base_color()
+            wire_base = rgb_power.translate_for_device(self._device, zone_base)
+            if wire_base is None:
+                return no_change
+            if self._send_zone_color(zone_id, wire_base):
+                mgr = rgb_power.get_manager(self._device)
+                if mgr is not None:
+                    mgr.notify_perkey_changed(zone_id, zone_base)
+                if not self._send_with_retry(0x70, b"\x00"):
+                    logger.warning("%s: per-key FrameEnd failed; frame not committed", self._device)
+            else:
+                logger.warning("%s: per-key un-set write failed; suppressing FrameEnd", self._device)
+            return no_change
 
     class rw_class(settings.FeatureRWMap):
         pass
@@ -2312,8 +3119,13 @@ SETTINGS: list[settings.Setting] = [
     LEDZoneSetting,
     RGBControl,
     RGBEffectSetting,
-    BrightnessControl,
     PerKeyLighting,
+    BrightnessControl,
+    RGBIdleEffect,
+    RGBIdleTimeout,
+    RGBSleepTimeout,
+    RgbStartupAnimation,
+    RgbShutdownAnimation,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
@@ -2476,7 +3288,15 @@ def check_feature_settings(device, already_known) -> bool:
     new_absent = []
     for sclass in SETTINGS:
         if sclass.feature:
-            known_present = device.persister and sclass.name in device.persister
+            if device.persister:
+                if sclass.name.endswith("_"):
+                    # Multi-setting prototype (e.g. rgb_zone_); persister stores child keys
+                    # like rgb_zone_1, never the prototype name itself.
+                    known_present = any(k.startswith(sclass.name) for k in device.persister)
+                else:
+                    known_present = sclass.name in device.persister
+            else:
+                known_present = False
             if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
                 try:
                     setting = check_feature(device, sclass)

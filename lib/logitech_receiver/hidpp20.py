@@ -1128,22 +1128,37 @@ class LEDParam:
     ramp = "ramp"
     form = "form"
     saturation = "saturation"
+    direction = "direction"
 
 
-class LedRampChoice(IntEnum):
-    DEFAULT = 0
-    YES = 1
-    NO = 2
+# NamedInts (not IntEnum) so the GTK ComboBoxText shows readable labels.
+LedRampChoice = common.NamedInts(Default=0, Yes=1, No=2)
 
+LedFormChoices = common.NamedInts(
+    Default=0,
+    Sine=1,
+    Square=2,
+    Triangle=3,
+    Sawtooth=4,
+    Shark_fin=5,
+    Exponential=6,
+)
 
-class LedFormChoices(IntEnum):
-    DEFAULT = 0
-    SINE = 1
-    SQUARE = 2
-    TRIANGLE = 3
-    SAWTOOTH = 4
-    SHARKFIN = 5
-    EXPONENTIAL = 6
+LedDirectionChoices = common.NamedInts()
+LedDirectionChoices[0] = _("Cycle")
+LedDirectionChoices[1] = _("Right")
+LedDirectionChoices[2] = _("Down")
+LedDirectionChoices[3] = _("Center Out")
+LedDirectionChoices[4] = _("In")
+LedDirectionChoices[5] = _("Out")
+LedDirectionChoices[6] = _("Left")
+LedDirectionChoices[7] = _("Up")
+LedDirectionChoices[8] = _("Center In")
+
+# Direction values to hide on devices whose LED grid can't render them.
+LedDirectionBlocklist = {
+    "40B4": {4, 5},  # G515 LS TKL — no edge-radiating wave geometry
+}
 
 
 LEDParamSize = {
@@ -1154,26 +1169,62 @@ LEDParamSize = {
     LEDParam.ramp: 1,
     LEDParam.form: 1,
     LEDParam.saturation: 1,
+    LEDParam.direction: 1,
 }
-# not implemented from x8070 Wave=4, Stars=5, Press=6, Audio=7
-# not implemented from x8071 Custom=12, Kitt=13, HSVPulsing=20,
-# WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
+# Entry: [NamedInt, params, defaults, ranges] — trailing dicts optional.
+# ranges overrides a field's global min/max, e.g. period: (2, 200).
 LEDEffects = {
     0x00: [NamedInt(0x00, _("Disabled")), {}],
     0x01: [NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
     0x02: [NamedInt(0x02, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
-    0x03: [NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x03: [
+        NamedInt(0x03, _("Cycle")),
+        {LEDParam.period: 5, LEDParam.intensity: 7},
+        {LEDParam.period: 5000, LEDParam.intensity: 100},
+    ],
+    # No probe device enumerates base Wave; assume the 0x16 layout so the
+    # UI matches what 0x16-capable hardware shows.
+    0x04: [
+        NamedInt(0x04, _("Wave")),
+        {LEDParam.period: 6, LEDParam.direction: 9},
+        {LEDParam.period: 5000},
+    ],
     0x08: [NamedInt(0x08, _("Boot")), {}],
     0x09: [NamedInt(0x09, _("Demo")), {}],
     0x0A: [
         NamedInt(0x0A, _("Breathe")),
         {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6},
+        {LEDParam.period: 5000, LEDParam.intensity: 100},
     ],
-    0x0B: [NamedInt(0x0B, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
+    0x0B: [
+        NamedInt(0x0B, _("Ripple")),
+        {LEDParam.color: 0, LEDParam.period: 4},
+        {LEDParam.period: 20},
+        {LEDParam.period: (2, 200)},
+    ],
     0x0E: [NamedInt(0x0E, _("Decomposition")), {LEDParam.period: 6, LEDParam.intensity: 8}],
     0x0F: [NamedInt(0x0F, _("Signature1")), {LEDParam.period: 5, LEDParam.intensity: 7}],
     0x10: [NamedInt(0x10, _("Signature2")), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x15: [NamedInt(0x15, _("CycleS")), {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8}],
+    0x15: [
+        NamedInt(0x15, _("Cycle")),
+        {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8},
+        {LEDParam.saturation: 255, LEDParam.period: 5000, LEDParam.intensity: 100},
+    ],
+    0x16: [
+        NamedInt(0x16, _("Wave")),
+        {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8, LEDParam.direction: 9},
+        {LEDParam.saturation: 255, LEDParam.period: 5000, LEDParam.intensity: 100},
+    ],
+    # Saturation derivative of Ripple 0x0B; pcap layout: color @ 0-2,
+    # saturation @ 3, period @ 6-7.
+    0x17: [
+        NamedInt(0x17, _("Ripple")),
+        {LEDParam.color: 0, LEDParam.saturation: 3, LEDParam.period: 6},
+        {LEDParam.saturation: 255, LEDParam.period: 20},
+        {LEDParam.period: (2, 200)},
+    ],
+    # Synthetic — host-side dim ramp, no wire effect.
+    0x80: [NamedInt(0x80, _("Dim")), {LEDParam.intensity: 0}],
 }
 
 

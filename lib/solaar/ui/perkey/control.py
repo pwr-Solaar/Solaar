@@ -137,15 +137,15 @@ class _SettingSink:
         persister[self._palette_key()] = {"active": int(active), "previous": int(previous)}
 
     def zone_base_color(self) -> int | None:
+        """Color used to render per-key unset cells in the editor. Matches
+        rgb_power.effective_zone_base_color: black when zone is ignored,
+        the saved zone color otherwise."""
         device = getattr(self._setting, "_device", None)
-        if device is None or not getattr(device, "settings", None):
+        if device is None:
             return None
-        for s in device.settings:
-            if s.name.startswith("rgb_zone_") and s._value is not None:
-                color = getattr(s._value, "color", None)
-                if isinstance(color, int):
-                    return int(color)
-        return None
+        from logitech_receiver import rgb_power
+
+        return int(rgb_power.effective_zone_base_color(device))
 
     def _notify(self) -> None:
         snapshot = self.current
