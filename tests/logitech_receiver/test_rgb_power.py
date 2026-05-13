@@ -310,14 +310,12 @@ def test_perkey_has_paint_with_real_colors():
     assert has_paint is True
 
 
-def test_perkey_has_paint_requires_explicit_opt_in():
-    # Paint exists but sensitivity is the default (False) — has_paint must
-    # be False so zone effects remain primary on devices where the user
-    # hasn't opted in to per-key dominance (e.g. G502X mouse out of the box).
+def test_perkey_has_paint_with_locked_sensitivity():
+    # False (locked) still counts as paint — only IGNORE opts out.
     pk = _FakePerKey({1: 0xFF0000})
     dev = _FakeDevice([pk], _FakePersister())  # sensitivity defaults to False
     _, has_paint = rgb_power.perkey_has_paint(dev)
-    assert has_paint is False
+    assert has_paint is True
 
 
 def test_perkey_has_paint_only_no_change():
@@ -354,12 +352,11 @@ def test_perkey_has_paint_user_ignores_perkey():
 
 
 def test_perkey_has_paint_with_no_persister():
-    # No persister means no place to record the user opting in, so per-key
-    # dominance never engages — zone effects remain primary.
+    # No persister, no IGNORE flag — treat as paint present.
     pk = _FakePerKey({1: 0xFF0000})
     dev = _FakeDevice([pk], persister=None)
     _, has_paint = rgb_power.perkey_has_paint(dev)
-    assert has_paint is False
+    assert has_paint is True
 
 
 def test_zone_effect_is_static_true_for_static():

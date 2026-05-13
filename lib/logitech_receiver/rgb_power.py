@@ -100,11 +100,9 @@ _EFFECT_STATIC = 0x01
 
 def perkey_has_paint(device):
     """Return ``(perkey_setting, has_paint)``. has_paint is True when the
-    per-key buffer has at least one real color, a usable zone set, and the
-    user has *explicitly enabled* per-key via the lock icon (sensitivity
-    is True). Default-sensitivity (False) and ignore both yield False so
-    zone effects remain the primary mechanism on devices where the user
-    hasn't opted in to per-key dominance."""
+    per-key buffer has at least one real color and the user hasn't opted
+    out via the lock icon (sensitivity == IGNORE). The locked-but-applied
+    state (False) still counts as paint."""
     perkey = None
     for s in getattr(device, "settings", []) or []:
         if s.name == "per-key-lighting":
@@ -127,7 +125,7 @@ def perkey_has_paint(device):
     no_change = special_keys.COLORSPLUS["No change"]
     if not any(c != no_change and isinstance(c, int) and c >= 0 for c in value.values()):
         return perkey, False
-    if persister is None or persister.get_sensitivity("per-key-lighting") is not True:
+    if persister is not None and persister.get_sensitivity("per-key-lighting") == settings.SENSITIVITY_IGNORE:
         return perkey, False
     return perkey, True
 
