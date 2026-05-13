@@ -2658,9 +2658,11 @@ for _feature in logivoice.PARAMETERS_FIELDS:
     _state_cls = _logivoice_make_state_class(_feature)
     if _state_cls is not None:
         _LOGIVOICE_SETTINGS.append(_state_cls)
-    _params_cls = _logivoice_make_parameters_class(_feature)
-    if _params_cls is not None:
-        _LOGIVOICE_SETTINGS.append(_params_cls)
+    # Parameters panels are read-only and the wire encoding is only
+    # partially decoded — hide from the UI until we can write them back.
+    # _params_cls = _logivoice_make_parameters_class(_feature)
+    # if _params_cls is not None:
+    #     _LOGIVOICE_SETTINGS.append(_params_cls)
 
 
 class BrightnessControl(settings.Setting):
