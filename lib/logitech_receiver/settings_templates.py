@@ -1815,12 +1815,20 @@ class BrightnessControl(settings.Setting):
 class LEDControl(settings.Setting):
     name = "led_control"
     label = _("LED Control")
-    description = _("Switch control of LED zones between device and Solaar")
+    description = _("Allow Solaar to control LED zones.")
     feature = _F.COLOR_LED_EFFECTS
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = common.NamedInts(Device=0, Solaar=1)
-    validator_class = settings_validator.ChoicesValidator
-    validator_options = {"choices": choices_universe}
+    # Two-state setting — render as a Gtk.Switch rather than a 2-option combo.
+    # true_value=1 / false_value=0 are the wire bytes for Solaar / Device mode.
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 1, "false_value": 0}
+
+    def _pre_read(self, cached, key=None):
+        # Migrate legacy int values (0/1) stored under the old ChoicesValidator
+        # to bool so the switch widget gets a value it can set_state() on.
+        super()._pre_read(cached, key)
+        if isinstance(self._value, int) and not isinstance(self._value, bool):
+            self._value = self._value != 0
 
 
 colors = special_keys.COLORS
@@ -1831,7 +1839,7 @@ _LEDP = hidpp20.LEDParam
 class LEDZoneSetting(settings.Setting):
     name = "led_zone_"  # the trailing underscore signals that this setting creates other settings
     label = _("LED Zone Effects")
-    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
+    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.COLOR_LED_EFFECTS
     color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
@@ -1868,18 +1876,27 @@ class LEDZoneSetting(settings.Setting):
 class RGBControl(settings.Setting):
     name = "rgb_control"
     label = _("LED Control")
-    description = _("Switch control of LED zones between device and Solaar")
+    description = _("Allow Solaar to control LED zones.")
     feature = _F.RGB_EFFECTS
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
-    choices_universe = common.NamedInts(Device=0, Solaar=1)
-    validator_class = settings_validator.ChoicesValidator
-    validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
+    # Two-state setting — render as a Gtk.Switch rather than a 2-option combo.
+    # true_value=1 / false_value=0 are the wire bytes for Solaar / Device mode
+    # returned by GetSWControl after the 1-byte sub-fn echo.
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 1, "false_value": 0, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
+
+    def _pre_read(self, cached, key=None):
+        # Migrate legacy int values (0/1) stored under the old ChoicesValidator
+        # to bool so the switch widget gets a value it can set_state() on.
+        super()._pre_read(cached, key)
+        if isinstance(self._value, int) and not isinstance(self._value, bool):
+            self._value = self._value != 0
 
 
 class RGBEffectSetting(LEDZoneSetting):
     name = "rgb_zone_"  # the trailing underscore signals that this setting creates other settings
     label = _("LED Zone Effects")
-    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
+    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.RGB_EFFECTS
 
     @classmethod

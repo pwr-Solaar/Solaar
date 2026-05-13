@@ -277,7 +277,7 @@ simple_tests = [
         fake_hidpp.Response("0A", 0x0420, "0A"),
     ),
     Setup(
-        FeatureTest(settings_templates.LEDControl, 0, 1),
+        FeatureTest(settings_templates.LEDControl, False, True),
         fake_hidpp.Response("00", 0x0470),
         fake_hidpp.Response("01", 0x0480, "01"),
     ),
@@ -295,7 +295,7 @@ simple_tests = [
         fake_hidpp.Response("000000000000000101500000", 0x0430, "000000000000000101500000"),
     ),
     Setup(
-        FeatureTest(settings_templates.RGBControl, 0, 1),
+        FeatureTest(settings_templates.RGBControl, False, True),
         fake_hidpp.Response("0000", 0x0450),
         fake_hidpp.Response("010100", 0x0450, "0101"),
     ),
