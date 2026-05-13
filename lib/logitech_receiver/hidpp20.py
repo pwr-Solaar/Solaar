@@ -24,6 +24,7 @@ import threading
 from collections import UserDict
 from enum import Flag
 from enum import IntEnum
+from random import getrandbits
 from typing import Any
 from typing import Dict
 from typing import Generator
@@ -1666,6 +1667,11 @@ def feature_request(device, feature, function=0x00, *params, no_reply=False):
 
 
 class Hidpp20:
+    # Host-side counter for SetComplete cookies (see set_configuration_complete).
+    # Seeded to a non-zero random 16-bit value at import so successive sessions
+    # don't trivially collide; we just need to never send 0x0000.
+    _session_cookie = getrandbits(16) or 1
+
     def get_firmware(self, device) -> tuple[common.FirmwareInfo] | None:
         """Reads a device's firmware info.
 
@@ -2056,16 +2062,19 @@ class Hidpp20:
         response = device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x00)
         return response[:2] if response else None
 
+    def next_session_cookie(self):
+        """Bump and return the host-side counter used as the SetComplete cookie."""
+        Hidpp20._session_cookie = (Hidpp20._session_cookie + 1) & 0xFFFF or 1
+        return bytes([Hidpp20._session_cookie >> 8, Hidpp20._session_cookie & 0xFF])
+
     def set_configuration_complete(self, device: Device, cookie=None, no_reply=False):
         """ConfigChange (0x0020) SetComplete — acknowledge host has synced with device configuration.
 
-        If cookie is None, reads the current cookie and increments it to mark
-        a new sync point, so future cookie changes indicate device-side drift."""
+        Sends a host-side monotonic counter, incremented per call and
+        always non-zero. Cookie 0x0000 has been observed to release the
+        SW effect-engine claim on at least the G515 LS TKL; we avoid it."""
         if cookie is None:
-            cookie = self.get_configuration_cookie(device)
-            if cookie and len(cookie) >= 2:
-                value = (cookie[0] << 8 | cookie[1]) + 1 & 0xFFFF
-                cookie = bytes([value >> 8, value & 0xFF])
+            cookie = self.next_session_cookie()
         if cookie and len(cookie) >= 2:
             return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, cookie[0], cookie[1], no_reply=no_reply)
 

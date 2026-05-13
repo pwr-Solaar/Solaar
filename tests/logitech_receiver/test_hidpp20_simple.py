@@ -372,6 +372,47 @@ def test_config_change():
     assert result == bytes.fromhex("03FFFF")
 
 
+def test_get_configuration_cookie():
+    responses = [fake_hidpp.Response("12345678", 0x0400)]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CONFIG_CHANGE)
+
+    result = _hidpp20.get_configuration_cookie(device)
+
+    assert result == bytes.fromhex("1234")
+
+
+def test_set_configuration_complete_explicit_cookie():
+    # An explicit cookie is sent unchanged.
+    responses = [fake_hidpp.Response("00", 0x0410, "1234")]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CONFIG_CHANGE)
+
+    result = _hidpp20.set_configuration_complete(device, cookie=bytes.fromhex("1234"))
+
+    assert result == bytes.fromhex("00")
+
+
+def test_set_configuration_complete_monotonic_counter():
+    # With no cookie, sends a host-side monotonic counter, +1 per call.
+    hidpp20.Hidpp20._session_cookie = 0x1233
+    responses = [
+        fake_hidpp.Response("00", 0x0410, "1234"),
+        fake_hidpp.Response("00", 0x0410, "1235"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CONFIG_CHANGE)
+
+    assert _hidpp20.set_configuration_complete(device) == bytes.fromhex("00")
+    assert _hidpp20.set_configuration_complete(device) == bytes.fromhex("00")
+
+
+def test_set_configuration_complete_skips_zero():
+    # Counter at 0xFFFF wraps to 1, never 0.
+    hidpp20.Hidpp20._session_cookie = 0xFFFF
+    responses = [fake_hidpp.Response("00", 0x0410, "0001")]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CONFIG_CHANGE)
+
+    assert _hidpp20.set_configuration_complete(device) == bytes.fromhex("00")
+
+
 def test_decipher_battery_status():
     report = b"\x50\x20\x00\xff\xff"
 

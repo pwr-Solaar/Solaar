@@ -437,10 +437,64 @@ class Device:
         if self.online and self.protocol >= 2.0:
             _hidpp20.config_change(self, configuration_, no_reply=no_reply)
 
-    def signal_configuration_complete(self):
-        """Read the device's config cookie and echo it back via SetComplete to ack end of configuration."""
+    def signal_configuration_complete(self, cookie=None):
+        """SetComplete on ConfigChange to ack end of configuration.
+
+        With no cookie, sends the host's session counter (see
+        Hidpp20.set_configuration_complete)."""
         if self.online and self.protocol >= 2.0:
-            _hidpp20.set_configuration_complete(self)
+            _hidpp20.set_configuration_complete(self, cookie=cookie)
+
+    def _record_config_cookie(self):
+        """After a successful apply, SetComplete with the next session cookie
+        and persist it so the dedup gate in apply_settings_if_needed can
+        detect drift on follow-up reconfig notifications within this session."""
+        if self.protocol < 2.0:
+            return
+        if not (self.features and SupportedFeature.CONFIG_CHANGE in self.features):
+            return
+        cookie = _hidpp20.next_session_cookie()
+        self.signal_configuration_complete(cookie=cookie)
+        if self.persister is not None:
+            self.persister["_config_cookie"] = [cookie[0], cookie[1]]
+
+    def apply_settings_if_needed(self):
+        """Cookie-gated dedup helper for repeat WIRELESS_DEVICE_STATUS
+        reconfig notifications on an already-active device. Skips when the
+        live ConfigChange cookie matches the value stored by the most
+        recent apply, otherwise applies and re-records. Must NOT be used as
+        the initial-activation apply path — across power cycles, devices
+        whose firmware resets the cookie to a fixed value would falsely
+        match a stored cookie from a prior session and skip the apply the
+        device actually needs.
+        Returns True if apply ran, False if it was skipped."""
+        if not self.online:
+            return False
+        if self.protocol >= 2.0 and self.features and SupportedFeature.CONFIG_CHANGE in self.features:
+            live = _hidpp20.get_configuration_cookie(self)
+            if live and len(live) >= 2:
+                stored = self.persister.get("_config_cookie") if self.persister else None
+                live_pair = [live[0], live[1]]
+                if stored == live_pair:
+                    if logger.isEnabledFor(logging.INFO):
+                        logger.info(
+                            "%s: config cookie %02X%02X matches stored — skip apply_all_settings",
+                            self,
+                            live[0],
+                            live[1],
+                        )
+                    return False
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info(
+                        "%s: config cookie live=%02X%02X stored=%s — apply_all_settings",
+                        self,
+                        live[0],
+                        live[1],
+                        "%02X%02X" % (stored[0], stored[1]) if stored else "None",
+                    )
+        settings.apply_all_settings(self)
+        self._record_config_cookie()
+        return True
 
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
@@ -541,12 +595,17 @@ class Device:
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
+                    # Activation apply must be unconditional — across power
+                    # cycles, the device may have lost state while its cookie
+                    # reset to a value that happens to match what we stored
+                    # last session. Cookie comparison is only a valid dedup
+                    # signal for repeat reconfig notifications within an
+                    # already-active session (see apply_settings_if_needed).
                     settings.apply_all_settings(self)
+                    self._record_config_cookie()
                 if not was_active:
                     if self.protocol < 2.0:  # Make sure to set notification flags on the device
                         self.notification_flags = self.enable_connection_notifications()
-                    else:
-                        self.signal_configuration_complete()
                     self.read_battery()  # battery information may have changed so try to read it now
             elif was_active and self.receiver and not isinstance(self.receiver, CenturionReceiver):
                 hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
