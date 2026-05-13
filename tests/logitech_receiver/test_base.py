@@ -125,11 +125,8 @@ def test_make_notification(report_id, sub_id, address, valid_notification):
 
 
 def test_get_next_sw_id():
-    res1 = base._get_next_sw_id()
-    res2 = base._get_next_sw_id()
-
-    assert res1 == 2
-    assert res2 == 3
+    assert base._get_next_sw_id() == base.SOLAAR_SOFTWARE_ID
+    assert base._get_next_sw_id() == base.SOLAAR_SOFTWARE_ID
 
 
 @pytest.mark.parametrize(

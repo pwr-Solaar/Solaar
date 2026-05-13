@@ -793,17 +793,22 @@ def _read_input_buffer(handle, ihandle, notifications_hook):
             return
 
 
+# HID++ Software ID claimed by Solaar. Fixed (not rotated) so cooperative
+# userspace HID++ clients sharing the same device can pick a different value
+# and reliably filter Solaar's traffic out of their reply stream.
+#
+# Known values in use by other tools at the time of writing:
+#
+#   0x07  OpenRGB
+#   0x0A  LGSTrayEx
+#   0x0D  Logitech G HUB (host-side)
+#   0x0F  Logitech firmware (sub-device self-enumeration on wired transports)
+#
+# 0x0B avoids those and keeps the high bit set so notifications (sw_id=0)
+# remain trivially distinguishable from replies.
+SOLAAR_SOFTWARE_ID = 0x0B
+
+
 def _get_next_sw_id() -> int:
-    """Returns 'random' software ID to separate replies from different devices.
-
-    Cycle the HID++ 2.0 software ID from 0x2 to 0xF to separate
-    results and notifications.
-    """
-    if not hasattr(_get_next_sw_id, "software_id"):
-        _get_next_sw_id.software_id = 0xF
-
-    if _get_next_sw_id.software_id < 0xF:
-        _get_next_sw_id.software_id += 1
-    else:
-        _get_next_sw_id.software_id = 2
-    return _get_next_sw_id.software_id
+    """Return Solaar's HID++ Software ID (fixed, see SOLAAR_SOFTWARE_ID)."""
+    return SOLAAR_SOFTWARE_ID
