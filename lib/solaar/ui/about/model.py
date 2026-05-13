@@ -61,7 +61,7 @@ class AboutModel:
 
     def get_credit_sections(self) -> List[Tuple[str, List[str]]]:
         return [
-            (_("Additional Programming"), ["Filipe Laíns", "Peter F. Patel-Schneider"]),
+            (_("Additional Programming"), ["Filipe Laíns", "Peter F. Patel-Schneider", "Ken Sanislo"]),
             (_("GUI design"), ["Julien Gascard", "Daniel Pavel"]),
             (
                 _("Testing"),
