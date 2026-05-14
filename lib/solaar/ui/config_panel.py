@@ -57,7 +57,8 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
         except Exception as e:
             v = None
             logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
-        GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
+        null_okay = not getattr(getattr(s, "_validator", None), "readable", True)
+        GLib.idle_add(_update_setting_item, sb, v, online, sensitive, null_okay, priority=99)
 
     ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
@@ -722,8 +723,6 @@ class HeteroKeyControl(Gtk.HBox, Control):
                         box.set_rgba(rgba)
                     else:
                         box.set_value(v)
-        else:
-            self.sbox._failed.set_visible(True)
         self.setup_visibles(id_)
 
     def setup_visibles(self, id_):
