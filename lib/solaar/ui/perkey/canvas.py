@@ -34,6 +34,7 @@ from gi.repository import Gtk  # NOQA: E402
 
 from .layout import BoundCell  # NOQA: E402
 from .layout import BoundLayout  # NOQA: E402
+from .layout import Cell  # NOQA: E402
 from .tools import TOOLS  # NOQA: E402
 from .tools import ToolContext  # NOQA: E402
 
@@ -168,6 +169,16 @@ class KeyboardCanvas(Gtk.DrawingArea):
             cx, cy, cw, ch = self._cell_rect(bc)
             if cx <= x < cx + cw and cy <= y < cy + ch:
                 return bc
+        # Phantom anchor for gaps in the matrix grid — gives rect/gradient
+        # drags a valid endpoint where no real cell exists.
+        rows, cols = self._matrix_size()
+        matrix_w = cols * CELL_PX + max(0, cols - 1) * GUTTER_PX
+        matrix_h = rows * CELL_PX + max(0, rows - 1) * GUTTER_PX
+        if PADDING_PX <= x < PADDING_PX + matrix_w and PADDING_PX <= y < PADDING_PX + matrix_h:
+            col = int((x - PADDING_PX) // (CELL_PX + GUTTER_PX))
+            row = int((y - PADDING_PX) // (CELL_PX + GUTTER_PX))
+            if 0 <= col < cols and 0 <= row < rows:
+                return BoundCell(cell=Cell(zone_id=-1, row=row, col=col), bound=False)
         return None
 
     # ---- draw ----
@@ -357,13 +368,17 @@ class KeyboardCanvas(Gtk.DrawingArea):
         if event.button != 1:
             return False
         bc = self._cell_at(event.x, event.y)
-        if bc is None or not bc.bound:
+        if bc is None:
+            return False
+        tool = TOOLS.get(self._tool_name)
+        # Endpoint tools (rect/gradient) anchor on cell centers regardless of
+        # bind state; brush/bucket need a real key to paint/flood.
+        if not (tool and tool.overlay_shape) and not bc.bound:
             return False
         self._press_cell = bc
         self._motion_cell = bc
         self._dragging = True
         self._brush_path = [bc.cell.zone_id]
-        tool = TOOLS.get(self._tool_name)
         if tool is not None and tool.is_brush:
             self.update_colors({bc.cell.zone_id: self._active_color})
         else:
@@ -374,12 +389,14 @@ class KeyboardCanvas(Gtk.DrawingArea):
         if not self._dragging:
             return False
         bc = self._cell_at(event.x, event.y)
-        if bc is None or not bc.bound:
+        if bc is None:
+            return False
+        tool = TOOLS.get(self._tool_name)
+        if not (tool and tool.overlay_shape) and not bc.bound:
             return False
         if bc is self._motion_cell:
             return False
         self._motion_cell = bc
-        tool = TOOLS.get(self._tool_name)
         if tool is not None and tool.is_brush:
             if bc.cell.zone_id not in self._brush_path:
                 self._brush_path.append(bc.cell.zone_id)
