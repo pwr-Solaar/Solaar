@@ -865,6 +865,17 @@ def _set_row_sensitive(device, name, can_function):
     sbox._control.set_sensitive(user_allowed is True and can_function)
 
 
+def _gate_blocks(device, name):
+    """Single source of truth for "is this setting's row gated off?". Used by
+    `_apply_rgb_gates` to grey rows and by `_update_setting_item` so async-read
+    completions can't undo the grey-out when their callbacks land later."""
+    if name in _SW_CONTROL_DEPENDENT_NAMES or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES):
+        return _sw_control_blocked(device)
+    if name == "per-key-lighting":
+        return _sw_control_blocked(device) or _zone_effect_blocks_perkey(device)
+    return False
+
+
 def _apply_rgb_gates(device):
     """Grey out RGB settings whose prerequisites aren't met. Visual-only:
     leaves persister _sensitive flags (user lock-icon opt-ins) intact.
@@ -874,12 +885,14 @@ def _apply_rgb_gates(device):
     - per-key-lighting needs LED Control = Solaar AND every zone effect on
       Static (0x01), because non-Static zone animations mask per-key writes.
     """
-    sw_blocked = _sw_control_blocked(device)
     for s in getattr(device, "settings", []) or []:
-        if s.name in _SW_CONTROL_DEPENDENT_NAMES or any(s.name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES):
-            _set_row_sensitive(device, s.name, not sw_blocked)
-    perkey_blocked = sw_blocked or _zone_effect_blocks_perkey(device)
-    _set_row_sensitive(device, "per-key-lighting", not perkey_blocked)
+        name = s.name
+        if (
+            name in _SW_CONTROL_DEPENDENT_NAMES
+            or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES)
+            or name == "per-key-lighting"
+        ):
+            _set_row_sensitive(device, name, not _gate_blocks(device, name))
 
 
 def _change_click(button, sbox):
@@ -1015,8 +1028,10 @@ def _create_sbox(s, _device):
 def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=False):
     sbox._spinner.stop()
     sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
+    name = sbox.setting.name
+    can_function = not _gate_blocks(sbox.setting._device, name)
     if value is None and not null_okay:
-        sbox._control.set_sensitive(sensitive is True)
+        sbox._control.set_sensitive(sensitive is True and can_function)
         _change_icon(sensitive, sbox._change_icon)
         sbox._failed.set_visible(is_online)
         return
@@ -1026,10 +1041,9 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         sbox._control.set_value(value)
     except TypeError as e:
         logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
-    sbox._control.set_sensitive(sensitive is True)
+    sbox._control.set_sensitive(sensitive is True and can_function)
     _change_icon(sensitive, sbox._change_icon)
     # rgb_control and rgb_zone_* state gate per-key sensitivity.
-    name = sbox.setting.name
     if name == "rgb_control" or name.startswith("rgb_zone_"):
         _apply_rgb_gates(sbox.setting._device)
 

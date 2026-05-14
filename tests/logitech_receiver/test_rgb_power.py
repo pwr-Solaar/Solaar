@@ -636,7 +636,6 @@ def test_perkey_write_skipped_when_zone_is_animation(monkeypatch):
     s._device = device
     s._value = {}
     s._has_rgb_effects = True
-    s._ensure_sw_control = MagicMock()
     s._send_with_retry = MagicMock(return_value=True)
     s._fill_unset_zones_with_base_color = MagicMock(return_value=True)
     monkeypatch.setattr(rgb_power, "translate_for_device", lambda d, c: c)
@@ -663,7 +662,6 @@ def test_perkey_write_key_value_skipped_when_zone_is_animation(monkeypatch):
     s._device = device
     s._value = {}
     s._has_rgb_effects = True
-    s._ensure_sw_control = MagicMock()
     s._send_with_retry = MagicMock(return_value=True)
     s._send_zone_color = MagicMock(return_value=True)
     s._fill_unset_zones_with_base_color = MagicMock(return_value=True)

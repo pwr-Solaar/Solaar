@@ -324,8 +324,14 @@ def cleanup(device):
     shutdown animation during the active→off transition. If the cap is
     disabled, the firmware powers down LEDs silently. Matches LGHUB exit.
     See solaar_shutdown_effect_trigger_spec.md.
+
+    rgb_control is the gate: when LED Control is off, skip every wire write
+    here. We never claimed, so there's nothing to release; firing the shutdown
+    animation would visibly contradict the user's "leave my lighting alone".
     """
     stop(device)
+    if any(s.name == "rgb_control" and not s._value for s in getattr(device, "settings", []) or []):
+        return
     try:
         device.feature_request(SupportedFeature.RGB_EFFECTS, 0x50, SW_RELEASE)
         if device.features and SupportedFeature.PROFILE_MANAGEMENT in device.features:

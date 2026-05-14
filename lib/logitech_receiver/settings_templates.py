@@ -2053,8 +2053,13 @@ class RGBControl(settings.Setting):
                 logger.warning("%s: post-claim per-key repaint failed: %s", device, e)
 
     def _release_sw_control(self, device):
-        # Stop software power management
+        # If we never claimed in this session, don't touch the device at all.
+        # The presence of an RGBPowerManager is the canonical "we claimed" signal
+        # — _claim_sw_control creates it via rgb_power.start, and stop() pops it.
+        had_claim = rgb_power.get_manager(device) is not None
         rgb_power.stop(device)
+        if not had_claim:
+            return
         # Release LED pipeline: SetSWControl(mode=0, flags=0)
         device.feature_request(_F.RGB_EFFECTS, 0x50, rgb_power.SW_RELEASE)
         # Restore firmware power management
@@ -2456,6 +2461,10 @@ class RGBEffectSetting(LEDZoneSetting):
         # Persist undimmed value first (single source of truth).
         if self._value != value:
             self.update(value, save)
+        # rgb_control gate: skip wire when the user has LED Control off.
+        rgb_ctrl = next((s for s in device.settings if s.name == "rgb_control"), None)
+        if rgb_ctrl is not None and not rgb_ctrl._value:
+            return value
         wire_value = self._translate_for_wire(value)
         if wire_value is None:  # SLEEPING — _wake() will re-push at full brightness.
             return value
@@ -2537,19 +2546,22 @@ class PerKeyLighting(settings.Settings):
     def update_key_value(self, key, value, save=True):
         super().update_key_value(key, self._wrap_color(value), save)
 
-    def _ensure_sw_control(self):
-        """Ensure SW control is claimed before writing per-key colors."""
+    def _sw_control_held(self):
+        """Return True if it's safe to push LED bytes to the wire.
+
+        rgb_control is the gate: when the user has it off, LED writes must be
+        silent no-ops at the wire. Never auto-flip it on from here — doing so
+        rewrites the persister and turns the user-facing toggle into a lie."""
         if getattr(self, "_has_rgb_effects", None) is None:
             self._has_rgb_effects = bool(self._device.features and _F.RGB_EFFECTS in self._device.features)
         if not self._has_rgb_effects:
-            return  # No autonomous effect engine, no claim needed
+            return True  # No autonomous effect engine, no gate needed
         for s in self._device.settings:
             if s.name == "rgb_control":
-                # _value may be bool (current) or int (legacy persister value
+                # _value may be bool (current) or int 3/0 (legacy persister value
                 # before BooleanValidator migration); both coerce cleanly.
-                if not s._value:  # Not already claimed by Solaar
-                    s.write(True)  # Triggers full claim sequence in RGBControl
-                return
+                return bool(s._value)
+        return True  # rgb_control not on this device → no gate to enforce
 
     # BUSY-retry backoff (ms).
     _BUSY_BACKOFF_MS = (30, 60, 90)
@@ -2719,9 +2731,10 @@ class PerKeyLighting(settings.Settings):
 
     def write(self, map, save=True):
         if self._device.online:
-            self._ensure_sw_control()
             # Persist undimmed (single source of truth).
             self.update(map, save)
+            if not self._sw_control_held():
+                return map  # gate is off — keep state in memory, skip the wire
             # Per-key is a sub-mode of Static — when zone is animating, the
             # firmware engine owns the visible layer.
             if not rgb_power.zone_effect_is_static(self._device):
@@ -2752,13 +2765,14 @@ class PerKeyLighting(settings.Settings):
         return map
 
     def write_key_value(self, key, value, save=True):
-        self._ensure_sw_control()
         no_change = special_keys.COLORSPLUS["No change"]
         zone_id = int(key)
         if value != no_change:
             self.update_key_value(zone_id, value, save)
             if not self._device.online:
                 return value
+            if not self._sw_control_held():
+                return value  # gate is off — state stored, no wire push
             # Per-key is a sub-mode of Static — defer to firmware animation.
             if not rgb_power.zone_effect_is_static(self._device):
                 return value
@@ -2788,6 +2802,8 @@ class PerKeyLighting(settings.Settings):
             self.update_key_value(zone_id, no_change, save)
             if not self._device.online:
                 return no_change
+            if not self._sw_control_held():
+                return no_change  # gate is off — state stored, no wire push
             if not rgb_power.zone_effect_is_static(self._device):
                 return no_change
             zone_base = self._zone_base_color()
