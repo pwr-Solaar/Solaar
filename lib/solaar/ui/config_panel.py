@@ -595,22 +595,25 @@ class GraphicEQControl(MultipleControl):
         control._timer.cancel()
         delattr(control, "_timer")
         new_state = int(control.get_value())
-        if self.sbox.setting._value[int(item)] != new_state:
-            self.sbox.setting._value[int(item)] = new_state
-            _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
+        value = self.sbox.setting._value
+        if not isinstance(value, dict):
+            return
+        if value.get(int(item)) != new_state:
+            value[int(item)] = new_state
+            _write_async(self.sbox.setting, value[int(item)], self.sbox, key=int(item))
 
     def set_value(self, value):
         if value is None:
             return
         b = ""
         n = len(self._items)
+        stored = self.sbox.setting._value if isinstance(self.sbox.setting._value, dict) else {}
         for vbox in self._items:
             item = vbox._setting_item
-            v = value.get(int(item), None)
-            if v is not None:
-                vbox.control.set_value(v)
-            else:
-                v = self.sbox.setting._value[int(item)]
+            v = value.get(int(item))
+            if v is None:
+                v = stored.get(int(item), 0)
+            vbox.control.set_value(v)
             b += f"{str(item)}: ({str(v)}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
