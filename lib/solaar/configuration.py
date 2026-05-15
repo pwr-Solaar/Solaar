@@ -224,16 +224,23 @@ yaml.add_representer(NamedInt, named_int_representer)
 
 
 # A device can be identified by a combination of WPID and serial number (for receiver-connected devices)
-# or a combination of modelId and unitId (for direct-connected devices).
+# or a combination of modelId and unitId (for direct-connected devices). Some devices report the same
+# physical ID as the receiver serial in one mode and as the direct unitId in another, so match those too
+# when another stable identifier agrees.
 # But some devices have empty (all zero) modelIds and unitIds.  Use the device name as a backup for the modelId.
 # The worst situation is a receiver-connected device that Solaar has never seen on-line
 # that is directly connected.  Here there is no way to realize that the two devices are the same.
 # So new entries are not created for unseen off-line receiver-connected devices
 def persister(device):
     def match(wpid, serial, modelId, unitId, c):
+        same_model = modelId and modelId == c.get(_KEY_MODEL_ID)
+        same_wpid = wpid and wpid == c.get(_KEY_WPID)
+        same_name = device_name and device_name == c.get(_KEY_NAME)
+        cross_unit_serial = (unitId and unitId == c.get(_KEY_SERIAL)) or (serial and serial == c.get(_KEY_UNIT_ID))
         return (
-            (wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL))
-            or (modelId and modelId == c.get(_KEY_MODEL_ID) and unitId and unitId == c.get(_KEY_UNIT_ID))
+            (same_wpid and serial and serial == c.get(_KEY_SERIAL))
+            or (same_model and unitId and unitId == c.get(_KEY_UNIT_ID))
+            or (cross_unit_serial and (same_model or same_wpid or same_name))
             or (
                 c.get(_KEY_WPID) is None
                 and c.get(_KEY_SERIAL) is None
@@ -250,6 +257,7 @@ def persister(device):
         # some devices report modelId and unitId as zero so use name and serial for them
         modelId = device.modelId if device.modelId != "000000000000" else device._name if device._name else None
         unitId = device.unitId if device.unitId != "00000000" else device._serial if device._serial else None
+        device_name = device.name
         for c in _config:
             if isinstance(c, _DeviceEntry) and match(device.wpid, device._serial, modelId, unitId, c):
                 entry = c
