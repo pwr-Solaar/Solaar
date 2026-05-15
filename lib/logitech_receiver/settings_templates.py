@@ -2581,6 +2581,150 @@ class HeadsetPerZoneLighting(settings.Settings):
         return result
 
 
+class _HeadsetSignatureEffect:
+    """A 0x0622 signature-effect slot value: an enable byte, two colors and a
+    speed. Synthetic 8-byte form [ID, R1,G1,B1, R2,G2,B2, speed] — ID is 0x01
+    on / 0x02 off. The rw_class splits it across get/setSignatureEffectParams
+    (colors + speed) and get/setSignatureEffectState (the enable byte)."""
+
+    def __init__(self, ID=1, color1=0, color2=0, speed=0):
+        self.ID = int(ID)
+        self.speed = max(0, min(100, int(speed)))
+        for k, v in (("color1", color1), ("color2", color2)):
+            setattr(self, k, common.ColorInt(int(v) & 0xFFFFFF))
+
+    @classmethod
+    def from_bytes(cls, data, options=None):
+        if data is None or len(data) < 8:
+            return cls()
+        c1 = (data[1] << 16) | (data[2] << 8) | data[3]
+        c2 = (data[4] << 16) | (data[5] << 8) | data[6]
+        return cls(ID=data[0], color1=c1, color2=c2, speed=data[7])
+
+    def to_bytes(self, options=None):
+        return bytes(
+            [
+                self.ID & 0xFF,
+                (self.color1 >> 16) & 0xFF,
+                (self.color1 >> 8) & 0xFF,
+                self.color1 & 0xFF,
+                (self.color2 >> 16) & 0xFF,
+                (self.color2 >> 8) & 0xFF,
+                self.color2 & 0xFF,
+                self.speed & 0xFF,
+            ]
+        )
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.to_bytes() == other.to_bytes()
+
+    def __str__(self):
+        return yaml.dump(self, width=float("inf")).rstrip("\n")
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return cls(**loader.construct_mapping(node))
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping("!HeadsetSignatureEffect", data.__dict__, flow_style=True)
+
+
+yaml.SafeLoader.add_constructor("!HeadsetSignatureEffect", _HeadsetSignatureEffect.from_yaml)
+yaml.add_representer(_HeadsetSignatureEffect, _HeadsetSignatureEffect.to_yaml)
+
+
+class _HeadsetSignatureEffectSetting(settings.Setting):
+    """One firmware signature-effect slot on HEADSET_RGB_SIGNATURE_EFFECTS
+    (0x0622). Subclasses set effect_id (0 startup, 1 shutdown, 2 passive).
+    Build probes the slot via getSignatureEffectState and suppresses the
+    setting if the device doesn't expose it. These run autonomously on the
+    device firmware, so — like the keyboard boot animations — they are not
+    gated on host LED control."""
+
+    feature = _F.HEADSET_RGB_SIGNATURE_EFFECTS
+    effect_id: int = 0
+
+    _ENABLED_CHOICES = common.NamedInts(**{"On": 1, "Off": 2})
+    _COLOR1_FIELD = {"name": "color1", "kind": settings.Kind.COLOR, "label": _("Primary")}
+    _COLOR2_FIELD = {"name": "color2", "kind": settings.Kind.COLOR, "label": _("Secondary")}
+    _SPEED_FIELD = {"name": "speed", "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 100}
+
+    class rw_class:
+        kind = settings.FeatureRW.kind
+
+        def __init__(self, feature, effect_id):
+            self.feature = feature
+            self._eid = bytes([(effect_id >> 8) & 0xFF, effect_id & 0xFF])
+
+        def read(self, device):
+            params = device.feature_request(self.feature, 0x10, self._eid)  # getSignatureEffectParams
+            state = device.feature_request(self.feature, 0x30, self._eid)  # getSignatureEffectState
+            if params is None or len(params) < 9 or state is None or len(state) < 3:
+                return None
+            # params: [effectId, R1,G1,B1, R2,G2,B2, speed]; state: [effectId, enabled]
+            return bytes([state[2]]) + params[2:9]
+
+        def write(self, device, data_bytes):
+            # data_bytes: [enabled, R1,G1,B1, R2,G2,B2, speed]
+            params = device.feature_request(self.feature, 0x20, self._eid + data_bytes[1:8])
+            state = device.feature_request(self.feature, 0x40, self._eid + data_bytes[0:1])
+            return data_bytes if params is not None and state is not None else None
+
+    @classmethod
+    def build(cls, device):
+        eid = bytes([(cls.effect_id >> 8) & 0xFF, cls.effect_id & 0xFF])
+        try:
+            state = device.feature_request(cls.feature, 0x30, eid)  # probe: is this slot present?
+        except exceptions.FeatureCallError:
+            return None
+        if state is None or len(state) < 3:
+            return None
+        # Log getSignatureEffectsInfo (fn 0) once per device — its byte layout
+        # isn't pinned down, so slot discovery uses per-slot probing for now.
+        if not getattr(device, "_headset_sig_info_logged", False):
+            device._headset_sig_info_logged = True
+            try:
+                info = device.feature_request(cls.feature, 0x00)
+                logger.debug("%s: getSignatureEffectsInfo raw reply: %s", cls.name, info.hex() if info else info)
+            except Exception as e:
+                logger.debug("%s: getSignatureEffectsInfo probe raised %s", cls.name, e)
+        rw = cls.rw_class(cls.feature, cls.effect_id)
+        validator = settings_validator.HeteroValidator(data_class=_HeadsetSignatureEffect, options=None)
+        setting = cls(device, rw, validator)
+        # Enable byte as a right-aligned Gtk.Switch (on=1 / off=2); colors and
+        # speed stay visible in both states so toggling Off keeps them.
+        id_field = {"name": "ID", "kind": settings.Kind.TOGGLE, "label": None, "on_value": 1, "off_value": 2}
+        setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD, cls._SPEED_FIELD]
+        visible = {"color1": 1, "color2": 1, "speed": 1}
+        setting.fields_map = {
+            int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
+            int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
+        }
+        return setting
+
+
+class HeadsetSignatureStartupEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-startup"
+    label = _("Startup Effect")
+    description = _("Firmware lighting effect played when the headset powers on or wakes.")
+    effect_id = 0
+
+
+class HeadsetSignatureShutdownEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-shutdown"
+    label = _("Shutdown Effect")
+    description = _("Firmware lighting effect played when the headset powers off or sleeps.")
+    effect_id = 1
+
+
+class HeadsetSignaturePassiveEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-passive"
+    label = _("Passive Effect")
+    description = _("Firmware lighting effect played while the headset is idle.")
+    effect_id = 2
+
+
 # ----------------------------------------------------------------------------
 # LogiVoice (0x0900 + 0x0901..0x0907) — read-only presentation pass.
 #
@@ -4150,6 +4294,9 @@ SETTINGS: list[settings.Setting] = [
     HeadsetLEDControl,
     HeadsetLEDsPrimary,
     HeadsetPerZoneLighting,
+    HeadsetSignatureStartupEffect,
+    HeadsetSignatureShutdownEffect,
+    HeadsetSignaturePassiveEffect,
     *_LOGIVOICE_SETTINGS,
 ]
 
