@@ -1721,6 +1721,15 @@ class HeadsetSidetone(settings.Setting):
             skip, prefix = 3, b"\x01\xff"
         else:
             skip, prefix = 2, b"\x01"
+        # getSidetoneLevelSettings (fn 2) carries the gain-step count that scales
+        # wire level <-> UI percent; its byte layout is unmapped. Log the raw
+        # reply under -dd so a user log pins it down.
+        if logger.isEnabledFor(logging.DEBUG):
+            try:
+                reply = device.feature_request(cls.feature, 0x20)
+                logger.debug("%s: getSidetoneLevelSettings raw reply: %s", cls.name, reply.hex() if reply else reply)
+            except Exception as e:
+                logger.debug("%s: getSidetoneLevelSettings probe raised %s", cls.name, e)
         rw = settings.FeatureRW(cls.feature, **cls.rw_options)
         validator = cls.validator_class.build(cls, device, read_skip_byte_count=skip, write_prefix_bytes=prefix)
         if validator:
