@@ -611,9 +611,10 @@ class GraphicEQControl(MultipleControl):
         for vbox in self._items:
             item = vbox._setting_item
             v = value.get(int(item))
-            if v is None:
+            if v is not None:
+                vbox.control.set_value(v)
+            else:
                 v = stored.get(int(item), 0)
-            vbox.control.set_value(v)
             b += f"{str(item)}: ({str(v)}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
