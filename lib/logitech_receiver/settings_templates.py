@@ -1708,9 +1708,34 @@ class HeadsetSidetone(settings.Setting):
     description = _("Sidetone level (0 = off, 100 = max).")
     feature = _F.HEADSET_AUDIO_SIDETONE
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
-    validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 100
+
+    class validator_class(settings_validator.RangeValidator):
+        """UI value is 0-100 percent; the wire level is a gain-step index
+        0..N-1. N (gain_steps) comes from getSidetoneLevelSettings on V2
+        devices, or defaults to 101 on V1 — which makes step == percent, so
+        V1 round-trips unchanged. The firmware silently ignores out-of-range
+        step writes, so writes are clamped to N-1."""
+
+        gain_steps = 101
+
+        def _level_bytes(self, raw):
+            return common.bytes2int(raw[self.read_skip_byte_count : self.read_skip_byte_count + self._byte_count])
+
+        def validate_read(self, reply_bytes):
+            level = self._level_bytes(reply_bytes)
+            steps = self.gain_steps
+            return int(round(level * 100 / (steps - 1))) if steps > 1 else level
+
+        def prepare_write(self, new_value, current_value=None):
+            steps = self.gain_steps
+            level = int(round((steps - 1) * new_value / 100)) if steps > 1 else new_value
+            level = max(0, min((steps - 1) if steps > 1 else self.max_value, level))
+            to_write = self.write_prefix_bytes + common.int2bytes(level, self._byte_count)
+            if current_value is not None and self._level_bytes(current_value) == level:
+                return None
+            return to_write
 
     @classmethod
     def build(cls, device):
@@ -1721,18 +1746,23 @@ class HeadsetSidetone(settings.Setting):
             skip, prefix = 3, b"\x01\xff"
         else:
             skip, prefix = 2, b"\x01"
-        # getSidetoneLevelSettings (fn 2) carries the gain-step count that scales
-        # wire level <-> UI percent; its byte layout is unmapped. Log the raw
-        # reply under -dd so a user log pins it down.
-        if logger.isEnabledFor(logging.DEBUG):
+        # V2 getSidetoneLevelSettings (fn 2) reply byte 2 is the gain-step count N.
+        # V1 has no such call — N stays 101 (step == percent). Raw reply still
+        # logged at debug so a G HUB setpoint correlation can refine the layout.
+        gain_steps = 101
+        if version > 1:
             try:
                 reply = device.feature_request(cls.feature, 0x20)
-                logger.debug("%s: getSidetoneLevelSettings raw reply: %s", cls.name, reply.hex() if reply else reply)
             except Exception as e:
+                reply = None
                 logger.debug("%s: getSidetoneLevelSettings probe raised %s", cls.name, e)
+            logger.debug("%s: getSidetoneLevelSettings raw reply: %s", cls.name, reply.hex() if reply else reply)
+            if reply is not None and len(reply) >= 3 and reply[2] > 1:
+                gain_steps = reply[2]
         rw = settings.FeatureRW(cls.feature, **cls.rw_options)
         validator = cls.validator_class.build(cls, device, read_skip_byte_count=skip, write_prefix_bytes=prefix)
         if validator:
+            validator.gain_steps = gain_steps
             return cls(device, rw, validator)
 
 
