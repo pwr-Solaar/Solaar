@@ -1,8 +1,7 @@
-"""Read-only corpus probe for the headset RGB feature triplet:
+"""Read-only corpus probe for the headset RGB feature pair:
 
   - HEADSET_RGB_ONBOARD_EFFECTS  (0x0621)
   - HEADSET_RGB_SIGNATURE_EFFECTS (0x0622)
-  - HEADSET_RGB_0623             (0x0623, function set unmapped)
 
 Logs raw response bytes and lengths at INFO so field testers without
 ``-dd`` can still capture the data. All calls are strictly read-side —
@@ -180,24 +179,6 @@ def probe_onboard_effects(device) -> None:
     _call(device, feature, 0x40)
 
 
-def probe_unknown_0623(device) -> None:
-    """Probe 0x0623 (purpose unmapped) — present on G522 sub-device.
-
-    Function set unknown. Try a small window of low function indexes to
-    capture whatever responds. Strictly read-side; we don't know what
-    arguments the functions take so we just call each with no payload
-    and let the device 0x0A any function that needs args.
-    """
-    feature = SupportedFeature.HEADSET_RGB_0623
-    if not device.features or feature not in device.features:
-        return
-    logger.debug("RGB probe: 0x0623 HEADSET_RGB_0623 present on %s", device)
-    # Functions 0..7 covers the typical "info / get* / get*" range; if
-    # anything responds we'll have first bytes to triangulate against.
-    for fn_idx in range(8):
-        _call(device, feature, fn_idx << 4)
-
-
 def probe_signature_effects(device) -> None:
     """Probe 0x0622 RGBSignatureEffects read-side functions."""
     feature = SupportedFeature.HEADSET_RGB_SIGNATURE_EFFECTS
@@ -236,7 +217,3 @@ def probe(device) -> None:
         probe_signature_effects(device)
     except Exception as e:
         logger.debug("RGB probe: signature-effects probe raised %r", e)
-    try:
-        probe_unknown_0623(device)
-    except Exception as e:
-        logger.debug("RGB probe: 0x0623 probe raised %r", e)
