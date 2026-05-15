@@ -199,6 +199,11 @@ class Setting:
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: apply (%s)", self.name, self._device)
         try:
+            if self.persist and getattr(self._device, "persister", None) and self.name in self._device.persister:
+                # Device-origin notifications can update _value without changing
+                # the saved preference. Reconnect replay must use the saved
+                # preference as the source of truth.
+                self._value = None
             value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
             if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
                 self.write(value, save=False)

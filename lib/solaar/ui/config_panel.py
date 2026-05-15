@@ -1159,10 +1159,10 @@ def _record_setting(device, setting_class, values):
     if setting:
         assert device == setting._device
         if len(values) > 1:
-            setting.update_key_value(values[0], values[-1])
+            setting.update_key_value(values[0], values[-1], save=False)
             value = {values[0]: values[-1]}
         else:
-            setting.update(values[-1])
+            setting.update(values[-1], save=False)
             value = values[-1]
         device_path = device.receiver.path if device.receiver else device.path
         if (device_path, device.number, setting.name) in _items:
