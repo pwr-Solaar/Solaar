@@ -2142,6 +2142,79 @@ class HeadsetAdvancedEQ(settings.RangeFieldSetting):
                     return None
             return map
 
+    def _is_valid_persisted_value(self, value):
+        """True iff `value` is a well-formed band-gain dict for the current
+        validator: a dict with exactly `count` int keys covering [0, count),
+        each mapped to an int within [min_value, max_value]. Used to detect
+        stale persister entries from older Solaar builds whose V2 parser had
+        a different stride/header (commits prior to 7c73c888) and produced
+        partial dicts or out-of-range gain values."""
+        validator = getattr(self, "_validator", None)
+        if not isinstance(value, dict) or validator is None:
+            return False
+        count = getattr(validator, "count", 0)
+        if count == 0 or len(value) != count:
+            return False
+        mn = getattr(validator, "min_value", None)
+        mx = getattr(validator, "max_value", None)
+        if mn is None or mx is None:
+            return False
+        for i in range(count):
+            if i not in value:
+                return False
+            v = value[i]
+            if not isinstance(v, int) or v < mn or v > mx:
+                return False
+        return True
+
+    def apply(self):
+        """Validate the persisted EQ against the live device state before
+        pushing. Setting.apply uses cached=True so the persister is treated
+        as authoritative — that's wrong here because (a) the EQ can be
+        changed externally (LGHUB, onboard preset buttons) and (b) older
+        Solaar V2 parsers stored partial/out-of-range dicts that
+        prepare_write silently fills with 0 dB, overwriting user EQ with
+        zeros. Strategy: if the persisted value is well-formed, apply it
+        normally (matches existing Solaar semantics). If it's corrupt,
+        treat the device's live read as truth and reseed the persister
+        from it without writing back. If both are invalid, skip this
+        setting only — apply_all_settings keeps going."""
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        if not self._device.online:
+            return
+        persister = getattr(self._device, "persister", None)
+        persisted = persister.get(self.name) if persister else None
+        persisted_valid = self._is_valid_persisted_value(persisted)
+        try:
+            live = self.read(cached=False)
+        except Exception as e:
+            logger.warning("%s: live EQ read failed during apply (%s): %s", self.name, self._device, repr(e))
+            live = None
+        live_valid = self._is_valid_persisted_value(live)
+        if persisted_valid:
+            try:
+                self.write(persisted, save=False)
+            except Exception as e:
+                logger.warning("%s: error applying %s (%s): %s", self.name, persisted, self._device, repr(e))
+        elif live_valid:
+            logger.info(
+                "%s: rejecting stale persister value %r; reseeding from device live %r",
+                self.name,
+                persisted,
+                live,
+            )
+            self._value = live
+            if persister is not None:
+                persister[self.name] = live
+        else:
+            logger.warning(
+                "%s: both persisted (%r) and live (%r) values invalid; skipping apply",
+                self.name,
+                persisted,
+                live,
+            )
+
 
 class HeadsetActiveEQPreset(settings.Setting):
     """Choose which AdvancedParaEQ slot drives live audio.
