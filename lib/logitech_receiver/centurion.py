@@ -272,7 +272,9 @@ class CenturionReceiver:
         self._usb_name = getattr(device_info, "product", None)
         if not self._usb_name and self.path:
             self._usb_name = _read_usb_product_string(self.path)
-        self.name = "Centurion Receiver"
+        # User-facing name: "Centurion" is Logitech's internal codename for this
+        # headset-dongle transport, kept in code/logs but not shown to users.
+        self.name = "Lightspeed Headset Receiver"
 
         # Dummy pairing object — lock_open stays False
         from .receiver import Pairing
