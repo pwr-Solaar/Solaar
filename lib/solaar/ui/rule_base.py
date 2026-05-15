@@ -20,7 +20,6 @@ from typing import Any
 from typing import Callable
 
 from gi.repository import Gtk
-from logitech_receiver import diversion
 
 
 def norm(s):
@@ -50,8 +49,6 @@ class CompletionEntry(Gtk.Entry):
 
 
 class RuleComponentUI(abc.ABC):
-    CLASS = diversion.RuleComponent
-
     def __init__(self, panel, on_update: Callable = None):
         self.panel = panel
         self.widgets = {}  # widget -> coord. in grid
@@ -109,5 +106,5 @@ class RuleComponentUI(abc.ABC):
         for c in self.panel.get_children():
             self.panel.remove(c)
 
-    def update_devices(self):  # noqa: B027
-        pass
+    def update_devices(self) -> None:
+        return None
