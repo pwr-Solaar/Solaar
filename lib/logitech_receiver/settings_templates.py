@@ -2330,13 +2330,31 @@ def _headset_setting_by_name(device, name):
 
 
 def _headset_primary_color(device, default=0xFFFFFF):
-    """Resolve the currently-saved Primary color, or `default` if absent."""
-    s = _headset_setting_by_name(device, HeadsetLEDsPrimary.name)
+    """The headset's base color — the 0x0621 onboard Fixed-effect color.
+    Per-zone 'No change' cells resolve against this. Returns `default` when
+    the onboard-effect setting is absent or not currently on Fixed."""
+    s = _headset_setting_by_name(device, HeadsetOnboardEffect.name)
+    value = getattr(s, "_value", None) if s is not None else None
+    if value is not None and int(getattr(value, "ID", -1)) == 0:
+        return int(getattr(value, "color1", default))
+    return default
+
+
+def _headset_cluster_effect_is_fixed(device):
+    """True when the 0x0621 onboard effect is Fixed (the Static analog), or
+    when the device has no onboard-effect setting. A non-Fixed cluster
+    animation masks the per-zone buffer, so per-zone writes are suppressed
+    while one runs."""
+    s = _headset_setting_by_name(device, HeadsetOnboardEffect.name)
     if s is None:
-        return default
+        return True
     value = getattr(s, "_value", None)
-    color = getattr(value, "color", None) if value is not None else None
-    return int(color) if color is not None else default
+    if value is None:
+        persister = getattr(device, "persister", None)
+        value = persister.get(HeadsetOnboardEffect.name) if persister else None
+    if value is None:
+        return True
+    return int(getattr(value, "ID", 0)) == 0
 
 
 def _headset_per_zone_overrides(device):
@@ -2360,35 +2378,48 @@ def _headset_per_zone_overrides(device):
     return overrides
 
 
-class _HeadsetStaticEffectOption:
-    """Minimal stand-in for `hidpp20.LEDEffectInfo`.
-
-    `HeteroValidator` only inspects `.ID` and `.index` on its `options`
-    list; we don't need the full device-query machinery here because the
-    headset wire protocol is handled by `headset_rgb.write_zone_map`.
-    """
-
-    ID = 0x01  # matches hidpp20.LEDEffects[0x01] = Static
-    index = 0x01
+def _headset_led_control_on(device):
+    """True when the headset LED Control is on (Solaar drives the LEDs).
+    When off, the firmware owns the LEDs and host color writes are
+    suppressed — the value is still persisted so it re-applies on switch-on.
+    Reads setting._value first, then the persister; accepts a bool or a
+    legacy int 0/1 from the old ChoicesValidator era."""
+    s = _headset_setting_by_name(device, HeadsetLEDControl.name)
+    v = getattr(s, "_value", None) if s is not None else None
+    if v is None:
+        persister = getattr(device, "persister", None)
+        v = persister.get(HeadsetLEDControl.name) if persister else None
+    if v is None:
+        return True  # unknown — don't suppress
+    return bool(v)
 
 
 class HeadsetLEDControl(settings.Setting):
-    """Switch headset LED control between device and Solaar.
+    """Whether Solaar holds the headset's live-coloring claim.
 
-    Mirrors the `LEDControl` / `RGBControl` pattern used for keyboards and
-    mice. When set to Solaar, the `LEDs Primary` and `Per-zone Lighting`
-    settings drive the LEDs; when set to Device, firmware-driven onboard
-    and signature effects resume.
+    Mirrors the `RGBControl` pattern for keyboards and mice. On = Solaar
+    may drive the LEDs — the 0x0621 onboard effect and 0x0620 per-zone
+    painting are both live LED control; off = Solaar releases the LEDs so
+    another app (e.g. OpenRGB) can drive them. The 0x0622 signature
+    effects are stored settings (startup/shutdown colors), not live
+    coloring, and stay editable either way.
     """
 
     name = "headset_led_control"
     label = _("LED Control")
-    description = _("Switch control of LED zones between device and Solaar")
+    description = _("Allow Solaar to control the headset LED zones.")
     feature = _F.HEADSET_RGB_HOSTMODE
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = common.NamedInts(Device=0, Solaar=1)
-    validator_class = settings_validator.ChoicesValidator
-    validator_options = {"choices": choices_universe}
+    # Two-state — render as a Gtk.Switch. Wire byte: 1 = Solaar (host) control,
+    # 0 = Device (firmware) control.
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 1, "false_value": 0}
+
+    def _pre_read(self, cached, key=None):
+        # Migrate legacy int values (0/1 from the old ChoicesValidator) to bool.
+        super()._pre_read(cached, key)
+        if isinstance(self._value, int) and not isinstance(self._value, bool):
+            self._value = self._value != 0
 
     @classmethod
     def build(cls, device):
@@ -2402,103 +2433,22 @@ class HeadsetLEDControl(settings.Setting):
         return super().build(device)
 
     def write(self, value, save=True):
-        # After switching to Solaar control, the firmware drops whatever
-        # colors we'd programmed — so reassert the saved Primary + per-zone
-        # overrides immediately. Otherwise the LEDs stay on whatever
-        # device-driven effect was last shown until the user edits a color.
+        # On re-claim the firmware drops our colors; reassert the dominant
+        # layer — per-zone when the onboard effect is Static, else the effect.
         result = super().write(value, save)
-        if result is not None and int(value) == 1 and self._device.online:
-            primary = _headset_primary_color(self._device)
-            zones = headset_rgb.discover_zones(self._device)
-            if zones:
-                zone_map = {int(z): primary for z in zones}
-                zone_map.update(_headset_per_zone_overrides(self._device) or {})
-                headset_rgb.write_zone_map(self._device, zone_map)
+        if result is not None and value and self._device.online:
+            if _headset_cluster_effect_is_fixed(self._device):
+                primary = _headset_primary_color(self._device)
+                zones = headset_rgb.discover_zones(self._device)
+                if zones:
+                    zone_map = {int(z): primary for z in zones}
+                    zone_map.update(_headset_per_zone_overrides(self._device) or {})
+                    headset_rgb.write_zone_map(self._device, zone_map)
+            else:
+                onboard = next((s for s in self._device.settings if s.name == "headset-onboard-effect"), None)
+                if onboard is not None and onboard._value is not None:
+                    onboard.write(onboard._value, save=False)
         return result
-
-
-class HeadsetLEDsPrimary(settings.Setting):
-    """Primary headset LED color, rendered as a GTK color picker.
-
-    Mirrors the `LEDZoneSetting` / `RGBEffectSetting` shape: a
-    `HeteroValidator` with a single "Static" effect whose only visible
-    field is the color. Write applies the chosen color across all zones
-    discovered at build time, then re-applies any per-zone overrides on
-    top so they aren't clobbered.
-
-    Read support is deliberately disabled — the feature exposes no "get
-    current color" function, so we rely on the persister.
-    """
-
-    name = "headset_leds_primary"
-    label = _("LEDs") + " " + _("Primary")
-    description = _(
-        "Set the primary color applied to every headset LED zone.\n" "LED Control needs to be set to Solaar to be effective."
-    )
-    feature = _F.HEADSET_RGB_HOSTMODE
-    persist = True
-    rw_options = {"read_fnid": None, "write_fnid": None}
-
-    # HeteroKeyControl renders exactly these fields; ID is hidden
-    # (`label=None`) but kept so setup_visibles can key off it.
-    color_field = {"name": hidpp20.LEDParam.color, "kind": settings.Kind.COLOR, "label": _("Color")}
-    possible_fields = [
-        {
-            "name": "ID",
-            "kind": settings.Kind.CHOICE,
-            "label": None,
-            "choices": [common.NamedInt(0x01, _("Static"))],
-        },
-        color_field,
-    ]
-    # HeteroKeyControl.setup_visibles looks up fields_map[effect_id][1] to
-    # decide which fields to show — we only expose the color.
-    fields_map = {0x01: [common.NamedInt(0x01, _("Static")), {hidpp20.LEDParam.color: 0}]}
-
-    @classmethod
-    def build(cls, device):
-        zones = headset_rgb.discover_zones(device)
-        if not zones:
-            return None
-        rw = settings.FeatureRW(cls.feature)
-        validator = settings_validator.HeteroValidator(
-            data_class=hidpp20.LEDEffectSetting,
-            options=[_HeadsetStaticEffectOption()],
-            readable=False,
-        )
-        return cls(device, rw, validator)
-
-    def read(self, cached=True):
-        # Feature 0x0620 doesn't expose a "current primary color" read —
-        # pull from the persister via _pre_read, fall back to white so
-        # the picker opens on a sane starting color.
-        self._pre_read(cached)
-        if self._value is not None:
-            return self._value
-        self._value = hidpp20.LEDEffectSetting(ID=common.NamedInt(0x01, _("Static")), color=0xFFFFFF)
-        return self._value
-
-    def write(self, value, save=True):
-        color = getattr(value, "color", None)
-        if color is None:
-            return None
-        device = self._device
-        if not device.online:
-            return None
-        zones = headset_rgb.discover_zones(device)
-        if not zones:
-            return None
-        primary = int(color)
-        zone_map = {int(z): primary for z in zones}
-        # Re-apply any non-"No change" per-zone overrides on top of the
-        # fresh Primary baseline so the user's explicit zone choices stick
-        # when they change the bulk color.
-        overrides = _headset_per_zone_overrides(device) or {}
-        zone_map.update(overrides)
-        if headset_rgb.write_zone_map(device, zone_map):
-            self.update(value, save)
-            return value
-        return None
 
 
 class HeadsetPerZoneLighting(settings.Settings):
@@ -2559,19 +2509,24 @@ class HeadsetPerZoneLighting(settings.Settings):
         if not device.online:
             return None
         self.update(map_, save)
+        # Gate the wire on both conditions, like keyboard per-key (needs
+        # rgb_control on + zone Static): LED Control on, cluster effect Fixed.
+        if not _headset_led_control_on(device) or not _headset_cluster_effect_is_fixed(device):
+            return map_  # value stored, skip the wire
         primary = _headset_primary_color(device)
         zone_map = self._resolve_zone_map(map_, primary)
         if not zone_map:
-            return None
-        if headset_rgb.write_zone_map(device, zone_map):
             return map_
-        return None
+        headset_rgb.write_zone_map(device, zone_map)
+        return map_
 
     def write_key_value(self, key, value, save=True):
         result = super().write_key_value(int(key), value, save)
         device = self._device
         if not device.online:
             return result
+        if not _headset_led_control_on(device) or not _headset_cluster_effect_is_fixed(device):
+            return result  # value stored, skip the wire
         try:
             v = int(value)
         except (TypeError, ValueError):
@@ -2808,11 +2763,12 @@ yaml.add_representer(_HeadsetOnboardEffect, _HeadsetOnboardEffect.to_yaml)
 
 
 class HeadsetOnboardEffect(settings.Setting):
-    """The firmware RGB effect a headset runs autonomously on its primary
-    lighting cluster (HEADSET_RGB_ONBOARD_EFFECTS, 0x0621). Build reads the
-    cluster's supported-effect set so the picker offers only those. Like the
-    signature/boot effects this is firmware-driven and not gated on host LED
-    control. Multi-cluster devices (none seen yet) drive only cluster 0."""
+    """The RGB effect the headset shows on its primary lighting cluster
+    (HEADSET_RGB_ONBOARD_EFFECTS, 0x0621). Build reads the cluster's
+    supported-effect set so the picker offers only those. This is live LED
+    control, like per-zone painting — gated on Solaar holding the LED-control
+    claim: writes are skipped and the row greys out when the claim is
+    released. Multi-cluster devices (none seen yet) drive only cluster 0."""
 
     name = "headset-onboard-effect"
     label = _("Onboard Effect")
@@ -2821,7 +2777,7 @@ class HeadsetOnboardEffect(settings.Setting):
 
     _CLUSTER = 0
     _ALL_EFFECTS = (
-        ("Fixed", 0),
+        ("Static", 0),
         ("Color Cycle", 1),
         ("Color Wave", 2),
         ("Breathing", 3),
@@ -2852,7 +2808,11 @@ class HeadsetOnboardEffect(settings.Setting):
             return reply[1:10]  # strip clusterIndex -> [effectId_u16, 7 param bytes]
 
         def write(self, device, data_bytes):
-            # data_bytes is [effectId_u16, 7 param bytes]; prepend clusterIndex
+            # data_bytes is [effectId_u16, 7 param bytes]; prepend clusterIndex.
+            # The onboard effect is live LED control — skip the wire when Solaar
+            # doesn't hold the claim; the value is still persisted.
+            if not _headset_led_control_on(device):
+                return data_bytes
             reply = device.feature_request(self.feature, 0x30, bytes([self._cluster]) + bytes(data_bytes))
             return data_bytes if reply is not None else None
 
@@ -4463,12 +4423,11 @@ SETTINGS: list[settings.Setting] = [
     HeadsetActiveEQPreset,
     HeadsetAdvancedEQ,
     HeadsetLEDControl,
-    HeadsetLEDsPrimary,
+    HeadsetOnboardEffect,
     HeadsetPerZoneLighting,
     HeadsetSignatureStartupEffect,
     HeadsetSignatureShutdownEffect,
     HeadsetSignaturePassiveEffect,
-    HeadsetOnboardEffect,
     *_LOGIVOICE_SETTINGS,
 ]
 
