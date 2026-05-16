@@ -1116,21 +1116,6 @@ def test_centurion_sub_device_hardware_info():
     assert product_id == 0x0AF7
 
 
-def test_centurion_kind_inference():
-    """Centurion device with 0x06xx audio features infers kind=headset."""
-    dev = fake_hidpp.Device("CENT_KIND", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
-    dev._centurion_sub_features = {
-        hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE,
-        hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE,
-    }
-
-    kind = dev._infer_kind_centurion()
-
-    from logitech_receiver import hidpp10_constants
-
-    assert kind == hidpp10_constants.DEVICE_KIND.headset
-
-
 # --- CenturionReceiver tests ---
 
 

@@ -403,7 +403,6 @@ class Device:
     gestures = device.Device.gestures
     __hash__ = device.Device.__hash__
     feature_request = device.Device.feature_request
-    _infer_kind_centurion = device.Device._infer_kind_centurion
 
     def __post_init__(self):
         self._name = self.name

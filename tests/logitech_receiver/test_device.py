@@ -108,6 +108,10 @@ def test_create_centurion_device():
     assert test_device.hidpp_long is True
     assert int(test_device.handle) in base._centurion_handles
 
+    # kind is seeded at construction, so the headset icon shows even offline
+    test_device.online = False
+    assert test_device.kind == "headset"
+
     # Clean up
     base._centurion_handles.discard(int(test_device.handle))
 
