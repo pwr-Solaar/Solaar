@@ -816,6 +816,13 @@ _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 # the zone index (rgb_zone_1, rgb_zone_2, ...).
 _SW_CONTROL_DEPENDENT_NAMES = ("rgb_idle_timeout", "rgb_idle_effect", "rgb_sleep_timeout")
 _SW_CONTROL_DEPENDENT_PREFIXES = ("rgb_zone_",)
+# headset_led_control = whether Solaar holds the live-coloring claim (off lets
+# another app drive the LEDs). The 0x0620 per-zone painting and the 0x0621
+# onboard effect are both live LED control, so both need the claim; per-zone
+# additionally needs the onboard effect on Static (the per-key analog of
+# needs-rgb_control + zone-Static). The 0x0622 signature effects are stored
+# settings (startup/shutdown colors) and stay ungated.
+_HEADSET_LED_DEPENDENT_NAMES = ("headset_per_zone_lighting", "headset-onboard-effect")
 
 
 def _sw_control_blocked(device):
@@ -837,6 +844,43 @@ def _sw_control_blocked(device):
         return False
     # Solaar = bool True or legacy int 3; everything else (False, 0, …) blocks.
     return value not in (True, 3)
+
+
+def _headset_led_blocked(device):
+    """True when the headset's LED Control is off (Device/firmware mode).
+    Reads setting._value first, then the persister; accepts the current bool
+    or a legacy int 0/1 from the old ChoicesValidator persister entries."""
+    persister = getattr(device, "persister", None)
+    if persister is None:
+        return False
+    value = None
+    for s in getattr(device, "settings", []) or []:
+        if s.name == "headset_led_control":
+            value = s._value
+            break
+    if value is None:
+        value = persister.get("headset_led_control")
+    if value is None:
+        return False
+    return value not in (True, 1)
+
+
+def _cluster_effect_blocks_perzone(device):
+    """True when the headset's 0x0621 onboard effect is not Fixed — a
+    non-Fixed cluster animation masks the per-zone buffer. Mirrors
+    `_zone_effect_blocks_perkey`. False when the device has no
+    onboard-effect setting (nothing to mask against)."""
+    persister = getattr(device, "persister", None)
+    value = None
+    for s in getattr(device, "settings", []) or []:
+        if s.name == "headset-onboard-effect":
+            value = s._value if s._value is not None else (persister.get(s.name) if persister else None)
+            break
+    else:
+        return False
+    if value is None:
+        return False
+    return int(getattr(value, "ID", 0)) != 0
 
 
 def _zone_effect_blocks_perkey(device):
@@ -877,6 +921,11 @@ def _gate_blocks(device, name):
         return _sw_control_blocked(device)
     if name == "per-key-lighting":
         return _sw_control_blocked(device) or _zone_effect_blocks_perkey(device)
+    if name in _HEADSET_LED_DEPENDENT_NAMES:
+        if _headset_led_blocked(device):
+            return True
+        # Per-zone painting additionally needs the onboard effect on Static.
+        return name == "headset_per_zone_lighting" and _cluster_effect_blocks_perzone(device)
     return False
 
 
@@ -895,6 +944,7 @@ def _apply_rgb_gates(device):
             name in _SW_CONTROL_DEPENDENT_NAMES
             or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES)
             or name == "per-key-lighting"
+            or name in _HEADSET_LED_DEPENDENT_NAMES
         ):
             _set_row_sensitive(device, name, not _gate_blocks(device, name))
 
@@ -940,10 +990,12 @@ def _change_click(button, sbox):
         perkey, has_paint = rgb_power.perkey_has_paint(device)
         if has_paint:
             _write_async(perkey, perkey._value, None)
-    # The lock icon on rgb_control, any zone, or per-key itself can change
-    # whether per-key is functional — re-evaluate the gate.
+    # The lock icon on rgb_control, any zone, per-key, or headset_led_control
+    # can change whether a dependent row is functional — re-evaluate the gate.
     name = sbox.setting.name
-    if name == "rgb_control" or name == "per-key-lighting" or name.startswith("rgb_zone_"):
+    if name in ("rgb_control", "per-key-lighting", "headset_led_control", "headset-onboard-effect") or name.startswith(
+        "rgb_zone_"
+    ):
         _apply_rgb_gates(sbox.setting._device)
     return True
 
@@ -1047,8 +1099,9 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True and can_function)
     _change_icon(sensitive, sbox._change_icon)
-    # rgb_control and rgb_zone_* state gate per-key sensitivity.
-    if name == "rgb_control" or name.startswith("rgb_zone_"):
+    # rgb_control / rgb_zone_* gate per-key; headset_led_control and the
+    # headset-onboard-effect gate the per-zone row — re-evaluate on a change.
+    if name in ("rgb_control", "headset_led_control", "headset-onboard-effect") or name.startswith("rgb_zone_"):
         _apply_rgb_gates(sbox.setting._device)
 
 
