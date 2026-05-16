@@ -130,6 +130,23 @@ def test_device_name(device_info, responses, expected_codename, expected_name, e
     assert test_device.kind == expected_kind
 
 
+def test_codename_uses_full_name():
+    """A direct-connected HID++ 2.0 device with no friendly name uses its full
+    live name as the codename instead of truncating it at the first space."""
+    test_device = device.create_device(LowLevelInterfaceFake(fake_hidpp.r_empty), di_CCCC)
+    test_device._protocol = 2.0
+    test_device.online = True
+
+    test_device._codename = None
+    test_device._name = "G502 X PLUS"
+    assert test_device.codename == "G502 X PLUS"
+
+    # a leading "Logitech" is still dropped
+    test_device._codename = None
+    test_device._name = "Logitech MX Master 3"
+    assert test_device.codename == "MX Master 3"
+
+
 @pytest.mark.parametrize(
     "device_info, responses, handle, _name, _codename, number, protocol, registers",
     zip(
