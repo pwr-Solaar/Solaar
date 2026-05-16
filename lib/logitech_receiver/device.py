@@ -250,11 +250,14 @@ class Device:
                 if not self.centurion:
                     self._codename = _hidpp20.get_friendly_name(self)
                 if not self._codename and self.name:
-                    if self.centurion:
-                        self._codename = self.name
+                    # Use the full live name; only drop a leading "Logitech".
+                    # Truncating at the first space mangled good names like
+                    # "G502 X PLUS" (direct USB connection, no friendly name).
+                    names = self.name.split(" ")
+                    if not self.centurion and len(names) > 1 and names[0] == "Logitech":
+                        self._codename = " ".join(names[1:])
                     else:
-                        names = self.name.split(" ")
-                        self._codename = names[1 if len(names) > 1 and names[0] == "Logitech" else 0]
+                        self._codename = self.name
             if not self._codename and self.receiver:
                 codename = self.receiver.device_codename(self.number)
                 if codename:
