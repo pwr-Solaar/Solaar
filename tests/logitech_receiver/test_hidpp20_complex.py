@@ -1213,6 +1213,21 @@ def test_centurion_receiver_container_with_device():
         recv[2]
 
 
+def test_centurion_receiver_child_device_kind_headset():
+    """notify_devices() seeds the headset child with kind=headset via pairing_info,
+    so the headphone icon shows even when the headset is powered off at startup."""
+    info = FakeCenturionDeviceInfo(product="PRO X 2 LIGHTSPEED")
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+    recv._pending = False
+    recv._dongle_features = []
+
+    recv.notify_devices()
+
+    child = recv[1]
+    child.online = False
+    assert child.kind == "headset"
+
+
 def test_centurion_receiver_enable_connection_notifications():
     """CenturionReceiver.enable_connection_notifications() returns False."""
     info = FakeCenturionDeviceInfo()

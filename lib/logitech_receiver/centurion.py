@@ -35,6 +35,7 @@ from solaar import configuration
 from . import base
 from . import exceptions
 from . import hidpp10
+from . import hidpp10_constants
 from .centurion_constants import CenturionCoreFeature
 from .common import Alert
 from .common import Battery
@@ -376,7 +377,7 @@ class CenturionReceiver:
         # Create child Device with receiver=self, number=1
         pairing_info = {
             "wpid": self.product_id,
-            "kind": None,
+            "kind": hidpp10_constants.DEVICE_KIND.headset,  # every Centurion-transport device so far is a headset
             "serial": None,
             "polling": None,
             "power_switch": None,
