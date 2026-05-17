@@ -2378,6 +2378,26 @@ def _headset_per_zone_overrides(device):
     return overrides
 
 
+def _headset_reassert_zone_layer(device):
+    """Re-paint the per-zone layer: every zone to the LEDs Primary color,
+    then the explicit per-zone overrides on top.
+
+    The headset firmware drops the host-painted per-zone buffer whenever a
+    cluster layer is (re)written — so any path that re-asserts a cluster
+    layer (LED Control re-claim, onboard Static color change) must call this
+    to restore the per-zone paint. No-op unless the onboard effect is Fixed;
+    a non-Static animation owns the LEDs and masks per-zone anyway.
+    """
+    if not _headset_cluster_effect_is_fixed(device):
+        return
+    zones = headset_rgb.discover_zones(device)
+    if not zones:
+        return
+    zone_map = {int(z): _headset_primary_color(device) for z in zones}
+    zone_map.update(_headset_per_zone_overrides(device) or {})
+    headset_rgb.write_zone_map(device, zone_map)
+
+
 def _headset_led_control_on(device):
     """True when the headset LED Control is on (Solaar drives the LEDs).
     When off, the firmware owns the LEDs and host color writes are
@@ -2438,12 +2458,7 @@ class HeadsetLEDControl(settings.Setting):
         result = super().write(value, save)
         if result is not None and value and self._device.online:
             if _headset_cluster_effect_is_fixed(self._device):
-                primary = _headset_primary_color(self._device)
-                zones = headset_rgb.discover_zones(self._device)
-                if zones:
-                    zone_map = {int(z): primary for z in zones}
-                    zone_map.update(_headset_per_zone_overrides(self._device) or {})
-                    headset_rgb.write_zone_map(self._device, zone_map)
+                _headset_reassert_zone_layer(self._device)
             else:
                 onboard = next((s for s in self._device.settings if s.name == "headset-onboard-effect"), None)
                 if onboard is not None and onboard._value is not None:
@@ -2909,6 +2924,17 @@ class HeadsetOnboardEffect(settings.Setting):
         ]
         setting.fields_map = {eid: (id_choices[eid], {field: 1 for field in cls._EFFECT_FIELDS[eid]}) for eid in supported}
         return setting
+
+    def write(self, value, save=True):
+        # Writing the 0x0621 cluster effect re-fills every LED uniformly; the
+        # firmware treats that as dropping the host per-zone buffer. After a
+        # Static write, re-overlay the per-zone paint so individually-colored
+        # zones survive a LEDs Primary change. _headset_reassert_zone_layer is
+        # a no-op for non-Static effects (the animation masks per-zone).
+        result = super().write(value, save)
+        if result is not None and self._device.online and _headset_led_control_on(self._device):
+            _headset_reassert_zone_layer(self._device)
+        return result
 
 
 # ----------------------------------------------------------------------------
