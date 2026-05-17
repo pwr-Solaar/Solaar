@@ -2635,6 +2635,15 @@ class _HeadsetSignatureEffectSetting(settings.Setting):
             return None
         if state is None or len(state) < 3:
             return None
+        # NVconfig-saved colors are default-DENY: signature effects persist to
+        # device storage, so a slot is shown only on models explicitly known-
+        # good. allowed is None on an unlisted model/slot (suppress the whole
+        # setting), else the set of fields the firmware honors. The G522
+        # passive slot is deliberately unlisted — its behavior is unknown.
+        # SOLAAR_EXPERIMENTAL unmasks everything.
+        allowed = device_quirks.headset_signature_allowed_fields(device, cls.effect_id)
+        if allowed is None:
+            return None
         # Log getSignatureEffectsInfo (fn 0) once per device — its byte layout
         # isn't pinned down, so slot discovery uses per-slot probing for now.
         if not getattr(device, "_headset_sig_info_logged", False):
@@ -2651,7 +2660,7 @@ class _HeadsetSignatureEffectSetting(settings.Setting):
         # speed stay visible in both states so toggling Off keeps them.
         id_field = {"name": "ID", "kind": settings.Kind.TOGGLE, "label": None, "on_value": 1, "off_value": 2}
         setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD, cls._SPEED_FIELD]
-        visible = {"color1": 1, "color2": 1, "speed": 1}
+        visible = {f: 1 for f in ("color1", "color2", "speed") if f in allowed}
         setting.fields_map = {
             int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
             int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
@@ -3642,6 +3651,23 @@ class _RgbBootEffectSetting(settings.Setting):
             return None  # device rejects this cap — gate the setting off
         if reply is None or len(reply) < 10:
             return None
+        # Register the firmware shutdown trigger on cap 0x0040 devices so the
+        # animation plays on Solaar exit. This depends only on the device
+        # having the cap (probe above), not on the UI control being shown —
+        # so it runs before the allowlist gate below. rgb_power.cleanup fires
+        # mode 0 at its end when _rgb_has_shutdown_cap is set. See
+        # solaar_shutdown_effect_trigger_spec.md.
+        if cls.cap_id == 0x0040:
+            device._rgb_has_shutdown_cap = True
+            if rgb_power.cleanup not in device.cleanups:
+                device.cleanups.append(rgb_power.cleanup)
+        # NVconfig-saved colors are default-DENY: the boot-effect setting is
+        # shown only on models explicitly known-good. allowed is None on an
+        # unlisted model/cap (suppress), or a (possibly empty) set of color
+        # fields the firmware honors. SOLAAR_EXPERIMENTAL unmasks everything.
+        allowed = device_quirks.rgb_effects_nvconfig_allowed_fields(device, cls.cap_id)
+        if allowed is None:
+            return None
         rw = cls.rw_class(cls.feature, cls.cap_id)
         validator = settings_validator.HeteroValidator(data_class=_RgbBootEffect, options=None)
         setting = cls(device, rw, validator)
@@ -3654,24 +3680,15 @@ class _RgbBootEffectSetting(settings.Setting):
         # them and writes still carry their values — the firmware may store
         # bytes it doesn't visibly use. fields_map controls UI visibility.
         setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD]
-        # Default-allow: show both color pickers unless this device model is
-        # known to ignore one or both. Most 0x8071 devices honor the bytes.
-        inert = device_quirks.get(device, "rgb_effects_nvconfig_colors_inert", {}).get(cls.cap_id, set())
-        visible = {n: o for n, o in (("color1", 1), ("color2", 4)) if n not in inert}
+        # An empty allowed set shows the On/Off toggle only (cap works, colors
+        # don't); a non-empty set adds the listed color pickers.
+        visible = {n: o for n, o in (("color1", 1), ("color2", 4)) if n in allowed}
         # Both On/Off map to the same visible field set so colors stay editable
         # when the effect is Off (pre-stages them for next enable).
         setting.fields_map = {
             int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
             int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
         }
-        # Register the firmware shutdown trigger on cap 0x0040 devices so the
-        # animation plays on Solaar exit. rgb_power.cleanup fires mode 0 at
-        # its end when _rgb_has_shutdown_cap is set. See
-        # solaar_shutdown_effect_trigger_spec.md.
-        if cls.cap_id == 0x0040:
-            device._rgb_has_shutdown_cap = True
-            if rgb_power.cleanup not in device.cleanups:
-                device.cleanups.append(rgb_power.cleanup)
         return setting
 
 
