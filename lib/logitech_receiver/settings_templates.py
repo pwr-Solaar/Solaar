@@ -2687,15 +2687,41 @@ class _HeadsetOnboardEffect:
     leading clusterIndex). intensity is a 0-100 percent; saturation is a raw
     0-255 byte (same as the keyboard RGB effects)."""
 
+    # Per-effect default parameter values, applied to any field the effect
+    # uses that would otherwise be 0. Picking an effect in the UI rebuilds
+    # this object from the (initially zeroed) field widgets, so without
+    # seeding the picker emits an all-zero frame: the firmware rejects
+    # ColorCycle/ColorWave outright and renders Breathing/DualColor/Static
+    # as black or zero-intensity. intensity 0 in particular reads as "LEDs
+    # off". Defaults confirmed against the LGHUB binary decode of 0x0621.
+    _DEFAULTS = {
+        0: {"color1": 0xFFFFFF},  # Static / Fixed
+        1: {"intensity": 100, "saturation": 255, "period": 5000},  # Color Cycle
+        2: {"intensity": 100, "saturation": 255, "period": 5000},  # Color Wave
+        3: {"color1": 0xFFFFFF, "intensity": 100, "period": 5000},  # Breathing
+        4: {"color1": 0xFFFFFF, "color2": 0x0000FF, "intensity": 100},  # Dual Color
+    }
+
+    # speed is accepted only to load configs persisted before the 0x0621
+    # decode (DualColor byte 6 was mislabelled "speed"; it is intensity).
     def __init__(self, ID=0, color1=0, color2=0, intensity=0, saturation=0, period=0, speed=0, direction=0):
         self.ID = int(ID)
         self.intensity = max(0, min(100, int(intensity)))
         self.saturation = max(0, min(255, int(saturation)))
         self.period = max(0, min(0xFFFF, int(period)))
-        self.speed = max(0, min(0xFF, int(speed)))
         self.direction = max(0, min(3, int(direction)))
         for k, v in (("color1", color1), ("color2", color2)):
             setattr(self, k, common.ColorInt(int(v) & 0xFFFFFF))
+        # Seed any field the selected effect uses that arrived as 0 so the
+        # picker never sends an all-zero (rejected / black) frame. An effect
+        # actually active on the device reports non-zero values, so reads
+        # via from_bytes are unaffected.
+        for field, default in self._DEFAULTS.get(self.ID, {}).items():
+            if not getattr(self, field):
+                if field.startswith("color"):
+                    setattr(self, field, common.ColorInt(default & 0xFFFFFF))
+                else:
+                    setattr(self, field, default)
 
     @classmethod
     def from_bytes(cls, data, options=None):
@@ -2712,13 +2738,14 @@ class _HeadsetOnboardEffect:
             kw["saturation"] = p[3]
             if eid == 2:
                 kw["direction"] = p[4]
-        elif eid == 3:  # Breathing
+        elif eid == 3:  # Breathing: R, G, B, intensity, period u16 BE
             kw["color1"] = (p[0] << 16) | (p[1] << 8) | p[2]
+            kw["intensity"] = p[3]
             kw["period"] = (p[4] << 8) | p[5]
-        elif eid == 4:  # DualColor
+        elif eid == 4:  # DualColor: R1, G1, B1, R2, G2, B2, intensity
             kw["color1"] = (p[0] << 16) | (p[1] << 8) | p[2]
             kw["color2"] = (p[3] << 16) | (p[4] << 8) | p[5]
-            kw["speed"] = p[6]
+            kw["intensity"] = p[6]
         return cls(**kw)
 
     def to_bytes(self, options=None):
@@ -2733,14 +2760,14 @@ class _HeadsetOnboardEffect:
             p[3] = self.saturation
             if eid == 2:
                 p[4] = self.direction
-        elif eid == 3:  # Breathing: R, G, B, CE[6]=0, period u16 BE
+        elif eid == 3:  # Breathing: R, G, B, intensity, period u16 BE, pad
             p[0], p[1], p[2] = (c1 >> 16) & 0xFF, (c1 >> 8) & 0xFF, c1 & 0xFF
+            p[3] = self.intensity
             p[4], p[5] = (self.period >> 8) & 0xFF, self.period & 0xFF
-        elif eid == 4:  # DualColor: R1,G1,B1, R2,G2,B2, speed
+        elif eid == 4:  # DualColor: R1,G1,B1, R2,G2,B2, intensity
             p[0], p[1], p[2] = (c1 >> 16) & 0xFF, (c1 >> 8) & 0xFF, c1 & 0xFF
             p[3], p[4], p[5] = (c2 >> 16) & 0xFF, (c2 >> 8) & 0xFF, c2 & 0xFF
-            p[6] = self.speed
-        # eid 5 Custom: no inline parameters
+            p[6] = self.intensity
         return bytes([(eid >> 8) & 0xFF, eid & 0xFF]) + bytes(p)
 
     def __eq__(self, other):
@@ -2776,21 +2803,21 @@ class HeadsetOnboardEffect(settings.Setting):
     feature = _F.HEADSET_RGB_ONBOARD_EFFECTS
 
     _CLUSTER = 0
+    # Custom (5) is intentionally absent — it is a stored card-reference
+    # effect, not a parametric one; it cannot be set via setRGBClusterEffect.
     _ALL_EFFECTS = (
         ("Static", 0),
         ("Color Cycle", 1),
         ("Color Wave", 2),
         ("Breathing", 3),
         ("Dual Color", 4),
-        ("Custom", 5),
     )
     _EFFECT_FIELDS = {
         0: ("color1",),
         1: ("intensity", "period", "saturation"),
         2: ("intensity", "period", "saturation", "direction"),
-        3: ("color1", "period"),
-        4: ("color1", "color2", "speed"),
-        5: (),
+        3: ("color1", "intensity", "period"),
+        4: ("color1", "color2", "intensity"),
     }
     _DIRECTIONS = common.NamedInts(**{"Horizontal": 0, "Vertical": 1, "Reverse Horizontal": 2, "Reverse Vertical": 3})
 
@@ -2831,12 +2858,13 @@ class HeadsetOnboardEffect(settings.Setting):
             if off + 2 > len(info):
                 break
             eid = (info[off] << 8) | info[off + 1]
-            if 0 <= eid <= 5 and eid not in supported:
+            if 0 <= eid <= 4 and eid not in supported:
                 supported.append(eid)
         if not supported:
-            # Unparseable reply — offer all six; the firmware rejects any it
-            # doesn't support. See the 0x0621 fallback note in protocol RE.
-            supported = [0, 1, 2, 3, 4, 5]
+            # Unparseable reply — offer the five parametric effects; the
+            # firmware rejects any it doesn't support. Custom (5) is never
+            # offered here. See the 0x0621 fallback note in protocol RE.
+            supported = [0, 1, 2, 3, 4]
         rw = cls.rw_class(cls.feature, cls._CLUSTER)
         validator = settings_validator.HeteroValidator(data_class=_HeadsetOnboardEffect, options=None)
         setting = cls(device, rw, validator)
@@ -2848,8 +2876,14 @@ class HeadsetOnboardEffect(settings.Setting):
             {"name": "color2", "kind": settings.Kind.COLOR, "label": _("Secondary")},
             {"name": "intensity", "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100},
             {"name": "saturation", "kind": settings.Kind.RANGE, "label": _("Saturation"), "min": 0, "max": 255},
-            {"name": "period", "kind": settings.Kind.RANGE, "label": _("Period"), "min": 0, "max": 0xFFFF},
-            {"name": "speed", "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 0xFF},
+            {
+                "name": "period",
+                "kind": settings.Kind.RANGE,
+                "label": _("Period"),
+                "min": 1000,
+                "max": 20000,
+                "display_seconds": True,
+            },
             {"name": "direction", "kind": settings.Kind.CHOICE, "label": _("Direction"), "choices": cls._DIRECTIONS},
         ]
         setting.fields_map = {eid: (id_choices[eid], {field: 1 for field in cls._EFFECT_FIELDS[eid]}) for eid in supported}
