@@ -2662,21 +2662,33 @@ class _HeadsetSignatureEffectSetting(settings.Setting):
 class HeadsetSignatureStartupEffect(_HeadsetSignatureEffectSetting):
     name = "headset-signature-startup"
     label = _("Startup Effect")
-    description = _("Firmware lighting effect played when the headset powers on or wakes.")
+    description = (
+        _("Firmware lighting effect played when the headset powers on or wakes.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100.")
+    )
     effect_id = 0
 
 
 class HeadsetSignatureShutdownEffect(_HeadsetSignatureEffectSetting):
     name = "headset-signature-shutdown"
     label = _("Shutdown Effect")
-    description = _("Firmware lighting effect played when the headset powers off or sleeps.")
+    description = (
+        _("Firmware lighting effect played when the headset powers off or sleeps.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100.")
+    )
     effect_id = 1
 
 
 class HeadsetSignaturePassiveEffect(_HeadsetSignatureEffectSetting):
     name = "headset-signature-passive"
     label = _("Passive Effect")
-    description = _("Firmware lighting effect played while the headset is idle.")
+    description = (
+        _("Firmware lighting effect played while the headset is idle.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 75.")
+    )
     effect_id = 2
 
 
@@ -3666,9 +3678,13 @@ class _RgbBootEffectSetting(settings.Setting):
 class RgbStartupAnimation(_RgbBootEffectSetting):
     name = "rgb_startup_animation"
     label = _("Startup Animation")
-    description = _(
-        "Firmware-played animation when the keyboard wakes from deep sleep or powers on.\n"
-        "Setting persists on the device (non-volatile)."
+    description = (
+        _(
+            "Firmware-played animation when the keyboard wakes from deep sleep or powers on.\n"
+            "Setting persists on the device (non-volatile)."
+        )
+        + "\n"
+        + _("Device default: Primary #FF0081, Secondary #80AAFF.")
     )
     cap_id = 0x0001
 
@@ -3676,8 +3692,10 @@ class RgbStartupAnimation(_RgbBootEffectSetting):
 class RgbShutdownAnimation(_RgbBootEffectSetting):
     name = "rgb_shutdown_animation"
     label = _("Shutdown Animation")
-    description = _(
-        "Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile)."
+    description = (
+        _("Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile).")
+        + "\n"
+        + _("Device default: Primary #FF0081, Secondary #80AAFF.")
     )
     cap_id = 0x0040
 
