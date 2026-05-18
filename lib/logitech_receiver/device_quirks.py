@@ -3,7 +3,7 @@
 Keyed by ``device.modelId``. For normal HID++ devices that is the string
 Logitech composes by concatenating every transport PID (btid + btleid + wpid
 + usbid) — one entry covers the model on any transport. For Centurion
-headsets it is the firmware-stable model byte (G522 ``"33"``, G325 ``"45"``);
+headsets it is the firmware-stable model byte (G522 ``"32"``, G325 ``"44"``);
 see ``device._get_ids_centurion``.
 
 Two postures, by feature class:
@@ -56,12 +56,13 @@ RGB_EFFECTS_NVCONFIG_ALLOWED: dict[str, dict[int, set[str]]] = {
 # fields the firmware is KNOWN to honor. An unlisted effect_id or model
 # suppresses that signature-effect setting entirely.
 HEADSET_SIGNATURE_EFFECTS_ALLOWED: dict[str, dict[int, set[str]]] = {
-    # G522 LIGHTSPEED (Centurion model byte 0x33). Verified against user
+    # G522 LIGHTSPEED (Centurion model byte 0x32, from DeviceInfo func 0;
+    # confirmed against multiple diagnostic logs). Verified against user
     # reports: startup honors only the primary color (secondary unused, speed
     # has no effect); shutdown honors both colors (speed has no effect). The
     # passive slot (effect_id 2) is omitted — its behavior is not understood,
     # so the whole passive setting is suppressed.
-    "33": {
+    "32": {
         0: {"color1"},
         1: {"color1", "color2"},
     },

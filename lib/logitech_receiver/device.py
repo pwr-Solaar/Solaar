@@ -310,8 +310,8 @@ class Device:
         hw_info = _hidpp20.get_hardware_info_centurion(self)
         if hw_info:
             model_id, hw_revision, product_id = hw_info
-            # modelId is the stable per-model disambiguator (G522 0x33, G325
-            # 0x45). productId is shared across the headset family and varies
+            # modelId is the stable per-model disambiguator (G522 0x32, G325
+            # 0x44). productId is shared across the headset family and varies
             # by firmware (G522 0x0508 -> 0x0509), so it must NOT key modelId.
             self._modelId = f"{model_id:02X}"
             self._tid_map = {"usbid": f"{product_id:04X}"}
