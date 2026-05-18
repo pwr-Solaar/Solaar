@@ -2723,13 +2723,12 @@ class _HeadsetOnboardEffect:
     leading clusterIndex). intensity is a 0-100 percent; saturation is a raw
     0-255 byte (same as the keyboard RGB effects)."""
 
-    # Per-effect default parameter values, applied to any field the effect
-    # uses that would otherwise be 0. Picking an effect in the UI rebuilds
-    # this object from the (initially zeroed) field widgets, so without
-    # seeding the picker emits an all-zero frame: the firmware rejects
-    # ColorCycle/ColorWave outright and renders Breathing/DualColor/Static
-    # as black or zero-intensity. intensity 0 in particular reads as "LEDs
-    # off". Defaults confirmed against the LGHUB binary decode of 0x0621.
+    # Per-effect default parameter values, applied only to fields left
+    # unset (passed as None). An explicit value is always honored — passing
+    # 0 means the caller chose 0, e.g. a black Static color1 turns the LEDs
+    # off. Only a genuinely absent field falls back to the default (a fresh
+    # effect-pick seeds its RANGE widgets UI-side via _apply_id_defaults).
+    # Defaults confirmed against the LGHUB binary decode of 0x0621.
     _DEFAULTS = {
         0: {"color1": 0xFFFFFF},  # Static / Fixed
         1: {"intensity": 100, "saturation": 255, "period": 5000},  # Color Cycle
@@ -2740,24 +2739,21 @@ class _HeadsetOnboardEffect:
 
     # speed is accepted only to load configs persisted before the 0x0621
     # decode (DualColor byte 6 was mislabelled "speed"; it is intensity).
-    def __init__(self, ID=0, color1=0, color2=0, intensity=0, saturation=0, period=0, speed=0, direction=0):
+    def __init__(self, ID=0, color1=None, color2=None, intensity=None, saturation=None, period=None, speed=0, direction=None):
         self.ID = int(ID)
+        defaults = self._DEFAULTS.get(self.ID, {})
+        color1 = defaults.get("color1", 0) if color1 is None else color1
+        color2 = defaults.get("color2", 0) if color2 is None else color2
+        intensity = defaults.get("intensity", 0) if intensity is None else intensity
+        saturation = defaults.get("saturation", 0) if saturation is None else saturation
+        period = defaults.get("period", 0) if period is None else period
+        direction = defaults.get("direction", 0) if direction is None else direction
         self.intensity = max(0, min(100, int(intensity)))
         self.saturation = max(0, min(255, int(saturation)))
         self.period = max(0, min(0xFFFF, int(period)))
         self.direction = max(0, min(3, int(direction)))
         for k, v in (("color1", color1), ("color2", color2)):
             setattr(self, k, common.ColorInt(int(v) & 0xFFFFFF))
-        # Seed any field the selected effect uses that arrived as 0 so the
-        # picker never sends an all-zero (rejected / black) frame. An effect
-        # actually active on the device reports non-zero values, so reads
-        # via from_bytes are unaffected.
-        for field, default in self._DEFAULTS.get(self.ID, {}).items():
-            if not getattr(self, field):
-                if field.startswith("color"):
-                    setattr(self, field, common.ColorInt(default & 0xFFFFFF))
-                else:
-                    setattr(self, field, default)
 
     @classmethod
     def from_bytes(cls, data, options=None):
