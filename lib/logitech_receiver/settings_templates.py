@@ -37,9 +37,12 @@ from . import desktop_notifications
 from . import device_quirks
 from . import diversion
 from . import exceptions
+from . import headset_rgb
 from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
+from . import logivoice
+from . import rgb_effects_probe
 from . import rgb_power
 from . import settings
 from . import settings_new
@@ -1633,6 +1636,17 @@ class HeadsetEcoMode(settings.Setting):
     feature = _F.HEADSET_BATTERY_SAVER
     validator_class = settings_validator.BooleanValidator
 
+    @classmethod
+    def build(cls, device):
+        # G522 firmware rejects no-op writes with device-specific NACK 0x0B.
+        # BooleanValidator.prepare_write already skips writes that match the
+        # current value when needs_current_value=True; default-mask (0xFF)
+        # BooleanValidators get needs_current_value=False, so flip it here.
+        rw = settings.FeatureRW(cls.feature)
+        validator = settings_validator.BooleanValidator()
+        validator.needs_current_value = True
+        return cls(device, rw, validator)
+
 
 class HeadsetDoNotDisturb(settings.Setting):
     name = "headset-do-not-disturb"
@@ -1648,6 +1662,18 @@ class HeadsetMicMute(settings.Setting):
     description = _("Mute the microphone.")
     feature = _F.HEADSET_MIC_MUTE
     validator_class = settings_validator.BooleanValidator
+    # HEADSET_MIC_MUTE (0x0601) doesn't follow the typical fn 0 GetState /
+    # fn 1 SetState pattern that BooleanValidator defaults to. Function
+    # layout (confirmed via G HUB pcap on G522):
+    #   fn 0 — physical-mute-switch state-change events from the device
+    #   fn 1 — state-change events emitted as the device's echo of a
+    #          host-driven SetState; also serves as the host-callable
+    #          GetState read
+    #   fn 2 — host-callable SetState (single byte: 0=unmuted, 1=muted)
+    # The standard fn 0/1 write path returns 0x0A UNSUPPORTED. State-change
+    # events from both fn 0 and fn 1 are handled by _process_feature_notification
+    # so the toggle reflects physical mute presses too.
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
 class HeadsetMicSNR(settings.Setting):
@@ -1682,9 +1708,34 @@ class HeadsetSidetone(settings.Setting):
     description = _("Sidetone level (0 = off, 100 = max).")
     feature = _F.HEADSET_AUDIO_SIDETONE
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
-    validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 100
+
+    class validator_class(settings_validator.RangeValidator):
+        """UI value is 0-100 percent; the wire level is a gain-step index
+        0..N-1. N (gain_steps) comes from getSidetoneLevelSettings on V2
+        devices, or defaults to 101 on V1 — which makes step == percent, so
+        V1 round-trips unchanged. The firmware silently ignores out-of-range
+        step writes, so writes are clamped to N-1."""
+
+        gain_steps = 101
+
+        def _level_bytes(self, raw):
+            return common.bytes2int(raw[self.read_skip_byte_count : self.read_skip_byte_count + self._byte_count])
+
+        def validate_read(self, reply_bytes):
+            level = self._level_bytes(reply_bytes)
+            steps = self.gain_steps
+            return int(round(level * 100 / (steps - 1))) if steps > 1 else level
+
+        def prepare_write(self, new_value, current_value=None):
+            steps = self.gain_steps
+            level = int(round((steps - 1) * new_value / 100)) if steps > 1 else new_value
+            level = max(0, min((steps - 1) if steps > 1 else self.max_value, level))
+            to_write = self.write_prefix_bytes + common.int2bytes(level, self._byte_count)
+            if current_value is not None and self._level_bytes(current_value) == level:
+                return None
+            return to_write
 
     @classmethod
     def build(cls, device):
@@ -1695,9 +1746,23 @@ class HeadsetSidetone(settings.Setting):
             skip, prefix = 3, b"\x01\xff"
         else:
             skip, prefix = 2, b"\x01"
+        # V2 getSidetoneLevelSettings (fn 2) reply byte 2 is the gain-step count N.
+        # V1 has no such call — N stays 101 (step == percent). Raw reply still
+        # logged at debug so a G HUB setpoint correlation can refine the layout.
+        gain_steps = 101
+        if version > 1:
+            try:
+                reply = device.feature_request(cls.feature, 0x20)
+            except Exception as e:
+                reply = None
+                logger.debug("%s: getSidetoneLevelSettings probe raised %s", cls.name, e)
+            logger.debug("%s: getSidetoneLevelSettings raw reply: %s", cls.name, reply.hex() if reply else reply)
+            if reply is not None and len(reply) >= 3 and reply[2] > 1:
+                gain_steps = reply[2]
         rw = settings.FeatureRW(cls.feature, **cls.rw_options)
         validator = cls.validator_class.build(cls, device, read_skip_byte_count=skip, write_prefix_bytes=prefix)
         if validator:
+            validator.gain_steps = gain_steps
             return cls(device, rw, validator)
 
 
@@ -1708,9 +1773,50 @@ class HeadsetMicGain(settings.Setting):
     feature = _F.HEADSET_MIC_GAIN
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = settings_validator.RangeValidator
+    # Fallback range covers int8; build() overrides with device-reported bounds
+    # from GetInfo (fn 0) so SetMicGain doesn't get device-specific
+    # out-of-range NACK (error 0x0B) on devices that use a small signed range
+    # (e.g. G522 reports a narrow window like -12..+12).
     min_value = -128
     max_value = 127
     validator_options = {"byte_count": 1, "signed": True}
+
+    @classmethod
+    def build(cls, device):
+        # GetInfo (function 0) returns [min_gain (int8), max_gain (int8)].
+        # Query once at build time so the slider range reflects the device's
+        # actual supported range rather than a generic int8 window.
+        try:
+            info = device.feature_request(cls.feature, 0x00)
+        except Exception as e:
+            logger.debug("HeadsetMicGain: GetInfo raised %s, using fallback int8 range", e)
+            info = None
+        if info and len(info) >= 2:
+            min_gain = struct.unpack("b", bytes([info[0]]))[0]
+            max_gain = struct.unpack("b", bytes([info[1]]))[0]
+            if max_gain <= min_gain:  # sanity — fall back to class defaults
+                logger.debug(
+                    "HeadsetMicGain: GetInfo returned nonsense range [%d, %d] (hex=%s), using fallback int8 range",
+                    min_gain,
+                    max_gain,
+                    info.hex(),
+                )
+                min_gain, max_gain = cls.min_value, cls.max_value
+            elif logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "HeadsetMicGain: device reports gain range [%d, %d]",
+                    min_gain,
+                    max_gain,
+                )
+        else:
+            logger.debug(
+                "HeadsetMicGain: GetInfo returned %s, using fallback int8 range",
+                info.hex() if info else info,
+            )
+            min_gain, max_gain = cls.min_value, cls.max_value
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=min_gain, max_value=max_gain, byte_count=1, signed=True)
+        return cls(device, rw, validator)
 
 
 class HeadsetMixBalance(settings.Setting):
@@ -1724,16 +1830,70 @@ class HeadsetMixBalance(settings.Setting):
     validator_options = {"byte_count": 1}
 
 
+class _AutoSleepRangeValidator(settings_validator.RangeValidator):
+    """Single-slot read-modify-write validator for HID++ 0x0108 AutoSleep.
+
+    0x0108 is not a single timer: V3 has two uint8 bytes, V4+ has three. Each
+    byte is an independent timer slot. Solaar exposes only the user-facing slot
+    today and preserves the others via RMW; writing zero into the other slots
+    causes the firmware to reject the request.
+
+    Wire byte layout per feature version:
+      V<3: [timer]
+      V3:  [reserved, timer]            — preserve byte[0]
+      V4+: [timer_a, timer_b, timer_c]  — preserve byte[1], byte[2]
+    """
+
+    def __init__(self, byte_count, **kwargs):
+        super().__init__(byte_count=byte_count, **kwargs)
+        # V3 sources the user-controllable timer from byte[1] per LGHUB.
+        self._slot = 1 if byte_count == 2 else 0
+
+    def validate_read(self, reply_bytes):
+        if len(reply_bytes) <= self._slot:
+            raise AssertionError(
+                f"{self.__class__.__name__}: read returned {len(reply_bytes)} bytes, expected ≥ {self._slot + 1}"
+            )
+        return reply_bytes[self._slot]
+
+    def prepare_write(self, new_value, current_value=None):
+        if new_value < self.min_value or new_value > self.max_value:
+            raise ValueError(f"invalid choice {new_value!r}")
+        if current_value is None:
+            payload = bytearray(self._byte_count)
+        else:
+            payload = bytearray(current_value[: self._byte_count])
+            if len(payload) < self._byte_count:
+                payload.extend(b"\x00" * (self._byte_count - len(payload)))
+        if payload[self._slot] == new_value:
+            return None
+        payload[self._slot] = new_value
+        return bytes(payload)
+
+
 class HeadsetAutoSleep(settings.Setting):
     name = "headset-auto-sleep"
     label = _("Auto Sleep Timeout")
     description = _("Idle time in minutes before the headset enters sleep mode (0 = disabled).")
     feature = _F.CENTURION_AUTO_SLEEP
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
-    validator_class = settings_validator.RangeValidator
+    validator_class = _AutoSleepRangeValidator
     min_value = 0
-    max_value = 255
+    max_value = 255  # uint8 slot
     validator_options = {"byte_count": 1}
+
+    @classmethod
+    def build(cls, device):
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version >= 4:
+            byte_count = 3
+        elif version >= 3:
+            byte_count = 2
+        else:
+            byte_count = 1
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = _AutoSleepRangeValidator(min_value=0, max_value=cls.max_value, byte_count=byte_count)
+        return cls(device, rw, validator)
 
 
 class HeadsetOnboardEQ(settings.RangeFieldSetting):
@@ -1751,10 +1911,19 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
         def build(cls, setting_class, device):
             info = hidpp20.get_onboard_eq_info(device)
             if not info:
+                logger.debug("HeadsetOnboardEQ.build: getEQInfo failed, no panel will be built")
                 return None
             _has_hw_eq, num_bands = info
             bands = hidpp20.get_onboard_eq_params(device, slot=0x00)
-            if not bands or len(bands) != num_bands:
+            if not bands:
+                logger.debug("HeadsetOnboardEQ.build: getEQParameters returned no bands, no panel will be built")
+                return None
+            if len(bands) != num_bands:
+                logger.debug(
+                    "HeadsetOnboardEQ.build: band count mismatch — EQInfo=%d getEQParameters=%d; skipping",
+                    num_bands,
+                    len(bands),
+                )
                 return None
             keys = common.NamedInts()
             for i, (freq, _gain, _q) in enumerate(bands):
@@ -1762,6 +1931,7 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
             v = cls(keys, min_value=-12, max_value=12, count=num_bands, byte_count=1)
             v._band_freqs = [freq for freq, _g, _q in bands]
             v._band_qs = [q for _f, _g, q in bands]
+            logger.debug("HeadsetOnboardEQ.build: panel built with %d band(s)", num_bands)
             return v
 
         def validate_read(self, reply_bytes):
@@ -1808,6 +1978,1155 @@ class HeadsetOnboardEQ(settings.RangeFieldSetting):
             except Exception:
                 logger.warning("HeadsetOnboardEQ: failed to persist EQ to slot 0x80")
         return result
+
+
+class HeadsetAdvancedEQ(settings.RangeFieldSetting):
+    """Per-band gain editor for the headset's active AdvancedParaEQ (0x020D) slot.
+
+    V2 wire format (pcap-verified against G522 LIGHTSPEED):
+      getCustomEQ  response: [dir_echo] + N × [freq_hi, freq_lo, filter, gain_hi, gain_lo]
+      setCustomEQ  request:  [dir, slot, pad=0] + N × [freq_hi, freq_lo, filter, gain_hi, gain_lo]
+    Gain is offset-binary against gain_min..gain_max with `gain_steps`
+    discrete positions (raw=120 ≈ 0 dB on G522's [-6, +6] / 241-step
+    grid). Frequency and filter type are read at build time and not
+    user-editable today — UI only exposes per-band gain.
+    """
+
+    name = "headset-advanced-eq"
+    label = _("Headset Advanced EQ")
+    description = _("Per-band gain for the headset's active parametric EQ.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    keys_universe = []
+
+    class rw_class(settings.FeatureRW):
+        """get/setCustomEQ both take [direction, slot]; on writes the
+        device additionally expects a single 0x00 padding byte before
+        the band payload. The slot is the *active* EQ preset, which the
+        device may have switched while we weren't looking — re-query it
+        on every read and write instead of caching at build time.
+        Direction is hardcoded to 0 (playback); mic-side EQ isn't
+        exposed yet.
+        """
+
+        def read(self, device, data_bytes=b""):
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0)
+            self.read_prefix = bytes([0, active_slot if active_slot is not None else 0])
+            return super().read(device, data_bytes)
+
+        def write(self, device, data_bytes):
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0)
+            slot = active_slot if active_slot is not None else 0
+            write_bytes = bytes([0, slot, 0]) + data_bytes
+            return device.feature_request(self.feature, self.write_fnid, write_bytes)
+
+    class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
+        @classmethod
+        def build(cls, setting_class, device):
+            info = hidpp20.get_advanced_eq_info(device)
+            if not info:
+                logger.debug("HeadsetAdvancedEQ.build: getEQInfos failed, no panel will be built")
+                return None
+            device._advanced_eq_info = info
+            version = info["version"]
+            gain_min = info["gain_min_db"]
+            gain_max = info["gain_max_db"]
+            step_db = info["step_db"]
+
+            active_slot = hidpp20.get_advanced_eq_active_slot(device, direction=0) or 0
+            bands = hidpp20.get_advanced_eq_params(device, direction=0, slot=active_slot)
+            if not bands:
+                logger.debug("HeadsetAdvancedEQ.build: getCustomEQ returned no bands, no panel will be built")
+                return None
+            band_count = len(bands)
+            expected = info.get("band_count")
+            if expected is not None and expected != band_count:
+                logger.debug(
+                    "HeadsetAdvancedEQ.build: V%d band count mismatch — EQInfos=%d getCustomEQ=%d; trusting getCustomEQ",
+                    version,
+                    expected,
+                    band_count,
+                )
+
+            keys = common.NamedInts()
+            for i, (filter_type, freq_hz, _gain_db) in enumerate(bands):
+                if filter_type == hidpp20.FILTER_TYPE_HP:
+                    keys[i] = "HP " + str(freq_hz) + _("Hz")
+                else:
+                    keys[i] = str(freq_hz) + _("Hz")
+            v = cls(
+                keys,
+                min_value=int(round(gain_min)),
+                max_value=int(round(gain_max)),
+                count=band_count,
+                byte_count=1,
+            )
+            v._version = version
+            v._step_db = step_db
+            v._gain_min = gain_min
+            v._gain_max = gain_max
+            v._gain_steps = info.get("gain_steps", 241)
+            v._band_types = [band[0] for band in bands]
+            v._band_freqs = [band[1] for band in bands]
+            v._active_slot = active_slot
+            logger.debug(
+                "HeadsetAdvancedEQ.build: panel built V%d with %d band(s), slot=%d, range=[%d,%d], step_db=%.4f",
+                version,
+                band_count,
+                active_slot,
+                gain_min,
+                gain_max,
+                step_db,
+            )
+            # One-shot per-slot probe — logs band data for each slot the
+            # firmware actually honors and caches the working-slot list on
+            # `device._advanced_eq_working_slots`. Cheap if HeadsetActiveEQPreset
+            # already populated the cache (it usually has at this point);
+            # otherwise this is the first-time probe.
+            if version >= 2:
+                try:
+                    hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
+                except Exception as e:
+                    logger.debug("HeadsetAdvancedEQ.build: preset corpus probe failed: %s", e)
+            return v
+
+        def validate_read(self, reply_bytes):
+            if reply_bytes is None:
+                return {}
+            version = getattr(self, "_version", 0)
+            if version >= 2:
+                info = {
+                    "gain_min_db": getattr(self, "_gain_min", -6),
+                    "gain_max_db": getattr(self, "_gain_max", 6),
+                    "gain_steps": getattr(self, "_gain_steps", 241),
+                    "step_db": getattr(self, "_step_db", 0.05),
+                }
+                bands = hidpp20.parse_v2_bands(reply_bytes, info)
+                if bands is None:
+                    return {}
+                result = {}
+                for i, (filter_type, freq_hz, gain_db) in enumerate(bands):
+                    if i >= self.count:
+                        break
+                    result[i] = int(round(gain_db))
+                    if hasattr(self, "_band_types") and i < len(self._band_types):
+                        self._band_types[i] = filter_type
+                    if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                        self._band_freqs[i] = freq_hz
+                return result
+            # V0/V1: 3-byte stride.
+            result = {}
+            offset = 0
+            i = 0
+            while offset + 3 <= len(reply_bytes) and i < self.count:
+                freq = struct.unpack(">H", reply_bytes[offset : offset + 2])[0]
+                if freq == 0:
+                    break
+                gain = struct.unpack("b", bytes([reply_bytes[offset + 2]]))[0]
+                result[i] = gain
+                if hasattr(self, "_band_freqs") and i < len(self._band_freqs):
+                    self._band_freqs[i] = freq
+                offset += 3
+                i += 1
+            return result
+
+        def prepare_write(self, new_values):
+            """Encode N × [freq_hi, freq_lo, filter, gain_hi, gain_lo].
+
+            new_values is {band_idx: int_gain_dB}. freq and filter type
+            come from the cache captured at build time; gain is mapped
+            from integer dB back to the device's offset-binary raw u16
+            against the [_gain_min, _gain_max] / _gain_steps grid.
+            """
+            version = getattr(self, "_version", 0)
+            if version < 2:
+                return None
+            gain_min = getattr(self, "_gain_min", -6)
+            gain_max = getattr(self, "_gain_max", 6)
+            steps = getattr(self, "_gain_steps", 241)
+            freqs = getattr(self, "_band_freqs", None) or []
+            types = getattr(self, "_band_types", None) or []
+            if not freqs or not types:
+                return None
+            span = gain_max - gain_min
+            payload = bytearray()
+            for i in range(self.count):
+                freq = freqs[i] if i < len(freqs) else 0
+                filt = types[i] if i < len(types) else hidpp20.FILTER_TYPE_PEAKING_G522
+                gain_db = new_values.get(i, 0)
+                if steps > 1 and span > 0:
+                    raw = int(round((gain_db - gain_min) / span * (steps - 1)))
+                else:
+                    raw = 0
+                raw = max(0, min(steps - 1, raw))
+                payload += bytes([(freq >> 8) & 0xFF, freq & 0xFF, filt & 0xFF, (raw >> 8) & 0xFF, raw & 0xFF])
+            return bytes(payload)
+
+    def write(self, map, save=True):
+        # RangeFieldSetting.write treats an empty-bytes reply (`not reply`)
+        # as failure, but setCustomEQ returns an empty ACK on success.
+        # Override to treat only `reply is None` (transport error/timeout)
+        # as failure.
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        assert map is not None
+        if self._device.online:
+            self.update(map, save)
+            data_bytes = self._validator.prepare_write(self._value)
+            if data_bytes is not None:
+                reply = self._rw.write(self._device, data_bytes)
+                if reply is None:
+                    return None
+            return map
+
+    def _is_valid_persisted_value(self, value):
+        """True iff `value` is a well-formed band-gain dict for the current
+        validator: a dict with exactly `count` int keys covering [0, count),
+        each mapped to an int within [min_value, max_value]. Used to detect
+        stale persister entries from older Solaar builds whose V2 parser had
+        a different stride/header (commits prior to 7c73c888) and produced
+        partial dicts or out-of-range gain values."""
+        validator = getattr(self, "_validator", None)
+        if not isinstance(value, dict) or validator is None:
+            return False
+        count = getattr(validator, "count", 0)
+        if count == 0 or len(value) != count:
+            return False
+        mn = getattr(validator, "min_value", None)
+        mx = getattr(validator, "max_value", None)
+        if mn is None or mx is None:
+            return False
+        for i in range(count):
+            if i not in value:
+                return False
+            v = value[i]
+            if not isinstance(v, int) or v < mn or v > mx:
+                return False
+        return True
+
+    def apply(self):
+        """Validate the persisted EQ against the live device state before
+        pushing. Setting.apply uses cached=True so the persister is treated
+        as authoritative — that's wrong here because (a) the EQ can be
+        changed externally (LGHUB, onboard preset buttons) and (b) older
+        Solaar V2 parsers stored partial/out-of-range dicts that
+        prepare_write silently fills with 0 dB, overwriting user EQ with
+        zeros. Strategy: if the persisted value is well-formed, apply it
+        normally (matches existing Solaar semantics). If it's corrupt,
+        treat the device's live read as truth and reseed the persister
+        from it without writing back. If both are invalid, skip this
+        setting only — apply_all_settings keeps going."""
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
+        if not self._device.online:
+            return
+        persister = getattr(self._device, "persister", None)
+        persisted = persister.get(self.name) if persister else None
+        persisted_valid = self._is_valid_persisted_value(persisted)
+        try:
+            live = self.read(cached=False)
+        except Exception as e:
+            logger.warning("%s: live EQ read failed during apply (%s): %s", self.name, self._device, repr(e))
+            live = None
+        live_valid = self._is_valid_persisted_value(live)
+        if persisted_valid:
+            try:
+                self.write(persisted, save=False)
+            except Exception as e:
+                logger.warning("%s: error applying %s (%s): %s", self.name, persisted, self._device, repr(e))
+        elif live_valid:
+            logger.info(
+                "%s: rejecting stale persister value %r; reseeding from device live %r",
+                self.name,
+                persisted,
+                live,
+            )
+            self._value = live
+            if persister is not None:
+                persister[self.name] = live
+        else:
+            logger.warning(
+                "%s: both persisted (%r) and live (%r) values invalid; skipping apply",
+                self.name,
+                persisted,
+                live,
+            )
+
+
+class HeadsetActiveEQPreset(settings.Setting):
+    """Choose which AdvancedParaEQ slot drives live audio.
+
+    Activation works for any slot — read-only factory presets and
+    user-custom slots alike. The "(factory)" tag in the slot label
+    distinguishes the read-only ones; that distinction matters for
+    band-editing (not supported yet), not for activation today.
+    """
+
+    name = "headset-eq-active-preset"
+    label = _("EQ Preset")
+    description = _("Switch the active EQ preset. Factory presets are read-only.")
+    feature = _F.HEADSET_ADVANCED_PARA_EQ
+    rw_options = {"read_fnid": 0x30, "write_fnid": 0x40, "prefix": b"\x00"}
+    validator_class = settings_validator.ChoicesValidator
+
+    @classmethod
+    def build(cls, device):
+        info = getattr(device, "_advanced_eq_info", None) or hidpp20.get_advanced_eq_info(device)
+        if not info:
+            return None
+        ro_count = info.get("onboard_ro_preset_count", 0) or 0
+        # Probe each advertised slot — getEQInfos may report capacity that
+        # the firmware doesn't actually back (G522 advertises 16 slots but
+        # only honors slot 0). Only include slots that responded with band
+        # data; the result is cached on device._advanced_eq_working_slots
+        # so HeadsetAdvancedEQ.build can reuse it without re-probing.
+        working = hidpp20.probe_advanced_eq_slots(device, direction=0, info=info)
+        if len(working) <= 1:
+            # One option (or zero) is meaningless as a selector — there's
+            # nothing for the user to choose between. The active EQ is
+            # whatever slot 0 has, no preset switching is available.
+            return None
+        choices = common.NamedInts()
+        for slot, slot_name, _bands in working:
+            if not slot_name:
+                slot_name = _("Slot") + " " + str(slot)
+            if slot < ro_count:
+                slot_name = slot_name + " " + _("(factory)")
+            choices[slot] = slot_name
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.ChoicesValidator(choices=choices)
+        return cls(device, rw, validator)
+
+    def write(self, value, save=True):
+        result = super().write(value, save)
+        if result is not None:
+            # After setActiveEQ, repopulate the AdvancedParaEQ band-display
+            # cache so the panel reflects the newly-active slot. Force a
+            # fresh read so _value is a real dict — leaving it as None
+            # would let a UI band-click hit `_value[item]` on None and
+            # crash (config_panel.py:589 'NoneType' is not subscriptable).
+            # The visible widget redraw still waits for a manual refresh /
+            # panel reopen — auto-redraw would need UI-side plumbing.
+            eq_panel = _headset_setting_by_name(self._device, HeadsetAdvancedEQ.name)
+            if eq_panel is not None:
+                try:
+                    eq_panel._value = None
+                    eq_panel.read(cached=False)
+                except Exception as e:
+                    logger.debug("HeadsetActiveEQPreset: failed to refresh EQ panel: %s", e)
+        return result
+
+
+_NO_CHANGE_COLOR = int(special_keys.COLORSPLUS["No change"])
+
+
+def _headset_setting_by_name(device, name):
+    for s in getattr(device, "settings", None) or []:
+        if getattr(s, "name", None) == name:
+            return s
+    return None
+
+
+def _headset_primary_color(device, default=0xFFFFFF):
+    """The headset's base color — the 0x0621 onboard Fixed-effect color.
+    Per-zone 'No change' cells resolve against this. Returns `default` when
+    the onboard-effect setting is absent or not currently on Fixed."""
+    s = _headset_setting_by_name(device, HeadsetOnboardEffect.name)
+    value = getattr(s, "_value", None) if s is not None else None
+    if value is not None and int(getattr(value, "ID", -1)) == 0:
+        return int(getattr(value, "color1", default))
+    return default
+
+
+def _headset_cluster_effect_is_fixed(device):
+    """True when the 0x0621 onboard effect is Fixed (the Static analog), or
+    when the device has no onboard-effect setting. A non-Fixed cluster
+    animation masks the per-zone buffer, so per-zone writes are suppressed
+    while one runs."""
+    s = _headset_setting_by_name(device, HeadsetOnboardEffect.name)
+    if s is None:
+        return True
+    value = getattr(s, "_value", None)
+    if value is None:
+        persister = getattr(device, "persister", None)
+        value = persister.get(HeadsetOnboardEffect.name) if persister else None
+    if value is None:
+        return True
+    return int(getattr(value, "ID", 0)) == 0
+
+
+def _headset_per_zone_overrides(device):
+    """Return `{zone_id: color_int}` for zones with explicit (non-'No change')
+    colors set via the Per-zone Lighting setting, or `None` if the setting
+    isn't built/present."""
+    s = _headset_setting_by_name(device, HeadsetPerZoneLighting.name)
+    if s is None:
+        return None
+    value = getattr(s, "_value", None)
+    if not isinstance(value, dict):
+        return None
+    overrides = {}
+    for zone, color in value.items():
+        try:
+            color_int = int(color)
+        except (TypeError, ValueError):
+            continue
+        if color_int != _NO_CHANGE_COLOR:
+            overrides[int(zone)] = color_int
+    return overrides
+
+
+def _headset_reassert_zone_layer(device):
+    """Re-paint the per-zone layer: every zone to the LEDs Primary color,
+    then the explicit per-zone overrides on top.
+
+    The headset firmware drops the host-painted per-zone buffer whenever a
+    cluster layer is (re)written — so any path that re-asserts a cluster
+    layer (LED Control re-claim, onboard Static color change) must call this
+    to restore the per-zone paint. No-op unless the onboard effect is Fixed;
+    a non-Static animation owns the LEDs and masks per-zone anyway.
+    """
+    if not _headset_cluster_effect_is_fixed(device):
+        return
+    zones = headset_rgb.discover_zones(device)
+    if not zones:
+        return
+    zone_map = {int(z): _headset_primary_color(device) for z in zones}
+    zone_map.update(_headset_per_zone_overrides(device) or {})
+    headset_rgb.write_zone_map(device, zone_map)
+
+
+def _headset_led_control_on(device):
+    """True when the headset LED Control is on (Solaar drives the LEDs).
+    When off, the firmware owns the LEDs and host color writes are
+    suppressed — the value is still persisted so it re-applies on switch-on.
+    Reads setting._value first, then the persister; accepts a bool or a
+    legacy int 0/1 from the old ChoicesValidator era."""
+    s = _headset_setting_by_name(device, HeadsetLEDControl.name)
+    v = getattr(s, "_value", None) if s is not None else None
+    if v is None:
+        persister = getattr(device, "persister", None)
+        v = persister.get(HeadsetLEDControl.name) if persister else None
+    if v is None:
+        return True  # unknown — don't suppress
+    return bool(v)
+
+
+class HeadsetLEDControl(settings.Setting):
+    """Whether Solaar holds the headset's live-coloring claim.
+
+    Mirrors the `RGBControl` pattern for keyboards and mice. On = Solaar
+    may drive the LEDs — the 0x0621 onboard effect and 0x0620 per-zone
+    painting are both live LED control; off = Solaar releases the LEDs so
+    another app (e.g. OpenRGB) can drive them. The 0x0622 signature
+    effects are stored settings (startup/shutdown colors), not live
+    coloring, and stay editable either way.
+    """
+
+    name = "headset_led_control"
+    label = _("LED Control")
+    description = _("Allow Solaar to control the headset LED zones.")
+    feature = _F.HEADSET_RGB_HOSTMODE
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
+    # Two-state — render as a Gtk.Switch. Wire byte: 1 = Solaar (host) control,
+    # 0 = Device (firmware) control.
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 1, "false_value": 0}
+
+    def _pre_read(self, cached, key=None):
+        # Migrate legacy int values (0/1 from the old ChoicesValidator) to bool.
+        super()._pre_read(cached, key)
+        if isinstance(self._value, int) and not isinstance(self._value, bool):
+            self._value = self._value != 0
+
+    @classmethod
+    def build(cls, device):
+        # One-shot read-only probe of 0x0621 / 0x0622 — logs the data the RE
+        # pass needs to pin down RGB onboard/signature effect structures.
+        # Skip cleanly if neither feature is exposed.
+        try:
+            rgb_effects_probe.probe(device)
+        except Exception as e:
+            logger.debug("RGB effects probe raised %r", e)
+        return super().build(device)
+
+    def write(self, value, save=True):
+        # On re-claim the firmware drops our colors; reassert the dominant
+        # layer — per-zone when the onboard effect is Static, else the effect.
+        result = super().write(value, save)
+        if result is not None and value and self._device.online:
+            if _headset_cluster_effect_is_fixed(self._device):
+                _headset_reassert_zone_layer(self._device)
+            else:
+                onboard = next((s for s in self._device.settings if s.name == "headset-onboard-effect"), None)
+                if onboard is not None and onboard._value is not None:
+                    onboard.write(onboard._value, save=False)
+        return result
+
+
+class HeadsetPerZoneLighting(settings.Settings):
+    """Per-zone LED color overrides.
+
+    Mirrors `PerKeyLighting` — keys are firmware zone IDs, values are
+    24-bit RGB ints with the `-1` sentinel meaning "inherit the current
+    `LEDs Primary` color." Surfaces in the UI via the per-key painter.
+    """
+
+    name = "headset_per_zone_lighting"
+    label = _("Per-zone Lighting")
+    description = _(
+        "Override individual zone colors. 'No change' inherits the LEDs Primary color.\n"
+        "LED Control needs to be set to Solaar to be effective."
+    )
+    feature = _F.HEADSET_RGB_HOSTMODE
+    persist = True
+    editor_class = "solaar.ui.perkey.control:PerKeyControl"
+
+    class rw_class(settings.FeatureRWMap):
+        pass
+
+    class validator_class(settings_validator.MapRangeValidator):
+        _COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3)
+
+        @classmethod
+        def build(cls, setting_class, device):
+            zones = headset_rgb.discover_zones(device)
+            if not zones:
+                return None
+            choices_map = {common.NamedInt(int(z), _("Zone") + " " + str(int(z))): cls._COLOR_RANGE for z in zones}
+            return cls(choices_map) if choices_map else None
+
+    def read(self, cached=True):
+        self._pre_read(cached)
+        if cached and self._value is not None:
+            return self._value
+        # Device doesn't expose current per-zone state; default every
+        # zone to "No change" so the primary color shows through.
+        reply_map = {int(key): _NO_CHANGE_COLOR for key in self._validator.choices}
+        self._value = reply_map
+        return reply_map
+
+    def _resolve_zone_map(self, map_, primary):
+        """Substitute 'No change' entries with the primary color."""
+        resolved = {}
+        for key, value in map_.items():
+            try:
+                v = int(value)
+            except (TypeError, ValueError):
+                continue
+            resolved[int(key)] = primary if v == _NO_CHANGE_COLOR else v
+        return resolved
+
+    def write(self, map_, save=True):
+        device = self._device
+        if not device.online:
+            return None
+        self.update(map_, save)
+        # Gate the wire on both conditions, like keyboard per-key (needs
+        # rgb_control on + zone Static): LED Control on, cluster effect Fixed.
+        if not _headset_led_control_on(device) or not _headset_cluster_effect_is_fixed(device):
+            return map_  # value stored, skip the wire
+        primary = _headset_primary_color(device)
+        zone_map = self._resolve_zone_map(map_, primary)
+        if not zone_map:
+            return map_
+        headset_rgb.write_zone_map(device, zone_map)
+        return map_
+
+    def write_key_value(self, key, value, save=True):
+        result = super().write_key_value(int(key), value, save)
+        device = self._device
+        if not device.online:
+            return result
+        if not _headset_led_control_on(device) or not _headset_cluster_effect_is_fixed(device):
+            return result  # value stored, skip the wire
+        try:
+            v = int(value)
+        except (TypeError, ValueError):
+            return result
+        effective = _headset_primary_color(device) if v == _NO_CHANGE_COLOR else v
+        headset_rgb.write_zone_map(device, {int(key): int(effective)})
+        return result
+
+
+class _HeadsetSignatureEffect:
+    """A 0x0622 signature-effect slot value: an enable byte, two colors and a
+    speed. Synthetic 8-byte form [ID, R1,G1,B1, R2,G2,B2, speed] — ID is 0x01
+    on / 0x02 off. The rw_class splits it across get/setSignatureEffectParams
+    (colors + speed) and get/setSignatureEffectState (the enable byte)."""
+
+    def __init__(self, ID=1, color1=0, color2=0, speed=0):
+        self.ID = int(ID)
+        self.speed = max(0, min(100, int(speed)))
+        for k, v in (("color1", color1), ("color2", color2)):
+            setattr(self, k, common.ColorInt(int(v) & 0xFFFFFF))
+
+    @classmethod
+    def from_bytes(cls, data, options=None):
+        if data is None or len(data) < 8:
+            return cls()
+        c1 = (data[1] << 16) | (data[2] << 8) | data[3]
+        c2 = (data[4] << 16) | (data[5] << 8) | data[6]
+        return cls(ID=data[0], color1=c1, color2=c2, speed=data[7])
+
+    def to_bytes(self, options=None):
+        return bytes(
+            [
+                self.ID & 0xFF,
+                (self.color1 >> 16) & 0xFF,
+                (self.color1 >> 8) & 0xFF,
+                self.color1 & 0xFF,
+                (self.color2 >> 16) & 0xFF,
+                (self.color2 >> 8) & 0xFF,
+                self.color2 & 0xFF,
+                self.speed & 0xFF,
+            ]
+        )
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.to_bytes() == other.to_bytes()
+
+    def __str__(self):
+        return yaml.dump(self, width=float("inf")).rstrip("\n")
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return cls(**loader.construct_mapping(node))
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping("!HeadsetSignatureEffect", data.__dict__, flow_style=True)
+
+
+yaml.SafeLoader.add_constructor("!HeadsetSignatureEffect", _HeadsetSignatureEffect.from_yaml)
+yaml.add_representer(_HeadsetSignatureEffect, _HeadsetSignatureEffect.to_yaml)
+
+
+class _HeadsetSignatureEffectSetting(settings.Setting):
+    """One firmware signature-effect slot on HEADSET_RGB_SIGNATURE_EFFECTS
+    (0x0622). Subclasses set effect_id (0 startup, 1 shutdown, 2 passive).
+    Build probes the slot via getSignatureEffectState and suppresses the
+    setting if the device doesn't expose it. These run autonomously on the
+    device firmware, so — like the keyboard boot animations — they are not
+    gated on host LED control."""
+
+    feature = _F.HEADSET_RGB_SIGNATURE_EFFECTS
+    effect_id: int = 0
+
+    _ENABLED_CHOICES = common.NamedInts(**{"On": 1, "Off": 2})
+    _COLOR1_FIELD = {"name": "color1", "kind": settings.Kind.COLOR, "label": _("Primary")}
+    _COLOR2_FIELD = {"name": "color2", "kind": settings.Kind.COLOR, "label": _("Secondary")}
+    _SPEED_FIELD = {"name": "speed", "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 100}
+
+    class rw_class:
+        kind = settings.FeatureRW.kind
+
+        def __init__(self, feature, effect_id):
+            self.feature = feature
+            self._eid = bytes([(effect_id >> 8) & 0xFF, effect_id & 0xFF])
+
+        def read(self, device):
+            params = device.feature_request(self.feature, 0x10, self._eid)  # getSignatureEffectParams
+            state = device.feature_request(self.feature, 0x30, self._eid)  # getSignatureEffectState
+            if params is None or len(params) < 9 or state is None or len(state) < 3:
+                return None
+            # params: [effectId, R1,G1,B1, R2,G2,B2, speed]; state: [effectId, enabled]
+            return bytes([state[2]]) + params[2:9]
+
+        def write(self, device, data_bytes):
+            # data_bytes: [enabled, R1,G1,B1, R2,G2,B2, speed]
+            params = device.feature_request(self.feature, 0x20, self._eid + data_bytes[1:8])
+            state = device.feature_request(self.feature, 0x40, self._eid + data_bytes[0:1])
+            return data_bytes if params is not None and state is not None else None
+
+    @classmethod
+    def build(cls, device):
+        eid = bytes([(cls.effect_id >> 8) & 0xFF, cls.effect_id & 0xFF])
+        try:
+            state = device.feature_request(cls.feature, 0x30, eid)  # probe: is this slot present?
+        except exceptions.FeatureCallError:
+            return None
+        if state is None or len(state) < 3:
+            return None
+        # NVconfig-saved colors are default-DENY: signature effects persist to
+        # device storage, so a slot is shown only on models explicitly known-
+        # good. allowed is None on an unlisted model/slot (suppress the whole
+        # setting), else the set of fields the firmware honors. The G522
+        # passive slot is deliberately unlisted — its behavior is unknown.
+        # SOLAAR_EXPERIMENTAL unmasks everything.
+        allowed = device_quirks.headset_signature_allowed_fields(device, cls.effect_id)
+        if allowed is None:
+            return None
+        # Log getSignatureEffectsInfo (fn 0) once per device — its byte layout
+        # isn't pinned down, so slot discovery uses per-slot probing for now.
+        if not getattr(device, "_headset_sig_info_logged", False):
+            device._headset_sig_info_logged = True
+            try:
+                info = device.feature_request(cls.feature, 0x00)
+                logger.debug("%s: getSignatureEffectsInfo raw reply: %s", cls.name, info.hex() if info else info)
+            except Exception as e:
+                logger.debug("%s: getSignatureEffectsInfo probe raised %s", cls.name, e)
+        rw = cls.rw_class(cls.feature, cls.effect_id)
+        validator = settings_validator.HeteroValidator(data_class=_HeadsetSignatureEffect, options=None)
+        setting = cls(device, rw, validator)
+        # Enable byte as a right-aligned Gtk.Switch (on=1 / off=2); colors and
+        # speed stay visible in both states so toggling Off keeps them.
+        id_field = {"name": "ID", "kind": settings.Kind.TOGGLE, "label": None, "on_value": 1, "off_value": 2}
+        setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD, cls._SPEED_FIELD]
+        visible = {f: 1 for f in ("color1", "color2", "speed") if f in allowed}
+        setting.fields_map = {
+            int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
+            int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
+        }
+        return setting
+
+
+class HeadsetSignatureStartupEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-startup"
+    label = _("Startup Effect")
+    description = (
+        _("Firmware lighting effect played when the headset powers on or wakes.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100.")
+    )
+    effect_id = 0
+
+
+class HeadsetSignatureShutdownEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-shutdown"
+    label = _("Shutdown Effect")
+    description = (
+        _("Firmware lighting effect played when the headset powers off or sleeps.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100.")
+    )
+    effect_id = 1
+
+
+class HeadsetSignaturePassiveEffect(_HeadsetSignatureEffectSetting):
+    name = "headset-signature-passive"
+    label = _("Passive Effect")
+    description = (
+        _("Firmware lighting effect played while the headset is idle.")
+        + "\n"
+        + _("Device default: Primary #00B8FC, Secondary #FF00AB, Speed 75.")
+    )
+    effect_id = 2
+
+
+class _HeadsetOnboardEffect:
+    """A 0x0621 onboard RGB effect: an effect ID plus the parameters that
+    effect uses. Synthetic form [effectId_u16_BE, 7 param bytes]; to_bytes /
+    from_bytes encode the per-effect parameter layout (the rw_class adds the
+    leading clusterIndex). intensity is a 0-100 percent; saturation is a raw
+    0-255 byte (same as the keyboard RGB effects)."""
+
+    # Per-effect default parameter values, applied only to fields left
+    # unset (passed as None). An explicit value is always honored — passing
+    # 0 means the caller chose 0, e.g. a black Static color1 turns the LEDs
+    # off. Only a genuinely absent field falls back to the default (a fresh
+    # effect-pick seeds its RANGE widgets UI-side via _apply_id_defaults).
+    # Defaults confirmed against the LGHUB binary decode of 0x0621.
+    _DEFAULTS = {
+        0: {"color1": 0xFFFFFF},  # Static / Fixed
+        1: {"intensity": 100, "saturation": 255, "period": 5000},  # Color Cycle
+        2: {"intensity": 100, "saturation": 255, "period": 5000},  # Color Wave
+        3: {"color1": 0xFFFFFF, "intensity": 100, "period": 5000},  # Breathing
+        4: {"color1": 0xFFFFFF, "color2": 0x0000FF, "intensity": 100},  # Dual Color
+    }
+
+    # speed is accepted only to load configs persisted before the 0x0621
+    # decode (DualColor byte 6 was mislabelled "speed"; it is intensity).
+    def __init__(self, ID=0, color1=None, color2=None, intensity=None, saturation=None, period=None, speed=0, direction=None):
+        self.ID = int(ID)
+        defaults = self._DEFAULTS.get(self.ID, {})
+        color1 = defaults.get("color1", 0) if color1 is None else color1
+        color2 = defaults.get("color2", 0) if color2 is None else color2
+        intensity = defaults.get("intensity", 0) if intensity is None else intensity
+        saturation = defaults.get("saturation", 0) if saturation is None else saturation
+        period = defaults.get("period", 0) if period is None else period
+        direction = defaults.get("direction", 0) if direction is None else direction
+        self.intensity = max(0, min(100, int(intensity)))
+        self.saturation = max(0, min(255, int(saturation)))
+        self.period = max(0, min(0xFFFF, int(period)))
+        self.direction = max(0, min(3, int(direction)))
+        for k, v in (("color1", color1), ("color2", color2)):
+            setattr(self, k, common.ColorInt(int(v) & 0xFFFFFF))
+
+    @classmethod
+    def from_bytes(cls, data, options=None):
+        if data is None or len(data) < 9:
+            return cls()
+        eid = (data[0] << 8) | data[1]
+        p = data[2:9]
+        kw = {"ID": eid}
+        if eid == 0:  # Fixed
+            kw["color1"] = (p[0] << 16) | (p[1] << 8) | p[2]
+        elif eid in (1, 2):  # ColorCycle / ColorWave
+            kw["intensity"] = p[0]
+            kw["period"] = (p[1] << 8) | p[2]
+            kw["saturation"] = p[3]
+            if eid == 2:
+                kw["direction"] = p[4]
+        elif eid == 3:  # Breathing: R, G, B, intensity, period u16 BE
+            kw["color1"] = (p[0] << 16) | (p[1] << 8) | p[2]
+            kw["intensity"] = p[3]
+            kw["period"] = (p[4] << 8) | p[5]
+        elif eid == 4:  # DualColor: R1, G1, B1, R2, G2, B2, intensity
+            kw["color1"] = (p[0] << 16) | (p[1] << 8) | p[2]
+            kw["color2"] = (p[3] << 16) | (p[4] << 8) | p[5]
+            kw["intensity"] = p[6]
+        return cls(**kw)
+
+    def to_bytes(self, options=None):
+        eid = self.ID
+        p = bytearray(7)
+        c1, c2 = int(self.color1), int(self.color2)
+        if eid == 0:  # Fixed: R, G, B
+            p[0], p[1], p[2] = (c1 >> 16) & 0xFF, (c1 >> 8) & 0xFF, c1 & 0xFF
+        elif eid in (1, 2):  # ColorCycle / ColorWave
+            p[0] = self.intensity
+            p[1], p[2] = (self.period >> 8) & 0xFF, self.period & 0xFF
+            p[3] = self.saturation
+            if eid == 2:
+                p[4] = self.direction
+        elif eid == 3:  # Breathing: R, G, B, intensity, period u16 BE, pad
+            p[0], p[1], p[2] = (c1 >> 16) & 0xFF, (c1 >> 8) & 0xFF, c1 & 0xFF
+            p[3] = self.intensity
+            p[4], p[5] = (self.period >> 8) & 0xFF, self.period & 0xFF
+        elif eid == 4:  # DualColor: R1,G1,B1, R2,G2,B2, intensity
+            p[0], p[1], p[2] = (c1 >> 16) & 0xFF, (c1 >> 8) & 0xFF, c1 & 0xFF
+            p[3], p[4], p[5] = (c2 >> 16) & 0xFF, (c2 >> 8) & 0xFF, c2 & 0xFF
+            p[6] = self.intensity
+        return bytes([(eid >> 8) & 0xFF, eid & 0xFF]) + bytes(p)
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.to_bytes() == other.to_bytes()
+
+    def __str__(self):
+        return yaml.dump(self, width=float("inf")).rstrip("\n")
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return cls(**loader.construct_mapping(node))
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping("!HeadsetOnboardEffect", data.__dict__, flow_style=True)
+
+
+yaml.SafeLoader.add_constructor("!HeadsetOnboardEffect", _HeadsetOnboardEffect.from_yaml)
+yaml.add_representer(_HeadsetOnboardEffect, _HeadsetOnboardEffect.to_yaml)
+
+
+class HeadsetOnboardEffect(settings.Setting):
+    """The RGB effect the headset shows on its primary lighting cluster
+    (HEADSET_RGB_ONBOARD_EFFECTS, 0x0621). Build reads the cluster's
+    supported-effect set so the picker offers only those. This is live LED
+    control, like per-zone painting — gated on Solaar holding the LED-control
+    claim: writes are skipped and the row greys out when the claim is
+    released. Multi-cluster devices (none seen yet) drive only cluster 0."""
+
+    name = "headset-onboard-effect"
+    label = _("Onboard Effect")
+    description = _("Firmware RGB effect the headset plays on its own.")
+    feature = _F.HEADSET_RGB_ONBOARD_EFFECTS
+
+    _CLUSTER = 0
+    # Custom (5) is intentionally absent — it is a stored card-reference
+    # effect, not a parametric one; it cannot be set via setRGBClusterEffect.
+    _ALL_EFFECTS = (
+        ("Static", 0),
+        ("Color Cycle", 1),
+        ("Color Wave", 2),
+        ("Breathing", 3),
+        ("Dual Color", 4),
+    )
+    _EFFECT_FIELDS = {
+        0: ("color1",),
+        1: ("intensity", "period", "saturation"),
+        2: ("intensity", "period", "saturation", "direction"),
+        3: ("color1", "intensity", "period"),
+        4: ("color1", "color2", "intensity"),
+    }
+    _DIRECTIONS = common.NamedInts(**{"Horizontal": 0, "Vertical": 1, "Reverse Horizontal": 2, "Reverse Vertical": 3})
+
+    class rw_class:
+        kind = settings.FeatureRW.kind
+
+        def __init__(self, feature, cluster):
+            self.feature = feature
+            self._cluster = cluster
+
+        def read(self, device):
+            reply = device.feature_request(self.feature, 0x20, bytes([self._cluster]))  # getRGBClusterEffect
+            if reply is None or len(reply) < 10:
+                return None
+            return reply[1:10]  # strip clusterIndex -> [effectId_u16, 7 param bytes]
+
+        def write(self, device, data_bytes):
+            # data_bytes is [effectId_u16, 7 param bytes]; prepend clusterIndex.
+            # The onboard effect is live LED control — skip the wire when Solaar
+            # doesn't hold the claim; the value is still persisted.
+            if not _headset_led_control_on(device):
+                return data_bytes
+            reply = device.feature_request(self.feature, 0x30, bytes([self._cluster]) + bytes(data_bytes))
+            return data_bytes if reply is not None else None
+
+    @classmethod
+    def build(cls, device):
+        try:
+            info = device.feature_request(cls.feature, 0x10, bytes([cls._CLUSTER]))  # getRGBClusterInfo
+        except exceptions.FeatureCallError:
+            return None
+        if info is None or len(info) < 1:
+            return None
+        # [count, count x {effectId_u16_BE, caps_u16_BE}] — take effectId of each entry
+        supported = []
+        for i in range(info[0]):
+            off = 1 + i * 4
+            if off + 2 > len(info):
+                break
+            eid = (info[off] << 8) | info[off + 1]
+            if 0 <= eid <= 4 and eid not in supported:
+                supported.append(eid)
+        if not supported:
+            # Unparseable reply — offer the five parametric effects; the
+            # firmware rejects any it doesn't support. Custom (5) is never
+            # offered here. See the 0x0621 fallback note in protocol RE.
+            supported = [0, 1, 2, 3, 4]
+        rw = cls.rw_class(cls.feature, cls._CLUSTER)
+        validator = settings_validator.HeteroValidator(data_class=_HeadsetOnboardEffect, options=None)
+        setting = cls(device, rw, validator)
+        id_choices = common.NamedInts(**{name: eid for name, eid in cls._ALL_EFFECTS if eid in supported})
+        id_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": id_choices}
+        setting.possible_fields = [
+            id_field,
+            {"name": "color1", "kind": settings.Kind.COLOR, "label": _("Primary")},
+            {"name": "color2", "kind": settings.Kind.COLOR, "label": _("Secondary")},
+            {"name": "intensity", "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100},
+            {"name": "saturation", "kind": settings.Kind.RANGE, "label": _("Saturation"), "min": 0, "max": 255},
+            {
+                "name": "period",
+                "kind": settings.Kind.RANGE,
+                "label": _("Period"),
+                "min": 1000,
+                "max": 20000,
+                "display_seconds": True,
+            },
+            {"name": "direction", "kind": settings.Kind.CHOICE, "label": _("Direction"), "choices": cls._DIRECTIONS},
+        ]
+        setting.fields_map = {eid: (id_choices[eid], {field: 1 for field in cls._EFFECT_FIELDS[eid]}) for eid in supported}
+        return setting
+
+    def write(self, value, save=True):
+        # Writing the 0x0621 cluster effect re-fills every LED uniformly; the
+        # firmware treats that as dropping the host per-zone buffer. After a
+        # Static write, re-overlay the per-zone paint so individually-colored
+        # zones survive a LEDs Primary change. _headset_reassert_zone_layer is
+        # a no-op for non-Static effects (the animation masks per-zone).
+        result = super().write(value, save)
+        if result is not None and self._device.online and _headset_led_control_on(self._device):
+            _headset_reassert_zone_layer(self._device)
+        return result
+
+
+# ----------------------------------------------------------------------------
+# LogiVoice (0x0900 + 0x0901..0x0907) — read-only presentation pass.
+#
+# Per module we auto-generate two settings:
+#   1. A flat State toggle — reads GetState (fn 1), renders as a boolean.
+#      Top-level so users see a direct on/off indicator at a glance.
+#   2. A collapsible "Parameters" panel — one MULTIPLE_RANGE-kind setting
+#      that reads GetParameters (fn 3) once and distributes the bytes to
+#      per-field sliders. The existing MultipleRangeControl widget is
+#      collapsible by default, so the field-level clutter stays folded.
+#
+# Writes are disabled — the Parameters struct carries fields whose wire
+# encodings are still ambiguous (see logivoice.py) and a SetParameters
+# write must bundle all fields at once. A write pass can be added once
+# each field's encoding is confirmed live.
+# ----------------------------------------------------------------------------
+
+
+class _LogiVoiceStateSetting(settings.Setting):
+    """Per-module State toggle. Reads GetState (fn 1) and writes SetState (fn 0).
+
+    State wire format is unambiguous (one byte: 0 = off, 1 = on), so this is
+    the one piece of the LogiVoice surface we enable for writes. The per-module
+    Parameters struct stays read-only until each field's encoding is confirmed.
+    """
+
+    rw_options = {"read_fnid": logivoice.FN_GET_STATE, "write_fnid": logivoice.FN_SET_STATE}
+    validator_class = settings_validator.BooleanValidator
+
+    @classmethod
+    def build(cls, device):
+        # Corpus probe runs here (once per module) so -dd users get a full
+        # snapshot of state + raw Parameters + raw Info for future decoding.
+        try:
+            logivoice.probe_module(device, cls.feature)
+        except Exception as e:
+            logger.debug("LogiVoice probe_module(%s) raised %s", cls.feature, e)
+        return super().build(device)
+
+
+class _LogiVoiceModuleItem:
+    """Top-level MULTIPLE_RANGE item representing one LogiVoice module.
+
+    One `item` per setting — the module itself. `__int__` returns the feature
+    id so the Setting's reply dict is keyed predictably.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        self._feature = feature
+        self.id = logivoice.MODULE_SLUGS.get(feature, f"0x{int(feature):04X}")
+        self.index = 0
+
+    def __int__(self):
+        return int(self._feature)
+
+    def __str__(self):
+        return logivoice.MODULE_NAMES.get(self._feature, f"0x{int(self._feature):04X}")
+
+
+class _LogiVoiceFieldSubItem:
+    """MULTIPLE_RANGE sub-item wrapping one decoded Parameters field.
+
+    MultipleRangeControl reads minimum/maximum/length/widget/str(). We pick
+    SpinButton for wide ranges (0..65535) where a 64k-step slider is useless,
+    and Scale for small ranges (e.g. signed int8 thresholds).
+    """
+
+    def __init__(self, field: logivoice.Field):
+        self._field = field
+        self.id = field.name
+        self.minimum = field.min_value
+        self.maximum = field.max_value
+        self.length = field.byte_count
+        self.widget = "SpinButton" if (field.max_value - field.min_value) > 512 else "Scale"
+
+    def __int__(self):
+        return hash(self.id) & 0xFFFFFF
+
+    def __str__(self):
+        return self._field.label + (" (raw)" if self._field.opaque else "")
+
+
+class _LogiVoiceParametersValidator(settings_validator.MultipleRangeValidator):
+    """Reads the whole GetParameters struct once and distributes bytes to fields.
+
+    MULTIPLE_RANGE's default read loop fires prepare_read_item once per top-
+    level item; we have exactly one item (the module), so this issues a single
+    GetParameters call. validate_read_item parses the shared reply into a
+    {field_name: value} dict. Writes are blocked.
+    """
+
+    def __init__(self, feature: hidpp20_constants.SupportedFeature):
+        fields = logivoice.PARAMETERS_FIELDS.get(feature, [])
+        self._fields = list(fields)
+        item = _LogiVoiceModuleItem(feature)
+        sub_items = {item: [_LogiVoiceFieldSubItem(f) for f in fields]}
+        super().__init__(items=[item], sub_items=sub_items)
+
+    def prepare_read_item(self, item):
+        return b""  # GetParameters takes no wire arguments
+
+    def validate_read(self, reply_bytes):
+        # Setting.read() calls validate_read with the raw GetParameters reply.
+        # MultipleRangeValidator only defines validate_read_item, so wrap that
+        # call — we have a single item (the module) so one call suffices.
+        item = self.items[0]
+        return {int(item): self.validate_read_item(reply_bytes, item)}
+
+    def validate_read_item(self, reply_bytes, item):
+        parsed = {}
+        # Key by str(sub_item) so MultipleRangeControl.set_value can look up
+        # values via v[str(sub_item)] — the UI uses the label as the dict key.
+        for sub in self.sub_items[item]:
+            f = sub._field
+            end = f.offset + f.byte_count
+            if end > len(reply_bytes):
+                continue
+            chunk = reply_bytes[f.offset : end]
+            if f.byte_count == 1:
+                v = struct.unpack("b" if f.signed else "B", chunk)[0]
+            elif f.byte_count == 2:
+                v = struct.unpack(">h" if f.signed else ">H", chunk)[0]
+            else:
+                v = int.from_bytes(chunk, "big", signed=f.signed)
+            parsed[str(sub)] = v
+        return parsed
+
+    def prepare_write_item(self, item, value):
+        return None
+
+    def prepare_write(self, value):
+        return None
+
+
+class _LogiVoiceParametersSetting(settings.Setting):
+    """Collapsible read-only display of one module's GetParameters struct."""
+
+    rw_options = {"read_fnid": logivoice.FN_GET_PARAMETERS}
+    persist = False
+    kind = settings.Kind.MULTIPLE_RANGE
+
+    @classmethod
+    def build(cls, device):
+        if not logivoice.PARAMETERS_FIELDS.get(cls.feature):
+            return None
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = _LogiVoiceParametersValidator(cls.feature)
+        return cls(device, rw, validator)
+
+    def write(self, map, save=True):
+        return None
+
+
+def _logivoice_make_state_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug:
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-state",
+        "label": f"LogiVoice {module_name}",
+        "description": f"Enable the headset {module_name} processing block.",
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_State", (_LogiVoiceStateSetting,), attrs)
+
+
+def _logivoice_make_parameters_class(feature: hidpp20_constants.SupportedFeature):
+    slug = logivoice.MODULE_SLUGS.get(feature)
+    if not slug or not logivoice.PARAMETERS_FIELDS.get(feature):
+        return None
+    module_name = logivoice.MODULE_NAMES.get(feature, f"0x{int(feature):04X}")
+    attrs = {
+        "name": f"logivoice-{slug}-parameters",
+        "label": f"LogiVoice {module_name}: Parameters (read-only)",
+        "description": (
+            f"Decoded {module_name} GetParameters fields. "
+            "Opaque raw values shown where the wire encoding isn't confirmed yet."
+        ),
+        "feature": feature,
+    }
+    return type(f"LogiVoice_{slug}_Parameters", (_LogiVoiceParametersSetting,), attrs)
+
+
+_LOGIVOICE_SETTINGS: list[type] = []
+for _feature in logivoice.PARAMETERS_FIELDS:
+    _state_cls = _logivoice_make_state_class(_feature)
+    if _state_cls is not None:
+        _LOGIVOICE_SETTINGS.append(_state_cls)
+    # Parameters panels are read-only and the wire encoding is only
+    # partially decoded — hide from the UI until we can write them back.
+    # _params_cls = _logivoice_make_parameters_class(_feature)
+    # if _params_cls is not None:
+    #     _LOGIVOICE_SETTINGS.append(_params_cls)
 
 
 class BrightnessControl(settings.Setting):
@@ -2354,6 +3673,23 @@ class _RgbBootEffectSetting(settings.Setting):
             return None  # device rejects this cap — gate the setting off
         if reply is None or len(reply) < 10:
             return None
+        # Register the firmware shutdown trigger on cap 0x0040 devices so the
+        # animation plays on Solaar exit. This depends only on the device
+        # having the cap (probe above), not on the UI control being shown —
+        # so it runs before the allowlist gate below. rgb_power.cleanup fires
+        # mode 0 at its end when _rgb_has_shutdown_cap is set. See
+        # solaar_shutdown_effect_trigger_spec.md.
+        if cls.cap_id == 0x0040:
+            device._rgb_has_shutdown_cap = True
+            if rgb_power.cleanup not in device.cleanups:
+                device.cleanups.append(rgb_power.cleanup)
+        # NVconfig-saved colors are default-DENY: the boot-effect setting is
+        # shown only on models explicitly known-good. allowed is None on an
+        # unlisted model/cap (suppress), or a (possibly empty) set of color
+        # fields the firmware honors. SOLAAR_EXPERIMENTAL unmasks everything.
+        allowed = device_quirks.rgb_effects_nvconfig_allowed_fields(device, cls.cap_id)
+        if allowed is None:
+            return None
         rw = cls.rw_class(cls.feature, cls.cap_id)
         validator = settings_validator.HeteroValidator(data_class=_RgbBootEffect, options=None)
         setting = cls(device, rw, validator)
@@ -2366,33 +3702,28 @@ class _RgbBootEffectSetting(settings.Setting):
         # them and writes still carry their values — the firmware may store
         # bytes it doesn't visibly use. fields_map controls UI visibility.
         setting.possible_fields = [id_field, cls._COLOR1_FIELD, cls._COLOR2_FIELD]
-        # Default-allow: show both color pickers unless this device model is
-        # known to ignore one or both. Most 0x8071 devices honor the bytes.
-        inert = device_quirks.get(device, "rgb_effects_nvconfig_colors_inert", {}).get(cls.cap_id, set())
-        visible = {n: o for n, o in (("color1", 1), ("color2", 4)) if n not in inert}
+        # An empty allowed set shows the On/Off toggle only (cap works, colors
+        # don't); a non-empty set adds the listed color pickers.
+        visible = {n: o for n, o in (("color1", 1), ("color2", 4)) if n in allowed}
         # Both On/Off map to the same visible field set so colors stay editable
         # when the effect is Off (pre-stages them for next enable).
         setting.fields_map = {
             int(cls._ENABLED_CHOICES["On"]): (cls._ENABLED_CHOICES["On"], visible),
             int(cls._ENABLED_CHOICES["Off"]): (cls._ENABLED_CHOICES["Off"], visible),
         }
-        # Register the firmware shutdown trigger on cap 0x0040 devices so the
-        # animation plays on Solaar exit. rgb_power.cleanup fires mode 0 at
-        # its end when _rgb_has_shutdown_cap is set. See
-        # solaar_shutdown_effect_trigger_spec.md.
-        if cls.cap_id == 0x0040:
-            device._rgb_has_shutdown_cap = True
-            if rgb_power.cleanup not in device.cleanups:
-                device.cleanups.append(rgb_power.cleanup)
         return setting
 
 
 class RgbStartupAnimation(_RgbBootEffectSetting):
     name = "rgb_startup_animation"
     label = _("Startup Animation")
-    description = _(
-        "Firmware-played animation when the keyboard wakes from deep sleep or powers on.\n"
-        "Setting persists on the device (non-volatile)."
+    description = (
+        _(
+            "Firmware-played animation when the keyboard wakes from deep sleep or powers on.\n"
+            "Setting persists on the device (non-volatile)."
+        )
+        + "\n"
+        + _("Device default: Primary #FF0081, Secondary #80AAFF.")
     )
     cap_id = 0x0001
 
@@ -2400,8 +3731,10 @@ class RgbStartupAnimation(_RgbBootEffectSetting):
 class RgbShutdownAnimation(_RgbBootEffectSetting):
     name = "rgb_shutdown_animation"
     label = _("Shutdown Animation")
-    description = _(
-        "Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile)."
+    description = (
+        _("Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile).")
+        + "\n"
+        + _("Device default: Primary #FF0081, Secondary #80AAFF.")
     )
     cap_id = 0x0040
 
@@ -3178,6 +4511,15 @@ SETTINGS: list[settings.Setting] = [
     HeadsetMixBalance,
     HeadsetAutoSleep,
     HeadsetOnboardEQ,
+    HeadsetActiveEQPreset,
+    HeadsetAdvancedEQ,
+    HeadsetLEDControl,
+    HeadsetOnboardEffect,
+    HeadsetPerZoneLighting,
+    HeadsetSignatureStartupEffect,
+    HeadsetSignatureShutdownEffect,
+    HeadsetSignaturePassiveEffect,
+    *_LOGIVOICE_SETTINGS,
 ]
 
 
@@ -3273,8 +4615,22 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Set
     if settings_class.feature not in device.features:
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
+        logger.debug(
+            "check_feature %s [%s]: min_version=%d > device feature version=%d; skipping",
+            settings_class.name,
+            settings_class.feature,
+            settings_class.min_version,
+            device.features.get_feature_version(settings_class.feature) or 0,
+        )
         return
     if device.features.get_hidden(settings_class.feature):
+        flags = device.features.flags.get(settings_class.feature, 0)
+        logger.debug(
+            "check_feature %s [%s]: feature has INTERNAL flag set (flags=0x%02X); skipping",
+            settings_class.name,
+            settings_class.feature,
+            flags,
+        )
         return
     try:
         detected = settings_class.build(device)
@@ -3313,34 +4669,49 @@ def check_feature_settings(device, already_known) -> bool:
                     known_present = sclass.name in device.persister
             else:
                 known_present = False
-            if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
-                try:
-                    setting = check_feature(device, sclass)
-                except Exception as err:
-                    # on an internal HID++ error, assume offline and stop further checking
-                    if (
-                        isinstance(err, exceptions.FeatureCallError)
-                        and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR
-                    ):
-                        logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
-                        device.online = False
-                        device.present = False
-                        return False
-                    else:
-                        logger.warning(f"ignore feature {sclass.name} because of error {err}")
+            already = any(s.name == sclass.name for s in already_known)
+            if already:
+                continue
+            if not known_present and sclass.name in absent:
+                # Silent-skip cache from an earlier run's failed build(). If the
+                # feature is actually present on this device now, the cache is
+                # stale (e.g. from a prior build that returned None for a
+                # feature that currently works) — drop it and retry the probe.
+                if sclass.feature in device.features:
+                    logger.debug(
+                        "check_feature_settings: retrying %s — cached in _absent but feature %s is present now",
+                        sclass.name,
+                        sclass.feature,
+                    )
+                    absent.remove(sclass.name)
+                    if device.persister:
+                        device.persister["_absent"] = absent
+                else:
+                    continue
+            try:
+                setting = check_feature(device, sclass)
+            except Exception as err:
+                # on an internal HID++ error, assume offline and stop further checking
+                if isinstance(err, exceptions.FeatureCallError) and err.error == hidpp20_constants.ErrorCode.LOGITECH_ERROR:
+                    logger.warning(f"HID++ internal error checking feature {sclass.name}: make device not present")
+                    device.online = False
+                    device.present = False
+                    return False
+                else:
+                    logger.warning(f"ignore feature {sclass.name} because of error {err}")
 
-                if isinstance(setting, list):
-                    for s in setting:
-                        already_known.append(s)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting:
-                    already_known.append(setting)
-                    if sclass.name in new_absent:
-                        new_absent.remove(sclass.name)
-                elif setting is None:
-                    if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
-                        new_absent.append(sclass.name)
+            if isinstance(setting, list):
+                for s in setting:
+                    already_known.append(s)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting:
+                already_known.append(setting)
+                if sclass.name in new_absent:
+                    new_absent.remove(sclass.name)
+            elif setting is None:
+                if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
+                    new_absent.append(sclass.name)
     if device.persister and new_absent:
         absent.extend(new_absent)
         device.persister["_absent"] = absent

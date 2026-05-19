@@ -1018,3 +1018,38 @@ def test_RGBIdleEffect_unrecognized_int_passes_through():
 
     assert setting._value == 999
     assert device.persister[setting.name] == 999
+
+
+def test_HeadsetOnboardEffect_explicit_black_is_honored():
+    """An explicit Static color1 of 0 (black) must survive: 0 is a real
+    choice — it turns the LEDs off — not an absent field to seed white."""
+    effect = settings_templates._HeadsetOnboardEffect(ID=0, color1=0)
+
+    assert int(effect.color1) == 0
+    assert effect.to_bytes()[2:5] == b"\x00\x00\x00"
+
+
+def test_HeadsetOnboardEffect_absent_color_seeds_default():
+    """A genuinely absent field (None) still falls back to the per-effect
+    default — Static with no color1 given is white."""
+    effect = settings_templates._HeadsetOnboardEffect(ID=0)
+
+    assert int(effect.color1) == 0xFFFFFF
+
+
+def test_HeadsetOnboardEffect_from_bytes_black_round_trips():
+    """A black Static frame read off the device round-trips to black
+    rather than being rewritten to the white default."""
+    effect = settings_templates._HeadsetOnboardEffect.from_bytes(bytes(9))
+
+    assert effect.ID == 0
+    assert int(effect.color1) == 0
+
+
+def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
+    """Animated effects with no params given still get sane defaults so
+    the picker never emits a zero-intensity (LEDs-off) frame."""
+    effect = settings_templates._HeadsetOnboardEffect(ID=1)  # Color Cycle
+
+    assert effect.intensity == 100
+    assert effect.period == 5000

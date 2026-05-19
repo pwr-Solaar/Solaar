@@ -26,6 +26,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from ..layout import Layout
+from . import headset_g522
 from . import keyboard_ansi
 from . import keyboard_iso_azerty
 from . import keyboard_iso_qwerty
@@ -140,3 +141,5 @@ for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
     register_layout(0x8081, _keyboard_matcher(_family, full_size=False), _tkl)
 
 register_layout(0x8081, _name_contains("G502 X"), mouse_g502x.LAYOUT)
+# HEADSET_RGB_HOSTMODE = 0x0620
+register_layout(0x0620, _name_contains("G522"), headset_g522.LAYOUT)

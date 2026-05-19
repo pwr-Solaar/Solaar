@@ -15,6 +15,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import dataclasses
 import logging
 import queue
 import threading
@@ -52,9 +53,11 @@ class _ThreadedHandle:
         else:
             # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("%r opened new handle %d", self, handle)
-            # If original handle was centurion, register new per-thread handle too
-            if any(h in base._centurion_handles for h in self._handles):
-                base._centurion_handles.add(handle)
+            # If original handle was centurion, copy state to new per-thread handle
+            for h in self._handles:
+                if h in base._centurion_handles:
+                    base._centurion_handles[handle] = dataclasses.replace(base._centurion_handles[h])
+                    break
             self._local.handle = handle
             self._handles.append(handle)
             return handle
