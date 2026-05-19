@@ -1116,21 +1116,6 @@ def test_centurion_sub_device_hardware_info():
     assert product_id == 0x0AF7
 
 
-def test_centurion_kind_inference():
-    """Centurion device with 0x06xx audio features infers kind=headset."""
-    dev = fake_hidpp.Device("CENT_KIND", True, 2.6, fake_hidpp.r_centurion_headset, centurion=True)
-    dev._centurion_sub_features = {
-        hidpp20_constants.SupportedFeature.HEADSET_AUDIO_SIDETONE,
-        hidpp20_constants.SupportedFeature.HEADSET_MIC_MUTE,
-    }
-
-    kind = dev._infer_kind_centurion()
-
-    from logitech_receiver import hidpp10_constants
-
-    assert kind == hidpp10_constants.DEVICE_KIND.headset
-
-
 # --- CenturionReceiver tests ---
 
 
@@ -1226,6 +1211,21 @@ def test_centurion_receiver_container_with_device():
     assert recv.status_string() == "1 device connected."
     with pytest.raises(IndexError):
         recv[2]
+
+
+def test_centurion_receiver_child_device_kind_headset():
+    """notify_devices() seeds the headset child with kind=headset via pairing_info,
+    so the headphone icon shows even when the headset is powered off at startup."""
+    info = FakeCenturionDeviceInfo(product="PRO X 2 LIGHTSPEED")
+    recv = CenturionReceiver(FakeLowLevel(), 0x99, info)
+    recv._pending = False
+    recv._dongle_features = []
+
+    recv.notify_devices()
+
+    child = recv[1]
+    child.online = False
+    assert child.kind == "headset"
 
 
 def test_centurion_receiver_enable_connection_notifications():

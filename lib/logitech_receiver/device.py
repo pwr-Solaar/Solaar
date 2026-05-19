@@ -146,6 +146,8 @@ class Device:
         self.status_callback = None  # for changes to other potentially visible aspects
         self.wpid = pairing_info["wpid"] if pairing_info else None  # the Wireless PID is unique per device model
         self._kind = pairing_info["kind"] if pairing_info else None  # mouse, keyboard, etc (see hidpp10.DEVICE_KIND)
+        if self._kind is None and self.centurion:
+            self._kind = hidpp10_constants.DEVICE_KIND.headset  # every Centurion-transport device so far is a headset
         self._serial = pairing_info["serial"] if pairing_info else None  # serial number (an 8-char hex string)
         self._polling_rate = pairing_info["polling"] if pairing_info else None
         self._power_switch = pairing_info["power_switch"] if pairing_info else None
@@ -322,26 +324,11 @@ class Device:
 
     @property
     def kind(self):
+        # Centurion devices are seeded with kind=headset at construction, so
+        # this online lookup only runs for descriptor-less HID++ 2.0 devices.
         if not self._kind and self.online and self.protocol >= 2.0:
-            if self.centurion:
-                self._kind = self._infer_kind_centurion()
-            else:
-                self._kind = _hidpp20.get_kind(self)
+            self._kind = _hidpp20.get_kind(self)
         return self._kind or "?"
-
-    def _infer_kind_centurion(self):
-        """Infer device kind from Centurion features (sub-device or top-level)."""
-        # Check sub-device features (wireless via bridge)
-        for feature in getattr(self, "_centurion_sub_features", ()):
-            if isinstance(feature, int) and 0x0600 <= feature <= 0x06FF:
-                return hidpp10_constants.DEVICE_KIND.headset
-        # Check top-level features (direct USB connection, no bridge)
-        if self.features:
-            for feature, _index in self.features.enumerate():
-                feat_int = int(feature) if isinstance(feature, int) else 0
-                if 0x0600 <= feat_int <= 0x06FF:
-                    return hidpp10_constants.DEVICE_KIND.headset
-        return None
 
     @property
     def firmware(self) -> tuple[common.FirmwareInfo]:
