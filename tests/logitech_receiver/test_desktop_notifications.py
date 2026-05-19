@@ -2,7 +2,9 @@ from unittest import mock
 
 from logitech_receiver import desktop_notifications
 
-# depends on external environment, so make some tests dependent on availability
+# The mock_desktop_notifications autouse fixture (tests/conftest.py) swaps the
+# libnotify backend for a mock, so these exercise the real code paths without
+# raising real desktop notifications.
 
 
 def test_init():
@@ -22,8 +24,11 @@ class MockDevice(mock.Mock):
         return True
 
 
-def test_show():
-    dev = MockDevice()
-    reason = "unknown"
-    result = desktop_notifications.show(dev, reason)
-    assert result is not None if desktop_notifications.available else result is None
+def test_show(mock_desktop_notifications):
+    result = desktop_notifications.show(MockDevice(), "unknown")
+
+    if desktop_notifications.available:
+        assert result is not None
+        mock_desktop_notifications.Notification.return_value.show.assert_called()
+    else:
+        assert result is None

@@ -2,7 +2,9 @@ from unittest import mock
 
 from solaar.ui import desktop_notifications
 
-# depends on external environment, so make some tests dependent on availability
+# The mock_desktop_notifications autouse fixture (tests/conftest.py) swaps the
+# libnotify backend for a mock, so these exercise the real code paths without
+# raising real desktop notifications.
 
 
 def test_init():
@@ -15,9 +17,11 @@ def test_uninit():
     assert desktop_notifications.uninit() is None
 
 
-def test_alert():
-    reason = "unknown"
-    assert desktop_notifications.alert(reason) is None
+def test_alert(mock_desktop_notifications):
+    assert desktop_notifications.alert("unknown") is None
+
+    if desktop_notifications.available:
+        mock_desktop_notifications.Notification.return_value.show.assert_called()
 
 
 class MockDevice(mock.Mock):
@@ -27,13 +31,11 @@ class MockDevice(mock.Mock):
         return True
 
 
-def test_show():
-    dev = MockDevice()
-    reason = "unknown"
-    available = desktop_notifications.init()
+def test_show(mock_desktop_notifications):
+    result = desktop_notifications.show(MockDevice(), "unknown")
 
-    result = desktop_notifications.show(dev, reason)
-    if available:
+    if desktop_notifications.available:
         assert result is not None
+        mock_desktop_notifications.Notification.return_value.show.assert_called()
     else:
         assert result is None
