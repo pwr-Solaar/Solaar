@@ -34,6 +34,7 @@ from solaar.i18n import ngettext
 from . import action
 from . import config_panel
 from . import diversion_rules
+from . import game_profiles
 from . import icons
 from .about import about
 from .common import ui_async
@@ -327,6 +328,14 @@ def _create_window_layout():
     bottom_buttons_box.add(quit_button)
     about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show)
     bottom_buttons_box.add(about_button)
+    game_profiles_button = _new_button(
+        _("Game DPI Profiles"),
+        "applications-games",
+        _SMALL_BUTTON_ICON_SIZE,
+        tooltip=_("Configure automatic onboard profile switching for games"),
+        clicked=lambda *_trigger: game_profiles.show(_window, _find_selected_device()),
+    )
+    bottom_buttons_box.add(game_profiles_button)
     diversion_button = _new_button(
         _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: diversion_rules.show_window(_model)
     )
@@ -376,6 +385,16 @@ def _find_selected_device_id():
     model, item = selection.get_selected()
     if item:
         return _model.get_value(item, Column.PATH), _model.get_value(item, Column.NUMBER)
+
+
+def _device_supports_game_profiles(device):
+    if not device or getattr(device, "kind", None) is None:
+        return False
+    settings = getattr(device, "settings", None) or []
+    for setting in settings:
+        if getattr(setting, "name", None) == "onboard_profiles":
+            return True
+    return False
 
 
 # triggered by changing selection in the tree
@@ -761,6 +780,14 @@ def _update_info_panel(device, full=False):
         _details.set_visible(False)
         _info.set_visible(False)
         _empty.set_visible(True)
+        for child in _window.get_children():
+            vbox = child
+            if hasattr(vbox, "get_children"):
+                for sub in vbox.get_children():
+                    if isinstance(sub, Gtk.HButtonBox):
+                        for btn in sub.get_children():
+                            if btn.get_tooltip_text() == _("Configure automatic onboard profile switching for games"):
+                                btn.set_sensitive(False)
         return
 
     # a receiver must be valid
@@ -782,6 +809,25 @@ def _update_info_panel(device, full=False):
         _info._icon.set_sensitive(is_online)
         _info._title.set_sensitive(is_online)
         _update_device_panel(device, _info._device, _info._buttons, full)
+
+    for child in _window.get_children():
+        pass
+    button = None
+    for child in _window.get_children():
+        vbox = child
+        if hasattr(vbox, "get_children"):
+            for sub in vbox.get_children():
+                if isinstance(sub, Gtk.HButtonBox):
+                    for btn in sub.get_children():
+                        if btn.get_tooltip_text() == _("Configure automatic onboard profile switching for games"):
+                            button = btn
+                            break
+                if button:
+                    break
+        if button:
+            break
+    if button is not None:
+        button.set_sensitive(_device_supports_game_profiles(device))
 
     _empty.set_visible(False)
     _info.set_visible(True)
