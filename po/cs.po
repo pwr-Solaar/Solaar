@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-15 19:21+0200\n"
-"PO-Revision-Date: 2026-05-15 19:55+0200\n"
+"POT-Creation-Date: 2026-05-22 18:55+0200\n"
+"PO-Revision-Date: 2026-05-22 19:15+0200\n"
 "Last-Translator: Marián Kyral <mkyral@email.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "Language: cs\n"
@@ -50,139 +50,141 @@ msgstr "Baterie: %(level)s (%(status)s)"
 msgid "Battery: %(percent)d%% (%(status)s)"
 msgstr "Baterie: %(percent)d%% (%(status)s)"
 
-#: lib/logitech_receiver/hidpp20.py:1148 lib/logitech_receiver/hidpp20.py:1181
-#: lib/logitech_receiver/hidpp20.py:1209
+#: lib/logitech_receiver/hidpp20.py:1189 lib/logitech_receiver/hidpp20.py:1222
+#: lib/logitech_receiver/hidpp20.py:1250
 msgid "Cycle"
 msgstr "Cyklické"
 
-#: lib/logitech_receiver/hidpp20.py:1149
+#: lib/logitech_receiver/hidpp20.py:1190
 msgid "Right"
 msgstr "Vpravo"
 
-#: lib/logitech_receiver/hidpp20.py:1150
+#: lib/logitech_receiver/hidpp20.py:1191
 msgid "Down"
 msgstr "Dolů"
 
-#: lib/logitech_receiver/hidpp20.py:1151
+#: lib/logitech_receiver/hidpp20.py:1192
 msgid "Center Out"
 msgstr "Ze středu"
 
-#: lib/logitech_receiver/hidpp20.py:1152
+#: lib/logitech_receiver/hidpp20.py:1193
 msgid "In"
 msgstr "Dovnitř"
 
-#: lib/logitech_receiver/hidpp20.py:1153
+#: lib/logitech_receiver/hidpp20.py:1194
 msgid "Out"
 msgstr "Ven"
 
-#: lib/logitech_receiver/hidpp20.py:1154
-#: lib/logitech_receiver/settings_templates.py:1395
+#: lib/logitech_receiver/hidpp20.py:1195
+#: lib/logitech_receiver/settings_templates.py:1398
 msgid "Left"
 msgstr "Vlevo"
 
-#: lib/logitech_receiver/hidpp20.py:1155
+#: lib/logitech_receiver/hidpp20.py:1196
 msgid "Up"
 msgstr "Nahoru"
 
-#: lib/logitech_receiver/hidpp20.py:1156
+#: lib/logitech_receiver/hidpp20.py:1197
 msgid "Center In"
 msgstr "Do středu"
 
-#: lib/logitech_receiver/hidpp20.py:1177
-#: lib/logitech_receiver/settings_templates.py:341
+#: lib/logitech_receiver/hidpp20.py:1218
+#: lib/logitech_receiver/settings_templates.py:344
 msgid "Disabled"
 msgstr "Zakázáno"
 
-#: lib/logitech_receiver/hidpp20.py:1178
+#: lib/logitech_receiver/hidpp20.py:1219
 msgid "Static"
 msgstr "Statické"
 
-#: lib/logitech_receiver/hidpp20.py:1179
+#: lib/logitech_receiver/hidpp20.py:1220
 msgid "Pulse"
 msgstr "Pulzní"
 
-#: lib/logitech_receiver/hidpp20.py:1188 lib/logitech_receiver/hidpp20.py:1214
+#: lib/logitech_receiver/hidpp20.py:1229 lib/logitech_receiver/hidpp20.py:1255
 msgid "Wave"
 msgstr "Vlna"
 
-#: lib/logitech_receiver/hidpp20.py:1192
+#: lib/logitech_receiver/hidpp20.py:1233
 msgid "Boot"
 msgstr "Spuštění"
 
-#: lib/logitech_receiver/hidpp20.py:1193
+#: lib/logitech_receiver/hidpp20.py:1234
 msgid "Demo"
 msgstr "Ukázka"
 
-#: lib/logitech_receiver/hidpp20.py:1195
+#: lib/logitech_receiver/hidpp20.py:1236
 msgid "Breathe"
 msgstr "Dech"
 
-#: lib/logitech_receiver/hidpp20.py:1200 lib/logitech_receiver/hidpp20.py:1221
+#: lib/logitech_receiver/hidpp20.py:1241 lib/logitech_receiver/hidpp20.py:1262
 msgid "Ripple"
 msgstr "Vlnění"
 
-#: lib/logitech_receiver/hidpp20.py:1205
+#: lib/logitech_receiver/hidpp20.py:1246
 msgid "Decomposition"
 msgstr "Dekompozice"
 
-#: lib/logitech_receiver/hidpp20.py:1206
+#: lib/logitech_receiver/hidpp20.py:1247
 msgid "Signature1"
 msgstr "Podpis1"
 
-#: lib/logitech_receiver/hidpp20.py:1207
+#: lib/logitech_receiver/hidpp20.py:1248
 msgid "Signature2"
 msgstr "Podpis2"
 
-#: lib/logitech_receiver/hidpp20.py:1227
+#: lib/logitech_receiver/hidpp20.py:1268
 msgid "Dim"
 msgstr "Ztlumeno"
 
-#: lib/logitech_receiver/hidpp20.py:1299
+#: lib/logitech_receiver/hidpp20.py:1340
 msgid "Unknown Location"
 msgstr "Neznámé místo"
 
-#: lib/logitech_receiver/hidpp20.py:1300
-#: lib/logitech_receiver/settings_templates.py:2328
+#: lib/logitech_receiver/hidpp20.py:1341
+#: lib/logitech_receiver/settings_templates.py:2619
+#: lib/logitech_receiver/settings_templates.py:2907
+#: lib/logitech_receiver/settings_templates.py:3647
 msgid "Primary"
 msgstr "Primární"
 
-#: lib/logitech_receiver/hidpp20.py:1301
+#: lib/logitech_receiver/hidpp20.py:1342
 msgid "Logo"
 msgstr "Logo"
 
-#: lib/logitech_receiver/hidpp20.py:1302
+#: lib/logitech_receiver/hidpp20.py:1343
 msgid "Left Side"
 msgstr "Levá strana"
 
-#: lib/logitech_receiver/hidpp20.py:1303
+#: lib/logitech_receiver/hidpp20.py:1344
 msgid "Right Side"
 msgstr "Pravá strana"
 
-#: lib/logitech_receiver/hidpp20.py:1304
+#: lib/logitech_receiver/hidpp20.py:1345
 msgid "Combined"
 msgstr "Kombinováno"
 
-#: lib/logitech_receiver/hidpp20.py:1305
+#: lib/logitech_receiver/hidpp20.py:1346
 msgid "Primary 1"
 msgstr "Primární 1"
 
-#: lib/logitech_receiver/hidpp20.py:1306
+#: lib/logitech_receiver/hidpp20.py:1347
 msgid "Primary 2"
 msgstr "Primární  2"
 
-#: lib/logitech_receiver/hidpp20.py:1307
+#: lib/logitech_receiver/hidpp20.py:1348
 msgid "Primary 3"
 msgstr "Primární 3"
 
-#: lib/logitech_receiver/hidpp20.py:1308
+#: lib/logitech_receiver/hidpp20.py:1349
 msgid "Primary 4"
 msgstr "Primární 4"
 
-#: lib/logitech_receiver/hidpp20.py:1309
+#: lib/logitech_receiver/hidpp20.py:1350
 msgid "Primary 5"
 msgstr "Primární 5"
 
-#: lib/logitech_receiver/hidpp20.py:1310
+#: lib/logitech_receiver/hidpp20.py:1351
 msgid "Primary 6"
 msgstr "Primární 6"
 
@@ -295,12 +297,12 @@ msgid "Other"
 msgstr "Další"
 
 #: lib/logitech_receiver/i18n.py:59
-#: lib/logitech_receiver/settings_templates.py:3003
+#: lib/logitech_receiver/settings_templates.py:4336
 msgid "Left Button"
 msgstr "Levé tlačítko"
 
 #: lib/logitech_receiver/i18n.py:60
-#: lib/logitech_receiver/settings_templates.py:3003
+#: lib/logitech_receiver/settings_templates.py:4336
 msgid "Right Button"
 msgstr "Pravé tlačítko"
 
@@ -376,11 +378,11 @@ msgstr "stisknuto"
 msgid "released"
 msgstr "uvolněno"
 
-#: lib/logitech_receiver/notifications.py:157 lib/solaar/listener.py:344
+#: lib/logitech_receiver/notifications.py:157 lib/solaar/listener.py:350
 msgid "connected"
 msgstr "připojeno"
 
-#: lib/logitech_receiver/notifications.py:157 lib/solaar/listener.py:344
+#: lib/logitech_receiver/notifications.py:157 lib/solaar/listener.py:350
 msgid "disconnected"
 msgstr "odpojeno"
 
@@ -396,21 +398,21 @@ msgstr "zapnuto"
 msgid "ADC measurement notification"
 msgstr "ADC měřící oznámení"
 
-#: lib/logitech_receiver/notifications.py:445
-#: lib/logitech_receiver/notifications.py:501
+#: lib/logitech_receiver/notifications.py:486
+#: lib/logitech_receiver/notifications.py:542
 msgid "pairing lock is closed"
 msgstr "zámek párování je uzamknut"
 
-#: lib/logitech_receiver/notifications.py:445
-#: lib/logitech_receiver/notifications.py:501
+#: lib/logitech_receiver/notifications.py:486
+#: lib/logitech_receiver/notifications.py:542
 msgid "pairing lock is open"
 msgstr "zámek párování je odemknut"
 
-#: lib/logitech_receiver/notifications.py:464
+#: lib/logitech_receiver/notifications.py:505
 msgid "discovery lock is closed"
 msgstr "zámek vyhledávání je uzamknut"
 
-#: lib/logitech_receiver/notifications.py:464
+#: lib/logitech_receiver/notifications.py:505
 msgid "discovery lock is open"
 msgstr "zámek vyhledávání je odemknut"
 
@@ -426,19 +428,19 @@ msgstr[0] "%(count)s spárované zařízení."
 msgstr[1] "%(count)s spárovaná zařízení."
 msgstr[2] "%(count)s spárovaných zařízení."
 
-#: lib/logitech_receiver/settings.py:613
+#: lib/logitech_receiver/settings.py:621
 msgid "register"
 msgstr "registrace"
 
-#: lib/logitech_receiver/settings.py:627 lib/logitech_receiver/settings.py:665
+#: lib/logitech_receiver/settings.py:635 lib/logitech_receiver/settings.py:673
 msgid "feature"
 msgstr "vlastnost"
 
-#: lib/logitech_receiver/settings_templates.py:180
+#: lib/logitech_receiver/settings_templates.py:183
 msgid "Swap Fx function"
 msgstr "Přepnout Fx funkci"
 
-#: lib/logitech_receiver/settings_templates.py:183
+#: lib/logitech_receiver/settings_templates.py:186
 msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
@@ -447,7 +449,7 @@ msgstr ""
 "funkce\n"
 "a musíte držet Fn klávesu pro aktivaci jejich standardní funkce."
 
-#: lib/logitech_receiver/settings_templates.py:188
+#: lib/logitech_receiver/settings_templates.py:191
 msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
@@ -456,29 +458,29 @@ msgstr ""
 "standardní funkce\n"
 "a musíte držet Fn pro aktivaci jejich speciální funkce."
 
-#: lib/logitech_receiver/settings_templates.py:196
+#: lib/logitech_receiver/settings_templates.py:199
 msgid "Hand Detection"
 msgstr "Detekce rukou"
 
-#: lib/logitech_receiver/settings_templates.py:197
+#: lib/logitech_receiver/settings_templates.py:200
 msgid "Turn on illumination when the hands hover over the keyboard."
 msgstr "Zapne podsvícení pokud se ruce objeví nad klávesnicí."
 
-#: lib/logitech_receiver/settings_templates.py:204
+#: lib/logitech_receiver/settings_templates.py:207
 msgid "Scroll Wheel Smooth Scrolling"
 msgstr "Plynulý posuv kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:205
-#: lib/logitech_receiver/settings_templates.py:452
-#: lib/logitech_receiver/settings_templates.py:481
+#: lib/logitech_receiver/settings_templates.py:208
+#: lib/logitech_receiver/settings_templates.py:455
+#: lib/logitech_receiver/settings_templates.py:484
 msgid "High-sensitivity mode for vertical scroll with the wheel."
 msgstr "Vysoce citlivý režim svislého posuvu kolečkem."
 
-#: lib/logitech_receiver/settings_templates.py:212
+#: lib/logitech_receiver/settings_templates.py:215
 msgid "Side Scrolling"
 msgstr "Boční posun"
 
-#: lib/logitech_receiver/settings_templates.py:214
+#: lib/logitech_receiver/settings_templates.py:217
 msgid ""
 "When disabled, pushing the wheel sideways sends custom button "
 "events\n"
@@ -488,30 +490,30 @@ msgstr ""
 "tlačítek\n"
 "místo standardních událostí bočního posuvu."
 
-#: lib/logitech_receiver/settings_templates.py:224
+#: lib/logitech_receiver/settings_templates.py:227
 msgid "Sensitivity (DPI - older mice)"
 msgstr "Citlivost (DPI - starší myši)"
 
-#: lib/logitech_receiver/settings_templates.py:225
-#: lib/logitech_receiver/settings_templates.py:1061
-#: lib/logitech_receiver/settings_templates.py:1089
+#: lib/logitech_receiver/settings_templates.py:228
+#: lib/logitech_receiver/settings_templates.py:1064
+#: lib/logitech_receiver/settings_templates.py:1092
 msgid "Mouse movement sensitivity"
 msgstr "Citlivost pohybu myši"
 
-#: lib/logitech_receiver/settings_templates.py:298
+#: lib/logitech_receiver/settings_templates.py:301
 msgid "Backlight Timed"
 msgstr "Doba podsvícení"
 
-#: lib/logitech_receiver/settings_templates.py:299
-#: lib/logitech_receiver/settings_templates.py:439
+#: lib/logitech_receiver/settings_templates.py:302
+#: lib/logitech_receiver/settings_templates.py:442
 msgid "Set illumination time for keyboard."
 msgstr "Nastavit dobu podsvícení klávesnice."
 
-#: lib/logitech_receiver/settings_templates.py:310
+#: lib/logitech_receiver/settings_templates.py:313
 msgid "Backlight"
 msgstr "Podsvícení"
 
-#: lib/logitech_receiver/settings_templates.py:311
+#: lib/logitech_receiver/settings_templates.py:314
 msgid ""
 "Illumination level on keyboard.  Changes made are only applied in "
 "Manual mode."
@@ -519,31 +521,31 @@ msgstr ""
 "Úroveň osvětlení kláves. Změny jsou aplikovány pouze v manuálním "
 "režimu."
 
-#: lib/logitech_receiver/settings_templates.py:343
+#: lib/logitech_receiver/settings_templates.py:346
 msgid "Automatic"
 msgstr "Automatický"
 
-#: lib/logitech_receiver/settings_templates.py:345
+#: lib/logitech_receiver/settings_templates.py:348
 msgid "Manual"
 msgstr "Manuální"
 
-#: lib/logitech_receiver/settings_templates.py:347
+#: lib/logitech_receiver/settings_templates.py:350
 msgid "Enabled"
 msgstr "Zapnuto"
 
-#: lib/logitech_receiver/settings_templates.py:353
+#: lib/logitech_receiver/settings_templates.py:356
 msgid "Backlight Level"
 msgstr "Úroveň podsvícení"
 
-#: lib/logitech_receiver/settings_templates.py:354
+#: lib/logitech_receiver/settings_templates.py:357
 msgid "Illumination level on keyboard when in Manual mode."
 msgstr "Úroveň podsvícení klávesnice v manuálním režimu."
 
-#: lib/logitech_receiver/settings_templates.py:411
+#: lib/logitech_receiver/settings_templates.py:414
 msgid "Backlight Delay Hands Out"
 msgstr "Zpoždění vypnutí podsvícení"
 
-#: lib/logitech_receiver/settings_templates.py:412
+#: lib/logitech_receiver/settings_templates.py:415
 msgid ""
 "Delay in seconds until backlight fades out with hands away from "
 "keyboard."
@@ -551,45 +553,45 @@ msgstr ""
 "Zpoždění v sekundách, po kterém se podsvícení zhasne, pokud ruce "
 "opustí prostor klávesnice."
 
-#: lib/logitech_receiver/settings_templates.py:420
+#: lib/logitech_receiver/settings_templates.py:423
 msgid "Backlight Delay Hands In"
 msgstr "Zpoždění zapnutí podsvícení"
 
-#: lib/logitech_receiver/settings_templates.py:421
+#: lib/logitech_receiver/settings_templates.py:424
 msgid "Delay in seconds until backlight fades out with hands near keyboard."
 msgstr ""
 "Zpoždění v sekundách, po kterém se podsvícení zhasne, když jsou ruce "
 "přiblíží klávesnice."
 
-#: lib/logitech_receiver/settings_templates.py:429
+#: lib/logitech_receiver/settings_templates.py:432
 msgid "Backlight Delay Powered"
 msgstr "Zpoždění podsvícení při napájení"
 
-#: lib/logitech_receiver/settings_templates.py:430
+#: lib/logitech_receiver/settings_templates.py:433
 msgid "Delay in seconds until backlight fades out with external power."
 msgstr ""
 "Zpoždění v sekundách, po kterém podsvícení při napájení z externího "
 "zdroje postupně zhasne."
 
-#: lib/logitech_receiver/settings_templates.py:438
+#: lib/logitech_receiver/settings_templates.py:441
 msgid "Backlight (Seconds)"
 msgstr "Podsvíceni (sekundy)"
 
-#: lib/logitech_receiver/settings_templates.py:450
+#: lib/logitech_receiver/settings_templates.py:453
 msgid "Scroll Wheel High Resolution"
 msgstr "Vysoké rozlišení posuvného kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:454
-#: lib/logitech_receiver/settings_templates.py:483
+#: lib/logitech_receiver/settings_templates.py:457
+#: lib/logitech_receiver/settings_templates.py:486
 msgid "Set to ignore if scrolling is abnormally fast or slow"
 msgstr "Nastavte na ignorovat pokud je rolování nezvykle rychle nebo pomalé"
 
-#: lib/logitech_receiver/settings_templates.py:461
-#: lib/logitech_receiver/settings_templates.py:492
+#: lib/logitech_receiver/settings_templates.py:464
+#: lib/logitech_receiver/settings_templates.py:495
 msgid "Scroll Wheel Diversion"
 msgstr "Odklonění rolovacího kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:463
+#: lib/logitech_receiver/settings_templates.py:466
 msgid ""
 "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
 "trigger Solaar rules but are otherwise ignored)."
@@ -597,19 +599,19 @@ msgstr ""
 "Nastaví rolovací kolečko aby posílalo LOWRES_WHEEL HID++ oznámení "
 "(které spustí Solaar pravidla, ale jinak je ignorováno)."
 
-#: lib/logitech_receiver/settings_templates.py:470
+#: lib/logitech_receiver/settings_templates.py:473
 msgid "Scroll Wheel Direction"
 msgstr "Směr kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:471
+#: lib/logitech_receiver/settings_templates.py:474
 msgid "Invert direction for vertical scroll with wheel."
 msgstr "Mění směr svislého otáčení kolečka."
 
-#: lib/logitech_receiver/settings_templates.py:479
+#: lib/logitech_receiver/settings_templates.py:482
 msgid "Scroll Wheel Resolution"
 msgstr "Rozlišení kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:494
+#: lib/logitech_receiver/settings_templates.py:497
 msgid ""
 "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
 "trigger Solaar rules but are otherwise ignored)."
@@ -617,19 +619,19 @@ msgstr ""
 "Nastaví rolovací kolečko aby posílalo HIRES_WHEEL HID++ oznámení "
 "(které spustí Solaar pravidla, ale jinak je ignorováno)."
 
-#: lib/logitech_receiver/settings_templates.py:503
+#: lib/logitech_receiver/settings_templates.py:506
 msgid "Sensitivity (Pointer Speed)"
 msgstr "Citlivost (rychlost kurzoru)"
 
-#: lib/logitech_receiver/settings_templates.py:504
+#: lib/logitech_receiver/settings_templates.py:507
 msgid "Speed multiplier for mouse (256 is normal multiplier)."
 msgstr "Rychlostní násobitel myši (256 je běžný násobitel)."
 
-#: lib/logitech_receiver/settings_templates.py:514
+#: lib/logitech_receiver/settings_templates.py:517
 msgid "Thumb Wheel Diversion"
 msgstr "Odklonění kolečka palce"
 
-#: lib/logitech_receiver/settings_templates.py:516
+#: lib/logitech_receiver/settings_templates.py:519
 msgid ""
 "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
 "Solaar rules but are otherwise ignored)."
@@ -637,19 +639,19 @@ msgstr ""
 "Nastaví kolečko palce aby posílalo THUMB_WHEEL HID++ oznámení (které "
 "spustí Solaar pravidla, ale jinak je ignorováno)."
 
-#: lib/logitech_receiver/settings_templates.py:525
+#: lib/logitech_receiver/settings_templates.py:528
 msgid "Thumb Wheel Direction"
 msgstr "Směr kolečka palce"
 
-#: lib/logitech_receiver/settings_templates.py:526
+#: lib/logitech_receiver/settings_templates.py:529
 msgid "Invert thumb wheel scroll direction."
 msgstr "Mění směr otáčení kolečka palce."
 
-#: lib/logitech_receiver/settings_templates.py:546
+#: lib/logitech_receiver/settings_templates.py:549
 msgid "Onboard Profiles"
 msgstr "Vestavěné profily"
 
-#: lib/logitech_receiver/settings_templates.py:547
+#: lib/logitech_receiver/settings_templates.py:550
 msgid ""
 "Enable an onboard profile, which controls report rate, sensitivity, "
 "and button actions"
@@ -657,30 +659,30 @@ msgstr ""
 "Povolit vestavěný profil který nastavuje četnost hlášením, citlivost "
 "a akce tlačítek"
 
-#: lib/logitech_receiver/settings_templates.py:591
-#: lib/logitech_receiver/settings_templates.py:624
+#: lib/logitech_receiver/settings_templates.py:594
+#: lib/logitech_receiver/settings_templates.py:627
 msgid "Report Rate"
 msgstr "Četnost hlášení"
 
-#: lib/logitech_receiver/settings_templates.py:593
-#: lib/logitech_receiver/settings_templates.py:626
+#: lib/logitech_receiver/settings_templates.py:596
+#: lib/logitech_receiver/settings_templates.py:629
 msgid "Frequency of device movement reports"
 msgstr "Frekvence hlášení pohybu zařízení"
 
-#: lib/logitech_receiver/settings_templates.py:593
-#: lib/logitech_receiver/settings_templates.py:626
-#: lib/logitech_receiver/settings_templates.py:1061
-#: lib/logitech_receiver/settings_templates.py:1089
-#: lib/logitech_receiver/settings_templates.py:1468
-#: lib/logitech_receiver/settings_templates.py:1499
+#: lib/logitech_receiver/settings_templates.py:596
+#: lib/logitech_receiver/settings_templates.py:629
+#: lib/logitech_receiver/settings_templates.py:1064
+#: lib/logitech_receiver/settings_templates.py:1092
+#: lib/logitech_receiver/settings_templates.py:1471
+#: lib/logitech_receiver/settings_templates.py:1502
 msgid "May need Onboard Profiles set to Disable to be effective."
 msgstr "Může vyžadovat deaktivaci Vestavěných profilů aby se změna projevila."
 
-#: lib/logitech_receiver/settings_templates.py:654
+#: lib/logitech_receiver/settings_templates.py:657
 msgid "Divert crown events"
 msgstr "Odklonění událostí korunky"
 
-#: lib/logitech_receiver/settings_templates.py:655
+#: lib/logitech_receiver/settings_templates.py:658
 msgid ""
 "Make crown send CROWN HID++ notifications (which trigger Solaar "
 "rules but are otherwise ignored)."
@@ -688,19 +690,19 @@ msgstr ""
 "Korunka bude zasílat CROWN HID++ oznámení (která spustí Solaar "
 "pravidla, ale jinak budou ignorována)."
 
-#: lib/logitech_receiver/settings_templates.py:663
+#: lib/logitech_receiver/settings_templates.py:666
 msgid "Crown smooth scroll"
 msgstr "Plynulý posun korunky"
 
-#: lib/logitech_receiver/settings_templates.py:664
+#: lib/logitech_receiver/settings_templates.py:667
 msgid "Set crown smooth scroll"
 msgstr "Nastaví plynulý posun korunky"
 
-#: lib/logitech_receiver/settings_templates.py:672
+#: lib/logitech_receiver/settings_templates.py:675
 msgid "Divert G and M Keys"
 msgstr "Odklonění G a M kláves"
 
-#: lib/logitech_receiver/settings_templates.py:673
+#: lib/logitech_receiver/settings_templates.py:676
 msgid ""
 "Make G and M keys send HID++ notifications (which trigger Solaar "
 "rules but are otherwise ignored)."
@@ -708,11 +710,11 @@ msgstr ""
 "Nastaví G a M klávesy aby posílaly HID++ oznámení (která spustí "
 "Solaar pravidla, ale jinak budou ignorována)."
 
-#: lib/logitech_receiver/settings_templates.py:687
+#: lib/logitech_receiver/settings_templates.py:690
 msgid "Scroll Wheel Ratcheted"
 msgstr "Krokování rolovacího kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:688
+#: lib/logitech_receiver/settings_templates.py:691
 msgid ""
 "Switch the mouse wheel between speed-controlled ratcheting and "
 "always freespin."
@@ -720,19 +722,19 @@ msgstr ""
 "Přepíná kolečko myši mezi rychlostně omezeným krokováním a volnou "
 "rotací."
 
-#: lib/logitech_receiver/settings_templates.py:690
+#: lib/logitech_receiver/settings_templates.py:693
 msgid "Freespinning"
 msgstr "Volná rotace"
 
-#: lib/logitech_receiver/settings_templates.py:690
+#: lib/logitech_receiver/settings_templates.py:693
 msgid "Ratcheted"
 msgstr "Krokování"
 
-#: lib/logitech_receiver/settings_templates.py:697
+#: lib/logitech_receiver/settings_templates.py:700
 msgid "Scroll Wheel Ratchet Speed"
 msgstr "Rychlost krokování kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:699
+#: lib/logitech_receiver/settings_templates.py:702
 msgid ""
 "Use the mouse wheel speed to switch between ratcheted and "
 "freespinning.\n"
@@ -742,27 +744,27 @@ msgstr ""
 "posunem.\n"
 "Hodnota 50 vždy přepne na krokování."
 
-#: lib/logitech_receiver/settings_templates.py:749
+#: lib/logitech_receiver/settings_templates.py:752
 msgid "Scroll Wheel Ratchet Torque"
 msgstr "Moment změny krokování kolečka"
 
-#: lib/logitech_receiver/settings_templates.py:750
+#: lib/logitech_receiver/settings_templates.py:753
 msgid "Change the torque needed to overcome the ratchet."
 msgstr "Změní moment nutný k překonání krokování."
 
-#: lib/logitech_receiver/settings_templates.py:785
+#: lib/logitech_receiver/settings_templates.py:788
 msgid "Key/Button Actions"
 msgstr "Akce klávesy/tlačítka"
 
-#: lib/logitech_receiver/settings_templates.py:787
+#: lib/logitech_receiver/settings_templates.py:790
 msgid "Change the action for the key or button."
 msgstr "Změní akci klávesy nebo tlačítka."
 
-#: lib/logitech_receiver/settings_templates.py:789
+#: lib/logitech_receiver/settings_templates.py:792
 msgid "Overridden by diversion."
 msgstr "Zrušeno odklonění."
 
-#: lib/logitech_receiver/settings_templates.py:791
+#: lib/logitech_receiver/settings_templates.py:794
 msgid ""
 "Changing important actions (such as for the left mouse button) can "
 "result in an unusable system."
@@ -770,11 +772,11 @@ msgstr ""
 "Změna důležité akce (například pro levé tlačítko myši) může vést k "
 "nepoužitelnému systému."
 
-#: lib/logitech_receiver/settings_templates.py:966
+#: lib/logitech_receiver/settings_templates.py:969
 msgid "Key/Button Diversion"
 msgstr "Odklonění klávesy/tlačítka"
 
-#: lib/logitech_receiver/settings_templates.py:967
+#: lib/logitech_receiver/settings_templates.py:970
 msgid ""
 "Make the key or button send HID++ notifications (Diverted) or "
 "initiate Mouse Gestures or Sliding DPI"
@@ -782,37 +784,37 @@ msgstr ""
 "Nastaví G klávesy aby posílaly HID++ oznámení (Odkloněno) nebo "
 "spustí gesta myši či plynulé nastavení DPI"
 
-#: lib/logitech_receiver/settings_templates.py:970
-#: lib/logitech_receiver/settings_templates.py:971
-#: lib/logitech_receiver/settings_templates.py:972
+#: lib/logitech_receiver/settings_templates.py:973
+#: lib/logitech_receiver/settings_templates.py:974
+#: lib/logitech_receiver/settings_templates.py:975
 msgid "Diverted"
 msgstr "Odkloněno"
 
-#: lib/logitech_receiver/settings_templates.py:970
-#: lib/logitech_receiver/settings_templates.py:971
+#: lib/logitech_receiver/settings_templates.py:973
+#: lib/logitech_receiver/settings_templates.py:974
 msgid "Mouse Gestures"
 msgstr "Gesta myši"
 
-#: lib/logitech_receiver/settings_templates.py:970
-#: lib/logitech_receiver/settings_templates.py:971
-#: lib/logitech_receiver/settings_templates.py:972
+#: lib/logitech_receiver/settings_templates.py:973
+#: lib/logitech_receiver/settings_templates.py:974
+#: lib/logitech_receiver/settings_templates.py:975
 msgid "Regular"
 msgstr "Běžné"
 
-#: lib/logitech_receiver/settings_templates.py:970
+#: lib/logitech_receiver/settings_templates.py:973
 msgid "Sliding DPI"
 msgstr "Plynulé nastavení DPI"
 
-#: lib/logitech_receiver/settings_templates.py:1060
-#: lib/logitech_receiver/settings_templates.py:1088
+#: lib/logitech_receiver/settings_templates.py:1063
+#: lib/logitech_receiver/settings_templates.py:1091
 msgid "Sensitivity (DPI)"
 msgstr "Citlivost (DPI)"
 
-#: lib/logitech_receiver/settings_templates.py:1170
+#: lib/logitech_receiver/settings_templates.py:1173
 msgid "Sensitivity Switching"
 msgstr "Přepnutí citlivosti"
 
-#: lib/logitech_receiver/settings_templates.py:1172
+#: lib/logitech_receiver/settings_templates.py:1175
 msgid ""
 "Switch the current sensitivity and the remembered sensitivity when "
 "the key or button is pressed.\n"
@@ -823,321 +825,321 @@ msgstr ""
 "klávesy.\n"
 "Pokud není citlivost uložena, uloží současnou citlivost."
 
-#: lib/logitech_receiver/settings_templates.py:1176
+#: lib/logitech_receiver/settings_templates.py:1179
 msgid "Off"
 msgstr "Vypnuto"
 
-#: lib/logitech_receiver/settings_templates.py:1207
+#: lib/logitech_receiver/settings_templates.py:1210
 msgid "Disable keys"
 msgstr "Zakázat klávesy"
 
-#: lib/logitech_receiver/settings_templates.py:1208
+#: lib/logitech_receiver/settings_templates.py:1211
 msgid "Disable specific keyboard keys."
 msgstr "Zakáže specifické klávesy."
 
-#: lib/logitech_receiver/settings_templates.py:1211
+#: lib/logitech_receiver/settings_templates.py:1214
 #, python-format
 msgid "Disables the %s key."
 msgstr "Zakáže %s klávesu."
 
-#: lib/logitech_receiver/settings_templates.py:1224
-#: lib/logitech_receiver/settings_templates.py:1281
+#: lib/logitech_receiver/settings_templates.py:1227
+#: lib/logitech_receiver/settings_templates.py:1284
 msgid "Set OS"
 msgstr "Nastavit OS"
 
-#: lib/logitech_receiver/settings_templates.py:1225
-#: lib/logitech_receiver/settings_templates.py:1282
+#: lib/logitech_receiver/settings_templates.py:1228
+#: lib/logitech_receiver/settings_templates.py:1285
 msgid "Change keys to match OS."
 msgstr "Změní klávesy dle operačního systému."
 
-#: lib/logitech_receiver/settings_templates.py:1294
+#: lib/logitech_receiver/settings_templates.py:1297
 msgid "Change Host"
 msgstr "Změnit hostitele"
 
-#: lib/logitech_receiver/settings_templates.py:1295
+#: lib/logitech_receiver/settings_templates.py:1298
 msgid "Switch connection to a different host"
 msgstr "Přepnout spojení na jiného hostitele"
 
-#: lib/logitech_receiver/settings_templates.py:1319
+#: lib/logitech_receiver/settings_templates.py:1322
 msgid "Performs a left click."
 msgstr "Provede levý klik."
 
-#: lib/logitech_receiver/settings_templates.py:1319
+#: lib/logitech_receiver/settings_templates.py:1322
 msgid "Single tap"
 msgstr "Jednoduché klepnutí"
 
-#: lib/logitech_receiver/settings_templates.py:1320
+#: lib/logitech_receiver/settings_templates.py:1323
 msgid "Performs a right click."
 msgstr "Provede pravý klik."
 
-#: lib/logitech_receiver/settings_templates.py:1320
+#: lib/logitech_receiver/settings_templates.py:1323
 msgid "Single tap with two fingers"
 msgstr "Jedno klepnutí dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1321
+#: lib/logitech_receiver/settings_templates.py:1324
 msgid "Single tap with three fingers"
 msgstr "Jedno klepnutí třemi prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1325
+#: lib/logitech_receiver/settings_templates.py:1328
 msgid "Double tap"
 msgstr "Dvojklepnutí"
 
-#: lib/logitech_receiver/settings_templates.py:1325
+#: lib/logitech_receiver/settings_templates.py:1328
 msgid "Performs a double click."
 msgstr "Provede dvouklik."
 
-#: lib/logitech_receiver/settings_templates.py:1326
+#: lib/logitech_receiver/settings_templates.py:1329
 msgid "Double tap with two fingers"
 msgstr "Dvojité klepnutí dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1327
+#: lib/logitech_receiver/settings_templates.py:1330
 msgid "Double tap with three fingers"
 msgstr "Dvojité klepnutí třemi prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1330
+#: lib/logitech_receiver/settings_templates.py:1333
 msgid "Drags items by dragging the finger after double tapping."
 msgstr "Táhnutí položek tažením prstu po dvojitém poklepání."
 
-#: lib/logitech_receiver/settings_templates.py:1330
+#: lib/logitech_receiver/settings_templates.py:1333
 msgid "Tap and drag"
 msgstr "Klepni a táhni"
 
-#: lib/logitech_receiver/settings_templates.py:1332
+#: lib/logitech_receiver/settings_templates.py:1335
 msgid "Tap and drag with two fingers"
 msgstr "Klepni a táhni dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1333
+#: lib/logitech_receiver/settings_templates.py:1336
 msgid "Drags items by dragging the fingers after double tapping."
 msgstr "Táhnutí položek tažením prstů po dvojitém poklepání."
 
-#: lib/logitech_receiver/settings_templates.py:1335
+#: lib/logitech_receiver/settings_templates.py:1338
 msgid "Tap and drag with three fingers"
 msgstr "Klepnutí a táhnutí třemi prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1338
+#: lib/logitech_receiver/settings_templates.py:1341
 msgid "Suppress tap and edge gestures"
 msgstr "Potlačit gesta klepnutí a hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1339
+#: lib/logitech_receiver/settings_templates.py:1342
 msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
 msgstr "Potlačí gesta klepnutí a hrany (ekvivalent stisknutí Fn + Levý klik)."
 
-#: lib/logitech_receiver/settings_templates.py:1341
+#: lib/logitech_receiver/settings_templates.py:1344
 msgid "Scroll with one finger"
 msgstr "Posuv jedním prstem."
 
-#: lib/logitech_receiver/settings_templates.py:1341
-#: lib/logitech_receiver/settings_templates.py:1342
+#: lib/logitech_receiver/settings_templates.py:1344
 #: lib/logitech_receiver/settings_templates.py:1345
+#: lib/logitech_receiver/settings_templates.py:1348
 msgid "Scrolls."
 msgstr "Posuvy."
 
-#: lib/logitech_receiver/settings_templates.py:1342
 #: lib/logitech_receiver/settings_templates.py:1345
+#: lib/logitech_receiver/settings_templates.py:1348
 msgid "Scroll with two fingers"
 msgstr "Posuv dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1343
+#: lib/logitech_receiver/settings_templates.py:1346
 msgid "Scroll horizontally with two fingers"
 msgstr "Vodorovný posuv dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1343
+#: lib/logitech_receiver/settings_templates.py:1346
 msgid "Scrolls horizontally."
 msgstr "Vodorovný posuv."
 
-#: lib/logitech_receiver/settings_templates.py:1344
+#: lib/logitech_receiver/settings_templates.py:1347
 msgid "Scroll vertically with two fingers"
 msgstr "Svislý posuv dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1344
+#: lib/logitech_receiver/settings_templates.py:1347
 msgid "Scrolls vertically."
 msgstr "Svislý posuv."
 
-#: lib/logitech_receiver/settings_templates.py:1346
+#: lib/logitech_receiver/settings_templates.py:1349
 msgid "Inverts the scrolling direction."
 msgstr "Mění směr otáčení."
 
-#: lib/logitech_receiver/settings_templates.py:1346
+#: lib/logitech_receiver/settings_templates.py:1349
 msgid "Natural scrolling"
 msgstr "Přirozený posuv"
 
-#: lib/logitech_receiver/settings_templates.py:1347
+#: lib/logitech_receiver/settings_templates.py:1350
 msgid "Enables the thumbwheel."
 msgstr "Povolí kolečko palce."
 
-#: lib/logitech_receiver/settings_templates.py:1347
+#: lib/logitech_receiver/settings_templates.py:1350
 msgid "Thumbwheel"
 msgstr "Kolečko palce"
 
-#: lib/logitech_receiver/settings_templates.py:1358
-#: lib/logitech_receiver/settings_templates.py:1362
+#: lib/logitech_receiver/settings_templates.py:1361
+#: lib/logitech_receiver/settings_templates.py:1365
 msgid "Swipe from the top edge"
 msgstr "Táhnutí z horní hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1359
+#: lib/logitech_receiver/settings_templates.py:1362
 msgid "Swipe from the left edge"
 msgstr "Táhnutí z levé hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1360
+#: lib/logitech_receiver/settings_templates.py:1363
 msgid "Swipe from the right edge"
 msgstr "Táhnutí z pravé hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1361
+#: lib/logitech_receiver/settings_templates.py:1364
 msgid "Swipe from the bottom edge"
 msgstr "Táhnutí ze spodní hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1363
+#: lib/logitech_receiver/settings_templates.py:1366
 msgid "Swipe two fingers from the left edge"
 msgstr "Táhnutí dvěma prsty z levé hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1364
+#: lib/logitech_receiver/settings_templates.py:1367
 msgid "Swipe two fingers from the right edge"
 msgstr "Táhnutí dvěma prsty z pravé hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1365
+#: lib/logitech_receiver/settings_templates.py:1368
 msgid "Swipe two fingers from the bottom edge"
 msgstr "Táhnutí dvěma prsty ze spodní hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1366
+#: lib/logitech_receiver/settings_templates.py:1369
 msgid "Swipe two fingers from the top edge"
 msgstr "Táhnutí dvěma prsty z horní hrany"
 
-#: lib/logitech_receiver/settings_templates.py:1367
-#: lib/logitech_receiver/settings_templates.py:1371
+#: lib/logitech_receiver/settings_templates.py:1370
+#: lib/logitech_receiver/settings_templates.py:1374
 msgid "Pinch to zoom out; spread to zoom in."
 msgstr "Sevření pro přiblížení; rozevření pro oddálení."
 
-#: lib/logitech_receiver/settings_templates.py:1367
+#: lib/logitech_receiver/settings_templates.py:1370
 msgid "Zoom with two fingers."
 msgstr "Přiblížení dvěma prsty."
 
-#: lib/logitech_receiver/settings_templates.py:1368
+#: lib/logitech_receiver/settings_templates.py:1371
 msgid "Pinch to zoom out."
 msgstr "Sevřít pro přiblížení."
 
-#: lib/logitech_receiver/settings_templates.py:1369
+#: lib/logitech_receiver/settings_templates.py:1372
 msgid "Spread to zoom in."
 msgstr "Rozevřít pro oddálení."
 
-#: lib/logitech_receiver/settings_templates.py:1370
+#: lib/logitech_receiver/settings_templates.py:1373
 msgid "Zoom with three fingers."
 msgstr "Přiblížení třemi prsty."
 
-#: lib/logitech_receiver/settings_templates.py:1371
+#: lib/logitech_receiver/settings_templates.py:1374
 msgid "Zoom with two fingers"
 msgstr "Přiblížení dvěma prsty"
 
-#: lib/logitech_receiver/settings_templates.py:1389
+#: lib/logitech_receiver/settings_templates.py:1392
 msgid "Pixel zone"
 msgstr "Pixelová zóna"
 
-#: lib/logitech_receiver/settings_templates.py:1390
+#: lib/logitech_receiver/settings_templates.py:1393
 msgid "Ratio zone"
 msgstr "Poměrová zóna"
 
-#: lib/logitech_receiver/settings_templates.py:1391
+#: lib/logitech_receiver/settings_templates.py:1394
 msgid "Scale factor"
 msgstr "Faktor škálování"
 
-#: lib/logitech_receiver/settings_templates.py:1391
+#: lib/logitech_receiver/settings_templates.py:1394
 msgid "Sets the cursor speed."
 msgstr "Nastaví rychlost kurzoru."
 
-#: lib/logitech_receiver/settings_templates.py:1395
+#: lib/logitech_receiver/settings_templates.py:1398
 msgid "Left-most coordinate."
 msgstr "Souřadnice nejvíce vlevo."
 
-#: lib/logitech_receiver/settings_templates.py:1396
+#: lib/logitech_receiver/settings_templates.py:1399
 msgid "Bottom"
 msgstr "Dole"
 
-#: lib/logitech_receiver/settings_templates.py:1396
+#: lib/logitech_receiver/settings_templates.py:1399
 msgid "Bottom coordinate."
 msgstr "Spodní souřadnice."
 
-#: lib/logitech_receiver/settings_templates.py:1397
+#: lib/logitech_receiver/settings_templates.py:1400
 msgid "Width"
 msgstr "Šířka"
 
-#: lib/logitech_receiver/settings_templates.py:1397
+#: lib/logitech_receiver/settings_templates.py:1400
 msgid "Width."
 msgstr "Šířka."
 
-#: lib/logitech_receiver/settings_templates.py:1398
+#: lib/logitech_receiver/settings_templates.py:1401
 msgid "Height"
 msgstr "Výška"
 
-#: lib/logitech_receiver/settings_templates.py:1398
+#: lib/logitech_receiver/settings_templates.py:1401
 msgid "Height."
 msgstr "Výška."
 
-#: lib/logitech_receiver/settings_templates.py:1399
+#: lib/logitech_receiver/settings_templates.py:1402
 msgid "Cursor speed."
 msgstr "Rychlost kurzoru."
 
-#: lib/logitech_receiver/settings_templates.py:1399
+#: lib/logitech_receiver/settings_templates.py:1402
 msgid "Scale"
 msgstr "Měřítko"
 
-#: lib/logitech_receiver/settings_templates.py:1405
+#: lib/logitech_receiver/settings_templates.py:1408
 msgid "Gestures"
 msgstr "Gesta"
 
-#: lib/logitech_receiver/settings_templates.py:1406
+#: lib/logitech_receiver/settings_templates.py:1409
 msgid "Tweak the mouse/touchpad behaviour."
 msgstr "Ladí chování myši/touchpadu."
 
-#: lib/logitech_receiver/settings_templates.py:1422
+#: lib/logitech_receiver/settings_templates.py:1425
 msgid "Gestures Diversion"
 msgstr "Gesto odklonění"
 
-#: lib/logitech_receiver/settings_templates.py:1423
+#: lib/logitech_receiver/settings_templates.py:1426
 msgid "Divert mouse/touchpad gestures."
 msgstr "Odkloní gesta myši/touchpadu."
 
-#: lib/logitech_receiver/settings_templates.py:1439
+#: lib/logitech_receiver/settings_templates.py:1442
 msgid "Gesture params"
 msgstr "Parametry gesta"
 
-#: lib/logitech_receiver/settings_templates.py:1440
+#: lib/logitech_receiver/settings_templates.py:1443
 msgid "Change numerical parameters of a mouse/touchpad."
 msgstr "Změňte číselné parametry myši/touchpadu."
 
-#: lib/logitech_receiver/settings_templates.py:1464
+#: lib/logitech_receiver/settings_templates.py:1467
 msgid "M-Key LEDs"
 msgstr "M-Key LEDky"
 
-#: lib/logitech_receiver/settings_templates.py:1466
+#: lib/logitech_receiver/settings_templates.py:1469
 msgid "Control the M-Key LEDs."
 msgstr "Ovládání LEDek M-Key."
 
-#: lib/logitech_receiver/settings_templates.py:1470
-#: lib/logitech_receiver/settings_templates.py:1501
+#: lib/logitech_receiver/settings_templates.py:1473
+#: lib/logitech_receiver/settings_templates.py:1504
 msgid "May need G Keys diverted to be effective."
 msgstr "Může vyžadovat odklonění G kláves aby se projevilo."
 
-#: lib/logitech_receiver/settings_templates.py:1476
+#: lib/logitech_receiver/settings_templates.py:1479
 #, python-format
 msgid "Lights up the %s key."
 msgstr "Osvětlení %s klávesy."
 
-#: lib/logitech_receiver/settings_templates.py:1495
+#: lib/logitech_receiver/settings_templates.py:1498
 msgid "MR-Key LED"
 msgstr "MR-Key LED"
 
-#: lib/logitech_receiver/settings_templates.py:1497
+#: lib/logitech_receiver/settings_templates.py:1500
 msgid "Control the MR-Key LED."
 msgstr "Ovládání MR-Key LEDky."
 
-#: lib/logitech_receiver/settings_templates.py:1518
+#: lib/logitech_receiver/settings_templates.py:1521
 msgid "Persistent Key/Button Mapping"
 msgstr "Trvalé mapování Klávesy/Tlačítka"
 
-#: lib/logitech_receiver/settings_templates.py:1520
+#: lib/logitech_receiver/settings_templates.py:1523
 msgid "Permanently change the mapping for the key or button."
 msgstr "Trvale změní mapování klávesy nebo tlačítka."
 
-#: lib/logitech_receiver/settings_templates.py:1522
+#: lib/logitech_receiver/settings_templates.py:1525
 msgid ""
 "Changing important keys or buttons (such as for the left mouse "
 "button) can result in an unusable system."
@@ -1145,113 +1147,115 @@ msgstr ""
 "Změna důležité klávesy nebo tlačítka (například levé tlačítko myši) "
 "může vést k nepoužitelnému systému."
 
-#: lib/logitech_receiver/settings_templates.py:1579
+#: lib/logitech_receiver/settings_templates.py:1582
 msgid "Sidetone"
 msgstr "Zpětná vazba"
 
-#: lib/logitech_receiver/settings_templates.py:1580
+#: lib/logitech_receiver/settings_templates.py:1583
 msgid "Set sidetone level."
 msgstr "Nastavení úrovně zpětné vazby."
 
-#: lib/logitech_receiver/settings_templates.py:1589
+#: lib/logitech_receiver/settings_templates.py:1592
 msgid "Equalizer"
 msgstr "Ekvalizér"
 
-#: lib/logitech_receiver/settings_templates.py:1590
-#: lib/logitech_receiver/settings_templates.py:1742
+#: lib/logitech_receiver/settings_templates.py:1593
+#: lib/logitech_receiver/settings_templates.py:1902
 msgid "Set equalizer levels."
 msgstr "Nastavení úrovní ekvalizéru."
 
-#: lib/logitech_receiver/settings_templates.py:1612
-#: lib/logitech_receiver/settings_templates.py:1761
+#: lib/logitech_receiver/settings_templates.py:1615
+#: lib/logitech_receiver/settings_templates.py:1930
+#: lib/logitech_receiver/settings_templates.py:2056
+#: lib/logitech_receiver/settings_templates.py:2058
 msgid "Hz"
 msgstr "Hz"
 
-#: lib/logitech_receiver/settings_templates.py:1618
+#: lib/logitech_receiver/settings_templates.py:1621
 msgid "Power Management"
 msgstr "Správa napájení"
 
-#: lib/logitech_receiver/settings_templates.py:1619
+#: lib/logitech_receiver/settings_templates.py:1622
 msgid "Power off in minutes (0 for never)."
 msgstr "Vypnutí po minutách (0 pro nikdy)."
 
-#: lib/logitech_receiver/settings_templates.py:1631
+#: lib/logitech_receiver/settings_templates.py:1634
 msgid "Eco Mode"
 msgstr "Eko režim"
 
-#: lib/logitech_receiver/settings_templates.py:1632
+#: lib/logitech_receiver/settings_templates.py:1635
 msgid "Battery saver mode."
 msgstr "Režim šetření baterie."
 
-#: lib/logitech_receiver/settings_templates.py:1639
+#: lib/logitech_receiver/settings_templates.py:1653
 msgid "Do Not Disturb"
 msgstr "Nerušit"
 
-#: lib/logitech_receiver/settings_templates.py:1640
+#: lib/logitech_receiver/settings_templates.py:1654
 msgid "Suppress notification sounds."
 msgstr "Potlačit zvuk oznámení."
 
-#: lib/logitech_receiver/settings_templates.py:1647
+#: lib/logitech_receiver/settings_templates.py:1661
 msgid "Mic Mute"
 msgstr "Ztlumit mikrofon."
 
-#: lib/logitech_receiver/settings_templates.py:1648
+#: lib/logitech_receiver/settings_templates.py:1662
 msgid "Mute the microphone."
 msgstr "Ztlumení mikrofonu."
 
-#: lib/logitech_receiver/settings_templates.py:1655
+#: lib/logitech_receiver/settings_templates.py:1681
 msgid "Mic SNR"
 msgstr "SNR mikrofonu"
 
-#: lib/logitech_receiver/settings_templates.py:1656
+#: lib/logitech_receiver/settings_templates.py:1682
 msgid "Microphone signal-to-noise ratio enhancement."
 msgstr "Rozšíření poměru signál-šum mikrofonu."
 
-#: lib/logitech_receiver/settings_templates.py:1663
+#: lib/logitech_receiver/settings_templates.py:1689
 msgid "AI Noise Reduction"
 msgstr "AI redukce šumu"
 
-#: lib/logitech_receiver/settings_templates.py:1664
+#: lib/logitech_receiver/settings_templates.py:1690
 msgid "Enable AI noise reduction."
 msgstr "Povolí AI redukci šumu."
 
-#: lib/logitech_receiver/settings_templates.py:1671
+#: lib/logitech_receiver/settings_templates.py:1697
 msgid "AI Noise Reduction Level"
 msgstr "Úroveň AI omezení šumu."
 
-#: lib/logitech_receiver/settings_templates.py:1672
+#: lib/logitech_receiver/settings_templates.py:1698
 msgid "AI noise reduction intensity."
 msgstr "Intenzita AI omezení šumu."
 
-#: lib/logitech_receiver/settings_templates.py:1681
+#: lib/logitech_receiver/settings_templates.py:1707
 msgid "Headset Sidetone"
 msgstr "Zpětná vazba náhlavní soupravy"
 
-#: lib/logitech_receiver/settings_templates.py:1682
+#: lib/logitech_receiver/settings_templates.py:1708
 msgid "Sidetone level (0 = off, 100 = max)."
 msgstr "Úroveň zpětné vazby (0 = vypnuto, 100 = max)."
 
-#: lib/logitech_receiver/settings_templates.py:1706
+#: lib/logitech_receiver/settings_templates.py:1771
 msgid "Mic Gain"
 msgstr "Zesílení mikrofonu"
 
-#: lib/logitech_receiver/settings_templates.py:1707
+#: lib/logitech_receiver/settings_templates.py:1772
 msgid "Microphone gain level."
 msgstr "Úroveň zesílení mikrofonu."
 
-#: lib/logitech_receiver/settings_templates.py:1718
+#: lib/logitech_receiver/settings_templates.py:1824
 msgid "Audio Mix Balance"
 msgstr "Vyvážení zvuku"
 
-#: lib/logitech_receiver/settings_templates.py:1719
+#: lib/logitech_receiver/settings_templates.py:1825
 msgid "Balance between game and chat audio."
 msgstr "Vyvážení zvuku mezi hrou a mluvením."
 
-#: lib/logitech_receiver/settings_templates.py:1729
+#: lib/logitech_receiver/settings_templates.py:1876
 msgid "Auto Sleep Timeout"
 msgstr "Časový limit pro automatické uspání"
 
-#: lib/logitech_receiver/settings_templates.py:1730
+#: lib/logitech_receiver/settings_templates.py:1877
 msgid ""
 "Idle time in minutes before the headset enters sleep mode (0 = "
 "disabled)."
@@ -1259,138 +1263,246 @@ msgstr ""
 "Doba nečinnosti v minutách, po které se sluchátka přepnou do režimu "
 "spánku (0 = vypnuto)."
 
-#: lib/logitech_receiver/settings_templates.py:1741
+#: lib/logitech_receiver/settings_templates.py:1901
 msgid "Headset Equalizer"
 msgstr "Ekvalizér sluchátek"
 
-#: lib/logitech_receiver/settings_templates.py:1815
-msgid "Brightness Control"
-msgstr "Nastavení jasu"
+#: lib/logitech_receiver/settings_templates.py:1996
+msgid "Headset Advanced EQ"
+msgstr "Pokročilý EQ sluchátek"
 
-#: lib/logitech_receiver/settings_templates.py:1816
-msgid "Control overall brightness"
-msgstr "Nastavení celkového jasu"
+#: lib/logitech_receiver/settings_templates.py:1997
+msgid "Per-band gain for the headset's active parametric EQ."
+msgstr ""
+"Zesílení jednotlivých pásem u aktivního parametrického ekvalizéru sluchátek."
 
-#: lib/logitech_receiver/settings_templates.py:1887
-#: lib/logitech_receiver/settings_templates.py:1979
+#: lib/logitech_receiver/settings_templates.py:2268
+msgid "EQ Preset"
+msgstr "Přednastavení ekvalizéru"
+
+#: lib/logitech_receiver/settings_templates.py:2269
+msgid "Switch the active EQ preset. Factory presets are read-only."
+msgstr ""
+"Přepne aktivní přednastavení ekvalizéru. Tovární přednastavení jsou pouze pro "
+"čtení."
+
+#: lib/logitech_receiver/settings_templates.py:2294
+msgid "Slot"
+msgstr "Pozice"
+
+#: lib/logitech_receiver/settings_templates.py:2296
+msgid "(factory)"
+msgstr "(tovární)"
+
+#: lib/logitech_receiver/settings_templates.py:2429
+#: lib/logitech_receiver/settings_templates.py:3206
+#: lib/logitech_receiver/settings_templates.py:3298
 msgid "LED Control"
 msgstr "Ovládání LED"
 
-#: lib/logitech_receiver/settings_templates.py:1888
-#: lib/logitech_receiver/settings_templates.py:1980
-msgid "Allow Solaar to control LED zones."
-msgstr "Povolit Sollaru kontrolovat LED zóny."
+#: lib/logitech_receiver/settings_templates.py:2430
+msgid "Allow Solaar to control the headset LED zones."
+msgstr "Povolit Solaaru kontrolovat LED zóny."
 
-#: lib/logitech_receiver/settings_templates.py:1911
-#: lib/logitech_receiver/settings_templates.py:2411
-msgid "LED Zone Effects"
-msgstr "LED zónové efekty"
+#: lib/logitech_receiver/settings_templates.py:2478
+msgid "Per-zone Lighting"
+msgstr "Zónové osvětlení"
 
-#: lib/logitech_receiver/settings_templates.py:1912
-#: lib/logitech_receiver/settings_templates.py:2080
-#: lib/logitech_receiver/settings_templates.py:2120
-#: lib/logitech_receiver/settings_templates.py:2227
-#: lib/logitech_receiver/settings_templates.py:2412
-msgid "LED Control needs to be enabled."
-msgstr "Ovládání LED musí být povoleno."
+#: lib/logitech_receiver/settings_templates.py:2480
+msgid ""
+"Override individual zone colors. 'No change' inherits the LEDs "
+"Primary color.\n"
+"LED Control needs to be set to Solaar to be effective."
+msgstr ""
+"Přepsání barev jednotlivých zón. Volba „Bez změny“ převezme primární barvu LED"
+" diod.\n"
+"Aby bylo ovládání LED funkční musí být nastaveno na Solaar."
 
-#: lib/logitech_receiver/settings_templates.py:1912
-#: lib/logitech_receiver/settings_templates.py:2412
-msgid "Set effect for LED Zone"
-msgstr "Nastavit efekt pro zónu LED"
+#: lib/logitech_receiver/settings_templates.py:2498
+msgid "Zone"
+msgstr "Zóna"
 
-#: lib/logitech_receiver/settings_templates.py:1914
-msgid "Color"
-msgstr "Barva"
+#: lib/logitech_receiver/settings_templates.py:2620
+#: lib/logitech_receiver/settings_templates.py:2908
+#: lib/logitech_receiver/settings_templates.py:3648
+msgid "Secondary"
+msgstr "Sekundární"
 
-#: lib/logitech_receiver/settings_templates.py:1915
+#: lib/logitech_receiver/settings_templates.py:2621
+#: lib/logitech_receiver/settings_templates.py:3234
 msgid "Speed"
 msgstr "Rychlost"
 
-#: lib/logitech_receiver/settings_templates.py:1919
-msgid "Period"
-msgstr "Období"
+#: lib/logitech_receiver/settings_templates.py:2688
+msgid "Startup Effect"
+msgstr "Efekt při zapnutí"
 
-#: lib/logitech_receiver/settings_templates.py:1924
+#: lib/logitech_receiver/settings_templates.py:2690
+msgid "Firmware lighting effect played when the headset powers on or wakes."
+msgstr ""
+"Světelný efekt firmwaru, který se spustí při zapnutí nebo probuzení sluchátek."
+
+#: lib/logitech_receiver/settings_templates.py:2692
+#: lib/logitech_receiver/settings_templates.py:2703
+msgid "Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100."
+msgstr ""
+"Výchozí v zařízení: Primární #00B8FC, Sekundární #FF00AB, Rychlost 100."
+
+#: lib/logitech_receiver/settings_templates.py:2699
+msgid "Shutdown Effect"
+msgstr "Efekt při vypnutí"
+
+#: lib/logitech_receiver/settings_templates.py:2701
+msgid ""
+"Firmware lighting effect played when the headset powers off or "
+"sleeps."
+msgstr ""
+"Světelný efekt firmwaru, který se spustí při vypnutí nebo uspání sluchátek."
+
+#: lib/logitech_receiver/settings_templates.py:2710
+msgid "Passive Effect"
+msgstr "Efekt při nečinnosti"
+
+#: lib/logitech_receiver/settings_templates.py:2712
+msgid "Firmware lighting effect played while the headset is idle."
+msgstr "Světelný efekt firmwaru, který se spustí při neaktivitě sluchátek."
+
+#: lib/logitech_receiver/settings_templates.py:2714
+msgid "Device default: Primary #00B8FC, Secondary #FF00AB, Speed 75."
+msgstr "Výchozí v zařízení: Primární #00B8FC, Sekundární #FF00AB, Rychlost 75."
+
+#: lib/logitech_receiver/settings_templates.py:2833
+msgid "Onboard Effect"
+msgstr "Vestavěný efekt"
+
+#: lib/logitech_receiver/settings_templates.py:2834
+msgid "Firmware RGB effect the headset plays on its own."
+msgstr "RGB efekt firmware, který sluchátka přehrají samy od sebe."
+
+#: lib/logitech_receiver/settings_templates.py:2909
+#: lib/logitech_receiver/settings_templates.py:3243
 msgid "Intensity"
 msgstr "Intenzita"
 
-#: lib/logitech_receiver/settings_templates.py:1925
+#: lib/logitech_receiver/settings_templates.py:2910
+#: lib/logitech_receiver/settings_templates.py:3245
+msgid "Saturation"
+msgstr "Sytost"
+
+#: lib/logitech_receiver/settings_templates.py:2914
+#: lib/logitech_receiver/settings_templates.py:3238
+msgid "Period"
+msgstr "Období"
+
+#: lib/logitech_receiver/settings_templates.py:2919
+#: lib/logitech_receiver/settings_templates.py:3250
+msgid "Direction"
+msgstr "Směr"
+
+#: lib/logitech_receiver/settings_templates.py:3134
+msgid "Brightness Control"
+msgstr "Nastavení jasu"
+
+#: lib/logitech_receiver/settings_templates.py:3135
+msgid "Control overall brightness"
+msgstr "Nastavení celkového jasu"
+
+#: lib/logitech_receiver/settings_templates.py:3207
+#: lib/logitech_receiver/settings_templates.py:3299
+msgid "Allow Solaar to control LED zones."
+msgstr "Povolit Sollaru kontrolovat LED zóny."
+
+#: lib/logitech_receiver/settings_templates.py:3230
+#: lib/logitech_receiver/settings_templates.py:3744
+msgid "LED Zone Effects"
+msgstr "LED zónové efekty"
+
+#: lib/logitech_receiver/settings_templates.py:3231
+#: lib/logitech_receiver/settings_templates.py:3399
+#: lib/logitech_receiver/settings_templates.py:3439
+#: lib/logitech_receiver/settings_templates.py:3546
+#: lib/logitech_receiver/settings_templates.py:3745
+msgid "LED Control needs to be enabled."
+msgstr "Ovládání LED musí být povoleno."
+
+#: lib/logitech_receiver/settings_templates.py:3231
+#: lib/logitech_receiver/settings_templates.py:3745
+msgid "Set effect for LED Zone"
+msgstr "Nastavit efekt pro zónu LED"
+
+#: lib/logitech_receiver/settings_templates.py:3233
+msgid "Color"
+msgstr "Barva"
+
+#: lib/logitech_receiver/settings_templates.py:3244
 #, fuzzy
 msgid "Ramp"
 msgstr "Rampa"
 
-#: lib/logitech_receiver/settings_templates.py:1926
-msgid "Saturation"
-msgstr "Sytost"
-
-#: lib/logitech_receiver/settings_templates.py:1927
+#: lib/logitech_receiver/settings_templates.py:3246
 msgid "Waveform"
 msgstr "Forma vlny"
 
-#: lib/logitech_receiver/settings_templates.py:1931
-msgid "Direction"
-msgstr "Směr"
-
-#: lib/logitech_receiver/settings_templates.py:1960
+#: lib/logitech_receiver/settings_templates.py:3279
 msgid "LEDs"
 msgstr "LEDky"
 
-#: lib/logitech_receiver/settings_templates.py:2079
+#: lib/logitech_receiver/settings_templates.py:3398
 msgid "Idle Timeout"
 msgstr "Limit nečinnosti"
 
-#: lib/logitech_receiver/settings_templates.py:2080
+#: lib/logitech_receiver/settings_templates.py:3399
 msgid "Time without input before LED idle effect starts."
 msgstr "Doba v klidu předtím než se spustí efekt nečinnosti."
 
-#: lib/logitech_receiver/settings_templates.py:2116
+#: lib/logitech_receiver/settings_templates.py:3435
 msgid "Idle Effect"
 msgstr "Efekt při nečinnosti"
 
-#: lib/logitech_receiver/settings_templates.py:2118
+#: lib/logitech_receiver/settings_templates.py:3437
 msgid ""
 "What happens to LEDs when idle — dim to a percentage, change the "
 "base color, or play an animation."
 msgstr ""
-"Co se má stít s LED během nečinnosti — ztlumit na procenta, změnit základní ba"
-"rvu nebo přehrát animaci."
+"Co se má stít s LED během nečinnosti — ztlumit na procenta, změnit "
+"základní barvu nebo přehrát animaci."
 
-#: lib/logitech_receiver/settings_templates.py:2201
+#: lib/logitech_receiver/settings_templates.py:3520
 msgid "No change"
 msgstr "Beze změny"
 
-#: lib/logitech_receiver/settings_templates.py:2226
+#: lib/logitech_receiver/settings_templates.py:3545
 msgid "Sleep Timeout"
 msgstr "Časový limit pro uspání"
 
-#: lib/logitech_receiver/settings_templates.py:2227
+#: lib/logitech_receiver/settings_templates.py:3546
 msgid "Time without input before LEDs fade off completely."
 msgstr "Doba v klidu předtím než LEDky kompletně zhasnou."
 
-#: lib/logitech_receiver/settings_templates.py:2329
-msgid "Secondary"
-msgstr "Sekundární"
-
-#: lib/logitech_receiver/settings_templates.py:2392
+#: lib/logitech_receiver/settings_templates.py:3719
 msgid "Startup Animation"
 msgstr "Úvodní animace"
 
-#: lib/logitech_receiver/settings_templates.py:2394
+#: lib/logitech_receiver/settings_templates.py:3722
 msgid ""
 "Firmware-played animation when the keyboard wakes from deep sleep or "
 "powers on.\n"
 "Setting persists on the device (non-volatile)."
 msgstr ""
-"Animace přehrávaná firmwarem při probuzení klávesnice z režimu hlubokého spánk"
-"u nebo při zapnutí.\n"
+"Animace přehrávaná firmwarem při probuzení klávesnice z režimu "
+"hlubokého spánku nebo při zapnutí.\n"
 "Nastavení zůstává uloženo v zařízení (trvale)."
 
-#: lib/logitech_receiver/settings_templates.py:2402
+#: lib/logitech_receiver/settings_templates.py:3726
+#: lib/logitech_receiver/settings_templates.py:3737
+msgid "Device default: Primary #FF0081, Secondary #80AAFF."
+msgstr "Výchozí v zařízení: Primární #FF0081, Sekundární #80AAFF."
+
+#: lib/logitech_receiver/settings_templates.py:3733
 msgid "Shutdown Animation"
 msgstr "Vypínací animace"
 
-#: lib/logitech_receiver/settings_templates.py:2404
+#: lib/logitech_receiver/settings_templates.py:3735
 msgid ""
 "Firmware-played animation when the keyboard powers off.\n"
 "Setting persists on the device (non-volatile)."
@@ -1398,40 +1510,40 @@ msgstr ""
 "Animace spouštěná firmwarem při vypnutí klávesnice.\n"
 "Nastavení zůstává uloženo v zařízení (trvale)."
 
-#: lib/logitech_receiver/settings_templates.py:2514
+#: lib/logitech_receiver/settings_templates.py:3847
 #: lib/solaar/ui/perkey/dialog.py:87
 msgid "Per-key Lighting"
 msgstr "Osvětlení jednotlivých kláves"
 
-#: lib/logitech_receiver/settings_templates.py:2516
+#: lib/logitech_receiver/settings_templates.py:3849
 msgid "Control per-key lighting."
 msgstr "Ovládání podsvícení jednotlivých kláves."
 
-#: lib/logitech_receiver/settings_templates.py:2518
+#: lib/logitech_receiver/settings_templates.py:3851
 msgid ""
 "LED Control needs to be enabled and the zone effect set to Static "
 "for per-key paint to be visible."
 msgstr ""
-"Aby bylo možné zobrazit barvy jednotlivých kláves, je třeba povolit ovládání L"
-"ED a nastavit efekt zóny na „Statický“."
+"Aby bylo možné zobrazit barvy jednotlivých kláves, je třeba povolit "
+"ovládání LED a nastavit efekt zóny na „Statický“."
 
-#: lib/logitech_receiver/settings_templates.py:2849
+#: lib/logitech_receiver/settings_templates.py:4182
 msgid "Force Sensing Buttons"
 msgstr "Tlačítka se snímačem tlaku"
 
-#: lib/logitech_receiver/settings_templates.py:2850
+#: lib/logitech_receiver/settings_templates.py:4183
 msgid "Change the force required to activate button."
 msgstr "Změňte sílu potřebnou pro aktivaci tlačítka."
 
-#: lib/logitech_receiver/settings_templates.py:2867
+#: lib/logitech_receiver/settings_templates.py:4200
 msgid "Force Sensing Button"
 msgstr "Tlačítko se snímačem tlaku"
 
-#: lib/logitech_receiver/settings_templates.py:2983
+#: lib/logitech_receiver/settings_templates.py:4316
 msgid "Analog Button Tuning"
 msgstr "Nastavení analogového tlačítka"
 
-#: lib/logitech_receiver/settings_templates.py:2984
+#: lib/logitech_receiver/settings_templates.py:4317
 msgid ""
 "Configure analog button settings including actuation point, rapid "
 "trigger, and haptics."
@@ -1439,34 +1551,34 @@ msgstr ""
 "Nastavte parametry analogových tlačítek, včetně bodu stisknutí, "
 "rychlého spouštění a haptické zpětné vazby."
 
-#: lib/logitech_receiver/settings_templates.py:3014
+#: lib/logitech_receiver/settings_templates.py:4347
 #, python-format
 msgid "Actuation point depth (1=shallow, %d=deep)."
 msgstr "Hloubka bodu aktivace (1=mělký, %d=hluboký)."
 
-#: lib/logitech_receiver/settings_templates.py:3022
+#: lib/logitech_receiver/settings_templates.py:4355
 #, python-format
 msgid "Rapid trigger sensitivity (1..%d)."
 msgstr "Citlivost spouště (1..%d)."
 
-#: lib/logitech_receiver/settings_templates.py:3030
+#: lib/logitech_receiver/settings_templates.py:4363
 #, python-format
 msgid "Click haptic feedback intensity (0=off, %d=max)."
 msgstr "Intenzita haptické odezvy na kliknutí (0=vypnuto, %d=max)."
 
-#: lib/logitech_receiver/settings_templates.py:3038
+#: lib/logitech_receiver/settings_templates.py:4371
 msgid "Haptic Feedback Level"
 msgstr "Úroveň haptické odezvy"
 
-#: lib/logitech_receiver/settings_templates.py:3039
+#: lib/logitech_receiver/settings_templates.py:4372
 msgid "Change power of haptic feedback.  (Zero to turn off.)"
 msgstr "Změní sílu haptické odezvy. (Nula pro vypnutí.)"
 
-#: lib/logitech_receiver/settings_templates.py:3081
+#: lib/logitech_receiver/settings_templates.py:4414
 msgid "Play Haptic Waveform"
 msgstr "Přehrát haptickou odezvu"
 
-#: lib/logitech_receiver/settings_templates.py:3082
+#: lib/logitech_receiver/settings_templates.py:4415
 msgid "Tell device to play a haptic waveform."
 msgstr "Řekne zařízení aby přehrálo haptickou odezvu."
 
@@ -1571,7 +1683,7 @@ msgid "Incomplete"
 msgstr "Nekompletní"
 
 #: lib/solaar/ui/config_panel.py:500 lib/solaar/ui/config_panel.py:552
-#: lib/solaar/ui/config_panel.py:615
+#: lib/solaar/ui/config_panel.py:619
 #, python-format
 msgid "%d value"
 msgid_plural "%d values"
@@ -1579,23 +1691,23 @@ msgstr[0] "%d hodnota"
 msgstr[1] "%d hodnoty"
 msgstr[2] "%d hodnot"
 
-#: lib/solaar/ui/config_panel.py:801
+#: lib/solaar/ui/config_panel.py:805
 msgid "Changes allowed"
 msgstr "Změny povoleny"
 
-#: lib/solaar/ui/config_panel.py:802
+#: lib/solaar/ui/config_panel.py:806
 msgid "No changes allowed"
 msgstr "Změny nejsou povoleny"
 
-#: lib/solaar/ui/config_panel.py:803
+#: lib/solaar/ui/config_panel.py:807
 msgid "Ignore this setting"
 msgstr "Ignorovat toto nastavení"
 
-#: lib/solaar/ui/config_panel.py:966
+#: lib/solaar/ui/config_panel.py:1022
 msgid "Working"
 msgstr "Pracuji"
 
-#: lib/solaar/ui/config_panel.py:969
+#: lib/solaar/ui/config_panel.py:1025
 msgid "Read/write operation failed."
 msgstr "Operace čtení/zápisu selhala."
 
