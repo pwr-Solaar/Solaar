@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: solaar 1.1.13\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-01 13:49+0800\n"
-"PO-Revision-Date: 2024-07-01 16:23+0800\n"
-"Last-Translator: iskandarma <iskandarma@gmail.com>\n"
+"PO-Revision-Date: 2026-05-24 01:16+0800\n"
+"Last-Translator: Rongrong <i@rong.moe>\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Language: zh_CN\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.4.3\n"
+"X-Generator: Poedit 3.9\n"
 
 #: lib/logitech_receiver/base_usb.py:45
 msgid "Bolt Receiver"
@@ -437,7 +437,7 @@ msgid ""
 "When disabled, pushing the wheel sideways sends custom button events\n"
 "instead of the standard side-scrolling events."
 msgstr ""
-"若禁用，按下滚轮侧边将发送自定义按钮事件\n"
+"若禁用，侧向推动滚轮将发送自定义按钮事件\n"
 "而不是标准侧向滚动事件。"
 
 #: lib/logitech_receiver/settings_templates.py:166
@@ -537,7 +537,7 @@ msgid ""
 "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger "
 "Solaar rules but are otherwise ignored)."
 msgstr ""
-"使滚轮发送 LOWRES_WHEEL (低精度滚轮) HID++ 报告（如有Solaar规则，则被触发）"
+"使滚轮发送 LOWRES_WHEEL (低精度滚轮) HID++ 通告（如有 Solaar 规则，则被触发）"
 
 #: lib/logitech_receiver/settings_templates.py:412
 msgid "Scroll Wheel Direction"
@@ -556,7 +556,7 @@ msgid ""
 "Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar "
 "rules but are otherwise ignored)."
 msgstr ""
-"使滚轮发送 HIRES_WHEEL (高精度滚轮) HID++ 报告（如有Solaar规则，则被触发）"
+"使滚轮发送 HIRES_WHEEL (高精度滚轮) HID++ 通告（如有 Solaar 规则，则被触发）"
 
 #: lib/logitech_receiver/settings_templates.py:445
 msgid "Sensitivity (Pointer Speed)"
@@ -575,7 +575,8 @@ msgid ""
 "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar "
 "rules but are otherwise ignored)."
 msgstr ""
-"使拇指滚轮发送 THUMB_WHEEL (拇指滚轮) HID++ 报告（如有Solaar规则，则被触发）"
+"使拇指滚轮发送 THUMB_WHEEL (拇指滚轮) HID++ 通告（如有 Solaar 规则，则被触"
+"发）"
 
 #: lib/logitech_receiver/settings_templates.py:467
 msgid "Thumb Wheel Direction"
@@ -593,7 +594,7 @@ msgstr "板载预设"
 msgid ""
 "Enable an onboard profile, which controls report rate, sensitivity, and "
 "button actions"
-msgstr "启用板载预设，用于控制回报率、灵敏度及按键功能"
+msgstr "启用板载预设，用于控制回报率、灵敏度及按钮功能"
 
 #: lib/logitech_receiver/settings_templates.py:533
 #: lib/logitech_receiver/settings_templates.py:566
@@ -621,7 +622,7 @@ msgstr "重定义旋钮事件"
 msgid ""
 "Make crown send CROWN HID++ notifications (which trigger Solaar rules but "
 "are otherwise ignored)."
-msgstr "使旋钮发送 CROWN (旋钮) HID++ 报告（如有Solaar规则，则被触发）"
+msgstr "使旋钮发送 CROWN (旋钮) HID++ 通告（如有 Solaar 规则，则被触发）"
 
 #: lib/logitech_receiver/settings_templates.py:605
 msgid "Crown smooth scroll"
@@ -633,13 +634,13 @@ msgstr "设置旋钮的平滑旋动"
 
 #: lib/logitech_receiver/settings_templates.py:614
 msgid "Divert G and M Keys"
-msgstr "转换G键及M键"
+msgstr "重定义 G 键及 M 键"
 
 #: lib/logitech_receiver/settings_templates.py:615
 msgid ""
 "Make G and M keys send HID++ notifications (which trigger Solaar rules but "
 "are otherwise ignored)."
-msgstr "G键及M键将发送 HID++ 报告（如有Solaar规则，则被触发）"
+msgstr "使 G 键及 M 键发送 HID++ 通告（如有 Solaar 规则，则被触发）"
 
 #: lib/logitech_receiver/settings_templates.py:629
 msgid "Scroll Wheel Ratcheted"
@@ -687,7 +688,7 @@ msgstr "会被重定义配置覆盖。"
 msgid ""
 "Changing important actions (such as for the left mouse button) can result in "
 "an unusable system."
-msgstr "更改关键行为 (如鼠标左键) 可能会导致无法操作。"
+msgstr "更改关键操作 (如鼠标左键) 可能导致系统无法使用。"
 
 #: lib/logitech_receiver/settings_templates.py:862
 msgid "Key/Button Diversion"
@@ -697,7 +698,7 @@ msgstr "按键/按钮重定义"
 msgid ""
 "Make the key or button send HID++ notifications (Diverted) or initiate Mouse "
 "Gestures or Sliding DPI"
-msgstr "使按键或按钮发送 HID++  (重定义)报告 、触发鼠标手势或滑动调节 DPI"
+msgstr "使按键或按钮发送 HID++ (重定义) 通告 、触发鼠标手势或滑动调节 DPI"
 
 #: lib/logitech_receiver/settings_templates.py:866
 #: lib/logitech_receiver/settings_templates.py:867
@@ -1060,7 +1061,7 @@ msgstr "永久更改按键或按钮的映射。"
 msgid ""
 "Changing important keys or buttons (such as for the left mouse button) can "
 "result in an unusable system."
-msgstr "更改重要的按键或按钮 (如鼠标左键) 可以导致系统无法使用。"
+msgstr "更改关键的按键或按钮 (如鼠标左键) 可能导致系统无法使用。"
 
 #: lib/logitech_receiver/settings_templates.py:1468
 msgid "Sidetone"
@@ -1116,7 +1117,7 @@ msgstr "LED区域效果"
 #: lib/logitech_receiver/settings_templates.py:1580
 #: lib/logitech_receiver/settings_templates.py:1629
 msgid "LED Control needs to be set to Solaar to be effective."
-msgstr "设置并启用LED控制到Solaar"
+msgstr "LED 控制需要设置到 Solaar 才能生效"
 
 #: lib/logitech_receiver/settings_templates.py:1580
 #: lib/logitech_receiver/settings_templates.py:1629
@@ -1149,7 +1150,7 @@ msgstr "按键独立灯光"
 
 #: lib/logitech_receiver/settings_templates.py:1640
 msgid "Control per-key lighting."
-msgstr "设置按键独立灯光"
+msgstr "设置每个按键的灯光"
 
 #: lib/solaar/ui/__init__.py:103
 msgid "Another Solaar process is already running so just expose its window"
@@ -1398,7 +1399,7 @@ msgstr "特性"
 
 #: lib/solaar/ui/diversion_rules.py:552 lib/solaar/ui/rule_conditions.py:181
 msgid "Report"
-msgstr "回报"
+msgstr "报文"
 
 #: lib/solaar/ui/diversion_rules.py:553 lib/solaar/ui/rule_conditions.py:60
 msgid "Process"
@@ -1418,7 +1419,7 @@ msgstr "按键"
 
 #: lib/solaar/ui/diversion_rules.py:557 lib/solaar/ui/rule_conditions.py:311
 msgid "KeyIsDown"
-msgstr "按键已按下"
+msgstr "按键正被按下"
 
 #: lib/solaar/ui/diversion_rules.py:558 lib/solaar/ui/diversion_rules.py:1359
 msgid "Active"
@@ -1460,7 +1461,7 @@ msgstr "按下按键"
 
 #: lib/solaar/ui/diversion_rules.py:571 lib/solaar/ui/rule_actions.py:183
 msgid "Mouse scroll"
-msgstr "移动鼠标"
+msgstr "鼠标滚轮滚动"
 
 #: lib/solaar/ui/diversion_rules.py:572 lib/solaar/ui/rule_actions.py:244
 msgid "Mouse click"
@@ -1549,7 +1550,7 @@ msgstr "设备已激活，且可更改其设置。"
 
 #: lib/solaar/ui/diversion_rules.py:1364
 msgid "Device that originated the current notification."
-msgstr "触发当前事件的设备"
+msgstr "发出当前通告的设备"
 
 #: lib/solaar/ui/diversion_rules.py:1377
 msgid "Name of host computer."
@@ -1756,11 +1757,11 @@ msgstr "光标所在进程"
 
 #: lib/solaar/ui/rule_conditions.py:114
 msgid "Feature name of notification triggering rule processing."
-msgstr "处理报告触发规则时的特性名称。"
+msgstr "在处理通告触发规则时，匹配特性名称。"
 
 #: lib/solaar/ui/rule_conditions.py:161
 msgid "Report number of notification triggering rule processing."
-msgstr "处理报告触发规则时的回报数字。"
+msgstr "在处理通告触发规则时，匹配报文编号。"
 
 #: lib/solaar/ui/rule_conditions.py:194
 msgid "Active keyboard modifiers. Not always available in Wayland."
@@ -1772,16 +1773,16 @@ msgid ""
 "Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
 "buttons."
 msgstr ""
-"转换的键未按下或已松开。\n"
-"请通过“转换按键”或“转换G键”设置来配置按键转换。"
+"重定义的键按下或松开。\n"
+"请先配置“按键/按钮重定义”和“重定义 G 键”。"
 
 #: lib/solaar/ui/rule_conditions.py:243
 msgid "Key down"
-msgstr "按键按下"
+msgstr "按下"
 
 #: lib/solaar/ui/rule_conditions.py:246
 msgid "Key up"
-msgstr "按键弹起"
+msgstr "松开"
 
 #: lib/solaar/ui/rule_conditions.py:286
 msgid ""
@@ -1789,12 +1790,12 @@ msgid ""
 "Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
 "buttons."
 msgstr ""
-"转换的键已按下。\n"
-"请通过“转换按键”或“转换G键”设置来配置按键转换。"
+"重定义的键正被按下。\n"
+"请先配置“按键/按钮重定义”和“重定义 G 键”。"
 
 #: lib/solaar/ui/rule_conditions.py:324
 msgid "Test condition on notification triggering rule processing."
-msgstr "在规则触发时测试条件。"
+msgstr "在处理通告触发规则时，进行条件测试。"
 
 #: lib/solaar/ui/rule_conditions.py:328
 msgid "Parameter"
@@ -1838,7 +1839,7 @@ msgstr "从%(0)d 到 %(1)d 字节，掩码为 %(2)d"
 msgid ""
 "Bit or range test on bytes in notification message triggering rule "
 "processing."
-msgstr "规则触发时对指定的比特位进行测试或值域检测。"
+msgstr "在处理通告触发规则时，对指定的字节进行比特位或范围测试。"
 
 #: lib/solaar/ui/rule_conditions.py:440
 msgid "type"
@@ -1848,7 +1849,7 @@ msgstr "类型"
 msgid ""
 "Mouse gesture with optional initiating button followed by zero or more mouse "
 "movements."
-msgstr "带有可选触发键并跟随有零个或多个鼠标移动轨迹的鼠标手势。"
+msgstr "鼠标手势，可指定触发键，并可跟随零个或多个鼠标移动轨迹。"
 
 #: lib/solaar/ui/rule_conditions.py:533
 msgid "Add movement"
@@ -1955,7 +1956,7 @@ msgstr "单元 ID"
 
 #: lib/solaar/ui/window.py:558
 msgid "Notifications"
-msgstr "提示"
+msgstr "通告"
 
 #: lib/solaar/ui/window.py:602
 msgid "No device paired."
