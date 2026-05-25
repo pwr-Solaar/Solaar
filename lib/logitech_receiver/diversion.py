@@ -481,14 +481,13 @@ class RuleComponent:
 
 
 def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
-    res = True
     for component in components:
-        res = component.evaluate(feature, notification, device, result)
-        if not isinstance(component, Action) and res is None:
+        result = component.evaluate(feature, notification, device, result)
+        if not isinstance(component, Action) and result is None:
             return None
-        if isinstance(component, Condition) and not res:
-            return res
-    return res
+        if isinstance(component, Condition) and not result:
+            return result
+    return result
 
 
 class Rule(RuleComponent):
