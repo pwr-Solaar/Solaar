@@ -414,10 +414,22 @@ def charging(f, r, d, _a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    "crown_right": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) > 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_left": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) < 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_right_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) > 0 and signed(d[2:3]),
+        False,
+    ],
+    "crown_left_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) < 0 and signed(d[2:3]),
+        False,
+    ],
     "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and True, False],
     "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and True, False],
     "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and True, False],
