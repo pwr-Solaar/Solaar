@@ -289,6 +289,10 @@ def signed(bytes_: bytes) -> int:
     return int.from_bytes(bytes_, "big", signed=True)
 
 
+def is_number(n) -> bool:
+    return not isinstance(n, bool) and isinstance(n, numbers.Number)
+
+
 def xy_direction(_x, _y):
     # normalize x and y
     m = math.sqrt((_x * _x) + (_y * _y))
@@ -1216,7 +1220,7 @@ class MouseScroll(Action):
     def __init__(self, amounts, warn=True):
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
-        if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
+        if not (len(amounts) == 2 and all([is_number(a) for a in amounts])):
             if warn:
                 logger.warning("rule MouseScroll argument not two numbers %s", amounts)
             amounts = [0, 0]
@@ -1227,7 +1231,7 @@ class MouseScroll(Action):
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
-        if isinstance(last_result, numbers.Number):
+        if is_number(last_result):
             amounts = [math.floor(last_result * a) for a in self.amounts]
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
