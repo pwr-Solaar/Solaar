@@ -257,6 +257,22 @@ else:
 class UInput:
     def __init__(self):
         self.udevice = None
+        self.barrier_until = None
+
+    def _wait_barrier(self):
+        if self.barrier_until is None:
+            return
+
+        remainder = self.barrier_until - time.monotonic()
+        if remainder > 0:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("wait %.3fs due to barrier", remainder)
+            time.sleep(remainder)
+
+        self.barrier_until = None
+
+    def barrier(self, margin: float):
+        self.barrier_until = time.monotonic() + margin
 
     def setup(self):
         if self.udevice is not None:
@@ -285,8 +301,10 @@ class UInput:
                 logger.warning("uinput write failed: %s", e)
 
     def key(self, code, event):  # X11 keycode but Solaar event code
-        if evdev and self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
-            return True
+        if evdev:
+            self._wait_barrier()
+            if self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
+                return True
         logger.warning("no way to simulate key input")
 
     def _click(self, button, count):
@@ -306,12 +324,14 @@ class UInput:
         return True
 
     def click(self, button, count):
+        self._wait_barrier()
         if self._click(button, count):
             return True
         logger.warning("no way to simulate mouse click")
         return False
 
     def scroll(self, dx, dy):
+        self._wait_barrier()
         success = True
         if dx:
             success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
@@ -1210,7 +1230,7 @@ class KeyPress(Action):
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
-            time.sleep(0.01)
+            uinput.barrier(0.01)
         else:
             logger.warning("no keymap so cannot determine which keycode to send")
         return None
@@ -1249,7 +1269,7 @@ class MouseScroll(Action):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
         uinput.scroll(dx, dy)
-        time.sleep(0.01)
+        uinput.barrier(0.01)
         return None
 
     def data(self):
@@ -1288,7 +1308,7 @@ class MouseClick(Action):
             logger.info(f"MouseClick action: {str(self.count)} {self.button}")
         if self.button and self.count:
             uinput.click(buttons[self.button], self.count)
-        time.sleep(0.01)
+        uinput.barrier(0.01)
         return None
 
     def data(self):
