@@ -130,8 +130,6 @@ NET_WM_PID = None
 WM_CLASS = None
 
 
-udevice = None
-
 key_down = None
 key_up = None
 
@@ -256,17 +254,75 @@ else:
     devicecap = {}
 
 
-def setup_uinput():
-    global udevice
-    if udevice is not None:
-        return udevice
-    try:
-        udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("uinput device set up")
+class UInput:
+    def __init__(self):
+        self.udevice = None
+
+    def setup(self):
+        if self.udevice is not None:
+            return self.udevice
+        try:
+            self.udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("uinput device set up")
+            return True
+        except Exception as e:
+            logger.warning("cannot create uinput device: %s", e)
+
+    def simulate(self, what, code, arg):
+        if self.setup():
+            try:
+                self.udevice.write(what, code, arg)
+                self.udevice.syn()
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("uinput simulated input %s %s %s", what, code, arg)
+                return True
+            except Exception as e:
+                with contextlib.suppress(Exception):
+                    self.udevice.close()
+
+                self.udevice = None
+                logger.warning("uinput write failed: %s", e)
+
+    def key(self, code, event):  # X11 keycode but Solaar event code
+        if evdev and self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
+            return True
+        logger.warning("no way to simulate key input")
+
+    def _click(self, button, count):
+        if isinstance(count, int):
+            for _ in range(count):
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                    return False
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                    return False
+        else:
+            if count != RELEASE:
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                    return False
+            if count != DEPRESS:
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                    return False
         return True
-    except Exception as e:
-        logger.warning("cannot create uinput device: %s", e)
+
+    def click(self, button, count):
+        if self._click(button, count):
+            return True
+        logger.warning("no way to simulate mouse click")
+        return False
+
+    def scroll(self, dx, dy):
+        success = True
+        if dx:
+            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+        if dy and success:
+            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+        if success:
+            return True
+        logger.warning("no way to simulate scrolling")
+
+
+uinput = UInput()
 
 
 def kbdgroup():
@@ -319,65 +375,6 @@ def xy_direction(_x, _y):
         return "Mouse Up"
     else:
         return "noop"
-
-
-def simulate_uinput(what, code, arg):
-    global udevice
-    if setup_uinput():
-        try:
-            udevice.write(what, code, arg)
-            udevice.syn()
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("uinput simulated input %s %s %s", what, code, arg)
-            return True
-        except Exception as e:
-            with contextlib.suppress(Exception):
-                udevice.close()
-
-            udevice = None
-            logger.warning("uinput write failed: %s", e)
-
-
-def simulate_key(code, event):  # X11 keycode but Solaar event code
-    if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
-        return True
-    logger.warning("no way to simulate key input")
-
-
-def click_uinput(button, count):
-    if isinstance(count, int):
-        for _ in range(count):
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-                return False
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-                return False
-    else:
-        if count != RELEASE:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-                return False
-        if count != DEPRESS:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-                return False
-    return True
-
-
-def click(button, count):
-    if click_uinput(button, count):
-        return True
-    logger.warning("no way to simulate mouse click")
-    return False
-
-
-def simulate_scroll(dx, dy):
-    if setup_uinput():
-        success = True
-        if dx:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
-        if dy and success:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
-        if success:
-            return True
-    logger.warning("no way to simulate scrolling")
 
 
 def thumb_wheel_up(f, r, d, a):
@@ -1176,11 +1173,11 @@ class KeyPress(Action):
         if level == 2 or level == 3:
             (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
             if sk and self.needed(sk, modifiers):
-                simulate_key(sk, direction)
+                uinput.key(sk, direction)
         if level == 1 or level == 3:
             (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
             if sk and self.needed(sk, modifiers):
-                simulate_key(sk, direction)
+                uinput.key(sk, direction)
 
     def keyDown(self, keysyms_, modifiers):
         for k in keysyms_:
@@ -1189,13 +1186,13 @@ class KeyPress(Action):
                 logger.warning("rule KeyPress key symbol not currently available %s", self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
-                simulate_key(keycode, _KEY_PRESS)
+                uinput.key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms_, modifiers):
         for k in keysyms_:
             (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
-                simulate_key(keycode, _KEY_RELEASE)
+                uinput.key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
@@ -1251,7 +1248,7 @@ class MouseScroll(Action):
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
-        simulate_scroll(dx, dy)
+        uinput.scroll(dx, dy)
         time.sleep(0.01)
         return None
 
@@ -1290,7 +1287,7 @@ class MouseClick(Action):
         if logger.isEnabledFor(logging.INFO):
             logger.info(f"MouseClick action: {str(self.count)} {self.button}")
         if self.button and self.count:
-            click(buttons[self.button], self.count)
+            uinput.click(buttons[self.button], self.count)
         time.sleep(0.01)
         return None
 
