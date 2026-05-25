@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import ctypes
 import logging
 import math
@@ -330,6 +331,9 @@ def simulate_uinput(what, code, arg):
                 logger.debug("uinput simulated input %s %s %s", what, code, arg)
             return True
         except Exception as e:
+            with contextlib.suppress(Exception):
+                udevice.close()
+
             udevice = None
             logger.warning("uinput write failed: %s", e)
 
