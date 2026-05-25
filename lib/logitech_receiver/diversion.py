@@ -241,7 +241,7 @@ if evdev:
     }
 
     # uinput capability for keyboard keys, mouse buttons, and scrolling
-    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n != "KEY_CNT"]
+    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n not in {"KEY_CNT", "KEY_MAX"}]
     for _, evcode in buttons.values():
         if evcode:
             key_events.append(evcode)
