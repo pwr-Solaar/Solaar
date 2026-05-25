@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import ctypes
+import enum
 import logging
 import math
 import numbers
@@ -255,23 +256,33 @@ else:
 
 
 class UInput:
+    class EventType(enum.Enum):
+        KEYBOARD = enum.auto()
+        MOUSE = enum.auto()
+
     def __init__(self):
         self.udevice = None
         self.barrier_until = None
+        self.barrier_type = None
 
-    def _wait_barrier(self):
+    def _wait_barrier(self, event_type: EventType):
         if self.barrier_until is None:
+            return
+
+        if event_type == self.barrier_type:
             return
 
         remainder = self.barrier_until - time.monotonic()
         if remainder > 0:
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("wait %.3fs due to barrier", remainder)
+                logger.debug("wait %.3fs due to %s barrier", remainder, self.barrier_type)
             time.sleep(remainder)
 
         self.barrier_until = None
+        self.barrier_type = None
 
-    def barrier(self, margin: float):
+    def barrier(self, margin: float, event_type: EventType):
+        self.barrier_type = event_type
         self.barrier_until = time.monotonic() + margin
 
     def setup(self):
@@ -302,7 +313,7 @@ class UInput:
 
     def key(self, code, event):  # X11 keycode but Solaar event code
         if evdev:
-            self._wait_barrier()
+            self._wait_barrier(self.EventType.KEYBOARD)
             if self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
                 return True
         logger.warning("no way to simulate key input")
@@ -324,14 +335,14 @@ class UInput:
         return True
 
     def click(self, button, count):
-        self._wait_barrier()
+        self._wait_barrier(self.EventType.MOUSE)
         if self._click(button, count):
             return True
         logger.warning("no way to simulate mouse click")
         return False
 
     def scroll(self, dx, dy):
-        self._wait_barrier()
+        self._wait_barrier(self.EventType.MOUSE)
         success = True
         if dx:
             success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
@@ -1230,7 +1241,7 @@ class KeyPress(Action):
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
-            uinput.barrier(0.01)
+            uinput.barrier(0.01, uinput.EventType.KEYBOARD)
         else:
             logger.warning("no keymap so cannot determine which keycode to send")
         return None
@@ -1269,7 +1280,7 @@ class MouseScroll(Action):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
         uinput.scroll(dx, dy)
-        uinput.barrier(0.01)
+        uinput.barrier(0.01, uinput.EventType.MOUSE)
         return None
 
     def data(self):
@@ -1308,7 +1319,7 @@ class MouseClick(Action):
             logger.info(f"MouseClick action: {str(self.count)} {self.button}")
         if self.button and self.count:
             uinput.click(buttons[self.button], self.count)
-        uinput.barrier(0.01)
+        uinput.barrier(0.01, uinput.EventType.MOUSE)
         return None
 
     def data(self):
