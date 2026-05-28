@@ -231,7 +231,7 @@ def run(receivers, args, _find_receiver, find_device):
         argl = ["config", dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
         args = yaml.dump(argl)
-        application.run(args)
+        application.run([args])
     else:
         if dev.persister and setting.persist:
             dev.persister[setting.name] = setting._value
