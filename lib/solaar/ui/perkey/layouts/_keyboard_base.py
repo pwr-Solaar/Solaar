@@ -157,11 +157,17 @@ MAIN_ANSI: tuple[Cell, ...] = (
     Cell(zone_id=108, row=5, col=13, group="main", label="Ctrl"),
 )
 
-# --- Main alpha block, ISO. Same as ANSI minus the row 2 col 13 backslash;
-#     on ISO that position is the top half of the L-shape Enter, addressed
-#     by zone 37 (the main Enter cell at row 3 col 13). Zone 46 is silently
-#     unaddressable on ISO layouts — same limitation as OpenRGB's UI.
-MAIN_ISO: tuple[Cell, ...] = tuple(c for c in MAIN_ANSI if not (c.row == 2 and c.col == 13))
+# --- Main alpha block, ISO. Drops the row 2 col 13 backslash (zone 46 is the
+#     upper half of the L-shape Enter on ISO, addressed by zone 37) and adds
+#     the two ISO-only keys: POUND (zone 47) at row 3 col 12 between ' and
+#     Enter, and ISO_BACKSLASH (zone 97) at row 4 col 1 between Shift and Z.
+#     Regional layouts override the labels to match local keycaps (# / < on
+#     QWERTZ, # / \ on UK QWERTY, * / < on AZERTY).
+_ISO_EXTRA_KEYS: tuple[Cell, ...] = (
+    Cell(zone_id=47, row=3, col=12, group="main", label="#"),
+    Cell(zone_id=97, row=4, col=1, group="main", label="\\"),
+)
+MAIN_ISO: tuple[Cell, ...] = tuple(c for c in MAIN_ANSI if not (c.row == 2 and c.col == 13)) + _ISO_EXTRA_KEYS
 
 # --- Curated allowlist for unmapped device zones surfaced in the bottom strip.
 #     G-keys, logo, media, brightness — the canonical "extras" Logitech firmware

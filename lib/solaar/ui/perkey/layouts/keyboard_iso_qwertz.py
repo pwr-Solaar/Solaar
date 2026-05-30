@@ -38,6 +38,8 @@ _OVERRIDES: dict[int, str] = {
     49: "Ä",  # row 3 col 11
     26: "Y",  # row 4 col 2 — Y/Z swap
     53: "-",  # row 4 col 11
+    47: "#",  # POUND key (row 3 col 12), between Ä and Enter
+    97: "<",  # ISO_BACKSLASH (row 4 col 1), between Shift and Y
 }
 
 
