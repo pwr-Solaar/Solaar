@@ -56,6 +56,8 @@ _OVERRIDES: dict[int, str] = {
     51: ";",  # ,-position → semicolon
     52: ":",  # .-position → colon
     53: "!",  # /-position → exclamation
+    47: "*",  # POUND key (row 3 col 12) — French * / µ
+    97: "<",  # ISO_BACKSLASH (row 4 col 1), between Shift and W
 }
 
 
