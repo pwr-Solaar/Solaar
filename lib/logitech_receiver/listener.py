@@ -96,6 +96,8 @@ class _ThreadedHandle:
     def __str__(self):
         if self._local:
             return str(int(self))
+        else:
+            return "None"
 
     def __repr__(self):
         return f"<_ThreadedHandle({self.path})>"

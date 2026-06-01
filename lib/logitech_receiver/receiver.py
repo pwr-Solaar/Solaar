@@ -171,6 +171,8 @@ class Receiver:
         self.pairing = Pairing()
         self.initialize(product_info)
         hidpp10.set_configuration_pending_flags(self, 0xFF)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("%s: init receiver: handle %s, path %s, serial %s", self, self.handle, self.path, self.serial)
 
     def initialize(self, product_info: dict):
         # read the receiver information subregister, so we can find out max_devices
@@ -185,6 +187,8 @@ class Receiver:
             self.max_devices = product_info.get("max_devices", 1)
 
     def close(self):
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("%s: closing - handle %s %s", self, type(self.handle), self.handle)
         handle, self.handle = self.handle, None
         for _n, d in self._devices.items():
             if d:
@@ -599,9 +603,10 @@ receiver_class_mapping = {
 
 def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=None) -> Optional[Receiver]:
     """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
-
     try:
         handle = low_level.open_path(device_info.path)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("create receiver %s %s", handle, device_info)
         if handle:
             usb_id = device_info.product_id
             if isinstance(usb_id, str):
