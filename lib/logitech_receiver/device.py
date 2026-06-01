@@ -706,6 +706,14 @@ class Device:
                 long_message=long,
                 protocol=self.protocol,
             )
+        if logger.isEnabledFor(logging.WARN):
+            logger.warning(
+                "%s: request failure for device %s %s %s",
+                self,
+                self.handle,
+                self.receiver,
+                self.receiver._devices if self.receiver else None,
+            )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
@@ -730,6 +738,8 @@ class Device:
                     if sub_idx is not None:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+        if logger.isEnabledFor(logging.WARN):
+            logger.warning("%s: feature request failure for device with protocol %s", self, self.protocol)
 
     # Max sub-message bytes in the first bridge fragment (for 0x51):
     # 64 - 1 (report ID) - 1 (cpl_len) - 1 (flags) - 2 (bridge prefix) - 2 (bridge hdr) = 57;

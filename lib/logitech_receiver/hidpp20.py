@@ -1756,6 +1756,10 @@ def feature_request(device, feature, function=0x00, *params, no_reply=False):
         if feature in device.features:
             feature_index = device.features[feature]
             return device.request((feature_index << 8) + (function & 0xFF), *params, no_reply=no_reply)
+    if logger.isEnabledFor(logging.WARN):
+        logger.warning(
+            "%s: feature request failure for device online %s and features %s", device, device.online, device.features
+        )
 
 
 class Hidpp20:
