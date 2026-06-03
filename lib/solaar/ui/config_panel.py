@@ -1153,6 +1153,7 @@ def update(device, is_online=None):
         k = (device_id[0], device_id[1], s.name)
         if k in _items:
             sbox = _items[k]
+            sbox.setting = s  # use setting from current version of device
         else:
             sbox = _create_sbox(s, device)
             if sbox is None:
