@@ -73,10 +73,9 @@ logger = logging.getLogger(__name__)
 # KeyPress action gets the current keyboard group using XkbGetState from libX11.so using ctypes definitions
 #   under Wayland the keyboard group is None resulting in using the first keyboard group
 # KeyPress action translates keysyms to keycodes using the GDK keymap
-# KeyPress, MouseScroll, and MouseClick actions use uinput.
+# KeyPress, MouseScroll, and MouseClick actions use XTest (under X11) or uinput.
 # For uinput to work the user must have write access for /dev/uinput.
-# The Solaar udev rule should set this up
-# Otherwise run  sudo setfacl -m u:${user}:rw /dev/uinput
+# To get this access run  sudo setfacl -m u:${user}:rw /dev/uinput
 #
 # Rule GUI keyname determination uses a local file generated
 #   from http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
@@ -86,7 +85,8 @@ logger = logging.getLogger(__name__)
 # Setting up is complex because there are several systems that each provide partial facilities:
 # GDK - always available (when running with a window system) but only provides access to keymap
 # X11 - provides access to active process and process with window under mouse and current modifier keys
-# uinput and evdev - provides input simulation
+# Xtest extension to X11 - provides input simulation, partly works under Wayland
+# Wayland - provides input simulation
 
 XK_KEYS: Dict[str, int] = keysymdef.key_symbols
 
@@ -110,12 +110,16 @@ if wayland:
         "accessing process only works on GNOME with Solaar Gnome extension installed"
     )
 
+# import Xlib was missing here; the try/except was a no-op and x11_setup() never attempted to load X11
 try:
+    import Xlib
+
     _x11 = None  # X11 might be available
 except Exception:
     _x11 = False  # X11 is not available
 
 # Globals
+xtest_available = True  # Xtest might be available
 xdisplay = None
 
 
@@ -139,6 +143,11 @@ g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
 thumb_wheel_displacement = 0
+# When a button fires a KeyIsDown action while held, the Noop gesture generated on release is spurious.
+# These three track that state so MouseGesture.evaluate can swallow the unwanted Noop.
+keys_used_while_held = set()  # control IDs of buttons that had a KeyIsDown action fire while held
+suppress_noop_for_buttons = set()  # control IDs whose next single-element MOUSE_GESTURE should be suppressed
+_suppress_current_noop = False  # reset each notification in evaluate_rules, checked in MouseGesture.evaluate
 
 _dbus_interface = None
 
@@ -167,7 +176,7 @@ class XkbStateRec(ctypes.Structure):
 
 
 def x11_setup():
-    global _x11, xdisplay, modifier_keycodes, NET_ACTIVE_WINDOW, NET_WM_PID, WM_CLASS
+    global _x11, xdisplay, modifier_keycodes, NET_ACTIVE_WINDOW, NET_WM_PID, WM_CLASS, xtest_available
     if _x11 is not None:
         return _x11
     try:
@@ -184,6 +193,7 @@ def x11_setup():
     except Exception:
         logger.warning("X11 not available - some rule capabilities inoperable", exc_info=sys.exc_info())
         _x11 = False
+        xtest_available = False
     return _x11
 
 
@@ -268,6 +278,10 @@ def setup_uinput():
         logger.warning("cannot create uinput device: %s", e)
 
 
+if wayland:  # Wayland can't use xtest so may as well set up uinput now
+    setup_uinput()
+
+
 def kbdgroup():
     if xkb_setup():
         state = XkbStateRec()
@@ -316,6 +330,33 @@ def xy_direction(_x, _y):
         return "noop"
 
 
+# simulate_xtest and click_xtest were removed in a prior refactor; restored as the preferred
+# input-simulation path on X11 (uinput is the fallback for Wayland and when xtest fails).
+def simulate_xtest(code, event):
+    global xtest_available
+    if x11_setup() and xtest_available:
+        try:
+            event = (
+                Xlib.X.KeyPress
+                if event == _KEY_PRESS
+                else Xlib.X.KeyRelease
+                if event == _KEY_RELEASE
+                else Xlib.X.ButtonPress
+                if event == _BUTTON_PRESS
+                else Xlib.X.ButtonRelease
+                if event == _BUTTON_RELEASE
+                else None
+            )
+            Xlib.ext.xtest.fake_input(xdisplay, event, code)
+            xdisplay.sync()
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("xtest simulated input %s %s %s", xdisplay, event, code)
+            return True
+        except Exception as e:
+            xtest_available = False
+            logger.warning("xtest fake input failed: %s", e)
+
+
 def simulate_uinput(what, code, arg):
     global udevice
     if setup_uinput():
@@ -331,9 +372,28 @@ def simulate_uinput(what, code, arg):
 
 
 def simulate_key(code, event):  # X11 keycode but Solaar event code
+    if not wayland and simulate_xtest(code, event):
+        return True
     if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
     logger.warning("no way to simulate key input")
+
+
+def click_xtest(button, count):
+    if isinstance(count, int):
+        for _ in range(count):
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
+    else:
+        if count != RELEASE:
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+        if count != DEPRESS:
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
+    return True
 
 
 def click_uinput(button, count):
@@ -354,6 +414,8 @@ def click_uinput(button, count):
 
 
 def click(button, count):
+    if not wayland and click_xtest(button, count):
+        return True
     if click_uinput(button, count):
         return True
     logger.warning("no way to simulate mouse click")
@@ -361,6 +423,14 @@ def click(button, count):
 
 
 def simulate_scroll(dx, dy):
+    if not wayland and xtest_available:
+        success = True
+        if dx:
+            success = click_xtest(buttons["scroll_right" if dx > 0 else "scroll_left"], count=abs(dx))
+        if dy and success:
+            success = click_xtest(buttons["scroll_up" if dy > 0 else "scroll_down"], count=abs(dy))
+        if success:
+            return True
     if setup_uinput():
         success = True
         if dx:
@@ -878,7 +948,18 @@ class KeyIsDown(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        return key_is_down(self.key)
+        result = key_is_down(self.key)
+        # Mark the button as "used while held" so its release Noop gesture can be suppressed.
+        # Skip key-down notifications themselves (those features trigger on address 0x00 and would
+        # record every press rather than only presses that co-occur with another action).
+        if result and feature not in (
+            SupportedFeature.REPROG_CONTROLS_V4,
+            SupportedFeature.GKEY,
+            SupportedFeature.MKEYS,
+            SupportedFeature.MR,
+        ):
+            keys_used_while_held.add(int(self.key))
+        return result
 
     def data(self):
         return {"KeyIsDown": str(self.key)}
@@ -996,6 +1077,8 @@ class MouseGesture(Condition):
         if feature == SupportedFeature.MOUSE_GESTURE:
             d = notification.data
             data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and _suppress_current_noop:  # swallow Noop from a button that had a KeyIsDown action
+                return False
             data_offset = 1
             movement_offset = 0
             if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
@@ -1436,8 +1519,21 @@ def key_is_down(key: NamedInt) -> bool:
 
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
+    global _suppress_current_noop
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s %s", feature, notification)
+    _suppress_current_noop = False
+    # If this is a single-element Noop gesture from a button that was used as a KeyIsDown modifier,
+    # set the flag so MouseGesture.evaluate ignores it.
+    if feature == SupportedFeature.MOUSE_GESTURE:
+        d = notification.data
+        try:
+            data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and int(data[0]) in suppress_noop_for_buttons:
+                _suppress_current_noop = True
+                suppress_noop_for_buttons.discard(int(data[0]))
+        except struct.error:
+            pass
     rules.evaluate(feature, notification, device, True)
 
 
@@ -1452,9 +1548,13 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
             for key in new_keys_down:
                 if key and key not in keys_down:
                     key_down = key
+                    suppress_noop_for_buttons.discard(int(key))  # re-press clears any pending noop suppression
             for key in keys_down:
                 if key and key not in new_keys_down:
                     key_up = key
+                    if int(key) in keys_used_while_held:  # was used as a KeyIsDown modifier; its release will Noop
+                        keys_used_while_held.discard(int(key))
+                        suppress_noop_for_buttons.add(int(key))
             keys_down = new_keys_down
         # and also G keys down
         elif feature == SupportedFeature.GKEY:
