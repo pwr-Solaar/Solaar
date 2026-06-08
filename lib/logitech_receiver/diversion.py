@@ -1164,13 +1164,20 @@ class KeyPress(Action):
                 simulate_key(sk, direction)
 
     def keyDown(self, keysyms_, modifiers):
+        pressed_codes = set()
         for k in keysyms_:
             (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode is None:
                 logger.warning("rule KeyPress key symbol not currently available %s", self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
+                if self.action == CLICK and keycode in pressed_codes:
+                    # The kernel drops key-down events for keys already held; release first so the
+                    # second occurrence registers as a fresh press (needed for repeated chars like "ss").
+                    simulate_key(keycode, _KEY_RELEASE)
+                    self.mods(level, modifiers, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
+                pressed_codes.add(keycode)
 
     def keyUp(self, keysyms_, modifiers):
         for k in keysyms_:
