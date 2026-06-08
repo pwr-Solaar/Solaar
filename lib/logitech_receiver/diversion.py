@@ -139,10 +139,12 @@ g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
 thumb_wheel_displacement = 0
-# When a button fires a KeyIsDown action while held, the Noop gesture generated on release is spurious.
-# These three track that state so MouseGesture.evaluate can swallow the unwanted Noop.
-keys_used_while_held = set()  # control IDs of buttons that had a KeyIsDown action fire while held
-suppress_noop_for_buttons = set()  # control IDs whose next single-element MOUSE_GESTURE should be suppressed
+# Spurious Noop suppression on KeyIsDown button release:
+#   When a button used as a KeyIsDown modifier is released, the firmware sends a single-element
+#   MOUSE_GESTURE (Noop) that can incorrectly match MouseGesture rules.
+#   keys_used_while_held / suppress_noop_for_buttons / _suppress_current_noop track and swallow it.
+keys_used_while_held = set()   # button IDs that had a KeyIsDown action fire while held
+suppress_noop_for_buttons = set()  # button IDs whose next single-element MOUSE_GESTURE should be suppressed
 _suppress_current_noop = False  # reset each notification in evaluate_rules, checked in MouseGesture.evaluate
 
 _dbus_interface = None
@@ -884,16 +886,17 @@ class KeyIsDown(Condition):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         result = key_is_down(self.key)
-        # Mark the button as "used while held" so its release Noop gesture can be suppressed.
-        # Skip key-down notifications themselves (those features trigger on address 0x00 and would
-        # record every press rather than only presses that co-occur with another action).
-        if result and feature not in (
-            SupportedFeature.REPROG_CONTROLS_V4,
-            SupportedFeature.GKEY,
-            SupportedFeature.MKEYS,
-            SupportedFeature.MR,
-        ):
-            keys_used_while_held.add(int(self.key))
+        if result:
+            # Mark the button as "used while held" so its release Noop gesture can be suppressed.
+            # Skip button-down notifications (REPROG_CONTROLS_V4 etc.) — only record when a non-button
+            # action (e.g. scroll, gesture) co-fires with the held button.
+            if feature not in (
+                SupportedFeature.REPROG_CONTROLS_V4,
+                SupportedFeature.GKEY,
+                SupportedFeature.MKEYS,
+                SupportedFeature.MR,
+            ):
+                keys_used_while_held.add(int(self.key))
         return result
 
     def data(self):
