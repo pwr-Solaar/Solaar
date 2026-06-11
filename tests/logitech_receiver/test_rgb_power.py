@@ -672,3 +672,36 @@ def test_perkey_write_key_value_skipped_when_zone_is_animation(monkeypatch):
     s.write_key_value(7, 0xFF0000)
 
     s._send_zone_color.assert_not_called()
+
+
+def test_perkey_write_key_value_initializes_unread_value(monkeypatch):
+    """The CLI writes a single key without ever reading the setting, so
+    _value is still None. write_key_value must initialize it via read()
+    (persisted state or the sentinel map — 0x8081 is write-only) instead
+    of crashing with a None dereference in update_key_value."""
+    from unittest.mock import MagicMock
+
+    from logitech_receiver import settings_templates
+
+    static_zone = _FakeZoneSetting("rgb_zone_1", _ValueWithID(0x01))
+
+    s = settings_templates.PerKeyLighting.__new__(settings_templates.PerKeyLighting)
+    device = MagicMock()
+    device.online = True
+    device.settings = [static_zone]
+    s._device = device
+    s._value = None  # fresh CLI invocation: nothing has read the setting
+    s._validator = MagicMock()
+    s._validator.choices = [7]
+    s._pre_read = lambda cached=True: None
+    s._has_rgb_effects = True
+    s._send_with_retry = MagicMock(return_value=True)
+    s._send_zone_color = MagicMock(return_value=True)
+    s._fill_unset_zones_with_base_color = MagicMock(return_value=True)
+    monkeypatch.setattr(rgb_power, "translate_for_device", lambda d, c: c)
+    monkeypatch.setattr(rgb_power, "get_manager", lambda d: None)
+
+    s.write_key_value(7, 0xFF0000)
+
+    assert s._value[7] == 0xFF0000
+    s._send_zone_color.assert_called_once()

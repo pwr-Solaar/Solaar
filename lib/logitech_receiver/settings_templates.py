@@ -4101,6 +4101,8 @@ class PerKeyLighting(settings.Settings):
         no_change = special_keys.COLORSPLUS["No change"]
         zone_id = int(key)
         if value != no_change:
+            if self._value is None:
+                self.read()  # 0x8081 is write-only — read() loads persisted state or the sentinel map
             self.update_key_value(zone_id, value, save)
             if not self._device.online:
                 return value
