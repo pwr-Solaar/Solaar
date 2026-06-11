@@ -76,6 +76,10 @@ _KEYBOARD_FAMILY_BY_COUNTRY: dict[int, str] = {
     1: "ansi",
     # ISO QWERTY (UK + ES/IT/PT/BE/Nordic — same shape, different keycap legends)
     2: "iso_qwerty",
+    # Observed: UK-ISO G915 TKL (model B35F408EC343, WPID 408E) reports 4 —
+    # its zone bitmap includes the ISO-only POUND (47) and ISO_BACKSLASH (97)
+    # keys and the physical board is UK QWERTY, not AZERTY.
+    4: "iso_qwerty",
     5: "iso_qwerty",
     8: "iso_qwerty",
     0x0B: "iso_qwerty",
@@ -89,8 +93,9 @@ _KEYBOARD_FAMILY_BY_COUNTRY: dict[int, str] = {
     # ISO QWERTZ (DE/Swiss)
     3: "iso_qwertz",
     7: "iso_qwertz",
-    # ISO AZERTY (FR)
-    4: "iso_azerty",
+    # ISO AZERTY (FR) — no confirmed country code; 4 was originally mapped
+    # here but a real UK-ISO G915 TKL reports 4 (see above), so AZERTY is
+    # unreachable until a confirmed FR device report arrives.
     # JIS
     9: "jis",
     0x3E: "jis",
