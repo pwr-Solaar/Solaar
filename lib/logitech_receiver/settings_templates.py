@@ -3871,12 +3871,35 @@ class PerKeyLighting(settings.Settings):
             return common.ColorInt(value)
         return value
 
+    def _valid_zones(self):
+        """Zone IDs the device reported, or None when no validator is
+        attached yet (then no filtering can happen)."""
+        choices = getattr(getattr(self, "_validator", None), "choices", None)
+        return {int(k) for k in choices} if choices is not None else None
+
+    def _sanitize_map(self, value):
+        """Drop zone keys the device never reported (e.g. the editor's -1
+        placeholder, or junk from an older persisted config). A single bad
+        key would otherwise abort the whole frame at pack time."""
+        valid = self._valid_zones()
+        if not isinstance(value, dict) or valid is None:
+            return value
+        bad = [k for k in value if int(k) not in valid]
+        if bad:
+            logger.warning("%s: dropping invalid per-key zones %s", self.name, bad)
+            value = {k: v for k, v in value.items() if int(k) in valid}
+        return value
+
     def update(self, value, save=True):
         if isinstance(value, dict):
-            value = {k: self._wrap_color(v) for k, v in value.items()}
+            value = {k: self._wrap_color(v) for k, v in self._sanitize_map(value).items()}
         super().update(value, save)
 
     def update_key_value(self, key, value, save=True):
+        valid = self._valid_zones()
+        if valid is not None and int(key) not in valid:
+            logger.warning("%s: ignoring write to invalid per-key zone %s", self.name, key)
+            return
         super().update_key_value(key, self._wrap_color(value), save)
 
     def _sw_control_held(self):
@@ -4003,6 +4026,9 @@ class PerKeyLighting(settings.Settings):
         # live line — it now matches what's actually on the keyboard.
         self._pre_read(cached)
         if self._value is not None:
+            # The persisted map may carry zones from a buggy editor or an
+            # older config — heal it here so they age out on the next save.
+            self._value = self._sanitize_map(self._value)
             return self._value
         reply_map = {}
         for key in self._validator.choices:
@@ -4064,6 +4090,7 @@ class PerKeyLighting(settings.Settings):
 
     def write(self, map, save=True):
         if self._device.online:
+            map = self._sanitize_map(map)  # the frame pack below can't take invalid zones
             # Persist undimmed (single source of truth).
             self.update(map, save)
             if not self._sw_control_held():
@@ -4100,6 +4127,10 @@ class PerKeyLighting(settings.Settings):
     def write_key_value(self, key, value, save=True):
         no_change = special_keys.COLORSPLUS["No change"]
         zone_id = int(key)
+        valid = self._valid_zones()
+        if valid is not None and zone_id not in valid:
+            logger.warning("%s: ignoring write to invalid per-key zone %s", self.name, zone_id)
+            return value
         if value != no_change:
             if self._value is None:
                 self.read()  # 0x8081 is write-only — read() loads persisted state or the sentinel map

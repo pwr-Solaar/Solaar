@@ -438,6 +438,9 @@ class KeyboardCanvas(Gtk.DrawingArea):
         delta: dict[int, int] = {}
         if tool is not None:
             delta = tool.compute(self._press_cell, self._motion_cell, list(self._brush_path), ctx)
+        # Strokes can sweep over layout gaps, which are placeholder cells
+        # with zone_id -1 — not real zones; they must never reach the sink.
+        delta = {z: c for z, c in delta.items() if int(z) >= 0}
         self._press_cell = None
         self._motion_cell = None
         self._brush_path = []
