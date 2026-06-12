@@ -473,9 +473,12 @@ class Device:
         match a stored cookie from a prior session and skip the apply the
         device actually needs.
         `force` skips the cookie comparison (but still re-records): pass it
-        when the notification says the device just powered on — volatile
-        state (RGB buffers, host-mode lighting) is gone even on devices
-        whose ConfigChange cookie survives the power cycle (e.g. G915 TKL).
+        when the device powered on while already marked active — no
+        activation apply ran in changed(), yet volatile state (RGB buffers,
+        host-mode lighting) is gone even on devices whose ConfigChange
+        cookie survives the power cycle (e.g. G915 TKL). When the device
+        was inactive, changed() just applied everything, so forcing here
+        would only push a redundant duplicate.
         Returns True if apply ran, False if it was skipped."""
         if not self.online:
             return False

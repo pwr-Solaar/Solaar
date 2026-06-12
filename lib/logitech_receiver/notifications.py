@@ -326,14 +326,17 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             reason = "powered on" if powered_on else None
             if notification.data[1] == 1:  # device is asking for software reconfiguration
                 alert = Alert.NONE
+                was_active = bool(device.online)  # before changed() updates it
                 device.changed(active=True, alert=alert, reason=reason)
-                # changed(active=True) already runs apply_settings_if_needed on
-                # the first transition; for follow-up reconfig notifications
-                # on an already-active device, fire the gate here so the
-                # cookie comparison decides whether to re-push. A power-on
-                # forces the apply: volatile state (RGB buffers, host-mode
-                # lighting) is gone even when the cookie survived the cycle.
-                device.apply_settings_if_needed(force=powered_on)
+                # changed(active=True) applies all settings unconditionally on
+                # the inactive→active transition; for follow-up reconfig
+                # notifications on an already-active device, fire the gate here
+                # so the cookie comparison decides whether to re-push. A
+                # power-on while already marked active forces the apply: no
+                # activation apply ran, yet volatile state (RGB buffers,
+                # host-mode lighting) is gone even when the cookie survived
+                # the cycle (e.g. G915 TKL).
+                device.apply_settings_if_needed(force=powered_on and was_active)
         else:
             logger.warning("%s: unknown WIRELESS %s", device, notification)
 

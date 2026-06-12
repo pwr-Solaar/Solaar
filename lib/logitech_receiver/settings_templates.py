@@ -3878,9 +3878,11 @@ class PerKeyLighting(settings.Settings):
         return {int(k) for k in choices} if choices is not None else None
 
     def _sanitize_map(self, value):
-        """Drop zone keys the device never reported (e.g. the editor's -1
+        """Drop zone keys the device never reported (e.g. the editor's gap
         placeholder, or junk from an older persisted config). A single bad
-        key would otherwise abort the whole frame at pack time."""
+        key would otherwise abort the whole frame at pack time.
+        Filters map KEYS only — the -1 "No change" sentinel as a map VALUE
+        is legitimate and handled separately in _send_perkey_frame."""
         valid = self._valid_zones()
         if not isinstance(value, dict) or valid is None:
             return value
@@ -4131,9 +4133,14 @@ class PerKeyLighting(settings.Settings):
         if valid is not None and zone_id not in valid:
             logger.warning("%s: ignoring write to invalid per-key zone %s", self.name, zone_id)
             return value
+        if self._value is None:
+            # 0x8081 is write-only — read() loads persisted state or the all-
+            # "No change" sentinel map. Both branches below mutate _value, so
+            # guard here (like the base class does). `is None` rather than the
+            # base class's falsy test: read() never yields an empty map here,
+            # so None is precisely "never initialized".
+            self.read()
         if value != no_change:
-            if self._value is None:
-                self.read()  # 0x8081 is write-only — read() loads persisted state or the sentinel map
             self.update_key_value(zone_id, value, save)
             if not self._device.online:
                 return value
