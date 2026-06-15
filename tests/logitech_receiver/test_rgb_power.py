@@ -763,3 +763,30 @@ def test_perkey_read_heals_poisoned_persisted_map(monkeypatch):
 
     assert -1 not in result
     assert result[7] == 0x00FF00
+
+
+# --- post-claim repaint ------------------------------------------------------
+
+
+def test_repaint_after_claim_pushes_zones_and_perkey(monkeypatch):
+    """The post-claim repaint pushes saved zone effects and the per-key
+    buffer. (The F4/MR blackout is handled structurally by keeping affected
+    models in onboard mode — device_quirks.rgb_claim_keeps_onboard_mode — not
+    by any timed repaint.)"""
+    from unittest.mock import MagicMock
+
+    from logitech_receiver import settings_templates
+
+    ctl = settings_templates.RGBControl.__new__(settings_templates.RGBControl)
+    zone = MagicMock()
+    zone.name = "rgb_zone_1"
+    zone._value = object()
+    device = MagicMock()
+    device.settings = [zone]
+    perkey = MagicMock()
+    perkey._value = {1: 0xFF0000}
+    monkeypatch.setattr(rgb_power, "perkey_has_paint", lambda d: (perkey, True))
+
+    ctl._repaint_after_claim(device)
+    zone.write.assert_called_once()
+    perkey.write.assert_called_once()

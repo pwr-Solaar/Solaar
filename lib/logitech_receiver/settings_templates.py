@@ -542,6 +542,18 @@ def profile_change(device, profile_sector):
                 device.setting_callback(device, AdjustableDpi, [profile.resolutions[resolution_index]])
                 device.setting_callback(device, ReportRate, [profile.report_rate])
                 break
+    # A profile switch reloads that profile's onboard lighting, dropping the
+    # software per-key/zone paint. On models prone to this, re-assert the claim
+    # and repaint (only when Solaar already holds the LED claim) so an
+    # accidental profile switch doesn't strand the user's scheme.
+    if device_quirks.rgb_repaint_on_profile_change(device):
+        for s in device.settings or []:
+            if s.name == "rgb_control" and getattr(s, "_value", None):
+                try:
+                    s._claim_sw_control(device)
+                except Exception as e:
+                    logger.warning("%s: repaint after profile change failed: %s", device, e)
+                break
 
 
 class OnboardProfiles(settings.Setting):
@@ -3330,11 +3342,16 @@ class RGBControl(settings.Setting):
         return value
 
     def _claim_sw_control(self, device):
-        # Disable firmware power management via profile management or onboard profiles
-        if device.features and _F.PROFILE_MANAGEMENT in device.features:
-            device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x05")
-        elif device.features and _F.ONBOARD_PROFILES in device.features:
-            device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
+        # Disable firmware power management via profile management or onboard
+        # profiles. Skipped on models where the onboard->host mode switch
+        # disables the F-row / media keys (device_quirks, Solaar #1100): they
+        # drive the LEDs from onboard mode via the SetSWControl claim alone,
+        # exactly as G HUB does.
+        if not device_quirks.rgb_claim_keeps_onboard_mode(device):
+            if device.features and _F.PROFILE_MANAGEMENT in device.features:
+                device.feature_request(_F.PROFILE_MANAGEMENT, 0x60, b"\x05")
+            elif device.features and _F.ONBOARD_PROFILES in device.features:
+                device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
         # Claim LED pipeline: SetSWControl(mode=3, flags=5)
         device.feature_request(_F.RGB_EFFECTS, 0x50, rgb_power.SW_ACTIVE)
         # Reset per-key one-shot flags so the first write after this claim
@@ -3349,15 +3366,15 @@ class RGBControl(settings.Setting):
         # Register cleanup for graceful release on device close
         if rgb_power.cleanup not in device.cleanups:
             device.cleanups.append(rgb_power.cleanup)
-        # Repaint LEDs with Solaar's saved state. Without this the firmware's
-        # last-active onboard profile keeps showing until the user changes
-        # something — the takeover would look like it did nothing.
+        # Repaint saved zone effects and the per-key buffer after the claim.
+        # (No settle-repaint timer needed: keeping onboard mode on the affected
+        # models avoids the host-mode transition that caused the F4 blackout.)
         self._repaint_after_claim(device)
 
     def _repaint_after_claim(self, device):
-        """Push saved zone effects and (if opted in) per-key buffer to the
-        device after a fresh SW claim. Best-effort: individual failures get
-        logged but don't abort the rest of the repaint."""
+        """Push saved zone effects and the per-key buffer to the device after
+        a fresh SW claim. Best-effort: individual failures get logged but
+        don't abort the rest of the repaint."""
         for s in device.settings:
             if s.name.startswith("rgb_zone_") and s._value is not None:
                 try:
