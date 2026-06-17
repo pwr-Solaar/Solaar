@@ -330,6 +330,11 @@ def simulate_uinput(what, code, arg):
                 logger.debug("uinput simulated input %s %s %s", what, code, arg)
             return True
         except Exception as e:
+            try:
+                udevice.close()
+            except Exception:
+                pass
+
             udevice = None
             logger.warning("uinput write failed: %s", e)
 
