@@ -1232,7 +1232,7 @@ class MouseScroll(Action):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
         if is_number(last_result):
-            amounts = [math.floor(last_result * a) for a in self.amounts]
+            amounts = [math.trunc(last_result * a) for a in self.amounts]
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
