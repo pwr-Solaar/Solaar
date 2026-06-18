@@ -1,5 +1,9 @@
-# 1.1.20rc2
+# 1.1.20rc3
 
+* Add Irish translation
+* Don't use old settings when reusing sboxes
+* Add POUND and ISO_BACKSLASH cells to MAIN_ISO key layout
+* Wrap argv in list for Gio.Application.run (PyGObject 3.56)
 * Mock libnotify to not perform notifications when doing tests
 * Isolate testing from real configuration file
 * Update handling of headset RGB controls
