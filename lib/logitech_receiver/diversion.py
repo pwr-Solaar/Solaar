@@ -246,7 +246,12 @@ if evdev:
             key_events.append(evcode)
     devicecap = {
         evdev.ecodes.EV_KEY: key_events,
-        evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+        evdev.ecodes.EV_REL: [
+            evdev.ecodes.REL_WHEEL,
+            evdev.ecodes.REL_HWHEEL,
+            evdev.ecodes.REL_WHEEL_HI_RES,
+            evdev.ecodes.REL_HWHEEL_HI_RES,
+        ],
     }
 else:
     # Just mock these since they won't be useful without evdev anyway
@@ -360,15 +365,23 @@ def click(button, count):
     return False
 
 
-def simulate_scroll(dx, dy):
+def simulate_scroll(dx, dy, hi_res_dx=None, hi_res_dy=None):
+    hi_res_dx = hi_res_dx or dx * 120
+    hi_res_dy = hi_res_dy or dy * 120
     if setup_uinput():
-        success = True
-        if dx:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
-        if dy and success:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
-        if success:
-            return True
+        for code, delta in (
+            (evdev.ecodes.REL_HWHEEL_HI_RES, hi_res_dx),
+            (evdev.ecodes.REL_WHEEL_HI_RES, hi_res_dy),
+            (evdev.ecodes.REL_HWHEEL, dx),
+            (evdev.ecodes.REL_WHEEL, dy),
+        ):
+            if delta:
+                success = simulate_uinput(evdev.ecodes.EV_REL, code, delta)
+                if not success:
+                    return False
+
+        return True
+
     logger.warning("no way to simulate scrolling")
 
 
@@ -621,8 +634,7 @@ class Process(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 logger.warning(
-                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome "
-                    "extension - %s",
+                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s",
                     self,
                 )
         if not isinstance(process, str):
@@ -1218,26 +1230,45 @@ class MouseScroll(Action):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
             if warn:
-                logger.warning("rule MouseScroll argument not two numbers %s", amounts)
+                logger.warning(f"rule {self.__class__.__name__} argument not two numbers {amounts}")
             amounts = [0, 0]
         self.amounts = amounts
 
     def __str__(self):
-        return "MouseScroll: " + " ".join([str(a) for a in self.amounts])
+        return f"{self.__class__.__name__}: " + " ".join([str(a) for a in self.amounts])
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
         if logger.isEnabledFor(logging.INFO):
-            logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
+            logger.info(f"{self.__class__.__name__} action: {self.amounts} {last_result} {amounts}")
         dx, dy = amounts
-        simulate_scroll(dx, dy)
+        self._scroll(dx, dy)
         time.sleep(0.01)
         return None
 
+    @classmethod
+    def _scroll(cls, dx, dy):
+        simulate_scroll(dx, dy)
+
     def data(self):
-        return {"MouseScroll": self.amounts[:]}
+        return {f"{self.__class__.__name__}": self.amounts[:]}
+
+
+class MouseScrollHiRes(MouseScroll):
+    accumulated_x = 0
+    accumulated_y = 0
+
+    @classmethod
+    def _scroll(cls, hi_res_dx, hi_res_dy):
+        cls.accumulated_x += hi_res_dx
+        cls.accumulated_y += hi_res_dy
+        dx = cls.accumulated_x // 120
+        dy = cls.accumulated_y // 120
+        cls.accumulated_x %= 120
+        cls.accumulated_y %= 120
+        simulate_scroll(dx, dy, hi_res_dx, hi_res_dy)
 
 
 class MouseClick(Action):
@@ -1405,6 +1436,7 @@ COMPONENTS = {
     "Host": Host,
     "KeyPress": KeyPress,
     "MouseScroll": MouseScroll,
+    "MouseScrollHiRes": MouseScrollHiRes,
     "MouseClick": MouseClick,
     "Set": Set,
     "Execute": Execute,
