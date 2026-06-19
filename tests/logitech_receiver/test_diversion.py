@@ -111,6 +111,7 @@ def test_feature():
         (SupportedFeature.MKEYS, [0x01, 0x02, 0x03, 0x04]),
         (SupportedFeature.MR, [0x01, 0x02, 0x03, 0x04]),
         (SupportedFeature.THUMB_WHEEL, [0x01, 0x02, 0x03, 0x04, 0x05]),
+        (SupportedFeature.CHANGE_HOST, [0x00, 0x01, 0x00, 0x00]),
         (SupportedFeature.DEVICE_UNIT_ID, [0x01, 0x02, 0x03, 0x04, 0x05]),
     ],
 )
@@ -125,3 +126,27 @@ def test_process_notification(feature, data):
     )
 
     diversion.process_notification(device_mock, notification, feature)
+
+
+@pytest.mark.parametrize(
+    "data, key_name",
+    [
+        (b"\x01\x00\x00\x00", "Host Switch Channel 1"),
+        (b"\x02\x00\x00\x00", "Host Switch Channel 2"),
+        (b"\x00\x01\x00\x00", "Host Switch Channel 2"),
+    ],
+)
+def test_process_change_host_notification_maps_to_key_press(data, key_name):
+    device_mock = mock.Mock()
+    notification = HIDPPNotification(
+        report_id=0x01,
+        devnumber=1,
+        sub_id=0x13,
+        address=0x00,
+        data=data,
+    )
+
+    diversion.process_notification(device_mock, notification, SupportedFeature.CHANGE_HOST)
+
+    condition = diversion.Key([key_name, "pressed"])
+    assert condition.evaluate(SupportedFeature.CHANGE_HOST, notification, device_mock, True)

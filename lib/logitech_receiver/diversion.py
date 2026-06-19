@@ -47,6 +47,7 @@ else:
     import evdev
 
 from .common import NamedInt
+from .hidpp20 import Hidpp20
 from .hidpp20 import SupportedFeature
 from .special_keys import CONTROL
 
@@ -1304,6 +1305,11 @@ class Set(Action):
         if setting is None:
             logger.warning("Set action: setting %s is not the name of a setting for %s", self.args[1], dev.name)
             return None
+        if setting.name == "change-host":
+            try:
+                Hidpp20().get_host_names(dev)
+            except Exception:
+                logger.debug("Set action: failed to refresh host names before change-host write", exc_info=True)
         args = setting.acceptable(self.args[2:], setting.read())
         if args is None:
             logger.warning(
@@ -1487,6 +1493,15 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
             if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
                 thumb_wheel_displacement = 0
             thumb_wheel_displacement += signed(notification.data[0:2])
+        elif feature == SupportedFeature.CHANGE_HOST and len(notification.data) >= 2:
+            if 1 <= notification.data[0] <= 3 and notification.data[1] == 0:
+                host = notification.data[0]
+                key_down = CONTROL["Host_Switch_Channel_" + str(host)]
+                logger.debug("mapping change host notification into key %s", key_down)
+            elif notification.data[0] == 0 and notification.data[1] <= 2:
+                host = notification.data[1] + 1
+                key_down = CONTROL["Host_Switch_Channel_" + str(host)]
+                logger.debug("mapping change host notification into key %s", key_down)
 
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
