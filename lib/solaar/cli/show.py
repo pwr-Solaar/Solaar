@@ -26,6 +26,7 @@ from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import strhex
 from logitech_receiver.device import CenturionReceiver
+from logitech_receiver.device import Device
 from logitech_receiver.hidpp20_constants import SupportedFeature
 
 from solaar import NAME
@@ -484,6 +485,8 @@ def run(devices, args, find_receiver, find_device):
             else:
                 _print_device(d)
                 print("")
+        for d in Device.instances:
+            d.close()
         return
 
     dev = find_receiver(devices, device_name)
@@ -496,3 +499,4 @@ def run(devices, args, find_receiver, find_device):
         raise Exception(f"no device found matching '{device_name}'")
 
     _print_device(dev)
+    dev.close()
