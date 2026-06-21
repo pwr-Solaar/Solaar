@@ -672,3 +672,121 @@ def test_perkey_write_key_value_skipped_when_zone_is_animation(monkeypatch):
     s.write_key_value(7, 0xFF0000)
 
     s._send_zone_color.assert_not_called()
+
+
+def test_perkey_write_key_value_initializes_unread_value(monkeypatch):
+    """The CLI writes a single key without ever reading the setting, so
+    _value is still None. write_key_value must initialize it via read()
+    (persisted state or the sentinel map — 0x8081 is write-only) instead
+    of crashing with a None dereference in update_key_value."""
+    from unittest.mock import MagicMock
+
+    from logitech_receiver import settings_templates
+
+    static_zone = _FakeZoneSetting("rgb_zone_1", _ValueWithID(0x01))
+
+    s = settings_templates.PerKeyLighting.__new__(settings_templates.PerKeyLighting)
+    device = MagicMock()
+    device.online = True
+    device.settings = [static_zone]
+    s._device = device
+    s._value = None  # fresh CLI invocation: nothing has read the setting
+    s._validator = MagicMock()
+    s._validator.choices = [7]
+    s._pre_read = lambda cached=True: None
+    s._has_rgb_effects = True
+    s._send_with_retry = MagicMock(return_value=True)
+    s._send_zone_color = MagicMock(return_value=True)
+    s._fill_unset_zones_with_base_color = MagicMock(return_value=True)
+    monkeypatch.setattr(rgb_power, "translate_for_device", lambda d, c: c)
+    monkeypatch.setattr(rgb_power, "get_manager", lambda d: None)
+
+    s.write_key_value(7, 0xFF0000)
+
+    assert s._value[7] == 0xFF0000
+    s._send_zone_color.assert_called_once()
+
+
+def _perkey_under_test(monkeypatch, choices):
+    """PerKeyLighting wired to a static-zone device with mocked wire sends."""
+    from unittest.mock import MagicMock
+
+    from logitech_receiver import settings_templates
+
+    static_zone = _FakeZoneSetting("rgb_zone_1", _ValueWithID(0x01))
+    s = settings_templates.PerKeyLighting.__new__(settings_templates.PerKeyLighting)
+    device = MagicMock()
+    device.online = True
+    device.settings = [static_zone]
+    device.kind = None  # not a mouse — no artanis prep
+    s._device = device
+    s._value = None
+    s._validator = MagicMock()
+    s._validator.choices = choices
+    s._pre_read = lambda cached=True: None
+    s._has_rgb_effects = True
+    s._send_with_retry = MagicMock(return_value=True)
+    s._send_zone_color = MagicMock(return_value=True)
+    s._fill_unset_zones_with_base_color = MagicMock(return_value=True)
+    monkeypatch.setattr(rgb_power, "translate_for_device", lambda d, c: c)
+    monkeypatch.setattr(rgb_power, "get_manager", lambda d: None)
+    return s
+
+
+def test_perkey_write_drops_invalid_zones(monkeypatch):
+    """A persisted or editor-supplied map can carry zones the device never
+    reported (e.g. the canvas' -1 gap placeholder). They must be dropped,
+    not abort the whole frame with OverflowError at pack time."""
+    s = _perkey_under_test(monkeypatch, choices=[7])
+
+    s.write({-1: 0xFF0000, 7: 0x00FF00})  # must not raise
+
+    assert -1 not in s._value
+    assert s._value[7] == 0x00FF00
+
+
+def test_perkey_write_key_value_ignores_invalid_zone(monkeypatch):
+    s = _perkey_under_test(monkeypatch, choices=[7])
+
+    s.write_key_value(-1, 0xFF0000)
+
+    s._send_zone_color.assert_not_called()
+
+
+def test_perkey_read_heals_poisoned_persisted_map(monkeypatch):
+    """A -1 zone saved by an older/buggy build must be dropped on read so
+    it ages out of the persisted config on the next save."""
+    s = _perkey_under_test(monkeypatch, choices=[7])
+    s._value = {-1: 0xFF0000, 7: 0x00FF00}  # as loaded from persister
+
+    result = s.read()
+
+    assert -1 not in result
+    assert result[7] == 0x00FF00
+
+
+# --- post-claim repaint ------------------------------------------------------
+
+
+def test_repaint_after_claim_pushes_zones_and_perkey(monkeypatch):
+    """The post-claim repaint pushes saved zone effects and the per-key
+    buffer. (The F4/MR blackout is handled structurally by keeping affected
+    models in onboard mode — device_quirks.rgb_claim_keeps_onboard_mode — not
+    by any timed repaint.)"""
+    from unittest.mock import MagicMock
+
+    from logitech_receiver import settings_templates
+
+    ctl = settings_templates.RGBControl.__new__(settings_templates.RGBControl)
+    zone = MagicMock()
+    zone.name = "rgb_zone_1"
+    zone._value = object()
+    device = MagicMock()
+    device.settings = [zone]
+    perkey = MagicMock()
+    perkey._value = {1: 0xFF0000}
+    monkeypatch.setattr(rgb_power, "perkey_has_paint", lambda d: (perkey, True))
+
+    ctl._repaint_after_claim(device)
+    zone.write.assert_called_once()
+    perkey.write.assert_called_once()
