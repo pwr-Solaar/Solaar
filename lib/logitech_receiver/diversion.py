@@ -16,7 +16,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import ctypes
+import enum
 import logging
 import math
 import numbers
@@ -129,8 +131,6 @@ NET_WM_PID = None
 WM_CLASS = None
 
 
-udevice = None
-
 key_down = None
 key_up = None
 
@@ -240,7 +240,7 @@ if evdev:
     }
 
     # uinput capability for keyboard keys, mouse buttons, and scrolling
-    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n != "KEY_CNT"]
+    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n not in {"KEY_CNT", "KEY_MAX"}]
     for _, evcode in buttons.values():
         if evcode:
             key_events.append(evcode)
@@ -255,17 +255,105 @@ else:
     devicecap = {}
 
 
-def setup_uinput():
-    global udevice
-    if udevice is not None:
-        return udevice
-    try:
-        udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("uinput device set up")
+class UInput:
+    class EventType(enum.Enum):
+        KEYBOARD = enum.auto()
+        MOUSE = enum.auto()
+
+    def __init__(self):
+        self.udevice = None
+        self.barrier_until = None
+        self.barrier_type = None
+
+    def _wait_barrier(self, event_type: EventType):
+        if self.barrier_until is None:
+            return
+
+        if event_type == self.barrier_type:
+            return
+
+        remainder = self.barrier_until - time.monotonic()
+        if remainder > 0:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("wait %.3fs due to %s barrier", remainder, self.barrier_type)
+            time.sleep(remainder)
+
+        self.barrier_until = None
+        self.barrier_type = None
+
+    def barrier(self, margin: float, event_type: EventType):
+        self.barrier_type = event_type
+        self.barrier_until = time.monotonic() + margin
+
+    def setup(self):
+        if self.udevice is not None:
+            return self.udevice
+        try:
+            self.udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("uinput device set up")
+            return True
+        except Exception as e:
+            logger.warning("cannot create uinput device: %s", e)
+
+    def simulate(self, what, code, arg):
+        if self.setup():
+            try:
+                self.udevice.write(what, code, arg)
+                self.udevice.syn()
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("uinput simulated input %s %s %s", what, code, arg)
+                return True
+            except Exception as e:
+                with contextlib.suppress(Exception):
+                    self.udevice.close()
+
+                self.udevice = None
+                logger.warning("uinput write failed: %s", e)
+
+    def key(self, code, event):  # X11 keycode but Solaar event code
+        if evdev:
+            self._wait_barrier(self.EventType.KEYBOARD)
+            if self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
+                return True
+        logger.warning("no way to simulate key input")
+
+    def _click(self, button, count):
+        if isinstance(count, int):
+            for _ in range(count):
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                    return False
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                    return False
+        else:
+            if count != RELEASE:
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                    return False
+            if count != DEPRESS:
+                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                    return False
         return True
-    except Exception as e:
-        logger.warning("cannot create uinput device: %s", e)
+
+    def click(self, button, count):
+        self._wait_barrier(self.EventType.MOUSE)
+        if self._click(button, count):
+            return True
+        logger.warning("no way to simulate mouse click")
+        return False
+
+    def scroll(self, dx, dy):
+        self._wait_barrier(self.EventType.MOUSE)
+        success = True
+        if dx:
+            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+        if dy and success:
+            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+        if success:
+            return True
+        logger.warning("no way to simulate scrolling")
+
+
+uinput = UInput()
 
 
 def kbdgroup():
@@ -287,6 +375,10 @@ def modifier_code(keycode):
 
 def signed(bytes_: bytes) -> int:
     return int.from_bytes(bytes_, "big", signed=True)
+
+
+def is_number(n) -> bool:
+    return not isinstance(n, bool) and isinstance(n, numbers.Number)
 
 
 def xy_direction(_x, _y):
@@ -314,62 +406,6 @@ def xy_direction(_x, _y):
         return "Mouse Up"
     else:
         return "noop"
-
-
-def simulate_uinput(what, code, arg):
-    global udevice
-    if setup_uinput():
-        try:
-            udevice.write(what, code, arg)
-            udevice.syn()
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("uinput simulated input %s %s %s", what, code, arg)
-            return True
-        except Exception as e:
-            udevice = None
-            logger.warning("uinput write failed: %s", e)
-
-
-def simulate_key(code, event):  # X11 keycode but Solaar event code
-    if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
-        return True
-    logger.warning("no way to simulate key input")
-
-
-def click_uinput(button, count):
-    if isinstance(count, int):
-        for _ in range(count):
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-                return False
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-                return False
-    else:
-        if count != RELEASE:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-                return False
-        if count != DEPRESS:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-                return False
-    return True
-
-
-def click(button, count):
-    if click_uinput(button, count):
-        return True
-    logger.warning("no way to simulate mouse click")
-    return False
-
-
-def simulate_scroll(dx, dy):
-    if setup_uinput():
-        success = True
-        if dx:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
-        if dy and success:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
-        if success:
-            return True
-    logger.warning("no way to simulate scrolling")
 
 
 def thumb_wheel_up(f, r, d, a):
@@ -410,14 +446,26 @@ def charging(f, r, d, _a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
-    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
-    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
-    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
+    "crown_right": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) > 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_left": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) < 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_right_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) > 0 and signed(d[2:3]),
+        False,
+    ],
+    "crown_left_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) < 0 and signed(d[2:3]),
+        False,
+    ],
+    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and True, False],
+    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and True, False],
+    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and True, False],
+    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and True, False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
     "lowres_wheel_up": [
@@ -465,14 +513,13 @@ class RuleComponent:
 
 
 def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
-    res = True
     for component in components:
-        res = component.evaluate(feature, notification, device, result)
-        if not isinstance(component, Action) and res is None:
+        result = component.evaluate(feature, notification, device, result)
+        if not isinstance(component, Action) and result is None:
             return None
-        if isinstance(component, Condition) and not res:
-            return res
-    return res
+        if isinstance(component, Condition) and not result:
+            return result
+    return result
 
 
 class Rule(RuleComponent):
@@ -1157,11 +1204,11 @@ class KeyPress(Action):
         if level == 2 or level == 3:
             (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
             if sk and self.needed(sk, modifiers):
-                simulate_key(sk, direction)
+                uinput.key(sk, direction)
         if level == 1 or level == 3:
             (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
             if sk and self.needed(sk, modifiers):
-                simulate_key(sk, direction)
+                uinput.key(sk, direction)
 
     def keyDown(self, keysyms_, modifiers):
         for k in keysyms_:
@@ -1170,13 +1217,13 @@ class KeyPress(Action):
                 logger.warning("rule KeyPress key symbol not currently available %s", self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
-                simulate_key(keycode, _KEY_PRESS)
+                uinput.key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms_, modifiers):
         for k in keysyms_:
             (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
-                simulate_key(keycode, _KEY_RELEASE)
+                uinput.key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
@@ -1194,7 +1241,7 @@ class KeyPress(Action):
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
-            time.sleep(0.01)
+            uinput.barrier(0.01, uinput.EventType.KEYBOARD)
         else:
             logger.warning("no keymap so cannot determine which keycode to send")
         return None
@@ -1216,7 +1263,7 @@ class MouseScroll(Action):
     def __init__(self, amounts, warn=True):
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
-        if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
+        if not (len(amounts) == 2 and all([is_number(a) for a in amounts])):
             if warn:
                 logger.warning("rule MouseScroll argument not two numbers %s", amounts)
             amounts = [0, 0]
@@ -1227,13 +1274,13 @@ class MouseScroll(Action):
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
-        if isinstance(last_result, numbers.Number):
-            amounts = [math.floor(last_result * a) for a in self.amounts]
+        if is_number(last_result):
+            amounts = [math.trunc(last_result * a) for a in self.amounts]
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
-        simulate_scroll(dx, dy)
-        time.sleep(0.01)
+        uinput.scroll(dx, dy)
+        uinput.barrier(0.01, uinput.EventType.MOUSE)
         return None
 
     def data(self):
@@ -1271,8 +1318,8 @@ class MouseClick(Action):
         if logger.isEnabledFor(logging.INFO):
             logger.info(f"MouseClick action: {str(self.count)} {self.button}")
         if self.button and self.count:
-            click(buttons[self.button], self.count)
-        time.sleep(0.01)
+            uinput.click(buttons[self.button], self.count)
+        uinput.barrier(0.01, uinput.EventType.MOUSE)
         return None
 
     def data(self):
