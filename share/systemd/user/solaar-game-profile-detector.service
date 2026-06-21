@@ -1,0 +1,12 @@
+[Unit]
+Description=Solaar Game Profile Detector
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/solaar-game-profile-detector
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
