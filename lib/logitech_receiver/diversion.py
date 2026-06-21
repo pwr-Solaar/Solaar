@@ -240,7 +240,7 @@ if evdev:
     }
 
     # uinput capability for keyboard keys, mouse buttons, and scrolling
-    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n != "KEY_CNT"]
+    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n not in {"KEY_CNT", "KEY_MAX"}]
     for _, evcode in buttons.values():
         if evcode:
             key_events.append(evcode)
@@ -289,6 +289,10 @@ def signed(bytes_: bytes) -> int:
     return int.from_bytes(bytes_, "big", signed=True)
 
 
+def is_number(n) -> bool:
+    return not isinstance(n, bool) and isinstance(n, numbers.Number)
+
+
 def xy_direction(_x, _y):
     # normalize x and y
     m = math.sqrt((_x * _x) + (_y * _y))
@@ -326,6 +330,11 @@ def simulate_uinput(what, code, arg):
                 logger.debug("uinput simulated input %s %s %s", what, code, arg)
             return True
         except Exception as e:
+            try:
+                udevice.close()
+            except Exception:
+                pass
+
             udevice = None
             logger.warning("uinput write failed: %s", e)
 
@@ -380,7 +389,7 @@ def thumb_wheel_up(f, r, d, a):
         return signed(d[0:2]) < 0 and signed(d[0:2])
     elif thumb_wheel_displacement <= -a:
         thumb_wheel_displacement += a
-        return 1
+        return -1
     else:
         return False
 
@@ -410,14 +419,26 @@ def charging(f, r, d, _a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
-    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
-    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
-    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
+    "crown_right": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) > 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_left": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[1:2]) < 0 and signed(d[1:2]),
+        False,
+    ],
+    "crown_right_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) > 0 and signed(d[2:3]),
+        False,
+    ],
+    "crown_left_ratchet": [
+        lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and signed(d[2:3]) < 0 and signed(d[2:3]),
+        False,
+    ],
+    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and True, False],
+    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and True, False],
+    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and True, False],
+    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and True, False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
     "lowres_wheel_up": [
@@ -465,14 +486,13 @@ class RuleComponent:
 
 
 def _evaluate(components, feature, notification: HIDPPNotification, device, result) -> Any:
-    res = True
     for component in components:
-        res = component.evaluate(feature, notification, device, result)
-        if not isinstance(component, Action) and res is None:
+        result = component.evaluate(feature, notification, device, result)
+        if not isinstance(component, Action) and result is None:
             return None
-        if isinstance(component, Condition) and not res:
-            return res
-    return res
+        if isinstance(component, Condition) and not result:
+            return result
+    return result
 
 
 class Rule(RuleComponent):
@@ -1216,7 +1236,7 @@ class MouseScroll(Action):
     def __init__(self, amounts, warn=True):
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
-        if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
+        if not (len(amounts) == 2 and all([is_number(a) for a in amounts])):
             if warn:
                 logger.warning("rule MouseScroll argument not two numbers %s", amounts)
             amounts = [0, 0]
@@ -1227,8 +1247,8 @@ class MouseScroll(Action):
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
-        if isinstance(last_result, numbers.Number):
-            amounts = [math.floor(last_result * a) for a in self.amounts]
+        if is_number(last_result):
+            amounts = [math.trunc(last_result * a) for a in self.amounts]
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
