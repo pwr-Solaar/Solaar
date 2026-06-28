@@ -279,6 +279,22 @@ def test_process_feature_notification(mocker, hidpp_notification, feature):
     assert result is True
 
 
+@pytest.mark.parametrize("was_active, expected_force", [(True, True), (False, False)])
+def test_wireless_power_on_reconfig_forces_apply_only_when_already_active(mocker, was_active, expected_force):
+    """A powered-on reconfig request must bypass the config-cookie gate
+    exactly when changed() ran no activation apply (device already active).
+    On the inactive→active transition changed() just applied everything, so
+    forcing there would push a redundant duplicate."""
+    device = mocker.Mock()
+    device.online = was_active  # state before changed() updates it
+    device.features.get_feature.return_value = SupportedFeature.WIRELESS_DEVICE_STATUS
+    hidpp_notification = HIDPPNotification(0, 0, sub_id=0x05, address=0x00, data=b"\x00\x01\x01")
+
+    notifications._process_feature_notification(device, hidpp_notification)
+
+    device.apply_settings_if_needed.assert_called_once_with(force=expected_force)
+
+
 def test_process_receiver_notification_invalid(mocker):
     invalid_sub_id = 0x30
     notification_data = b"\x02"
