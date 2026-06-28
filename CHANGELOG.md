@@ -1,4 +1,4 @@
-# 1.1.20rc3
+# 1.1.20
 
 * Add Irish translation
 * Don't use old settings when reusing sboxes
@@ -41,7 +41,7 @@
 * Use per-key RGB color painter
 * Fix bug in notification flag handling
 * Fix bug in HID parser
-* Update Swedish, German, Polish, Chinese translations
+* Update Swedish, German, Polish, Chinese, and French translations
 * Use battery-level-N icons when available
 * Document haptic capabilities
 * Support per-slot unpair on Lightspeed receivers
