@@ -225,7 +225,7 @@ class ChoiceControlBig(Gtk.Entry, Control):
         def norm(s):
             return s.replace("_", "").replace(" ", "").lower()
 
-        completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][1]))
+        completion.set_match_func(lambda completion, key, it: norm(completion.get_model()[it][1]).startswith(norm(key)))
         completion.set_text_column(1)
         self.set_completion(completion)
         self.connect(GtkSignal.CHANGED.value, self.changed)
