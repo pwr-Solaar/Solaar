@@ -802,6 +802,17 @@ class RGBPowerManager:
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning("%s: failed to wake RGB LEDs: %s", self._device, e)
 
+    # --- Suspend / Restore (used e.g. to toggle LEDs on screen lock) ---
+
+    def suspend_leds(self):
+        """Force enter sleep state (e.g. on screen lock)."""
+        if self._state != self.SLEEPING:
+            self._start_sleep()
+
+    def restore_leds(self):
+        """Force wake from sleep state (e.g. on screen unlock)."""
+        self._wake()
+
     def _cancel_dim_timer(self):
         if self._dim_timer_id is not None:
             GLib.source_remove(self._dim_timer_id)
