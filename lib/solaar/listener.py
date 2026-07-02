@@ -30,7 +30,13 @@ from typing import Callable
 import gi
 import logitech_receiver
 
-from logitech_receiver import base, exceptions, hidpp10_constants, listener, notifications, rgb_power, settings_templates as st
+from logitech_receiver import base
+from logitech_receiver import exceptions
+from logitech_receiver import hidpp10_constants
+from logitech_receiver import listener
+from logitech_receiver import notifications
+from logitech_receiver import rgb_power
+from logitech_receiver import settings_templates as st
 from logitech_receiver.hidpp20 import LEDEffectSetting
 
 from . import configuration
@@ -452,7 +458,7 @@ def ping_all(resuming=False):
 def suspend_leds():
     """Turn off LEDs for all connected devices."""
     logger.info("screen locked, suspending LED lighting on all devices")
-    
+
     for listener_thread in _all_listeners.values():
         devices = [listener_thread.receiver] if listener_thread.receiver.isDevice else list(listener_thread.receiver)
         for dev in devices:
@@ -475,7 +481,7 @@ def suspend_leds():
 def restore_leds():
     """Restore LED lighting for all connected devices to their saved states."""
     logger.info("screen unlocked, restoring LED lighting on all devices")
-    
+
     for listener_thread in _all_listeners.values():
         devices = [listener_thread.receiver] if listener_thread.receiver.isDevice else list(listener_thread.receiver)
         for dev in devices:
@@ -487,8 +493,11 @@ def restore_leds():
                 return
 
             for s in dev.settings:
-                if s.name in (st.Backlight.name, st.Backlight2.name, st.Backlight2Level.name, st.PerKeyLighting.name) \
-                    or s.name.startswith(st.LEDZoneSetting.name) or s.name.startswith(st.RGBEffectSetting.name):
+                if (
+                    s.name in (st.Backlight.name, st.Backlight2.name, st.Backlight2Level.name, st.PerKeyLighting.name)
+                    or s.name.startswith(st.LEDZoneSetting.name)
+                    or s.name.startswith(st.RGBEffectSetting.name)
+                ):
                     s.apply()
 
 

@@ -60,6 +60,7 @@ def _suspend_or_resume(suspend):
     if not suspend and _resume_callback:
         _resume_callback()
 
+
 def _lock_or_unlock(locked):
     if locked and _lock_callback:
         _lock_callback()
@@ -92,21 +93,18 @@ def watch_suspend_resume(
     logger.info("connected to system dbus, watching for suspend/resume events")
 
 
-
 def watch_screen_lock_state(
     on_lock_callback: Callable[[], None],
     on_unlock_callback: Callable[[], None],
 ):
     """Register callbacks for screen lock/unlock events.
-    They are called only if the session DBus is running and the Desktop environments sends events on the org.freedesktop.ScreenSaver interface."""
+    They are called only if the session DBus is running and the Desktop environments sends
+    events on the org.freedesktop.ScreenSaver interface."""
     global _lock_callback, _unlock_callback
     _lock_callback = on_lock_callback
     _unlock_callback = on_unlock_callback
     session_bus.add_signal_receiver(
-        _lock_or_unlock,
-        "ActiveChanged",
-        dbus_interface=_SCREEN_SAVER_INTERFACE,
-        path=_SCREEN_SAVER_PATH
+        _lock_or_unlock, "ActiveChanged", dbus_interface=_SCREEN_SAVER_INTERFACE, path=_SCREEN_SAVER_PATH
     )
     logger.info("connected to session dbus watching for screen lock/unlock events")
 
