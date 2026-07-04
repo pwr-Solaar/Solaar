@@ -428,6 +428,8 @@ _D("G500 Gaming Mouse", codename="G500 Gaming", usbid=0xC068, interface=1, proto
 _D("G500s Gaming Mouse", codename="G500s Gaming", usbid=0xC24E, interface=1, protocol=1.0)
 _D("G502 Proteus Spectrum Optical Mouse", codename="G502 Proteus Spectrum", usbid=0xC332, interface=1)
 _D("Logitech PRO Gaming Keyboard", codename="PRO Gaming Keyboard", usbid=0xC339, interface=1)
+_D("Bluetooth Multi-Device Keyboard K380", codename="Keyboard K380", protocol=4.5, btid=0xB342)
+# K380 HID Report Descriptor cannot be parsed
 
 _D("Logitech MX Revolution Mouse M-RCL 124", codename="M-RCL 124", btid=0xB007, interface=1)
 
