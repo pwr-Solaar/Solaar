@@ -32,6 +32,7 @@ from . import keyboard_iso_azerty
 from . import keyboard_iso_qwerty
 from . import keyboard_iso_qwertz
 from . import keyboard_jis
+from . import keyboard_pro_x_rapid
 from . import mouse_g502x
 
 # (feature_id, matcher, layout). Matcher receives a `hint` dict the editor
@@ -134,6 +135,29 @@ def _keyboard_matcher(family: str, full_size: bool) -> Callable[[dict], bool]:
 
     return match
 
+
+def _pro_x_rapid_matcher(family: str) -> Callable[[dict], bool]:
+    """Match the PRO X RAPID (reported as "PRO X RAPID", TKL) for one region.
+    Same country-code family routing as the generic keyboards; only the media
+    top row differs."""
+    named = _name_contains("PRO X RAPID")
+
+    def match(hint: dict) -> bool:
+        if hint.get("kind") != "keyboard":
+            return False
+        if not named(hint):
+            return False
+        if _has_numpad(hint):  # PRO X RAPID is TKL
+            return False
+        return _keyboard_family(hint) == family
+
+    return match
+
+
+# PRO X RAPID — regional generated base + a customized media top row.
+# Registered ahead of the generic family matchers so it wins for this model.
+for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
+    register_layout(0x8081, _pro_x_rapid_matcher(_family), keyboard_pro_x_rapid.with_media_top_row(_tkl))
 
 # PER_KEY_LIGHTING_V2 = 0x8081
 for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
