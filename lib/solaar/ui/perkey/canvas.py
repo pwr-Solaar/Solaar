@@ -54,6 +54,11 @@ GUTTER_PX = 4
 STRIP_GAP_PX = 16
 PADDING_PX = 8
 
+# Phantom anchor zone for matrix gaps (positions with no key). Never a real
+# zone, never sent to the device — distinct from the -1 "No change" color
+# VALUE (special_keys.COLORSPLUS / control.NO_CHANGE).
+GAP_ZONE_ID = -1
+
 
 class KeyboardCanvas(Gtk.DrawingArea):
     __gsignals__ = {
@@ -178,7 +183,7 @@ class KeyboardCanvas(Gtk.DrawingArea):
             col = int((x - PADDING_PX) // (CELL_PX + GUTTER_PX))
             row = int((y - PADDING_PX) // (CELL_PX + GUTTER_PX))
             if 0 <= col < cols and 0 <= row < rows:
-                return BoundCell(cell=Cell(zone_id=-1, row=row, col=col), bound=False)
+                return BoundCell(cell=Cell(zone_id=GAP_ZONE_ID, row=row, col=col), bound=False)
         return None
 
     # ---- draw ----
@@ -438,6 +443,10 @@ class KeyboardCanvas(Gtk.DrawingArea):
         delta: dict[int, int] = {}
         if tool is not None:
             delta = tool.compute(self._press_cell, self._motion_cell, list(self._brush_path), ctx)
+        # Strokes can sweep over layout gaps; drop their phantom cells so
+        # they never reach the sink. This filters KEYS — "No change" color
+        # VALUES (-1) pass through untouched.
+        delta = {z: c for z, c in delta.items() if z != GAP_ZONE_ID}
         self._press_cell = None
         self._motion_cell = None
         self._brush_path = []

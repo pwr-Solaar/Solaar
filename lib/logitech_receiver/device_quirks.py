@@ -69,6 +69,38 @@ HEADSET_SIGNATURE_EFFECTS_ALLOWED: dict[str, dict[int, set[str]]] = {
 }
 
 
+# Keyboards whose firmware breaks the F-row / media keys when the RGB
+# SW-control claim switches them to host mode (ONBOARD_PROFILES fn 0x10 mode
+# 0x02) — Solaar #1100. A USB capture of G HUB's bring-up shows it drives the
+# LEDs from onboard mode via the RGB SetSWControl claim alone, never making
+# that switch. For these models the claim keeps onboard mode, which also avoids
+# the host-mode transition that made the firmware re-assert the M/MR indicator
+# over a per-key cell (the G915 TKL F4 blackout).
+RGB_CLAIM_KEEPS_ONBOARD_MODE: set[str] = {
+    "B35F408EC343",  # G915 TKL LIGHTSPEED — verified: host mode disables F-keys/media keys
+}
+
+# Keyboards where switching onboard profiles drops the software per-key/zone
+# paint (the firmware loads the switched-to profile's own onboard lighting).
+# For these, re-assert the claim + repaint on a profile-change notification so
+# an accidental profile switch doesn't strand the user's software scheme.
+RGB_REPAINT_ON_PROFILE_CHANGE: set[str] = {
+    "B35F408EC343",  # G915 TKL LIGHTSPEED
+}
+
+
+def rgb_claim_keeps_onboard_mode(device) -> bool:
+    """True when the RGB SW-control claim must NOT switch this model to host
+    mode (it would disable the F-row / media keys)."""
+    return (getattr(device, "modelId", None) or "") in RGB_CLAIM_KEEPS_ONBOARD_MODE
+
+
+def rgb_repaint_on_profile_change(device) -> bool:
+    """True when a profile-change notification should re-apply the claimed
+    software RGB state on this model (the switch drops the per-key paint)."""
+    return (getattr(device, "modelId", None) or "") in RGB_REPAINT_ON_PROFILE_CHANGE
+
+
 def rgb_effects_nvconfig_allowed_fields(device, cap_id: int) -> set[str] | None:
     """Color fields to expose for an 0x8071 NvConfig boot effect.
 

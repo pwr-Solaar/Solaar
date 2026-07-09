@@ -463,7 +463,7 @@ class Device:
         if self.persister is not None:
             self.persister["_config_cookie"] = [cookie[0], cookie[1]]
 
-    def apply_settings_if_needed(self):
+    def apply_settings_if_needed(self, force=False):
         """Cookie-gated dedup helper for repeat WIRELESS_DEVICE_STATUS
         reconfig notifications on an already-active device. Skips when the
         live ConfigChange cookie matches the value stored by the most
@@ -472,10 +472,17 @@ class Device:
         whose firmware resets the cookie to a fixed value would falsely
         match a stored cookie from a prior session and skip the apply the
         device actually needs.
+        `force` skips the cookie comparison (but still re-records): pass it
+        when the device powered on while already marked active — no
+        activation apply ran in changed(), yet volatile state (RGB buffers,
+        host-mode lighting) is gone even on devices whose ConfigChange
+        cookie survives the power cycle (e.g. G915 TKL). When the device
+        was inactive, changed() just applied everything, so forcing here
+        would only push a redundant duplicate.
         Returns True if apply ran, False if it was skipped."""
         if not self.online:
             return False
-        if self.protocol >= 2.0 and self.features and SupportedFeature.CONFIG_CHANGE in self.features:
+        if not force and self.protocol >= 2.0 and self.features and SupportedFeature.CONFIG_CHANGE in self.features:
             live = _hidpp20.get_configuration_cookie(self)
             if live and len(live) >= 2:
                 stored = self.persister.get("_config_cookie") if self.persister else None
