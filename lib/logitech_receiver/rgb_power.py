@@ -338,8 +338,8 @@ def cleanup(device):
             device.feature_request(SupportedFeature.PROFILE_MANAGEMENT, 0x60, b"\x03")
         elif device.features and SupportedFeature.ONBOARD_PROFILES in device.features:
             device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x10, b"\x01")
-    except Exception:
-        pass  # Device may already be offline
+    except Exception as e:
+        logger.debug("%s: cleanup release writes failed (device offline?): %s", device, e)
     if getattr(device, "_rgb_has_shutdown_cap", False):
         try:
             # SetRgbPowerMode(set=1, mode=0) — firmware off transition.
