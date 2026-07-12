@@ -197,7 +197,7 @@ def gnome_dbus_interface_setup():
         bus = dbus.SessionBus()
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
-    except dbus.exceptions.DBusException:
+    except Exception:
         logger.warning(
             "Solaar Gnome extension not installed - some rule capabilities inoperable",
             exc_info=sys.exc_info(),
