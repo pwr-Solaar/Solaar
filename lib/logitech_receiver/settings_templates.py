@@ -3246,6 +3246,18 @@ class LEDControl(settings.Setting):
                         logger.warning("%s: post-claim repaint of %s failed: %s", self._device, s.name, e)
         return result
 
+    def apply(self):
+        # Off = leave the lighting alone on connect (don't send the release);
+        # another app may own it. Only an explicit On claim is applied.
+        try:
+            value = self.read(self.persist)
+        except Exception:
+            value = None
+        if value:
+            super().apply()
+        elif logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: LED control off — leaving lighting untouched on %s", self.name, self._device)
+
 
 colors = special_keys.COLORS
 _LEDP = hidpp20.LEDParam
@@ -3257,6 +3269,20 @@ class LEDZoneSetting(settings.Setting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.COLOR_LED_EFFECTS
+    gate_setting_name = LEDControl.name
+
+    def apply(self):
+        # Skip when the control gate is off (SETTINGS order runs it first, so
+        # its _value is set) — leave the lighting to whatever owns it.
+        for s in self._device.settings:
+            if s.name == self.gate_setting_name:
+                if not s._value:
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s: %s off — not applying on %s", self.name, s.name, self._device)
+                    return
+                break
+        super().apply()
+
     color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
     period_field = {
@@ -3809,6 +3835,7 @@ class RGBEffectSetting(LEDZoneSetting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.RGB_EFFECTS
+    gate_setting_name = RGBControl.name
     # 0x8071 firmware-fixes ramp/form bytes; drop those widgets here.
     possible_fields = [
         LEDZoneSetting.color_field,

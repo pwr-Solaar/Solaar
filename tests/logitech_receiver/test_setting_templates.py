@@ -1072,3 +1072,49 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+def _led_lighting_device():
+    responses = [
+        fake_hidpp.Response("0100000001", 0x0400),
+        fake_hidpp.Response("00000102", 0x0410, "00FF00"),
+        fake_hidpp.Response("0000000300040005", 0x0420, "000000"),
+        fake_hidpp.Response("0001000B00080009", 0x0420, "000100"),
+        fake_hidpp.Response("01", 0x0480, "01"),
+        fake_hidpp.Response("000000000000000020500000", 0x0430, "000000000000000020500000"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.SupportedFeature.COLOR_LED_EFFECTS, offset=4)
+    control = settings_templates.check_feature(device, settings_templates.LEDControl)
+    zones = settings_templates.check_feature(device, settings_templates.LEDZoneSetting)
+    device.settings = [control] + zones
+    return device
+
+
+def test_lighting_apply_led_control_off_leaves_lighting_alone(mocker):
+    """With led_control persisted off, connect-time apply must not send any
+    lighting traffic — the device or another app (e.g. OpenRGB) owns it."""
+    device = _led_lighting_device()
+    device.persister["led_control"] = False
+    device.persister[device.settings[1].name] = hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50)
+    spy = mocker.spy(device, "request")
+
+    for s in device.settings:
+        s.apply()
+
+    assert spy.call_count == 0
+
+
+def test_lighting_apply_led_control_on_claims_and_repaints(mocker):
+    """With led_control persisted on, apply claims SW control and pushes the
+    saved zone effect."""
+    device = _led_lighting_device()
+    device.persister["led_control"] = True
+    device.persister[device.settings[1].name] = hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50)
+    spy = mocker.spy(device, "request")
+
+    for s in device.settings:
+        s.apply()
+
+    request_ids = [c.args[0] for c in spy.call_args_list]
+    assert 0x0480 in request_ids  # SetSWControl claim
+    assert 0x0430 in request_ids  # zone effect write
