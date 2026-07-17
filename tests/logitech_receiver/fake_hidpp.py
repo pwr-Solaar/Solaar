@@ -264,6 +264,11 @@ zone_responses_2 = [  # responses for RGB EFFECTS
     Response("0000000300040005", 0x0700, "000000"),
     Response("0001000200080009", 0x0700, "000100"),
 ]
+zone_responses_speaker = [  # COLOR LED EFFECTS zone with Audio Visualizer (G560)
+    Response("00000102", 0x0710, "00FF00"),
+    Response("0000000300040005", 0x0720, "000000"),
+    Response("0001000700040005", 0x0720, "000100"),
+]
 effects_responses_1 = [Response("0100000001", 0x0700)] + zone_responses_1
 effects_responses_2 = [Response("FFFF0100000001", 0x0700, "FFFF00")] + zone_responses_2
 

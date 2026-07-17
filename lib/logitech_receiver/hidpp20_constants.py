@@ -257,6 +257,18 @@ DEVICE_KIND = NamedInts(
     trackball=0x05,
     presenter=0x06,
     receiver=0x07,
+    headset=0x08,
+    webcam=0x09,
+    steering_wheel=0x0A,
+    joystick=0x0B,
+    gamepad=0x0C,
+    dock=0x0D,
+    speaker=0x0E,
+    microphone=0x0F,
+    illumination_light=0x10,
+    programmable_controller=0x11,
+    car_sim_pedals=0x12,
+    adapter=0x13,
 )
 
 

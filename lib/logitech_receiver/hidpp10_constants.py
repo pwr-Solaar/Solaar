@@ -43,6 +43,16 @@ DEVICE_KIND = NamedInts(
     headset=0x0D,  # not from Logitech documentation
     remote_control=0x0E,  # for compatibility with HID++ 2.0
     receiver=0x0F,  # for compatibility with HID++ 2.0
+    # 0x10 and up: not HID++ 1.0 protocol values, only for compatibility with HID++ 2.0
+    webcam=0x10,
+    steering_wheel=0x11,
+    dock=0x12,
+    speaker=0x13,
+    microphone=0x14,
+    illumination_light=0x15,
+    programmable_controller=0x16,
+    car_sim_pedals=0x17,
+    adapter=0x18,
 )
 
 

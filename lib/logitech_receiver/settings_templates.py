@@ -3219,6 +3219,18 @@ class LEDControl(settings.Setting):
         if isinstance(self._value, int) and not isinstance(self._value, bool):
             self._value = self._value != 0
 
+    def write(self, value, save=True):
+        result = super().write(value, save)
+        # Repaint saved zone effects after a fresh claim — firmware starts blank.
+        if value and result is not None:
+            for s in self._device.settings:
+                if s.name.startswith(LEDZoneSetting.name) and s._value is not None:
+                    try:
+                        s.write(s._value, save=False)
+                    except Exception as e:
+                        logger.warning("%s: post-claim repaint of %s failed: %s", self._device, s.name, e)
+        return result
+
 
 colors = special_keys.COLORS
 _LEDP = hidpp20.LEDParam
@@ -3250,6 +3262,12 @@ class LEDZoneSetting(settings.Setting):
         "label": _("Direction"),
         "choices": hidpp20.LedDirectionChoices,
     }
+    cycle_field = {
+        "name": _LEDP.cycle,
+        "kind": settings.Kind.CHOICE,
+        "label": _("Color Cycling"),
+        "choices": hidpp20.LedCycleChoices,
+    }
     # Per-widget visibility driven by LEDEffects[ID][1]; RGBEffectSetting
     # overrides this list to drop ramp/form on 0x8071.
     possible_fields = [
@@ -3261,6 +3279,7 @@ class LEDZoneSetting(settings.Setting):
         saturation_field,
         form_field,
         direction_field,
+        cycle_field,
     ]
 
     @classmethod
@@ -3272,11 +3291,14 @@ class LEDZoneSetting(settings.Setting):
             prefix = common.int2bytes(zone.index, 1)
             rw = settings.FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix, suffix=suffix)
             validator = settings_validator.HeteroValidator(
-                data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable and read_fnid is not None
+                data_class=hidpp20.LEDEffectSetting,
+                options=zone.effects,
+                readable=infos.readable and read_fnid is not None,
+                read_skip_byte_count=len(prefix),  # GetEffect echoes the zone index
             )
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
-            setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
+            setting.label = _("LEDs") + " " + str(zone.location)
             choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
             ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + possible_fields

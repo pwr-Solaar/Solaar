@@ -291,7 +291,7 @@ simple_tests = [
         fake_hidpp.Response("00000102", 0x0410, "00FF00"),
         fake_hidpp.Response("0000000300040005", 0x0420, "000000"),
         fake_hidpp.Response("0001000B00080009", 0x0420, "000100"),
-        fake_hidpp.Response("000000000000010050", 0x04E0, "00"),
+        fake_hidpp.Response("00000000000000010050", 0x04E0, "00"),  # GetEffect echoes the zone index
         fake_hidpp.Response("000000000000000101500000", 0x0430, "000000000000000101500000"),
     ),
     Setup(
