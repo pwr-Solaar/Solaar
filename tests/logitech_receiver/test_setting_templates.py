@@ -272,6 +272,11 @@ simple_tests = [
         fake_hidpp.Response("0A", 0x0410, "0A"),
     ),
     Setup(
+        FeatureTest(settings_templates.BassTone, 0x46, 0x50),
+        fake_hidpp.Response("46", 0x0400),
+        fake_hidpp.Response("50", 0x0410, "50"),
+    ),
+    Setup(
         FeatureTest(settings_templates.ADCPower, 5, 0xA, version=0x03),
         fake_hidpp.Response("05", 0x0410),
         fake_hidpp.Response("0A", 0x0420, "0A"),
@@ -661,6 +666,15 @@ key_tests = [
         fake_hidpp.Response("E010", 0x0420, "00"),
         fake_hidpp.Response("E010", 0x0430, "02E010"),
         fake_hidpp.Response("E018", 0x0430, "02E018"),
+    ),
+    Setup(  # signed asymmetric dB range as reported by the G560 (-20..+6, bounds exclusive)
+        FeatureTest(settings_templates.Equalizer, {0: -4, 1: 2}, {1: 5}, 2),
+        [-19, 5],
+        fake_hidpp.Response("021A00EC06", 0x0400),
+        fake_hidpp.Response("0000200040", 0x0410, "00"),
+        fake_hidpp.Response("FC02", 0x0420, "00"),
+        fake_hidpp.Response("FC02", 0x0430, "02FC02"),
+        fake_hidpp.Response("FC05", 0x0430, "02FC05"),
     ),
     Setup(  # HeadsetOnboardEQ: 2 bands, 128Hz/-2dB/Q10 and 256Hz/+3dB/Q10
         FeatureTest(settings_templates.HeadsetOnboardEQ, {0: -2, 1: 3}, {1: 5}, 2),

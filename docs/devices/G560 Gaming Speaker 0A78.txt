@@ -4,12 +4,12 @@ G560 Gaming Speaker
      Codename     : G560 Gaming Speaker
      Kind         : speaker
      Protocol     : HID++ 4.2
-     Serial number: 
+     Serial number:
      Model ID:      000000000A78
      Unit ID:       FFFFFFFF
                  0: U1  22.04.B0370
      Supports 10 HID++ 2.0 features:
-         0: ROOT                   {0000} V0     
+         0: ROOT                   {0000} V0
          1: FEATURE SET            {0001}
          2: DEVICE FW VERSION      {0003}
             Firmware: 0 U1  22.04.B0370 0A78
@@ -60,5 +60,5 @@ G560 Gaming Speaker
          8: BRIGHTNESS CONTROL     {8040}
             Brightness Control (saved): 100
             Brightness Control        : 100
-         9: unknown:8305           {0583} V0     
+         9: unknown:8305           {0583} V0
      Battery status unavailable.

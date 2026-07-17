@@ -1587,6 +1587,16 @@ class Sidetone(settings.Setting):
     max_value = 100
 
 
+class BassTone(settings.Setting):
+    name = "bass_tone"
+    label = _("Bass Level")
+    description = _("Set subwoofer bass level.")
+    feature = _F.BASS_TONE
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 100
+
+
 class Equalizer(settings.RangeFieldSetting):
     name = "equalizer"
     label = _("Equalizer")
@@ -1596,16 +1606,21 @@ class Equalizer(settings.RangeFieldSetting):
     keys_universe = []
 
     class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
         @classmethod
         def build(cls, setting_class, device):
             data = device.feature_request(_F.EQUALIZER, 0x00)
             if not data:
                 return None
-            count, dbRange, _x, dbMin, dbMax = struct.unpack("!BBBBB", data[:5])
-            if dbMin == 0:
-                dbMin = -dbRange
-            if dbMax == 0:
-                dbMax = dbRange
+            # dbMin/dbMax are signed; the G560 reports an asymmetric -20..+6
+            count, dbRange, _x, dbMin, dbMax = struct.unpack("!BBBbb", data[:5])
+            if dbMin == 0 and dbMax == 0:
+                dbMin, dbMax = -dbRange, dbRange
+            else:
+                # reported bounds are exclusive: the G560 NACKs writes at
+                # exactly dbMin/dbMax but accepts dbMin+1..dbMax-1
+                dbMin, dbMax = dbMin + 1, dbMax - 1
             map = common.NamedInts()
             for g in range((count + 6) // 7):
                 freqs = device.feature_request(_F.EQUALIZER, 0x10, g * 7)
@@ -4520,6 +4535,7 @@ SETTINGS: list[settings.Setting] = [
     HapticLevel,
     PlayHapticWaveForm,
     Sidetone,
+    BassTone,
     Equalizer,
     ADCPower,
     HeadsetEcoMode,
