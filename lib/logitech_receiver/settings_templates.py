@@ -3330,6 +3330,34 @@ class LEDZoneSetting(settings.Setting):
         return cls.setup(device, 0xE0, 0x30, b"")
 
 
+class LEDStartupAnimation(settings.Setting):
+    """Startup effect on/off via 0x8070 NvConfig (funcs 4/5, cap 0x0001, V1+).
+
+    A pure toggle with no color payload; GetNvConfig echoes the capability ID
+    ahead of the value.
+    """
+
+    name = "led_startup_animation"
+    label = _("Startup Animation")
+    description = (
+        _("Firmware-played animation when the device powers on.") + "\n" + _("Setting persists on the device (non-volatile).")
+    )
+    feature = _F.COLOR_LED_EFFECTS
+    min_version = 1
+    rw_options = {"read_fnid": 0x40, "write_fnid": 0x50, "prefix": b"\x00\x01"}  # NvConfig capability 0x0001
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 0x01, "false_value": 0x02, "read_skip_byte_count": 2}
+
+    @classmethod
+    def build(cls, device):
+        try:  # gate on the device actually supporting the capability
+            if not device.feature_request(cls.feature, 0x40, b"\x00\x01"):
+                return None
+        except exceptions.FeatureCallError:
+            return None
+        return super().build(device)
+
+
 class RGBControl(settings.Setting):
     name = "rgb_control"
     label = _("LED Control")
@@ -4503,6 +4531,7 @@ SETTINGS: list[settings.Setting] = [
     Backlight3,
     LEDControl,
     LEDZoneSetting,
+    LEDStartupAnimation,
     RGBControl,
     RGBEffectSetting,
     PerKeyLighting,

@@ -286,6 +286,11 @@ simple_tests = [
         fake_hidpp.Response("00", 0x0470),
         fake_hidpp.Response("01", 0x0480, "01"),
     ),
+    Setup(  # NvConfig startup toggle: GetNvConfig echoes the cap ID; 0x01 on / 0x02 off
+        FeatureTest(settings_templates.LEDStartupAnimation, False, True, version=5),
+        fake_hidpp.Response("00010200000000000000", 0x0440, "0001"),
+        fake_hidpp.Response("000101", 0x0450, "000101"),
+    ),
     Setup(
         FeatureTest(
             settings_templates.LEDZoneSetting,
