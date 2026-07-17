@@ -672,3 +672,42 @@ def test_perkey_write_key_value_skipped_when_zone_is_animation(monkeypatch):
     s.write_key_value(7, 0xFF0000)
 
     s._send_zone_color.assert_not_called()
+
+
+class _SettingsPropertyExplodes:
+    """A device whose `.settings` property raises — mirrors the interpreter
+    -shutdown case where forcing a lazy settings build fails. cleanup() must
+    never touch it."""
+
+    def __init__(self, settings_list=None, persister=None):
+        self._settings = settings_list
+        self.persister = persister
+
+    @property
+    def settings(self):
+        raise AssertionError("cleanup must not access the settings property")
+
+
+def _rgb_control_setting(value):
+    class _S:
+        name = "rgb_control"
+
+    s = _S()
+    s._value = value
+    return s
+
+
+def test_rgb_control_off_reads_built_setting_without_building():
+    dev = _SettingsPropertyExplodes(settings_list=[_rgb_control_setting(False)])
+    assert rgb_power._rgb_control_off(dev) is True
+
+    dev = _SettingsPropertyExplodes(settings_list=[_rgb_control_setting(True)])
+    assert rgb_power._rgb_control_off(dev) is False
+
+
+def test_rgb_control_off_falls_back_to_persister():
+    dev = _SettingsPropertyExplodes(settings_list=None, persister={"rgb_control": False})
+    assert rgb_power._rgb_control_off(dev) is True
+
+    dev = _SettingsPropertyExplodes(settings_list=None, persister={})
+    assert rgb_power._rgb_control_off(dev) is False
