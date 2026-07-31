@@ -316,6 +316,21 @@ def stop(device):
         mgr.stop()
 
 
+def _rgb_control_off(device):
+    # Reads already-built settings/persister, never device.settings (the lazy
+    # property): cleanup() runs from __del__, where a settings build fails at
+    # shutdown. Unknown state ⇒ False (proceed).
+    for s in getattr(device, "_settings", None) or []:
+        if s.name == "rgb_control":
+            return not s._value
+    persister = getattr(device, "persister", None)
+    if persister is not None:
+        value = persister.get("rgb_control")
+        if value is not None:
+            return value in (False, 0)
+    return False
+
+
 def cleanup(device):
     """device.cleanups handler — restore firmware control on device close.
 
@@ -330,7 +345,7 @@ def cleanup(device):
     animation would visibly contradict the user's "leave my lighting alone".
     """
     stop(device)
-    if any(s.name == "rgb_control" and not s._value for s in getattr(device, "settings", []) or []):
+    if _rgb_control_off(device):
         return
     try:
         device.feature_request(SupportedFeature.RGB_EFFECTS, 0x50, SW_RELEASE)
@@ -338,8 +353,8 @@ def cleanup(device):
             device.feature_request(SupportedFeature.PROFILE_MANAGEMENT, 0x60, b"\x03")
         elif device.features and SupportedFeature.ONBOARD_PROFILES in device.features:
             device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x10, b"\x01")
-    except Exception:
-        pass  # Device may already be offline
+    except Exception as e:
+        logger.debug("%s: cleanup release writes failed (device offline?): %s", device, e)
     if getattr(device, "_rgb_has_shutdown_cap", False):
         try:
             # SetRgbPowerMode(set=1, mode=0) — firmware off transition.

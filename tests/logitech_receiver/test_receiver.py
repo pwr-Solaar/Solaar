@@ -369,3 +369,21 @@ def test_force_unpair_slot_no_handle():
 
     assert r.force_unpair_slot(2) is False
     r._unpair_device_per_receiver.assert_not_called()
+
+
+def test_close_keeps_handle_until_paired_devices_closed():
+    """Paired-device cleanup writes go over the receiver's handle, so
+    Receiver.close must close its devices before dropping it."""
+    device_info = DeviceInfo("11")
+    mock_low_level = LowLevelInterfaceFake(responses_unifying)
+    r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
+    handle_at_device_close = []
+    dev = mock.Mock()
+    dev.close.side_effect = lambda: handle_at_device_close.append(r.handle)
+    r._devices[1] = dev
+
+    r.close()
+
+    assert handle_at_device_close == [fake_hidpp.open_path("11")]
+    assert r.handle is None
+    assert r._devices == {}
