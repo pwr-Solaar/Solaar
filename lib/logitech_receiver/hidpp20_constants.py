@@ -175,10 +175,11 @@ class SupportedFeature(IntEnum):
     OPERATING_RANGE = 0x8138
     TRUE_FORCE = 0x8139
     FFB_FILTER = 0x8140
-    # Headsets
+    # Headsets / speakers
     SIDETONE = 0x8300
+    BASS_TONE = 0x8305
     EQUALIZER = 0x8310
-    HEADSET_OUT = 0x8320
+    JACK_DETECTION = 0x8320  # jack presence (was HEADSET_OUT)
     # Centurion core
     CENTURION_DEVICE_INFO = 0x0100
     CENTURION_DEVICE_NAME = 0x0101
@@ -257,6 +258,18 @@ DEVICE_KIND = NamedInts(
     trackball=0x05,
     presenter=0x06,
     receiver=0x07,
+    headset=0x08,
+    webcam=0x09,
+    steering_wheel=0x0A,
+    joystick=0x0B,
+    gamepad=0x0C,
+    dock=0x0D,
+    speaker=0x0E,
+    microphone=0x0F,
+    illumination_light=0x10,
+    programmable_controller=0x11,
+    car_sim_pedals=0x12,
+    adapter=0x13,
 )
 
 

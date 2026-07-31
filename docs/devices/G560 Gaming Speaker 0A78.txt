@@ -1,0 +1,64 @@
+G560 Gaming Speaker
+     Device path  : /dev/hidraw11
+     USB id       : 046d:0A78
+     Codename     : G560 Gaming Speaker
+     Kind         : speaker
+     Protocol     : HID++ 4.2
+     Serial number:
+     Model ID:      000000000A78
+     Unit ID:       FFFFFFFF
+                 0: U1  22.04.B0370
+     Supports 10 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: 0 U1  22.04.B0370 0A78
+            Unit ID: FFFFFFFF  Model ID: 000000000A78  Transport IDs: {'btid': '0000', 'btleid': '0000'}
+         3: DEVICE NAME            {0005}
+            Name: G560 Gaming Speaker
+            Kind: speaker
+         4: COLOR LED EFFECTS      {8070}
+            Zone 0 (Left Front): 5 effect(s)
+              [0] 0x00 Disabled       caps 0x0000=none                  default 0ms  params: —
+              [1] 0x01 Static         caps 0x0000=none                  default 0ms  params: color, ramp
+              [2] 0x03 Cycle          caps 0xc005=color+period+fw       default 1000ms  params: period, intensity
+              [3] 0x07 Audio Visualizer caps 0x0067=color+fade+period++0x0060 default 1000ms  params: cycle, color, period
+              [4] 0x0a Breathe        caps 0xc105=color+period+fw++0x0100 default 60ms  params: color, period, form, intensity
+            Zone 1 (Right Front): 5 effect(s)
+              [0] 0x00 Disabled       caps 0x0000=none                  default 0ms  params: —
+              [1] 0x01 Static         caps 0x0000=none                  default 0ms  params: color, ramp
+              [2] 0x03 Cycle          caps 0xc005=color+period+fw       default 1000ms  params: period, intensity
+              [3] 0x07 Audio Visualizer caps 0x0067=color+fade+period++0x0060 default 1000ms  params: cycle, color, period
+              [4] 0x0a Breathe        caps 0xc105=color+period+fw++0x0100 default 60ms  params: color, period, form, intensity
+            Zone 2 (Left Rear): 5 effect(s)
+              [0] 0x00 Disabled       caps 0x0000=none                  default 0ms  params: —
+              [1] 0x01 Static         caps 0x0000=none                  default 0ms  params: color, ramp
+              [2] 0x03 Cycle          caps 0xc005=color+period+fw       default 1000ms  params: period, intensity
+              [3] 0x07 Audio Visualizer caps 0x0067=color+fade+period++0x0060 default 1000ms  params: cycle, color, period
+              [4] 0x0a Breathe        caps 0xc105=color+period+fw++0x0100 default 60ms  params: color, period, form, intensity
+            Zone 3 (Right Rear): 5 effect(s)
+              [0] 0x00 Disabled       caps 0x0000=none                  default 0ms  params: —
+              [1] 0x01 Static         caps 0x0000=none                  default 0ms  params: color, ramp
+              [2] 0x03 Cycle          caps 0xc005=color+period+fw       default 1000ms  params: period, intensity
+              [3] 0x07 Audio Visualizer caps 0x0067=color+fade+period++0x0060 default 1000ms  params: cycle, color, period
+              [4] 0x0a Breathe        caps 0xc105=color+period+fw++0x0100 default 60ms  params: color, period, form, intensity
+            LED Control (saved): False
+            LED Control        : False
+            LEDs Left Front (saved): !LEDEffectSetting {ID: 7, color: 0xff7800, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Left Front        : !LEDEffectSetting {ID: 7, color: 0xff6000, cycle: 0, period: 4839}
+            LEDs Right Front (saved): !LEDEffectSetting {ID: 7, color: 0xff7800, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Right Front        : !LEDEffectSetting {ID: 7, color: 0xff6000, cycle: 0, period: 4839}
+            LEDs Left Rear (saved): !LEDEffectSetting {ID: 7, color: 0xf6f5f4, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Left Rear        : !LEDEffectSetting {ID: 7, color: 0xffffff, cycle: 0, period: 4839}
+            LEDs Right Rear (saved): !LEDEffectSetting {ID: 7, color: 0xf6f5f4, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Right Rear        : !LEDEffectSetting {ID: 7, color: 0xffffff, cycle: 0, period: 4839}
+         5: GKEY                   {8010}
+            Divert G and M Keys (saved): False
+            Divert G and M Keys        : False
+         6: EQUALIZER              {8310}
+         7: HEADSET OUT            {8320}
+         8: BRIGHTNESS CONTROL     {8040}
+            Brightness Control (saved): 100
+            Brightness Control        : 100
+         9: unknown:8305           {0583} V0
+     Battery status unavailable.

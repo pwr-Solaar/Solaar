@@ -1587,6 +1587,16 @@ class Sidetone(settings.Setting):
     max_value = 100
 
 
+class BassTone(settings.Setting):
+    name = "bass_tone"
+    label = _("Bass Level")
+    description = _("Set subwoofer bass level.")
+    feature = _F.BASS_TONE
+    validator_class = settings_validator.RangeValidator
+    min_value = 0
+    max_value = 100
+
+
 class Equalizer(settings.RangeFieldSetting):
     name = "equalizer"
     label = _("Equalizer")
@@ -1596,16 +1606,21 @@ class Equalizer(settings.RangeFieldSetting):
     keys_universe = []
 
     class validator_class(settings_validator.PackedRangeValidator):
+        kind = settings.Kind.GRAPHIC_EQ
+
         @classmethod
         def build(cls, setting_class, device):
             data = device.feature_request(_F.EQUALIZER, 0x00)
             if not data:
                 return None
-            count, dbRange, _x, dbMin, dbMax = struct.unpack("!BBBBB", data[:5])
-            if dbMin == 0:
-                dbMin = -dbRange
-            if dbMax == 0:
-                dbMax = dbRange
+            # dbMin/dbMax are signed; the G560 reports an asymmetric -20..+6
+            count, dbRange, _x, dbMin, dbMax = struct.unpack("!BBBbb", data[:5])
+            if dbMin == 0 and dbMax == 0:
+                dbMin, dbMax = -dbRange, dbRange
+            else:
+                # reported bounds are exclusive: the G560 NACKs writes at
+                # exactly dbMin/dbMax but accepts dbMin+1..dbMax-1
+                dbMin, dbMax = dbMin + 1, dbMax - 1
             map = common.NamedInts()
             for g in range((count + 6) // 7):
                 freqs = device.feature_request(_F.EQUALIZER, 0x10, g * 7)
@@ -3219,6 +3234,30 @@ class LEDControl(settings.Setting):
         if isinstance(self._value, int) and not isinstance(self._value, bool):
             self._value = self._value != 0
 
+    def write(self, value, save=True):
+        result = super().write(value, save)
+        # Repaint saved zone effects after a fresh claim — firmware starts blank.
+        if value and result is not None:
+            for s in self._device.settings:
+                if s.name.startswith(LEDZoneSetting.name) and s._value is not None:
+                    try:
+                        s.write(s._value, save=False)
+                    except Exception as e:
+                        logger.warning("%s: post-claim repaint of %s failed: %s", self._device, s.name, e)
+        return result
+
+    def apply(self):
+        # Off = leave the lighting alone on connect (don't send the release);
+        # another app may own it. Only an explicit On claim is applied.
+        try:
+            value = self.read(self.persist)
+        except Exception:
+            value = None
+        if value:
+            super().apply()
+        elif logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: LED control off — leaving lighting untouched on %s", self.name, self._device)
+
 
 colors = special_keys.COLORS
 _LEDP = hidpp20.LEDParam
@@ -3230,6 +3269,20 @@ class LEDZoneSetting(settings.Setting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.COLOR_LED_EFFECTS
+    gate_setting_name = LEDControl.name
+
+    def apply(self):
+        # Skip when the control gate is off (SETTINGS order runs it first, so
+        # its _value is set) — leave the lighting to whatever owns it.
+        for s in self._device.settings:
+            if s.name == self.gate_setting_name:
+                if not s._value:
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s: %s off — not applying on %s", self.name, s.name, self._device)
+                    return
+                break
+        super().apply()
+
     color_field = {"name": _LEDP.color, "kind": settings.Kind.COLOR, "label": _("Color")}
     speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
     period_field = {
@@ -3250,6 +3303,12 @@ class LEDZoneSetting(settings.Setting):
         "label": _("Direction"),
         "choices": hidpp20.LedDirectionChoices,
     }
+    cycle_field = {
+        "name": _LEDP.cycle,
+        "kind": settings.Kind.CHOICE,
+        "label": _("Color Cycling"),
+        "choices": hidpp20.LedCycleChoices,
+    }
     # Per-widget visibility driven by LEDEffects[ID][1]; RGBEffectSetting
     # overrides this list to drop ramp/form on 0x8071.
     possible_fields = [
@@ -3261,6 +3320,7 @@ class LEDZoneSetting(settings.Setting):
         saturation_field,
         form_field,
         direction_field,
+        cycle_field,
     ]
 
     @classmethod
@@ -3272,11 +3332,14 @@ class LEDZoneSetting(settings.Setting):
             prefix = common.int2bytes(zone.index, 1)
             rw = settings.FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix, suffix=suffix)
             validator = settings_validator.HeteroValidator(
-                data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable and read_fnid is not None
+                data_class=hidpp20.LEDEffectSetting,
+                options=zone.effects,
+                readable=infos.readable and read_fnid is not None,
+                read_skip_byte_count=len(prefix),  # GetEffect echoes the zone index
             )
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
-            setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
+            setting.label = _("LEDs") + " " + str(zone.location)
             choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
             ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + possible_fields
@@ -3291,6 +3354,34 @@ class LEDZoneSetting(settings.Setting):
     @classmethod
     def build(cls, device):
         return cls.setup(device, 0xE0, 0x30, b"")
+
+
+class LEDStartupAnimation(settings.Setting):
+    """Startup effect on/off via 0x8070 NvConfig (funcs 4/5, cap 0x0001, V1+).
+
+    A pure toggle with no color payload; GetNvConfig echoes the capability ID
+    ahead of the value.
+    """
+
+    name = "led_startup_animation"
+    label = _("Startup Animation")
+    description = (
+        _("Firmware-played animation when the device powers on.") + "\n" + _("Setting persists on the device (non-volatile).")
+    )
+    feature = _F.COLOR_LED_EFFECTS
+    min_version = 1
+    rw_options = {"read_fnid": 0x40, "write_fnid": 0x50, "prefix": b"\x00\x01"}  # NvConfig capability 0x0001
+    validator_class = settings_validator.BooleanValidator
+    validator_options = {"true_value": 0x01, "false_value": 0x02, "read_skip_byte_count": 2}
+
+    @classmethod
+    def build(cls, device):
+        try:  # gate on the device actually supporting the capability
+            if not device.feature_request(cls.feature, 0x40, b"\x00\x01"):
+                return None
+        except exceptions.FeatureCallError:
+            return None
+        return super().build(device)
 
 
 class RGBControl(settings.Setting):
@@ -3744,6 +3835,7 @@ class RGBEffectSetting(LEDZoneSetting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be enabled.")
     feature = _F.RGB_EFFECTS
+    gate_setting_name = RGBControl.name
     # 0x8071 firmware-fixes ramp/form bytes; drop those widgets here.
     possible_fields = [
         LEDZoneSetting.color_field,
@@ -4466,6 +4558,7 @@ SETTINGS: list[settings.Setting] = [
     Backlight3,
     LEDControl,
     LEDZoneSetting,
+    LEDStartupAnimation,
     RGBControl,
     RGBEffectSetting,
     PerKeyLighting,
@@ -4498,6 +4591,7 @@ SETTINGS: list[settings.Setting] = [
     HapticLevel,
     PlayHapticWaveForm,
     Sidetone,
+    BassTone,
     Equalizer,
     ADCPower,
     HeadsetEcoMode,
