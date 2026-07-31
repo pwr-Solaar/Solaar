@@ -198,6 +198,8 @@ def main():
         else:
             dbus.watch_suspend_resume(lambda: listener.ping_all(True))
 
+        dbus.watch_screen_lock_state(listener.suspend_leds, listener.restore_leds)
+
         configuration.defer_saves = True  # allow configuration saves to be deferred
 
         # main UI event loop
