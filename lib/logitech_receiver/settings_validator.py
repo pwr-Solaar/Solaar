@@ -557,7 +557,8 @@ class RangeValidator(Validator):
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError(f"invalid choice {new_value!r}")
-        current_value = self.validate_read(current_value) if current_value is not None else None
+        if isinstance(current_value, bytes):
+            current_value = self.validate_read(current_value)
         to_write = self.write_prefix_bytes + common.int2bytes(new_value, self._byte_count, signed=self._signed)
         # current value is known and same as value to be written return None to signal not to write it
         return None if current_value is not None and current_value == new_value else to_write

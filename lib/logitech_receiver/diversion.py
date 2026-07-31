@@ -104,11 +104,34 @@ if logger.isEnabledFor(logging.INFO):
     logger.info("GDK Keymap %sset up", "" if gkeymap else "not ")
 
 wayland = os.getenv("WAYLAND_DISPLAY")  # is this Wayland?
-if wayland:
-    logger.warning(
-        "rules cannot access modifier keys in Wayland, "
-        "accessing process only works on GNOME with Solaar Gnome extension installed"
-    )
+
+def get_global_modifiers():
+    # Always try to use evdev first if on Wayland, falling back to GDK
+    if wayland and evdev:
+        mask = 0
+        try:
+            devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+            for dev in devices:
+                if evdev.ecodes.EV_KEY in dev.capabilities():
+                    keys = dev.active_keys()
+                    if keys:
+                        if evdev.ecodes.KEY_LEFTSHIFT in keys or evdev.ecodes.KEY_RIGHTSHIFT in keys:
+                            mask |= int(Gdk.ModifierType.SHIFT_MASK)
+                        if evdev.ecodes.KEY_LEFTCTRL in keys or evdev.ecodes.KEY_RIGHTCTRL in keys:
+                            mask |= int(Gdk.ModifierType.CONTROL_MASK)
+                        if evdev.ecodes.KEY_LEFTALT in keys or evdev.ecodes.KEY_RIGHTALT in keys:
+                            mask |= int(Gdk.ModifierType.MOD1_MASK)
+                        if evdev.ecodes.KEY_LEFTMETA in keys or evdev.ecodes.KEY_RIGHTMETA in keys:
+                            mask |= int(Gdk.ModifierType.MOD4_MASK)
+            for dev in devices:
+                dev.close()
+            return mask
+        except Exception:
+            pass
+            
+    if gkeymap:
+        return gkeymap.get_modifier_state()
+    return 0
 
 try:
     _x11 = None  # X11 might be available
@@ -141,6 +164,24 @@ mr_key_down = False
 thumb_wheel_displacement = 0
 
 _dbus_interface = None
+active_profile = "Default"
+
+def get_all_profiles():
+    profiles = set(["Default"])
+    def _find_profiles(node):
+        if hasattr(node, "components"):
+            for comp in node.components:
+                if isinstance(comp, Profile):
+                    if comp.profile_name:
+                        profiles.add(comp.profile_name)
+                elif isinstance(comp, Rule):
+                    _find_profiles(comp)
+                elif hasattr(comp, "rule"):
+                    _find_profiles(comp.rule)
+    from logitech_receiver.diversion import rules
+    if rules:
+        _find_profiles(rules)
+    return sorted(list(profiles))
 
 
 class XkbDisplay(ctypes.Structure):
@@ -246,7 +287,11 @@ if evdev:
             key_events.append(evcode)
     devicecap = {
         evdev.ecodes.EV_KEY: key_events,
-        evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+        evdev.ecodes.EV_REL: [
+            evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL,
+            getattr(evdev.ecodes, 'REL_WHEEL_HI_RES', 11),
+            getattr(evdev.ecodes, 'REL_HWHEEL_HI_RES', 12)
+        ],
     }
 else:
     # Just mock these since they won't be useful without evdev anyway
@@ -370,6 +415,20 @@ def simulate_scroll(dx, dy):
         if success:
             return True
     logger.warning("no way to simulate scrolling")
+
+
+def simulate_smooth_scroll(dx, dy):
+    if setup_uinput():
+        if dx:
+            simulate_uinput(evdev.ecodes.EV_REL, getattr(evdev.ecodes, 'REL_HWHEEL_HI_RES', 12), int(dx * 120))
+            if int(dx):
+                simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, int(dx))
+        if dy:
+            simulate_uinput(evdev.ecodes.EV_REL, getattr(evdev.ecodes, 'REL_WHEEL_HI_RES', 11), int(dy * 120))
+            if int(dy):
+                simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, int(dy))
+        return True
+    logger.warning("no way to simulate smooth scrolling")
 
 
 def thumb_wheel_up(f, r, d, a):
@@ -786,8 +845,8 @@ class Modifiers(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        if gkeymap:
-            current = gkeymap.get_modifier_state()  # get the current keyboard modifier
+        if True:
+            current = get_global_modifiers()  # get the current keyboard modifier
             return self.desired == (current & MODIFIER_MASK)
         else:
             logger.warning("no keymap so cannot determine modifier keys")
@@ -1021,6 +1080,25 @@ class MouseGesture(Condition):
         return {"MouseGesture": [str(m) for m in self.movements]}
 
 
+class Profile(Condition):
+    def __init__(self, profile_name, warn=True):
+        if not (isinstance(profile_name, str)):
+            if warn:
+                logger.warning("rule Profile argument not a string: %s", profile_name)
+            self.profile_name = ""
+        else:
+            self.profile_name = profile_name
+
+    def __str__(self):
+        return f"Profile: {str(self.profile_name)}"
+
+    def evaluate(self, feature, notification, device, last_result):
+        return self.profile_name == active_profile
+
+    def data(self):
+        return {"Profile": self.profile_name}
+
+
 class Active(Condition):
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
@@ -1180,8 +1258,8 @@ class KeyPress(Action):
                 self.mods(level, modifiers, _KEY_RELEASE)
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
-        if gkeymap:
-            current = gkeymap.get_modifier_state()
+        if True:
+            current = get_global_modifiers()
             if logger.isEnabledFor(logging.INFO):
                 logger.info(
                     "KeyPress action: %s %s, group %s, modifiers %s",
@@ -1225,12 +1303,10 @@ class MouseScroll(Action):
     def __str__(self):
         return "MouseScroll: " + " ".join([str(a) for a in self.amounts])
 
-    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
         simulate_scroll(dx, dy)
         time.sleep(0.01)
@@ -1238,6 +1314,32 @@ class MouseScroll(Action):
 
     def data(self):
         return {"MouseScroll": self.amounts[:]}
+
+
+class SmoothScroll(Action):
+    def __init__(self, amounts, warn=True):
+        if len(amounts) == 1 and isinstance(amounts[0], list):
+            amounts = amounts[0]
+        if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
+            if warn:
+                logger.warning("rule SmoothScroll argument not two numbers %s", amounts)
+            amounts = [0.0, 0.0]
+        self.amounts = [float(amounts[0]), float(amounts[1])]
+
+    def __str__(self):
+        return "SmoothScroll: " + " ".join([str(a) for a in self.amounts])
+
+    def evaluate(self, feature, notification, device, last_result):
+        amounts = self.amounts
+        if isinstance(last_result, numbers.Number):
+            amounts = [last_result * a for a in self.amounts]
+        dx, dy = amounts
+        simulate_smooth_scroll(dx, dy)
+        time.sleep(0.01)
+        return None
+
+    def data(self):
+        return {"SmoothScroll": self.amounts[:]}
 
 
 class MouseClick(Action):
@@ -1277,6 +1379,54 @@ class MouseClick(Action):
 
     def data(self):
         return {"MouseClick": [self.button, self.count]}
+
+
+class MouseFollowsKeyboard(Action):
+    def __init__(self, args, warn=True):
+        if not (isinstance(args, list) and len(args) >= 2):
+            if warn:
+                logger.warning("rule MouseFollowsKeyboard argument not list with minimum length 2: %s", args)
+            self.args = []
+        else:
+            self.args = args
+
+    def __str__(self):
+        return "MouseFollowsKeyboard: " + " ".join([str(a) for a in self.args])
+
+    def evaluate(self, feature, notification, device, last_result):
+        if len(self.args) < 2:
+            return None
+        target_name = self.args[0]
+        host_num = self.args[1]
+        
+        target_mouse = device.find(target_name)
+        if not target_mouse:
+            logger.warning("MouseFollowsKeyboard: device %s is not known", target_name)
+            return None
+            
+        mouse_setting = next((s for s in target_mouse.settings if s.name == "change-host"), None)
+        keyboard_setting = next((s for s in device.settings if s.name == "change-host"), None)
+        divert_setting = next((s for s in device.settings if s.name == "divert-keys"), None)
+        
+        if mouse_setting:
+            mouse_setting.write(host_num, save=False)
+            
+        if divert_setting:
+            divert_setting.write(False, save=False)
+            
+        if keyboard_setting:
+            keyboard_setting.write(host_num, save=False)
+            
+        try:
+            from solaar.ui import desktop_notifications
+            desktop_notifications.show(target_mouse, reason=f"Flow: Switched to Host {host_num}")
+        except Exception as e:
+            logger.warning("Failed to show Flow notification: %s", e)
+            
+        return None
+
+    def data(self):
+        return {"MouseFollowsKeyboard": self.args[:]}
 
 
 class Set(Action):
@@ -1400,15 +1550,18 @@ COMPONENTS = {
     "Test": Test,
     "TestBytes": TestBytes,
     "MouseGesture": MouseGesture,
+    "Profile": Profile,
     "Active": Active,
     "Device": Device,
     "Host": Host,
     "KeyPress": KeyPress,
     "MouseScroll": MouseScroll,
+    "SmoothScroll": SmoothScroll,
     "MouseClick": MouseClick,
     "Set": Set,
     "Execute": Execute,
     "Later": Later,
+    "MouseFollowsKeyboard": MouseFollowsKeyboard,
 }
 
 

@@ -60,6 +60,8 @@ class KeyPressUI(ActionUI):
         self.add_btn = Gtk.Button(label=_("Add key"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.add_btn.connect(GtkSignal.CLICKED.value, self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
+        self.listen_btn = Gtk.ToggleButton(label=_("Listen for Keystrokes"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.widgets[self.listen_btn] = (2, 1, 1, 1)
         self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
         self.action_clicked_radio.connect(GtkSignal.TOGGLED.value, self._on_update, CLICK)
         self.widgets[self.action_clicked_radio] = (0, 3, 1, 1)
@@ -73,10 +75,28 @@ class KeyPressUI(ActionUI):
     def _create_field(self):
         field_entry = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         field_entry.connect(GtkSignal.CHANGED.value, self._on_update)
+        field_entry.connect("key-press-event", self._on_key_press_event)
         field_entry.set_size_request(250, -1)
         self.fields.append(field_entry)
         self.widgets[field_entry] = (len(self.fields) - 1, 1, 1, 1)
         return field_entry
+
+    def _on_key_press_event(self, widget, event):
+        if not hasattr(self, "listen_btn") or not self.listen_btn.get_active():
+            return False
+        
+        from gi.repository import Gdk
+        keyval = event.keyval
+        key_name = Gdk.keyval_name(keyval)
+        if key_name:
+            if key_name.startswith("Control_"): key_name = "Control"
+            elif key_name.startswith("Shift_"): key_name = "Shift"
+            elif key_name.startswith("Alt_"): key_name = "Alt"
+            elif key_name.startswith("Super_"): key_name = "Super"
+            widget.set_text(key_name)
+            self._on_update()
+            return True
+        return False
 
     def _create_del_btn(self):
         btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
@@ -116,6 +136,7 @@ class KeyPressUI(ActionUI):
             self._create_del_btn()
 
         self.widgets[self.add_btn] = (n, 1, 1, 1)
+        self.widgets[self.listen_btn] = (n + 1, 1, 1, 1)
         super().show(component, editable)
         for i in range(n):
             field_entry = self.fields[i]
@@ -193,6 +214,62 @@ class MouseScrollUI(ActionUI):
     @classmethod
     def right_label(cls, component):
         x = y = 0
+        x = cls.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0)
+        y = cls.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0)
+        return f"{x}, {y}"
+
+
+class SmoothScrollUI(ActionUI):
+    CLASS = diversion.SmoothScroll
+    MIN_VALUE = -2000.0
+    MAX_VALUE = 2000.0
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(
+            label=_("Simulate a smooth mouse scroll.\nOn Wayland requires write access to /dev/uinput."),
+            halign=Gtk.Align.CENTER,
+            justify=Gtk.Justification.CENTER,
+        )
+        self.widgets[self.label] = (0, 0, 4, 1)
+        self.label_x = Gtk.Label(label="x", halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
+        self.label_y = Gtk.Label(label="y", halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
+        self.field_x = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 0.1)
+        self.field_x.set_digits(2)
+        self.field_y = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 0.1)
+        self.field_y.set_digits(2)
+        for f in [self.field_x, self.field_y]:
+            f.set_halign(Gtk.Align.CENTER)
+            f.set_valign(Gtk.Align.START)
+        self.field_x.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.field_y.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.widgets[self.label_x] = (0, 1, 1, 1)
+        self.widgets[self.field_x] = (1, 1, 1, 1)
+        self.widgets[self.label_y] = (2, 1, 1, 1)
+        self.widgets[self.field_y] = (3, 1, 1, 1)
+
+    @classmethod
+    def __parse(cls, v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def show(self, component, editable=True):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field_x.set_value(self.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0))
+            self.field_y.set_value(self.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0))
+
+    def collect_value(self):
+        return [float(self.field_x.get_value()), float(self.field_y.get_value())]
+
+    @classmethod
+    def left_label(cls, component):
+        return _("Smooth scroll")
+
+    @classmethod
+    def right_label(cls, component):
         x = cls.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0)
         y = cls.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0)
         return f"{x}, {y}"
@@ -330,3 +407,50 @@ class ExecuteUI(ActionUI):
     @classmethod
     def right_label(cls, component):
         return " ".join([shlex_quote(a) for a in component.args])
+
+
+class MouseFollowsKeyboardUI(ActionUI):
+    CLASS = diversion.MouseFollowsKeyboard
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(
+            label=_("Mouse Follows Keyboard (Enhanced Easy-Switch)\nSwitches the target mouse to the specified host."),
+            halign=Gtk.Align.CENTER,
+            justify=Gtk.Justification.CENTER,
+        )
+        self.widgets[self.label] = (0, 0, 4, 1)
+        self.label_m = Gtk.Label(label=_("Mouse Name"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.label_h = Gtk.Label(label=_("Host Channel (1, 2, 3)"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.field_m = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        self.field_h = Gtk.SpinButton.new_with_range(1, 3, 1)
+        self.field_m.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.field_h.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.widgets[self.label_m] = (0, 1, 1, 1)
+        self.widgets[self.field_m] = (1, 1, 1, 1)
+        self.widgets[self.label_h] = (2, 1, 1, 1)
+        self.widgets[self.field_h] = (3, 1, 1, 1)
+
+    def show(self, component, editable=True):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field_m.set_text(component.args[0] if len(component.args) >= 1 else "")
+            try:
+                self.field_h.set_value(int(component.args[1]) + 1 if len(component.args) >= 2 else 1)
+            except (ValueError, TypeError):
+                self.field_h.set_value(1)
+
+    def collect_value(self):
+        m = self.field_m.get_text()
+        h = int(self.field_h.get_value()) - 1
+        return [m, h]
+
+    @classmethod
+    def left_label(cls, component):
+        return _("Follow Keyboard")
+
+    @classmethod
+    def right_label(cls, component):
+        host = int(component.args[1]) + 1 if len(component.args) >= 2 else 1
+        name = component.args[0] if len(component.args) >= 1 else "Unknown"
+        return f"{name} -> Host {host}"

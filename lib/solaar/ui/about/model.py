@@ -33,14 +33,16 @@ class AboutModel:
         return __version__
 
     def get_description(self) -> str:
-        return _("Manages Logitech receivers,\nkeyboards, mice, and tablets.")
+        return _("Logifeed: Advanced Logitech peripheral manager.\nForked from Solaar with added features.")
 
     def get_copyright(self) -> str:
-        return f"© 2012-{_get_current_year()} Daniel Pavel and contributors to the Solaar project"
+        return f"© 2012-{_get_current_year()} Solaar Contributors, modified by Sir Will & Antigravity"
 
     def get_authors(self) -> List[str]:
         return [
             "Daniel Pavel http://github.com/pwr",
+            "Linuxknows https://github.com/Linuxknows/Logifeed"
+            "Antigravity AI (Logifeed Modifications)",
         ]
 
     def get_translators(self) -> List[str]:
@@ -57,7 +59,7 @@ class AboutModel:
             "Ferdina Kusumah (Indonesia)",
             "John Erling Blad (Norwegian Bokmål, Norwegian Nynorsk)",
             "Oleksandr Afanasiev (Ukrainian)",
-        ]
+        ]/home/will/.gemini/antigravity/scratch/Solaar/lib/solaar/ui/about/
 
     def get_credit_sections(self) -> List[Tuple[str, List[str]]]:
         return [

@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import dbus
+    import dbus.service
 
     from dbus.mainloop.glib import DBusGMainLoop  # integration into the main GLib loop
 
@@ -85,3 +86,46 @@ def watch_bluez_connect(serial, callback=None):
         _bluetooth_callbacks[serial] = bus.add_signal_receiver(
             callback, "PropertiesChanged", path=path, dbus_interface=_BLUETOOTH_INTERFACE
         )
+
+class BatteryBroadcaster(dbus.service.Object):
+    def __init__(self, bus_name, path):
+        super().__init__(bus_name, path)
+        self.levels = {}
+        self.charging = {}
+
+    @dbus.service.signal('io.github.pwr_solaar.solaar.Battery', signature='sib')
+    def BatteryChanged(self, serial, level, is_charging):
+        pass
+
+    @dbus.service.method('io.github.pwr_solaar.solaar.Battery', in_signature='s', out_signature='(ib)')
+    def GetBattery(self, serial):
+        return (self.levels.get(serial, -1), self.charging.get(serial, False))
+
+    @dbus.service.method('io.github.pwr_solaar.solaar.Battery', in_signature='', out_signature='a{s(ib)}')
+    def GetAllBatteries(self):
+        return {s: (self.levels[s], self.charging[s]) for s in self.levels}
+
+    def update_battery(self, serial, level, is_charging):
+        self.levels[serial] = level
+        self.charging[serial] = is_charging
+        self.BatteryChanged(serial, level, is_charging)
+
+battery_broadcaster = None
+
+# D-Bus names
+NAME = 'io.github.pwr_solaar.solaar_beta.BatteryService'
+PATH = '/io/github/pwr_solaar/solaar_beta/Battery'
+
+def setup_battery_broadcaster():
+    global battery_broadcaster
+    try:
+        session_bus = dbus.SessionBus()
+        bus_name = dbus.service.BusName(NAME, bus=session_bus)
+        battery_broadcaster = BatteryBroadcaster(bus_name, PATH)
+        logger.info("Session DBus battery broadcaster started on %s", PATH)
+    except Exception as e:
+        logger.warning("Failed to start Session DBus battery broadcaster: %s", e)
+
+def broadcast_battery(serial, level, is_charging):
+    if battery_broadcaster:
+        battery_broadcaster.update_battery(serial, level, is_charging)

@@ -533,6 +533,7 @@ class Device:
             with self._settings_lock:
                 if not self._feature_settings_checked:
                     self._feature_settings_checked = settings_templates.check_feature_settings(self, self._settings)
+                    settings_templates._inject_battery_led(self, self._settings)
         return self._settings
 
     def battery(self):  # None  or  level, next, status, voltage

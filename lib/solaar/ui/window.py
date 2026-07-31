@@ -333,6 +333,116 @@ def _create_window_layout():
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
+    profile_label = Gtk.Label(label=_(" Profile: "))
+    bottom_buttons_box.add(profile_label)
+    bottom_buttons_box.set_child_secondary(profile_label, True)
+    
+    profile_combo = Gtk.ComboBoxText.new_with_entry()
+    
+    def _get_custom_profiles():
+        import json, os
+        path = os.path.expanduser("~/.config/solaar/profiles.json")
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {"profiles": [], "active-profile": "Default"}
+            
+    def _save_custom_profiles(data):
+        import json, os
+        path = os.path.expanduser("~/.config/solaar/profiles.json")
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                json.dump(data, f)
+        except Exception:
+            pass
+
+    _updating_combo = False
+    def update_profile_combo(*args):
+        nonlocal _updating_combo
+        _updating_combo = True
+        profile_combo.remove_all()
+        from logitech_receiver import diversion
+        rule_profiles = diversion.get_all_profiles()
+        custom_data = _get_custom_profiles()
+        custom_profiles = custom_data.get("profiles", [])
+        profiles = sorted(list(set(rule_profiles + custom_profiles)))
+        if "Default" not in profiles:
+            profiles.insert(0, "Default")
+            
+        for p in profiles:
+            profile_combo.append_text(p)
+            
+        active_profile = custom_data.get("active-profile", "Default")
+        diversion.active_profile = active_profile
+        
+        if active_profile in profiles:
+            profile_combo.get_child().set_text(active_profile)
+            profile_combo.set_active(profiles.index(active_profile))
+        _updating_combo = False
+    
+    def on_profile_changed(combo):
+        nonlocal _updating_combo
+        if _updating_combo: return
+        from logitech_receiver import diversion
+        active = combo.get_active_text()
+        if active:
+            diversion.active_profile = active
+            custom_data = _get_custom_profiles()
+            custom_data["active-profile"] = active
+            _save_custom_profiles(custom_data)
+
+    def save_new_profile(*args):
+        active = profile_combo.get_active_text()
+        if active and active != "Default":
+            from logitech_receiver import diversion
+            custom_data = _get_custom_profiles()
+            custom_profiles = custom_data.get("profiles", [])
+            if active not in custom_profiles and active not in diversion.get_all_profiles():
+                custom_profiles.append(active)
+                custom_data["profiles"] = custom_profiles
+                _save_custom_profiles(custom_data)
+                update_profile_combo()
+    
+    profile_combo.get_child().connect("activate", save_new_profile)
+                
+    def on_delete_profile(*args):
+        from logitech_receiver import diversion
+        active = profile_combo.get_active_text()
+        with open("/tmp/solaar_profile_debug.log", "a") as f:
+            f.write(f"on_delete_profile called, active={active}\n")
+        if not active or active == "Default":
+            return
+        custom_data = _get_custom_profiles()
+        custom_profiles = custom_data.get("profiles", [])
+        with open("/tmp/solaar_profile_debug.log", "a") as f:
+            f.write(f"custom_profiles before={custom_profiles}\n")
+        if active in custom_profiles:
+            custom_profiles.remove(active)
+            custom_data["profiles"] = custom_profiles
+            custom_data["active-profile"] = "Default"
+            _save_custom_profiles(custom_data)
+            diversion.active_profile = "Default"
+            with open("/tmp/solaar_profile_debug.log", "a") as f:
+                f.write(f"custom_profiles after={custom_profiles}, saving...\n")
+            update_profile_combo()
+
+    update_profile_combo()
+    profile_combo.connect("changed", on_profile_changed)
+    bottom_buttons_box.add(profile_combo)
+    bottom_buttons_box.set_child_secondary(profile_combo, True)
+    
+    save_profile_button = Gtk.Button(label=_("Save Profile"))
+    save_profile_button.connect("clicked", save_new_profile)
+    bottom_buttons_box.add(save_profile_button)
+    bottom_buttons_box.set_child_secondary(save_profile_button, True)
+
+    delete_profile_button = Gtk.Button(label=_("Delete Profile"))
+    delete_profile_button.connect("clicked", on_delete_profile)
+    bottom_buttons_box.add(delete_profile_button)
+    bottom_buttons_box.set_child_secondary(delete_profile_button, True)
+
     vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 8)
     vbox.set_border_width(8)
     vbox.pack_start(panel, True, True, 0)
@@ -811,7 +921,7 @@ _window = None
 
 
 def init(show_window, hide_on_close):
-    Gtk.Window.set_default_icon_name(NAME.lower())
+    Gtk.Window.set_default_icon_name("logifeed-icon-v3")
 
     global _model, _tree, _details, _info, _empty, _window
     _model = Gtk.TreeStore(*_COLUMN_TYPES)

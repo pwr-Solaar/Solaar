@@ -4735,3 +4735,174 @@ def check_feature_setting(device, setting_name: str) -> settings.Setting | None:
                         return s
             elif setting:
                 return setting
+
+from . import settings as _settings
+from . import settings_validator as _settings_validator
+
+class BatteryLedRW:
+    kind = 2
+    def __init__(self, *args, **kwargs): pass
+    def read(self, device): 
+        mode = device.persister.get("battery_led_mode", False) if device.persister else False
+        return b"\x01" if mode else b"\x00"
+    def write(self, device, value):
+        is_enabled = bool(value and value not in (0, b"\x00", [0]))
+        if device.persister: device.persister["battery_led_mode"] = is_enabled
+        if is_enabled:
+            try:
+                _update_battery_led(device)
+            except Exception:
+                pass
+        return b"\x01" if is_enabled else b"\x00"
+
+class BatteryLedSetting(_settings.Setting):
+    name = "battery_led_mode"
+    label = "Battery LED Configurator"
+    description = "Match LED color to battery (Green:100-70%, Yellow:69-45%, Orange:44-20%, Red:19-6%, Blink:<5%)"
+    rw_class = BatteryLedRW
+    feature = 0x1000
+
+class BatteryLedBrightnessRW:
+    kind = 4
+    def __init__(self, *args, **kwargs): pass
+    def read(self, device):
+        val = device.persister.get("battery_led_brightness", 100) if device.persister else 100
+        import logitech_receiver.common as common
+        return common.int2bytes(val, 1)
+    def write(self, device, value_bytes):
+        if not value_bytes: return b"\x00"
+        import logitech_receiver.common as common
+        val = common.bytes2int(value_bytes)
+        
+        with open("/tmp/battery_led_debug.log", "a") as dbg:
+            dbg.write(f"Brightness slider moved. value_bytes={value_bytes}, unpacked val={val}\n")
+            
+        if device.persister: device.persister["battery_led_brightness"] = val
+        try:
+            _update_battery_led(device)
+        except Exception:
+            pass
+        return value_bytes
+
+class BatteryLedBrightnessSetting(_settings.Setting):
+    name = "battery_led_brightness"
+    label = "Battery LED Brightness"
+    description = "Adjust the brightness of the Battery LED Configurator."
+    rw_class = BatteryLedBrightnessRW
+    feature = 0x1000
+    
+    @classmethod
+    def build(cls, device, **kwargs):
+        rw = cls.rw_class()
+        validator = _settings_validator.RangeValidator(min_value=0, max_value=100)
+        return cls(device, rw, validator)
+
+def _inject_battery_led(device, settings):
+    try:
+        if device.persister:
+            b_setting = BatteryLedSetting.build(device)
+            if b_setting:
+                settings.append(b_setting)
+            br_setting = BatteryLedBrightnessSetting.build(device)
+            if br_setting:
+                settings.append(br_setting)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Failed to inject Battery LED setting: %s", e)
+
+def _update_battery_led(device):
+    with open("/tmp/battery_led_debug.log", "a") as dbg:
+        import traceback
+        dbg.write(f"\n--- _update_battery_led called for {device.name} ---\n")
+        dbg.write("".join(traceback.format_stack()))
+        if not getattr(device, "persister", None) or not device.persister.get("battery_led_mode", False):
+            dbg.write("Not enabled in persister, aborting.\n")
+            return
+        try:
+            b = device.battery()
+            dbg.write(f"Battery info: {b}\n")
+            if not b or getattr(b, "level", None) is None: 
+                dbg.write("No battery level, aborting.\n")
+                return
+            level = b.level
+            
+            # Load custom JSON config
+            import os, json
+            config_path = os.path.expanduser("~/.config/solaar/battery_led.json")
+            
+            default_config = [
+                {"min": 70, "max": 100, "color": "00ff00", "blink": False},
+                {"min": 45, "max": 69, "color": "ffff00", "blink": False},
+                {"min": 20, "max": 44, "color": "ff8000", "blink": False},
+                {"min": 6, "max": 19, "color": "ff0000", "blink": False},
+                {"min": 0, "max": 5, "color": "ff0000", "blink": True}
+            ]
+            
+            if not os.path.exists(config_path):
+                dbg.write("Creating default JSON config.\n")
+                os.makedirs(os.path.dirname(config_path), exist_ok=True)
+                with open(config_path, "w") as f:
+                    json.dump(default_config, f, indent=4)
+                config = default_config
+            else:
+                try:
+                    with open(config_path, "r") as f:
+                        config = json.load(f)
+                except Exception as e:
+                    dbg.write(f"JSON load error: {e}\n")
+                    config = default_config
+            
+            color = "00ff00"
+            blink = False
+            for rule in config:
+                if rule["min"] <= level <= rule["max"]:
+                    color = rule["color"]
+                    blink = rule["blink"]
+                    break
+            
+            dbg.write(f"Computed color={color}, blink={blink}\n")
+            
+            intensity = device.persister.get("battery_led_brightness", 100) if getattr(device, "persister", None) else 100
+            
+            # Scale RGB color by intensity because Static effect doesn't support the intensity parameter
+            r = int(int(color[0:2], 16) * (intensity / 100.0))
+            g = int(int(color[2:4], 16) * (intensity / 100.0))
+            b_ch = int(int(color[4:6], 16) * (intensity / 100.0))
+            scaled_color = f"{r:02x}{g:02x}{b_ch:02x}"
+            
+            for s in getattr(device, "settings", []):
+                if s.name == "led_control":
+                    dbg.write("Setting led_control = True\n")
+                    try:
+                        data_bytes = s._validator.prepare_write(True, s.read())
+                        if data_bytes is not None:
+                            res = s._rw.write(device, data_bytes)
+                            if res:
+                                s._value = s._validator.validate_read(res)
+                    except Exception:
+                        pass
+                    
+            for s in getattr(device, "settings", []):
+                if s.name in ("led_zone_1", "rgb_control", "backlight"):
+                    dbg.write(f"Found {s.name}. Writing new effect...\n")
+                    try:
+                        import logitech_receiver.hidpp20 as hidpp20
+                        new_val = hidpp20.LEDEffectSetting(
+                            ID=0x0a if blink else 1,
+                            color=int(scaled_color, 16),
+                            intensity=intensity,
+                            period=1000 if blink else 0,
+                            ramp=3
+                        )
+                        data_bytes = s._validator.prepare_write(new_val, s.read())
+                        res = s._rw.write(device, data_bytes)
+                        if res:
+                            s._value = s._validator.validate_read(res)
+                        dbg.write(f"Write result: {res}\n")
+                    except Exception as ex:
+                        import traceback
+                        dbg.write(f"Exception during write: {traceback.format_exc()}\n")
+                    break
+        except Exception as e:
+            import traceback
+            dbg.write(f"Global exception: {traceback.format_exc()}\n")

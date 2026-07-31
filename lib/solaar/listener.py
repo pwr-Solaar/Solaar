@@ -141,6 +141,14 @@ class SolaarListener(listener.EventsListener):
 
         self.status_changed_callback(device, alert, reason)
 
+        if device and getattr(device, 'battery_info', None) is not None:
+            if device.battery_info.level is not None:
+                try:
+                    from solaar.dbus import broadcast_battery
+                    broadcast_battery(device.serial, device.battery_info.level, device.battery_info.charging())
+                except Exception as e:
+                    logger.warning("Failed to broadcast battery DBus event: %s", e)
+
         if not device:
             # the device was just unpaired, need to update the status of the receiver as well
             self.status_changed_callback(self.receiver)

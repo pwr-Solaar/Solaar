@@ -24,9 +24,9 @@ import solaar.gtk as gtk
 logger = logging.getLogger(__name__)
 
 LARGE_SIZE = Gtk.IconSize.DIALOG  # was 64
-TRAY_INIT = "solaar-init"
-TRAY_OKAY = "solaar"
-TRAY_ATTENTION = "solaar-attention"
+TRAY_INIT = "logifeed-icon"
+TRAY_OKAY = "logifeed-icon"
+TRAY_ATTENTION = "logifeed-icon"
 
 _default_theme = None
 _has_level_icons = False

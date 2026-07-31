@@ -65,13 +65,20 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
     def _do_write(_s, v, sb, key):
+        with open("/tmp/solaar_slider_crash.log", "a") as f:
+            f.write(f"_do_write for {setting.name} with value {v}\n")
         try:
             if key is None:
                 v = setting.write(v)
             else:
                 v = setting.write_key_value(key, v)
                 v = {key: v}
-        except Exception:
+        except Exception as e:
+            import traceback
+            logging.getLogger(__name__).error(f"EXCEPTION in _do_write: {traceback.format_exc()}")
+            with open("/tmp/solaar_slider_crash.log", "a") as dbg:
+                dbg.write(f"Crash in {setting.name} with value {v}:\n")
+                dbg.write(traceback.format_exc())
             v = None
         if sb:
             GLib.idle_add(_update_setting_item, sb, v, True, sensitive, priority=99)
@@ -117,6 +124,24 @@ class Control:
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
         fill = sbox.setting.kind == settings.Kind.RANGE or sbox.setting.kind == settings.Kind.HETERO
+        
+        if sbox.setting.name == "battery_led_brightness":
+            def apply_clicked(*args):
+                device = getattr(sbox.setting, "_device", None)
+                if not device: return
+                for setting in device.settings:
+                    if setting.name == "battery_led_mode":
+                        import solaar.ui.config_panel as cp
+                        cp._write_async(setting, False, None)
+                        from gi.repository import GLib
+                        GLib.timeout_add(100, lambda s=setting: cp._write_async(s, True, None))
+                        break
+
+            apply_btn = Gtk.Button(label="Apply")
+            apply_btn.connect("clicked", apply_clicked)
+            apply_btn.set_halign(Gtk.Align.CENTER)
+            sbox.pack_end(apply_btn, False, False, 5)
+            
         sbox.pack_end(self, fill, fill, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)

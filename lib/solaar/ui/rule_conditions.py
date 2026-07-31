@@ -246,7 +246,10 @@ class KeyUI(ConditionUI):
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
         self.key_field.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.key_field.connect("key-press-event", self._on_key_press_event)
         self.widgets[self.key_field] = (0, 1, 2, 1)
+        self.listen_btn = Gtk.ToggleButton(label=_("Listen"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        self.widgets[self.listen_btn] = (4, 1, 1, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Key down"))
         self.action_pressed_radio.connect(GtkSignal.TOGGLED.value, self._on_update, Key.DOWN)
         self.widgets[self.action_pressed_radio] = (2, 1, 1, 1)
@@ -271,6 +274,21 @@ class KeyUI(ConditionUI):
         super()._on_update(*args)
         icon = "dialog-warning" if not self.component.key or not self.component.action else ""
         self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    def _on_key_press_event(self, widget, event):
+        if not hasattr(self, "listen_btn") or not self.listen_btn.get_active():
+            return False
+            
+        from gi.repository import Gdk
+        keyval = event.keyval
+        key_name = Gdk.keyval_name(keyval)
+        if key_name:
+            if key_name.startswith("XF86"):
+                key_name = key_name[4:]
+            widget.set_text(key_name)
+            self._on_update()
+            return True
+        return False
 
     @classmethod
     def left_label(cls, component):
@@ -298,7 +316,10 @@ class KeyIsDownUI(ConditionUI):
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
         self.key_field.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.key_field.connect("key-press-event", self._on_key_press_event)
         self.widgets[self.key_field] = (0, 1, 1, 1)
+        self.listen_btn = Gtk.ToggleButton(label=_("Listen"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        self.widgets[self.listen_btn] = (1, 1, 1, 1)
 
     def show(self, component, editable=True):
         super().show(component, editable)
@@ -312,6 +333,21 @@ class KeyIsDownUI(ConditionUI):
         super()._on_update(*args)
         icon = "dialog-warning" if not self.component.key else ""
         self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    def _on_key_press_event(self, widget, event):
+        if not hasattr(self, "listen_btn") or not self.listen_btn.get_active():
+            return False
+            
+        from gi.repository import Gdk
+        keyval = event.keyval
+        key_name = Gdk.keyval_name(keyval)
+        if key_name:
+            if key_name.startswith("XF86"):
+                key_name = key_name[4:]
+            widget.set_text(key_name)
+            self._on_update()
+            return True
+        return False
 
     @classmethod
     def left_label(cls, component):
@@ -612,4 +648,33 @@ class MouseGestureUI(ConditionUI):
         if len(component.movements) == 0:
             return "No-op"
         else:
-            return " -> ".join(component.movements)
+            return " + ".join([_(m) for m in component.movements])
+
+
+class ProfileUI(ConditionUI):
+    CLASS = diversion.Profile
+    
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True, justify=Gtk.Justification.CENTER)
+        self.label.set_text(_("Active profile matches."))
+        self.widgets[self.label] = (0, 0, 5, 1)
+        self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        self.field.connect(GtkSignal.CHANGED.value, self._on_update)
+        self.widgets[self.field] = (0, 1, 5, 1)
+
+    def show(self, component, editable=True):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field.set_text(component.profile_name)
+
+    def collect_value(self):
+        return self.field.get_text().strip()
+
+    @classmethod
+    def left_label(cls, component):
+        return _("Profile")
+
+    @classmethod
+    def right_label(cls, component):
+        return component.profile_name

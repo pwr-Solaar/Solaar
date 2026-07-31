@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
 
-APP_ID = "io.github.pwr_solaar.solaar"
+APP_ID = "io.github.pwr_solaar.solaar_beta"
 
 
 class GtkSignal(Enum):
@@ -142,6 +142,12 @@ def _status_changed(device, alert, reason, refresh=False):
 
 
 def status_changed(device, alert=Alert.NONE, reason=None, refresh=False):
+    try:
+        from logitech_receiver import settings_templates
+        if hasattr(settings_templates, "_update_battery_led"):
+            settings_templates._update_battery_led(device)
+    except Exception:
+        pass
     GLib.idle_add(_status_changed, device, alert, reason, refresh)
 
 

@@ -1853,6 +1853,7 @@ COMPONENT_UI: dict[Any, RuleComponentUI] = {
     diversion.MouseProcess: rule_conditions.MouseProcessUI,
     diversion.Active: ActiveUI,
     diversion.Device: DeviceUI,
+    diversion.Profile: rule_conditions.ProfileUI,
     diversion.Host: HostUI,
     diversion.Feature: rule_conditions.FeatureUI,
     diversion.Report: rule_conditions.ReportUI,
@@ -1865,8 +1866,10 @@ COMPONENT_UI: dict[Any, RuleComponentUI] = {
     diversion.MouseGesture: rule_conditions.MouseGestureUI,
     diversion.KeyPress: rule_actions.KeyPressUI,
     diversion.MouseScroll: rule_actions.MouseScrollUI,
+    diversion.SmoothScroll: rule_actions.SmoothScrollUI,
     diversion.MouseClick: rule_actions.MouseClickUI,
     diversion.Execute: rule_actions.ExecuteUI,
+    diversion.MouseFollowsKeyboard: rule_actions.MouseFollowsKeyboardUI,
     diversion.Set: SetUI,
     # type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
 }

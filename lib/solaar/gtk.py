@@ -193,10 +193,12 @@ def main():
     try:
         listener.setup_scanner(ui.status_changed, ui.setting_changed, ui.common.error_dialog)
 
-        if args.restart_on_wake_up:
-            dbus.watch_suspend_resume(listener.start_all, listener.stop_all)
-        else:
-            dbus.watch_suspend_resume(lambda: listener.ping_all(True))
+        if dbus:
+            dbus.setup_battery_broadcaster()
+            if args.restart_on_wake_up:
+                dbus.watch_suspend_resume(listener.start_all, listener.stop_all)
+            else:
+                dbus.watch_suspend_resume(lambda: listener.ping_all(True))
 
         configuration.defer_saves = True  # allow configuration saves to be deferred
 
