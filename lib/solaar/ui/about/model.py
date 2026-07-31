@@ -59,7 +59,7 @@ class AboutModel:
             "Ferdina Kusumah (Indonesia)",
             "John Erling Blad (Norwegian Bokmål, Norwegian Nynorsk)",
             "Oleksandr Afanasiev (Ukrainian)",
-        ]/home/will/.gemini/antigravity/scratch/Solaar/lib/solaar/ui/about/
+        ]
 
     def get_credit_sections(self) -> List[Tuple[str, List[str]]]:
         return [
