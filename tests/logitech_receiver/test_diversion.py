@@ -48,7 +48,7 @@ def test_load_rule_config(rule_config):
     ]
 
     with mock.patch("builtins.open", new=mock_open(read_data=rule_config)):
-        loaded_rules = diversion._load_rule_config(file_path=mock.Mock())
+        loaded_rules = diversion.Persister.load_rule_config()
 
     assert len(loaded_rules.components) == 2  # predefined and user configured rules
     user_configured_rules = loaded_rules.components[0]
