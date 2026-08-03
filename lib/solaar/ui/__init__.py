@@ -23,6 +23,7 @@ from typing import Callable
 import gi
 import yaml
 
+from logitech_receiver import diversion
 from logitech_receiver.common import Alert
 
 from solaar.i18n import _
@@ -130,6 +131,8 @@ def _status_changed(device, alert, reason, refresh=False):
         alert = Alert.NONE
 
     tray.update(device)
+    if device.kind is None and not tray._devices_info:
+        diversion.teardown_uinput()
     if alert & Alert.ATTENTION:
         tray.attention(reason)
 
