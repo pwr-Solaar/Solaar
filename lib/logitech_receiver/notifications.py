@@ -531,7 +531,7 @@ def handle_device_discovery(receiver: Receiver, notification: HIDPPNotification)
             receiver.pairing.device_address = notification.data[6:12]
             receiver.pairing.device_authentication = notification.data[14]
         elif notification.data[1] == 1:
-            receiver.pairing.device_name = notification.data[3 : 3 + notification.data[2]].decode("utf-8")
+            receiver.pairing.device_name = notification.data[3 : 3 + notification.data[2]].decode("utf-8", errors="replace")
         return True
 
 
