@@ -165,6 +165,7 @@ Backlight   			 | Turn on backlight
 Swap Fx function		 | Change Fn keys to normally do their special action
 DPI Sliding Adjustment		 | Change Sensitivity (DPI) by holding a button and moving the mouse
 Mouse Gestures			 | Create HID++ events by holding a button and moving the mouse
+Live Mouse Gestures		 | Create HID++ events while holding a button and moving the mouse
 Key/Button Actions   		 | Change what a key or button does
 Key/Button Diversion		 | Divert keys and buttons to create HID++ events
 Divert crown events		 | Divert crown actions to create HID++ events

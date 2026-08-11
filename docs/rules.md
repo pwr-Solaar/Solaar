@@ -115,6 +115,12 @@ The condition `Smart Shift` -> `Mouse Down` -> `Back Button` would match pressin
 Directions and buttons can be mixed and chained together however you like.
 It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
+Buttons set to `Live Mouse Gestures` emit each direction or diverted key press as a
+separate notification while the initiating button is still held. Rules for live
+gestures should therefore contain a single direction or key event. Continued mouse
+movement can trigger the same rule repeatedly; releasing the initiating button stops
+the live gesture without emitting an additional event.
+
 ### Key modifiers
 `Modifiers` conditions take either a string or a sequence of strings, which
 can only be `Shift`, `Control`, `Alt`, and `Super`.

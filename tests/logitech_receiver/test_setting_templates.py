@@ -18,7 +18,10 @@
 The device uses some methods from the real device to set up data structures that are needed for some tests.
 """
 
+import struct
+
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -36,6 +39,74 @@ from . import fake_hidpp
 _PERKEY_COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3, value_type=common.ColorInt)
 
 # TODO action part of DpiSlidingXY, MouseGesturesXY
+
+
+def live_mouse_gesture_processor(mocker, feature_version=4):
+    dpi_setting = mocker.Mock(name="dpi_setting")
+    dpi_setting.name = "dpi"
+    dpi_setting.read.return_value = 1000
+
+    features = mocker.MagicMock()
+    features.__getitem__.return_value = 1
+    features.get_feature_version.return_value = feature_version
+
+    device = mocker.MagicMock()
+    device.features = features
+    device.settings = [dpi_setting]
+
+    processor = settings_templates.LiveMouseGesturesXY(device, name="LiveMouseGestures")
+    processor.activate_action()
+    return processor
+
+
+def test_live_mouse_gestures_emit_during_movement_and_stop_on_release(mocker):
+    processor = live_mouse_gesture_processor(mocker)
+    process_notification = mocker.patch.object(settings_templates.diversion, "process_notification")
+    mocker.patch.object(settings_templates, "monotonic", side_effect=[0.0, 0.1, 0.36])
+
+    processor.press_action(SimpleNamespace(key=0xC3))
+    processor.move_action(200, 0)
+
+    process_notification.assert_called_once()
+    first_notification = process_notification.call_args.args[1]
+    assert struct.unpack("!4h", first_notification.data) == (0xC3, 0, 3, 0)
+
+    processor.move_action(200, 0)
+    process_notification.assert_called_once()  # repeat event is held back by the cooldown
+
+    processor.move_action(1, 0)
+    assert process_notification.call_count == 2
+
+    processor.release_action()
+    processor.move_action(-200, 0)
+    assert process_notification.call_count == 2
+
+
+def test_live_mouse_gestures_ignore_first_mx_master_3s_movement(mocker):
+    processor = live_mouse_gesture_processor(mocker, feature_version=5)
+    process_notification = mocker.patch.object(settings_templates.diversion, "process_notification")
+    mocker.patch.object(settings_templates, "monotonic", return_value=0.0)
+
+    processor.press_action(SimpleNamespace(key=0xC3))
+    processor.move_action(-200, 0)
+    process_notification.assert_not_called()
+
+    processor.move_action(-200, 0)
+    process_notification.assert_called_once()
+    notification = process_notification.call_args.args[1]
+    assert struct.unpack("!4h", notification.data) == (0xC3, 0, -3, 0)
+
+
+def test_live_mouse_gestures_emit_diverted_keys_immediately(mocker):
+    processor = live_mouse_gesture_processor(mocker)
+    process_notification = mocker.patch.object(settings_templates.diversion, "process_notification")
+
+    processor.press_action(SimpleNamespace(key=0xC3))
+    processor.key_action(0x53)
+
+    process_notification.assert_called_once()
+    notification = process_notification.call_args.args[1]
+    assert struct.unpack("!3h", notification.data) == (0xC3, 1, 0x53)
 
 
 class Setup:
@@ -576,16 +647,35 @@ key_tests = [
     ),
     Setup(
         FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 1}, 2, offset=0x05),
-        {common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Regular=0, Diverted=1, Mouse_Gestures=2)},
+        {
+            common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(
+                Regular=0, Diverted=1, Mouse_Gestures=2, Live_Mouse_Gestures=4
+            )
+        },
         *responses_reprog_controls,
         fake_hidpp.Response("00C4020000", 0x0530, "00C4020000"),  # Smart Shift write
         fake_hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
     ),
     Setup(
         FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 2}, 2, offset=0x05),
-        {common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Regular=0, Diverted=1, Mouse_Gestures=2, Sliding_DPI=3)},
+        {
+            common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(
+                Regular=0, Diverted=1, Mouse_Gestures=2, Sliding_DPI=3, Live_Mouse_Gestures=4
+            )
+        },
         *responses_reprog_controls,
         fake_hidpp.Response("0A0001", 0x0000, "2201"),  # ADJUSTABLE_DPI
+        fake_hidpp.Response("00C4300000", 0x0530, "00C4300000"),  # Smart Shift write
+        fake_hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
+    ),
+    Setup(
+        FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 4}, 2, offset=0x05),
+        {
+            common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(
+                Regular=0, Diverted=1, Mouse_Gestures=2, Live_Mouse_Gestures=4
+            )
+        },
+        *responses_reprog_controls,
         fake_hidpp.Response("00C4300000", 0x0530, "00C4300000"),  # Smart Shift write
         fake_hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
     ),
