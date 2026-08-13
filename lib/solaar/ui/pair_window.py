@@ -47,6 +47,7 @@ _STEP_ENTER = "enter"
 _PASSKEY_PAGE = "_solaar_passkey_page"
 _PAIRED_ADDRESS = "_solaar_paired_address"
 _ON_RETRY = "_solaar_on_retry"
+_COUNTDOWN = "_solaar_countdown"
 _STEPS = "_solaar_steps"
 _PROGRESS = "_solaar_progress"
 
@@ -62,6 +63,7 @@ _SEPARATOR_GAP = 10
 _STRIP_MARGIN = 8
 _STEPS_PER_ROW = 5
 _FINAL_STEP_SCALE = 1.25
+_LABEL_WIDTH_CHARS = 40  # keeps the wrapped labels inside the width of the dialog
 
 
 class GtkSignal(Enum):
@@ -71,13 +73,15 @@ class GtkSignal(Enum):
     DRAW = "draw"
 
 
-def create(receiver):
+def create(receiver, on_retry=None):
     receiver.reset_pairing()  # clear out any information on previous pairing
     title = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
     if receiver.receiver_kind == "bolt":
         text = _("Bolt receivers are only compatible with Bolt devices.")
         text += "\n\n"
         text += _("Press a pairing button or key until the pairing light flashes quickly.")
+        text += "\n"
+        text += _("Press and hold the pairing button on the device for about three seconds.")
     else:
         if receiver.receiver_kind == "unifying":
             text = _("Unifying receivers are only compatible with Unifying devices.")
@@ -109,10 +113,33 @@ def create(receiver):
         )
         text += _("\nCancelling at this point will not use up a pairing.")
     ok = prepare(receiver)
-    assistant = _create_assistant(receiver, ok, _finish, title, text)
+    assistant = _create_assistant(receiver, ok, _finish, title, text, on_retry)
     if ok:
         GLib.timeout_add(_STATUS_CHECK, check_lock_state, assistant, receiver)
+        deadline = time.monotonic() + _PAIRING_TIMEOUT
+        GLib.timeout_add(_STATUS_CHECK, _update_countdown, assistant, receiver, deadline)
     return assistant
+
+
+def _update_countdown(assistant, receiver, deadline):
+    """Counts down the time left to find a device.
+
+    Only this phase gets a countdown: Solaar sets its timeout itself, whereas the
+    passkey entry timeout lives in the receiver's firmware and is never reported,
+    so any timer shown during entry would be made up.
+    """
+    countdown = getattr(assistant, _COUNTDOWN, None)
+    if countdown is None:
+        return False
+    remaining = deadline - time.monotonic()
+    found = receiver.pairing.device_address or getattr(assistant, _PASSKEY_PAGE, None) is not None
+    if not assistant.is_drawable() or remaining <= 0 or found:
+        countdown.hide()
+        return False
+    seconds = int(math.ceil(remaining))
+    countdown.set_fraction(remaining / _PAIRING_TIMEOUT)
+    countdown.set_text(ngettext("%d second left", "%d seconds left", seconds) % seconds)
+    return True
 
 
 def prepare(receiver):
@@ -171,7 +198,7 @@ def _check_lock_state(assistant, receiver, count):
 def _pairing_failed(assistant, receiver, error):
     assistant.remove_page(0)  # needed to reset the window size
     logger.debug("%s fail: %s", receiver, error)
-    _create_failure_page(assistant, error)
+    _create_failure_page(assistant, receiver, error)
 
 
 def _pairing_succeeded(assistant, receiver, device):
@@ -472,16 +499,22 @@ def _create_passcode_page(assistant, receiver, passkey):
     page.pack_start(strip, False, False, 0)
     status = Gtk.Label(label=_("Waiting for the first click…"))
     status.set_line_wrap(True)
+    status.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    status.set_halign(Gtk.Align.CENTER)
     page.pack_start(status, False, False, 0)
     if steps[-1] == _STEP_BOTH:
         # the receiver reports that a button was pressed but never which one,
         # so say so rather than let a counted click look like a checked one
         honesty = Gtk.Label(label=_("Solaar cannot tell which button was pressed — only that the receiver accepted a click."))
         honesty.set_line_wrap(True)
+        honesty.set_max_width_chars(_LABEL_WIDTH_CHARS)
+        honesty.set_halign(Gtk.Align.CENTER)
         honesty.get_style_context().add_class("dim-label")
         page.pack_start(honesty, False, False, 0)
     reminder = Gtk.Label(label=_("Keep the device switched on and within range until pairing finishes."))
     reminder.set_line_wrap(True)
+    reminder.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    reminder.set_halign(Gtk.Align.CENTER)
     reminder.get_style_context().add_class("dim-label")
     page.pack_start(reminder, False, False, 0)
     page.show_all()
@@ -522,13 +555,16 @@ def _update_passcode_page(page, receiver):
     strip.queue_draw()
 
 
-def _create_assistant(receiver, ok, finish, title, text):
+def _create_assistant(receiver, ok, finish, title, text, on_retry=None):
     assistant = Gtk.Assistant()
     assistant.set_title(title)
     assistant.set_icon_name("list-add")
     assistant.set_size_request(400, 240)
     assistant.set_resizable(False)
     assistant.set_role("pair-device")
+    # stash the callback before any page is built, so that a failure while preparing
+    # also gets a retry button
+    setattr(assistant, _ON_RETRY, on_retry)
     if ok:
         page_intro = _create_page(
             assistant,
@@ -537,13 +573,18 @@ def _create_assistant(receiver, ok, finish, title, text):
             "preferences-desktop-peripherals",
             text,
         )
+        countdown = Gtk.ProgressBar()
+        countdown.set_show_text(True)
+        countdown.set_visible(True)
+        page_intro.pack_end(countdown, False, False, 0)
+        setattr(assistant, _COUNTDOWN, countdown)
         spinner = Gtk.Spinner()
         spinner.set_visible(True)
         spinner.start()
         page_intro.pack_end(spinner, True, True, 24)
         assistant.set_page_complete(page_intro, True)
     else:
-        page_intro = _create_failure_page(assistant, receiver.pairing.error)
+        page_intro = _create_failure_page(assistant, receiver, receiver.pairing.error)
     assistant.connect(GtkSignal.CANCEL.value, finish, receiver)
     assistant.connect(GtkSignal.CLOSE.value, finish, receiver)
     return assistant
@@ -578,19 +619,65 @@ def _create_success_page(assistant, device):
     assistant.commit()
 
 
-def _create_failure_page(assistant, error) -> None:
-    header = _("Pairing failed") + ": " + _(str(error)) + "."
-    if "timeout" in str(error):
-        text = _("Make sure your device is within range, and has a decent battery charge.")
-    elif str(error) == "device not supported":
-        text = _("A new device was detected, but it is not compatible with this receiver.")
-    elif "many" in str(error):
-        text = _("More paired devices than receiver can support.")
-    else:
-        text = _("No further details are available about the error.")
-    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, "dialog-error", text)
+def _failure_text(label):
+    """Describes a pairing failure, matching the error labels exactly.
+
+    The cause has to be chosen from literals rather than translated at runtime,
+    because gettext can only translate strings it saw when the catalogs were built.
+    """
+    if label == "device timeout" or label == "failed to open pairing lock":
+        return _("Make sure your device is within range, and has a decent battery charge.")
+    if label == "device not supported":
+        return _("A new device was detected, but it is not compatible with this receiver.")
+    if label == "too many devices":
+        return _("More paired devices than receiver can support.")
+    if label == "sequence timeout":
+        return _("Sequence entry timed out.") + "\n" + _("Press the pairing button on your device again and retry.")
+    if label == "failed":
+        # the receiver reports nothing beyond this, so do not guess at a cause: a
+        # wrong button, a mistimed press and a wrong sequence all arrive as "failed"
+        return (
+            _("The click sequence was not accepted.")
+            + "\n"
+            + _("The receiver only reports that verification failed; it cannot tell which buttons were pressed.")
+            + "\n"
+            + _("Press the pairing button on your device again and retry.")
+        )
+    return _("No further details are available about the error.")
+
+
+def _retry_pairing(_button, assistant, receiver, on_retry):
+    _finish(assistant, receiver)
+    on_retry()
+
+
+def _create_failure_page(assistant, receiver, error) -> Gtk.VBox:
+    page = _create_page(
+        assistant,
+        Gtk.AssistantPageType.SUMMARY,
+        _("Pairing failed"),
+        "dialog-error",
+        _failure_text(str(error)),
+    )
+    token = Gtk.Label()
+    token.set_markup(f"<small><tt>{GLib.markup_escape_text(str(error))}</tt></small>")
+    token.set_line_wrap(True)
+    token.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    token.set_halign(Gtk.Align.CENTER)
+    token.get_style_context().add_class("dim-label")
+    page.pack_start(token, False, False, 0)
+    on_retry = getattr(assistant, _ON_RETRY, None)
+    if on_retry is not None:
+        # packed into the page rather than added as an assistant action widget, so
+        # that this path keeps working wherever the assistant is only duck-typed
+        retry = Gtk.Button(label=_("Try again"))
+        retry.set_halign(Gtk.Align.CENTER)
+        retry.connect(GtkSignal.CLICKED.value, _retry_pairing, assistant, receiver, on_retry)
+        page.pack_start(retry, False, False, 0)
+    page.show_all()
     assistant.next_page()
     assistant.commit()
+    return page
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None) -> Gtk.VBox:

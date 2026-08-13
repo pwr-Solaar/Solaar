@@ -1,3 +1,5 @@
+import time
+
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
@@ -8,6 +10,8 @@ import gi
 import pytest
 
 from logitech_receiver import receiver
+from logitech_receiver.hidpp10_constants import BoltPairingError
+from logitech_receiver.hidpp10_constants import PairingError
 from solaar.ui import pair_window
 
 gi.require_version("Gtk", "3.0")
@@ -400,3 +404,150 @@ def test_draw_step_strip_without_steps():
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
 
     assert pair_window._draw_step_strip(strip, cairo.Context(surface)) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize(
+    "error",
+    [
+        PairingError.DEVICE_TIMEOUT.label,
+        PairingError.DEVICE_NOT_SUPPORTED.label,
+        PairingError.TOO_MANY_DEVICES.label,
+        PairingError.SEQUENCE_TIMEOUT.label,
+        BoltPairingError.DEVICE_TIMEOUT.label,
+        BoltPairingError.FAILED.label,
+        "discovery did not start",
+        "the pairing lock did not open",
+        "failed to open pairing lock",
+    ],
+)
+def test_create_failure_page_covers_every_error(error, mocker):
+    spy_create = mocker.spy(pair_window, "_create_page")
+
+    pair_window._pairing_failed(Assistant(True), Receiver("nano", "nano"), error)
+
+    assert spy_create.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        PairingError.DEVICE_TIMEOUT.label,
+        PairingError.DEVICE_NOT_SUPPORTED.label,
+        PairingError.TOO_MANY_DEVICES.label,
+        PairingError.SEQUENCE_TIMEOUT.label,
+        BoltPairingError.FAILED.label,
+        "failed to open pairing lock",
+    ],
+)
+def test_failure_text_is_specific(error):
+    """A protocol error must never fall through to the generic message."""
+    assert pair_window._failure_text(error) != pair_window._failure_text("something unheard of")
+
+
+def test_failure_text_explains_a_rejected_sequence():
+    """Bolt reports only that verification failed, so the page must not diagnose a cause."""
+    text = pair_window._failure_text(BoltPairingError.FAILED.label)
+
+    assert "not accepted" in text
+    assert "cannot tell which buttons were pressed" in text
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_failure_page_has_no_retry_button_without_a_callback(mocker):
+    """The periodic check reaches this path with a duck-typed assistant, which must
+    never be asked for anything beyond the methods it already provides."""
+    spy_create = mocker.spy(pair_window, "_create_page")
+    assistant = Assistant(True)
+
+    pair_window._pairing_failed(assistant, Receiver("nano", "nano"), "failed")
+
+    assert spy_create.call_count == 1
+    assert not any(isinstance(child, Gtk.Button) for child in assistant.pages[0].get_children())
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_failure_page_offers_retry_when_wired():
+    r = Receiver("nano", "nano")
+    retried = []
+    assistant = Gtk.Assistant()
+    setattr(assistant, pair_window._ON_RETRY, lambda: retried.append(True))
+
+    page = pair_window._create_failure_page(assistant, r, "failed")
+    buttons = [child for child in page.get_children() if isinstance(child, Gtk.Button)]
+
+    assert len(buttons) == 1
+    assert buttons[0].get_label() == "Try again"
+
+    buttons[0].clicked()
+
+    assert retried == [True]
+
+
+def _countdown_assistant(drawable=True):
+    assistant = Assistant(drawable)
+    countdown = Gtk.ProgressBar()
+    setattr(assistant, pair_window._COUNTDOWN, countdown)
+    return assistant, countdown
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize("receiver_kind", ["bolt", "unifying"])
+def test_create_adds_a_discovery_countdown(receiver_kind):
+    r = Receiver(receiver_kind, receiver_kind, True)
+
+    assistant = pair_window.create(r)
+
+    countdown = getattr(assistant, pair_window._COUNTDOWN, None)
+    assert isinstance(countdown, Gtk.ProgressBar)
+    assert countdown in assistant.get_nth_page(0).get_children()
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_drains_and_stops():
+    r = Receiver("bolt", "bolt", True)
+    assistant, countdown = _countdown_assistant()
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(assistant, r, deadline) is True
+    assert 0 < countdown.get_fraction() <= 1
+    assert countdown.get_text()
+
+    # a device was found, so the discovery timeout no longer applies
+    r.pairing.device_address = b"\x01\x02\x03\x04\x05\x06"
+    assert pair_window._update_countdown(assistant, r, deadline) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_stops_when_the_deadline_passes():
+    assistant, _countdown = _countdown_assistant()
+
+    assert pair_window._update_countdown(assistant, Receiver("bolt", "bolt", True), time.monotonic() - 1) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_stops_when_the_dialog_is_gone():
+    assistant, _countdown = _countdown_assistant(drawable=False)
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(assistant, Receiver("bolt", "bolt", True), deadline) is False
+
+
+def test_update_countdown_without_a_progress_bar():
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(Assistant(True), Receiver("bolt", "bolt", True), deadline) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_no_countdown_during_passkey_entry():
+    """The entry timeout lives in the receiver's firmware and is never reported, so
+    showing a countdown there would mean inventing one."""
+    r = Receiver("bolt", "bolt", True, receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02))
+    assistant, _countdown = _countdown_assistant()
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    assert pair_window._update_countdown(assistant, r, time.monotonic() + pair_window._PAIRING_TIMEOUT) is False
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    assert not any(isinstance(child, Gtk.ProgressBar) for child in page.get_children())

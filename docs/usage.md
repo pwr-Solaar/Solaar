@@ -63,6 +63,12 @@ Bolt devices and some Lightspeed devices pair by pressing a special pairing butt
 To pair with a Bolt receiver you have to type a passcode followed by enter
 or click the left and right buttons in the correct sequence followed by
 clicking both buttons simultaneously.
+Solaar shows this sequence as numbered steps, each one indicating which button
+to press, with the final both-buttons step set apart from the rest.
+Receivers that report entry progress also advance a highlight as each press is
+accepted. That highlight only counts presses: the receiver never reports which
+button was pressed, so Solaar cannot tell you whether a press was the right one,
+and only reports whether the whole sequence was accepted.
 
 ![Solaar-main-window-receiver](screenshots/Solaar-main-window-receiver.png)
 
