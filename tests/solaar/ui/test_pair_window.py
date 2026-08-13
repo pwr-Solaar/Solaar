@@ -285,6 +285,28 @@ def test_step_strip_cells(steps, expected_cells):
     assert width > 0 and height > cells[-1].y
 
 
+def _page_labels(page):
+    return [child.get_label() for child in page.get_children() if isinstance(child, Gtk.Label)]
+
+
+@pytest.mark.parametrize(
+    "passkey, authentication, forbidden",
+    [("50", 0x02, "key press"), ("000918", 0x01, "click")],
+)
+def test_entry_progress_text_uses_the_words_of_the_device(passkey, authentication, forbidden):
+    """A mouse is clicked and a keyboard is typed on, so neither may borrow the other's
+    vocabulary — the wrong one reaches the translators as well as the user."""
+    steps = pair_window._passkey_steps(passkey, authentication)
+    total = len(steps) - 1
+
+    waiting = pair_window._entry_progress_text(steps, 0, total)
+    counted = pair_window._entry_progress_text(steps, 3, total)
+
+    assert forbidden not in waiting.lower()
+    assert forbidden not in counted.lower()
+    assert "3" in counted and str(total) in counted
+
+
 @pytest.mark.skipif(not gtk_init, reason="requires Gtk")
 def test_show_passcode_appends_a_single_page():
     """The periodic check keeps running while the passkey is shown, so the page has to
@@ -351,6 +373,52 @@ def test_show_passcode_clamps_overshoot():
 
 
 @pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_never_blames_the_receiver_for_a_slow_user(monkeypatch):
+    """A receiver that reports nothing and a user who has not pressed anything yet look
+    exactly alike from the page, so no amount of elapsed time may turn one into a claim
+    about the other, and the current step must keep its highlight throughout."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    waiting = page.status.get_label()
+
+    real_monotonic = time.monotonic
+    monkeypatch.setattr(time, "monotonic", lambda: real_monotonic() + 3600)
+    pair_window._update_passcode_page(page, r)
+
+    assert page.status.get_label() == waiting
+    assert getattr(page.strip, pair_window._PROGRESS) == 0
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_passcode_page_keeps_the_click_sequence_as_text():
+    """The strip is a drawing area, so it carries no text: the sequence has to stay on
+    the page as a sentence, since a tooltip needs a pointer to be seen at all."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    steps = pair_window._passkey_steps("50", 0x02)
+    sequence = pair_window._passkey_description(steps, "50", 0x02)
+    assert sequence in _page_labels(page)
+    assert page.strip.get_accessible().get_name() == sequence
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
 def test_show_passcode_survives_unreadable_passkey():
     r = Receiver(
         "passcode",
@@ -363,6 +431,26 @@ def test_show_passcode_survives_unreadable_passkey():
     assert pair_window._check_lock_state(assistant, r, 0) is True
     assert pair_window._check_lock_state(assistant, r, 0) is True
     assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_unreadable_passkey_does_not_ask_a_mouse_to_type():
+    """Keyboards always yield steps, so this path is only ever reached by a device with
+    no keys to type on and no enter key to press."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="oops", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    text = "\n".join(_page_labels(page))
+    assert "enter key" not in text
+    assert "cannot read the passcode" in text
 
 
 @pytest.mark.skipif(not gtk_init, reason="requires Gtk")

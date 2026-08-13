@@ -35,7 +35,6 @@ logger = logging.getLogger(__name__)
 
 _PAIRING_TIMEOUT = 30  # seconds
 _STATUS_CHECK = 500  # milliseconds
-_PROGRESS_GRACE = 3  # seconds to wait for a first progress notification before giving up on them
 
 # steps the user has to perform to enter a passkey
 _STEP_LEFT = "left"
@@ -251,6 +250,22 @@ def _passkey_description(steps, passkey, authentication):
     return _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
 
 
+def _entry_progress_text(steps, done, total):
+    """Describes how much of the passkey the receiver has accepted, in the words of the device.
+
+    A mouse is clicked and a keyboard is typed on, so the two cannot share a sentence.
+    Both wordings are spelled out in full rather than assembled from fragments, so that
+    each one reaches the translators as a complete sentence.
+    """
+    if steps[-1] == _STEP_BOTH:  # mice and touchpads enter the passcode by clicking
+        if done <= 0:
+            return _("Waiting for the first click…")
+        return _("Clicks registered by the receiver: %(done)d of %(total)d") % {"done": done, "total": total}
+    if done <= 0:
+        return _("Waiting for the first key press…")
+    return _("Key presses registered by the receiver: %(done)d of %(total)d") % {"done": done, "total": total}
+
+
 @dataclass
 class _StepCell:
     """Placement of a single step inside the step strip."""
@@ -398,8 +413,8 @@ def _draw_step_strip(area, cr):
     if not steps:
         return False
     progress = getattr(area, _PROGRESS, None)
-    # without progress notifications no step is singled out, and the strip is
-    # simply the whole sequence, numbered and always readable
+    # the strip is the whole sequence, numbered and always readable, whether or not a
+    # count is known; without one no step is singled out and nothing is marked done
     done = 0 if progress is None else min(progress, len(steps))
     current = None if progress is None else min(progress, len(steps) - 1)
     cells, separator_y, width, _height = _step_strip_cells(steps)
@@ -455,10 +470,13 @@ def _create_step_strip(steps, description):
     _cells, _separator_y, width, height = _step_strip_cells(steps)
     area.set_size_request(width, int(math.ceil(height)))
     area.connect(GtkSignal.DRAW.value, _draw_step_strip)
-    # a drawing area is invisible to screen readers, so the sequence has to
-    # stay available as text as well
+    # a drawing area carries no text of its own, so name it after the sequence it
+    # draws; screen readers announce the name first, and the caller also keeps the
+    # sequence in a label of its own
     area.set_tooltip_text(description)
-    area.get_accessible().set_description(description)
+    accessible = area.get_accessible()
+    accessible.set_name(description)
+    accessible.set_description(description)
     return area
 
 
@@ -480,9 +498,14 @@ def _create_passcode_page(assistant, receiver, passkey):
     intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
     page_text = _("Enter passcode on %(name)s.") % {"name": name}
     steps = _passkey_steps(passkey, authentication)
-    if steps is None:  # unreadable passkey, so fall back to the plain instructions
+    if steps is None:
+        # every step is derived from the passcode, so an unreadable one leaves nothing
+        # to instruct with. Only non-keyboards can get here with a passcode at all, so
+        # say what happened instead of naming an action the device cannot perform.
         page_text += "\n"
-        page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": passkey}
+        page_text += _("Solaar cannot read the passcode this receiver sent, so it cannot show how to enter it.")
+        page_text += "\n"
+        page_text += _("Press the pairing button on your device again and retry.")
     elif authentication & 0x01:  # for keyboards the passcode is meant to be read
         page_text += "\n"
         page_text += _passkey_description(steps, passkey, authentication)
@@ -495,9 +518,19 @@ def _create_passcode_page(assistant, receiver, passkey):
     )
     if steps is None:
         return page
-    strip = _create_step_strip(steps, _passkey_description(steps, passkey, authentication))
+    description = _passkey_description(steps, passkey, authentication)
+    strip = _create_step_strip(steps, description)
     page.pack_start(strip, False, False, 0)
-    status = Gtk.Label(label=_("Waiting for the first click…"))
+    if not authentication & 0x01:
+        # the strip is drawn, not written, so the sequence also stays on the page as a
+        # sentence: a tooltip needs a pointer and an accessible description is not text
+        sequence = Gtk.Label(label=description)
+        sequence.set_line_wrap(True)
+        sequence.set_max_width_chars(_LABEL_WIDTH_CHARS)
+        sequence.set_halign(Gtk.Align.CENTER)
+        sequence.get_style_context().add_class("dim-label")
+        page.pack_start(sequence, False, False, 0)
+    status = Gtk.Label(label=_entry_progress_text(steps, 0, len(steps) - 1))
     status.set_line_wrap(True)
     status.set_max_width_chars(_LABEL_WIDTH_CHARS)
     status.set_halign(Gtk.Align.CENTER)
@@ -520,7 +553,6 @@ def _create_passcode_page(assistant, receiver, passkey):
     page.show_all()
     page.strip = strip
     page.status = status
-    page.started = time.monotonic()
     return page
 
 
@@ -532,24 +564,18 @@ def _update_passcode_page(page, receiver):
     steps = getattr(strip, _STEPS)
     total = len(steps) - 1  # the receiver counts presses, not the final combined one
     entered = receiver.pairing.passkey_entered
+    # a receiver that reports nothing and a user who has not pressed anything yet look
+    # exactly alike from here, so never claim either: the count stands at zero and the
+    # first step stays highlighted until the receiver says otherwise
     if receiver.pairing.passkey_complete:
         progress = len(steps)
         text = _("The receiver is checking the sequence…")
-    elif entered > 0:
+    elif entered >= total and steps[-1] == _STEP_BOTH:
         progress = entered
-        if entered >= total and steps[-1] == _STEP_BOTH:
-            text = _("Finally, press the left and right buttons at the same time.")
-        else:
-            text = _("Clicks registered by the receiver: %(done)d of %(total)d") % {
-                "done": min(entered, total),
-                "total": total,
-            }
-    elif time.monotonic() - page.started < _PROGRESS_GRACE:
-        progress = 0
-        text = _("Waiting for the first click…")
-    else:  # this receiver never reports progress, so highlight nothing at all
-        progress = None
-        text = _("This receiver does not report entry progress. Follow the numbered steps in order.")
+        text = _("Finally, press the left and right buttons at the same time.")
+    else:
+        progress = entered
+        text = _entry_progress_text(steps, min(entered, total), total)
     page.status.set_label(text)
     setattr(strip, _PROGRESS, progress)
     strip.queue_draw()
