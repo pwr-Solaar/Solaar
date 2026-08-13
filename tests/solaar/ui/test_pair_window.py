@@ -243,3 +243,160 @@ def test_create_failure_page(error, mocker):
     pair_window._pairing_failed(Assistant(True), Receiver("nano", "nano"), error)
 
     assert spy_create.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "passkey, authentication, expected",
+    [
+        ("50", 0x02, ["left"] * 4 + ["right"] * 2 + ["left"] * 2 + ["right"] + ["left"] + ["both"]),
+        (50, 0x02, ["left"] * 4 + ["right"] * 2 + ["left"] * 2 + ["right"] + ["left"] + ["both"]),
+        ("0", 0x02, ["left"] * 10 + ["both"]),
+        ("1023", 0x02, ["right"] * 10 + ["both"]),
+        ("000918", 0x01, ["0", "0", "0", "9", "1", "8", "enter"]),
+        ("abcdef", 0x02, None),
+        ("", 0x02, None),
+        (None, 0x02, None),
+    ],
+)
+def test_passkey_steps(passkey, authentication, expected):
+    assert pair_window._passkey_steps(passkey, authentication) == expected
+
+
+def test_passkey_steps_bit_polarity():
+    """The receiver never reports which button was pressed, so this mapping cannot be
+    validated from inside Solaar and must not be flipped without hardware evidence."""
+    steps = pair_window._passkey_steps(f"{0b1010101010:d}", 0x02)
+
+    assert steps == ["right", "left"] * 5 + ["both"]
+
+
+@pytest.mark.parametrize("steps, expected_cells", [(["left"] * 10 + ["both"], 11), (["1", "2", "enter"], 3)])
+def test_step_strip_cells(steps, expected_cells):
+    cells, separator_y, width, height = pair_window._step_strip_cells(steps)
+
+    assert [cell.step for cell in cells] == steps
+    assert [cell.index for cell in cells] == list(range(expected_cells))
+    assert cells[-1].width > cells[0].width  # the final step is drawn larger
+    assert cells[-1].y > separator_y  # and below the separator
+    assert width > 0 and height > cells[-1].y
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_appends_a_single_page():
+    """The periodic check keeps running while the passkey is shown, so the page has to
+    be created once and refreshed afterwards instead of being appended again."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    first = pair_window._check_lock_state(assistant, r, 0)
+    second = pair_window._check_lock_state(assistant, r, 0)
+
+    assert first is True
+    assert second is True
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_updates_status_in_place():
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    waiting = page.status.get_label()
+
+    r.pairing.passkey_entered = 4
+    pair_window._check_lock_state(assistant, r, 0)
+    counted = page.status.get_label()
+
+    r.pairing.passkey_complete = True
+    pair_window._check_lock_state(assistant, r, 0)
+    checking = page.status.get_label()
+
+    assert waiting != counted != checking
+    assert "4" in counted
+    assert getattr(page.strip, pair_window._PROGRESS) == len(getattr(page.strip, pair_window._STEPS))
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_clamps_overshoot():
+    """The receiver owns the verdict, so more presses than steps must not raise."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02, passkey_entered=99),
+    )
+    assistant = Assistant(True)
+
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    assert getattr(page.strip, pair_window._PROGRESS) == 99  # clamped when drawn, not when stored
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_survives_unreadable_passkey():
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="oops", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_pair_device_issued_once(mocker):
+    r = Receiver("discovered", "bolt", True, receiver.Pairing(discovering=True, device_address=2, device_name=5))
+    spy_pair_device = mocker.spy(r, "pair_device")
+    assistant = Assistant(True)
+
+    first = pair_window._check_lock_state(assistant, r, 2)
+    second = pair_window._check_lock_state(assistant, r, 2)
+
+    assert first is True
+    assert second is True
+    assert spy_pair_device.call_count == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize("progress", [None, 0, 5, 10, 11, 15])
+@pytest.mark.parametrize("passkey, authentication", [("50", 0x02), ("000918", 0x01)])
+def test_draw_step_strip(passkey, authentication, progress):
+    """Draws against an image surface, so cairo misuse and a bad highlight clamp are
+    caught without needing a display."""
+    import cairo
+
+    steps = pair_window._passkey_steps(passkey, authentication)
+    strip = pair_window._create_step_strip(steps, "sequence")
+    _cells, _separator_y, width, height = pair_window._step_strip_cells(steps)
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(width), int(height))
+    setattr(strip, pair_window._PROGRESS, progress)
+
+    assert pair_window._draw_step_strip(strip, cairo.Context(surface)) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_draw_step_strip_without_steps():
+    import cairo
+
+    strip = Gtk.DrawingArea()
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+
+    assert pair_window._draw_step_strip(strip, cairo.Context(surface)) is False
