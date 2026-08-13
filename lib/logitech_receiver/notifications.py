@@ -510,6 +510,8 @@ def handle_discovery_status(receiver: Receiver, notification: HIDPPNotification)
             receiver.pairing.counter = receiver.pairing.device_address = None
             receiver.pairing.device_authentication = receiver.pairing.device_name = None
         receiver.pairing.device_passkey = None
+        receiver.pairing.passkey_entered = 0
+        receiver.pairing.passkey_complete = False
         discover_error = ord(notification.data[:1])
         if discover_error:
             receiver.pairing.error = discover_string = hidpp10_constants.BoltPairingError(discover_error).label
@@ -538,6 +540,8 @@ def handle_device_discovery(receiver: Receiver, notification: HIDPPNotification)
 def handle_pairing_status(receiver: Receiver, notification: HIDPPNotification) -> bool:
     with notification_lock:
         receiver.pairing.device_passkey = None
+        receiver.pairing.passkey_entered = 0
+        receiver.pairing.passkey_complete = False
         receiver.pairing.lock_open = notification.address == 0x00
         reason = _("pairing lock is open") if receiver.pairing.lock_open else _("pairing lock is closed")
         if logger.isEnabledFor(logging.INFO):
@@ -564,8 +568,26 @@ def handle_pairing_status(receiver: Receiver, notification: HIDPPNotification) -
 def handle_passkey_request(receiver: Receiver, notification: HIDPPNotification) -> bool:
     with notification_lock:
         receiver.pairing.device_passkey = notification.data[0:6].decode("utf-8")
+        # a fresh passkey means entry is starting over, so any earlier progress is stale
+        receiver.pairing.passkey_entered = 0
+        receiver.pairing.passkey_complete = False
         return True
 
 
-def handle_passkey_pressed(_receiver: Receiver, _hidpp_notification: HIDPPNotification) -> bool:
-    return True
+def handle_passkey_pressed(receiver: Receiver, notification: HIDPPNotification) -> bool:
+    """Tracks how much of the passkey the receiver has accepted so far.
+
+    The receiver reports that a key or button was pressed, but never which one,
+    so only the number of accepted presses can be derived from these events.
+    """
+    with notification_lock:
+        if notification.address == 0x00:  # passkey entry started
+            receiver.pairing.passkey_entered = 0
+            receiver.pairing.passkey_complete = False
+        elif notification.address == 0x01:  # one more digit or bit was accepted
+            receiver.pairing.passkey_entered += 1
+        elif notification.address == 0x04:  # entry terminated, receiver is verifying
+            receiver.pairing.passkey_complete = True
+        else:  # the rest of the address space is undocumented, so do not guess
+            logger.debug("%s: unknown passkey pressed address %02X: %s", receiver, notification.address, notification)
+        return True
