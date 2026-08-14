@@ -330,3 +330,7 @@ switches the mouse to host 3 after popping up a simple notification.
 ![Solaar-divert-back](screenshots/Solaar-main-window-back-divert.png)
 
 ![Solaar-rule-back-host](screenshots/Solaar-rule-editor.png)
+
+For a worked-through configuration of one device — which buttons can be diverted, the
+gestures and thumb wheel, and the settings that need no rules at all — see
+[the MX Master page](https://pwr-solaar.github.io/Solaar/mx-master).

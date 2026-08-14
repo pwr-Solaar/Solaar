@@ -12,6 +12,7 @@ nav:
   - Capabilities: capabilities.md
   - Issues: issues.md
   - Rules: rules.md
+  - MX Master: mx-master.md
   - Installation: installation.md
   - Uninstallation: uninstallation.md
   - Translation: i18n.md
