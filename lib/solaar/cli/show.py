@@ -185,6 +185,8 @@ def _receiver_json(receiver):
 
 def _device_json(dev):
     """Serialize a device as a JSON-friendly dict, or None if the device is gone."""
+    # Save the protocol before the ping, as it overrides it
+    protocol = float(dev.protocol) if dev.protocol else None
     try:
         online = dev.ping()
     except exceptions.NoSuchDevice:
@@ -195,7 +197,6 @@ def _device_json(dev):
             battery = dev.battery()
         except Exception:
             battery = None
-    protocol = float(dev.protocol) if dev.protocol else None
     receiver = getattr(dev, "receiver", None)
     return {
         "name": dev.name,
