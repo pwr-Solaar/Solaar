@@ -149,18 +149,21 @@ def _battery_line(dev):
         print("     Battery status unavailable.")
 
 
+def _level_kind(level):
+    """Distinguish a real percentage ("level") from a qualitative approximation."""
+    if isinstance(level, BatteryLevelApproximation):
+        return "approximation"
+    if isinstance(level, int):
+        return "level"
+    return None
+
+
 def _battery_json(battery):
     """Serialize a Battery as a JSON-friendly dict, or None if unavailable."""
     if battery is None:
         return None
     level = battery.level
-    if isinstance(level, BatteryLevelApproximation):
-        # A qualitative level (e.g. "good"), not an actual percentage
-        level_kind = "approximation"
-    elif isinstance(level, int):
-        level_kind = "level"
-    else:
-        level_kind = None
+    next_level = battery.next_level
     status = getattr(battery.status, "name", None)  # canonical member name; combined flags have none on Python < 3.11
     if status is None and battery.status is not None:
         # Decompose combined flags into single-bit members so the output
@@ -173,8 +176,9 @@ def _battery_json(battery):
         )
     return {
         "level": int(level) if level is not None else None,
-        "level_kind": level_kind,
-        "next_level": int(battery.next_level) if battery.next_level is not None else None,
+        "level_kind": _level_kind(level),
+        "next_level": int(next_level) if next_level is not None else None,
+        "next_level_kind": _level_kind(next_level),
         "status": status,
         "voltage": battery.voltage,
     }
@@ -193,8 +197,8 @@ def _receiver_json(receiver):
 
 def _device_json(dev):
     """Serialize a device as a JSON-friendly dict, or None if the device is gone."""
-    # Save the descriptor-known protocol; the ping below may update it, and
-    # for an offline device the ping fails and would leave it unset.
+    # Save the descriptor-known protocol before the ping below updates it; for
+    # a descriptor-less device the property itself pings to determine it.
     protocol = float(dev.protocol) if dev.protocol else None
     try:
         online = dev.ping()
@@ -211,7 +215,7 @@ def _device_json(dev):
         "name": dev.name,
         "number": dev.number,
         "receiver": _receiver_json(receiver),
-        "pid": str(dev.wpid or dev.product_id),
+        "pid": str(dev.wpid or dev.product_id).upper(),  # hex, uppercase (product_id case varies by hid backend)
         "path": dev.path,
         "bluetooth": dev.bluetooth,
         "mac": dev.hid_serial if dev.bluetooth else None,

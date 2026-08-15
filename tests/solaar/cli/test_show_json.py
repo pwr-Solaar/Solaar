@@ -82,6 +82,13 @@ class DeviceInfoStub:
 
 pi_4066 = {"wpid": "4066", "kind": NamedInt(1, "keyboard"), "serial": "5678", "polling": "4ms", "power_switch": "left"}
 
+
+@pytest.fixture(autouse=True)
+def _reset_device_instances():
+    yield
+    Device.instances[:] = []
+
+
 responses_receiver = [
     fake_hidpp.Response("000000", 0x8003, "FF"),
     fake_hidpp.Response("000300", 0x8102),
@@ -114,6 +121,7 @@ def test_battery_json_percentage():
         "level": 55,
         "level_kind": "level",
         "next_level": None,
+        "next_level_kind": None,
         "status": "DISCHARGING",
         "voltage": 3800,
     }
@@ -123,6 +131,7 @@ def test_battery_json_approximation():
     info = _battery_json(_battery(BatteryLevelApproximation.GOOD))
     assert info["level"] == 50
     assert info["level_kind"] == "approximation"
+    assert info["next_level_kind"] is None
 
 
 def test_battery_json_full_approximation():
@@ -130,6 +139,7 @@ def test_battery_json_full_approximation():
     assert info["level"] == 90
     assert info["level_kind"] == "approximation"
     assert info["next_level"] == 20
+    assert info["next_level_kind"] == "approximation"
 
 
 @pytest.mark.parametrize(
@@ -182,7 +192,14 @@ def test_device_json_online():
     assert info["kind"] == "keyboard"
     assert info["protocol"] == 4.5
     assert info["online"] is True
-    assert info["battery"] == {"level": 18, "level_kind": "level", "next_level": 52, "status": None, "voltage": None}
+    assert info["battery"] == {
+        "level": 18,
+        "level_kind": "level",
+        "next_level": 52,
+        "next_level_kind": "level",
+        "status": None,
+        "voltage": None,
+    }
 
 
 def test_device_json_direct_usb_device():
