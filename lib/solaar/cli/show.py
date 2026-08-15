@@ -26,7 +26,6 @@ from logitech_receiver import receiver
 from logitech_receiver import settings_templates
 from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import BatteryLevelApproximation
-from logitech_receiver.common import BatteryStatus
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import strhex
 from logitech_receiver.device import CenturionReceiver
@@ -162,12 +161,12 @@ def _battery_json(battery):
         level_kind = "level"
     else:
         level_kind = None
-    status = battery.status
+    status = getattr(battery.status, "name", None)
     return {
         "level": int(level) if level is not None else None,
         "level_kind": level_kind,
         "next_level": int(battery.next_level) if battery.next_level is not None else None,
-        "status": status.name.lower().replace("_", " ") if isinstance(status, BatteryStatus) else None,
+        "status": status,
         "voltage": battery.voltage,
     }
 

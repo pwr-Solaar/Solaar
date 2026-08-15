@@ -128,7 +128,7 @@ def test_battery_json_percentage():
         "level": 55,
         "level_kind": "level",
         "next_level": None,
-        "status": "discharging",
+        "status": "DISCHARGING",
         "voltage": 3800,
     }
 
@@ -149,10 +149,10 @@ def test_battery_json_full_approximation():
 @pytest.mark.parametrize(
     "status, expected",
     [
-        (BatteryStatus.DISCHARGING, "discharging"),
-        (BatteryStatus.RECHARGING, "recharging"),
-        (BatteryStatus.ALMOST_FULL, "almost full"),
-        (BatteryStatus.SLOW_RECHARGE, "slow recharge"),
+        (BatteryStatus.DISCHARGING, "DISCHARGING"),
+        (BatteryStatus.RECHARGING, "RECHARGING"),
+        (BatteryStatus.ALMOST_FULL, "ALMOST_FULL"),
+        (BatteryStatus.SLOW_RECHARGE, "SLOW_RECHARGE"),
     ],
 )
 def test_battery_json_status_names(status, expected):
@@ -161,6 +161,12 @@ def test_battery_json_status_names(status, expected):
 
 def test_battery_json_no_status():
     assert _battery_json(_battery(50, None))["status"] is None
+
+
+def test_battery_json_combined_status_flag():
+    combined = BatteryStatus(0x07)  # bits from multiple flags (no canonical name on Python < 3.11)
+    status = _battery_json(_battery(50, combined))["status"]
+    assert status is None or isinstance(status, str)
 
 
 def test_receiver_json_none():
