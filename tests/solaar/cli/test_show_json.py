@@ -81,6 +81,19 @@ class DeviceInfo:
     product_id: int = 0xC534
 
 
+@dataclass
+class DeviceInfoStub:
+    path: str
+    product_id: str
+    vendor_id: int = 1133
+    hidpp_short: bool = False
+    hidpp_long: bool = True
+    bus_id: int = 0x0003
+    serial: str = "aa:aa:aa;aa"
+    centurion: bool = False
+    centurion_report_id: int | None = None
+
+
 pi_4066 = {"wpid": "4066", "kind": NamedInt(1, "keyboard"), "serial": "5678", "polling": "4ms", "power_switch": "left"}
 
 responses_receiver = [
@@ -94,10 +107,10 @@ def _keyboard_device():
     return Device(LowLevelInterfaceFake(responses), FakeReceiver(), 3, True, pi_4066, handle=0x11)
 
 
-def _json_dump(mocker, *args):
+def _capture_json(mocker, func, *args):
     printed = []
     mocker.patch("solaar.cli.show.print", side_effect=lambda *a, **kw: printed.append(a[0]))
-    _json_output(*args)
+    func(*args)
     return json.loads(printed[-1])
 
 
@@ -167,6 +180,10 @@ def test_device_json_online():
     assert info["name"] == "Craft Advanced Keyboard"
     assert info["number"] == 3
     assert info["receiver"] == {"name": "Nano Receiver", "serial": "F14890D2", "path": "/dev/hidraw2"}
+    assert info["pid"] == "4066"
+    assert info["path"] is None
+    assert info["bluetooth"] is False
+    assert info["mac"] is None
     assert info["serial"] == "5678"
     assert info["unitId"] == "12345678"
     assert info["modelId"] == "1234567890AB"
@@ -174,6 +191,32 @@ def test_device_json_online():
     assert info["protocol"] == 4.5
     assert info["online"] is True
     assert info["battery"] == {"level": 18, "level_kind": "level", "next_level": 52, "status": None, "voltage": None}
+
+
+def test_device_json_direct_usb_device():
+    di = DeviceInfoStub("11", product_id="C318")
+    responses = fake_hidpp.replace_number(fake_hidpp.r_keyboard_1, 0x00)
+    dev = Device(LowLevelInterfaceFake(responses), None, None, None, handle=0x11, device_info=di)
+    info = _device_json(dev)
+    assert info["receiver"] is None
+    assert info["pid"] == "C318"
+    assert info["path"] == "11"
+    assert info["bluetooth"] is False
+    assert info["mac"] is None
+    assert info["protocol"] == 1.0
+    assert info["online"] is True
+    assert info["battery"]["level"] == 50
+
+
+def test_device_json_bluetooth_device():
+    di = DeviceInfoStub("11", product_id="B350", bus_id=0x0005)
+    dev = Device(LowLevelInterfaceFake(fake_hidpp.r_keyboard_1), None, None, None, handle=0x11, device_info=di)
+    info = _device_json(dev)
+    assert info["receiver"] is None
+    assert info["path"] == "11"
+    assert info["bluetooth"] is True
+    assert info["mac"] == "aa:aa:aa;aa"
+    assert info["online"] is True
 
 
 def test_device_json_reported_battery(mocker):
@@ -204,7 +247,7 @@ def test_json_output_all_flattens_receiver(mocker):
     r._devices[1] = dev
     mocker.patch.object(r, "count", return_value=1)
 
-    output = _json_dump(mocker, [r], "all", None, None)
+    output = _capture_json(mocker, _json_output, [r], "all", None, None)
 
     assert "solaar_version" in output
     assert [d["name"] for d in output["devices"]] == ["Craft Advanced Keyboard"]
@@ -216,7 +259,7 @@ def test_json_output_single_device(mocker):
     find_receiver = mocker.Mock(return_value=None)
     find_device = mocker.Mock(return_value=iter([dev]))
 
-    output = _json_dump(mocker, [dev], "Craft Advanced Keyboard", find_receiver, find_device)
+    output = _capture_json(mocker, _json_output, [dev], "Craft Advanced Keyboard", find_receiver, find_device)
 
     assert [d["name"] for d in output["devices"]] == ["Craft Advanced Keyboard"]
     assert output["devices"][0]["battery"]["level"] == 18
@@ -229,7 +272,7 @@ def test_json_output_single_device_on_receiver(mocker):
     mocker.patch.object(r, "count", return_value=1)
     find_receiver = mocker.Mock(return_value=r)
 
-    output = _json_dump(mocker, [r], "Craft Advanced Keyboard", find_receiver, None)
+    output = _capture_json(mocker, _json_output, [r], "Craft Advanced Keyboard", find_receiver, None)
 
     assert [d["name"] for d in output["devices"]] == ["Craft Advanced Keyboard"]
 
@@ -240,3 +283,23 @@ def test_json_output_no_matching_device_raises(mocker):
 
     with pytest.raises(Exception, match="no device found"):
         _json_output([], "Missing", find_receiver, find_device)
+
+
+def test_parser_json_flag():
+    from solaar import cli
+
+    parser = cli._create_parser()[0]
+    args = parser.parse_args(["show", "--json"])
+    assert args.json is True
+    assert args.device == "all"
+
+
+def test_run_json_output(mocker):
+    from solaar.cli.show import run
+
+    dev = _keyboard_device()
+    args = mocker.Mock(json=True, device="all")
+
+    output = _capture_json(mocker, run, [dev], args, None, None)
+
+    assert [d["name"] for d in output["devices"]] == ["Craft Advanced Keyboard"]
