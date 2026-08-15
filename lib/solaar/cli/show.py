@@ -156,12 +156,21 @@ def _battery_json(battery):
     level = battery.level
     if isinstance(level, BatteryLevelApproximation):
         # A qualitative level (e.g. "good"), not an actual percentage
-        level_kind = "reported"
+        level_kind = "approximation"
     elif isinstance(level, int):
         level_kind = "level"
     else:
         level_kind = None
-    status = getattr(battery.status, "name", None)
+    status = getattr(battery.status, "name", None)  # canonical member name; combined flags have none on Python < 3.11
+    if status is None and battery.status is not None:
+        # Decompose combined flags into single-bit members so the output
+        # is identical on every Python version.
+        status = (
+            "|".join(
+                m.name for m in type(battery.status) if m.value and m.value & (m.value - 1) == 0 and (battery.status & m) == m
+            )
+            or None
+        )
     return {
         "level": int(level) if level is not None else None,
         "level_kind": level_kind,
@@ -184,7 +193,8 @@ def _receiver_json(receiver):
 
 def _device_json(dev):
     """Serialize a device as a JSON-friendly dict, or None if the device is gone."""
-    # Save the protocol before the ping, as it overrides it
+    # Save the descriptor-known protocol; the ping below may update it, and
+    # for an offline device the ping fails and would leave it unset.
     protocol = float(dev.protocol) if dev.protocol else None
     try:
         online = dev.ping()
@@ -201,7 +211,7 @@ def _device_json(dev):
         "name": dev.name,
         "number": dev.number,
         "receiver": _receiver_json(receiver),
-        "pid": dev.wpid or dev.product_id,
+        "pid": str(dev.wpid or dev.product_id),
         "path": dev.path,
         "bluetooth": dev.bluetooth,
         "mac": dev.hid_serial if dev.bluetooth else None,
@@ -562,9 +572,11 @@ def run(devices, args, find_receiver, find_device):
     assert args.device
 
     if args.json:
-        _json_output(devices, args.device.lower(), find_receiver, find_device)
-        for d in Device.instances:
-            d.close()
+        try:
+            _json_output(devices, args.device.lower(), find_receiver, find_device)
+        finally:
+            for d in Device.instances:
+                d.close()
         return
 
     print(f"{NAME.lower()} version {__version__}")

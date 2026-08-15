@@ -14,6 +14,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import json
 
 from dataclasses import dataclass
@@ -136,13 +138,13 @@ def test_battery_json_percentage():
 def test_battery_json_approximation():
     info = _battery_json(_battery(BatteryLevelApproximation.GOOD))
     assert info["level"] == 50
-    assert info["level_kind"] == "reported"
+    assert info["level_kind"] == "approximation"
 
 
 def test_battery_json_full_approximation():
     info = _battery_json(_battery(BatteryLevelApproximation.FULL, next_level=BatteryLevelApproximation.LOW))
     assert info["level"] == 90
-    assert info["level_kind"] == "reported"
+    assert info["level_kind"] == "approximation"
     assert info["next_level"] == 20
 
 
@@ -166,7 +168,7 @@ def test_battery_json_no_status():
 def test_battery_json_combined_status_flag():
     combined = BatteryStatus(0x07)  # bits from multiple flags (no canonical name on Python < 3.11)
     status = _battery_json(_battery(50, combined))["status"]
-    assert status is None or isinstance(status, str)
+    assert status == "RECHARGING|ALMOST_FULL|SLOW_RECHARGE"
 
 
 def test_receiver_json_none():
@@ -225,12 +227,12 @@ def test_device_json_bluetooth_device():
     assert info["online"] is True
 
 
-def test_device_json_reported_battery(mocker):
+def test_device_json_approximation_battery(mocker):
     dev = _keyboard_device()
     mocker.patch.object(dev, "battery", return_value=_battery(BatteryLevelApproximation.GOOD))
     info = _device_json(dev)
     assert info["battery"]["level"] == 50
-    assert info["battery"]["level_kind"] == "reported"
+    assert info["battery"]["level_kind"] == "approximation"
 
 
 def test_device_json_offline_battery_unavailable():
@@ -309,3 +311,18 @@ def test_run_json_output(mocker):
     output = _capture_json(mocker, run, [dev], args, None, None)
 
     assert [d["name"] for d in output["devices"]] == ["Craft Advanced Keyboard"]
+
+
+def test_run_json_closes_devices_when_output_raises(mocker):
+    from solaar.cli.show import Device
+    from solaar.cli.show import run
+
+    dev = _keyboard_device()
+    args = mocker.Mock(json=True, device="all")
+    mocker.patch("solaar.cli.show._json_output", side_effect=RuntimeError("boom"))
+    close = mocker.patch.object(Device, "close")
+
+    with pytest.raises(RuntimeError):
+        run([dev], args, None, None)
+
+    close.assert_called()
