@@ -14,6 +14,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import json
+
 from logitech_receiver import common
 from logitech_receiver import exceptions
 from logitech_receiver import hidpp10
@@ -23,6 +25,8 @@ from logitech_receiver import hidpp20_constants
 from logitech_receiver import receiver
 from logitech_receiver import settings_templates
 from logitech_receiver.common import LOGITECH_VENDOR_ID
+from logitech_receiver.common import BatteryLevelApproximation
+from logitech_receiver.common import BatteryStatus
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import strhex
 from logitech_receiver.device import CenturionReceiver
@@ -144,6 +148,95 @@ def _battery_line(dev):
         print(f"     Battery: {text}, {status}{nextText}.")
     else:
         print("     Battery status unavailable.")
+
+
+def _battery_json(battery):
+    """Serialize a Battery as a JSON-friendly dict, or None if unavailable."""
+    if battery is None:
+        return None
+    level = battery.level
+    if isinstance(level, BatteryLevelApproximation):
+        # A qualitative level (e.g. "good"), not an actual percentage
+        level_kind = "reported"
+    elif isinstance(level, int):
+        level_kind = "level"
+    else:
+        level_kind = None
+    status = battery.status
+    return {
+        "level": int(level) if level is not None else None,
+        "level_kind": level_kind,
+        "next_level": int(battery.next_level) if battery.next_level is not None else None,
+        "status": status.name.lower().replace("_", " ") if isinstance(status, BatteryStatus) else None,
+        "voltage": battery.voltage,
+    }
+
+
+def _receiver_json(receiver):
+    """Serialize the receiver a device is paired to, or None for standalone devices."""
+    if receiver is None:
+        return None
+    return {
+        "name": receiver.name,
+        "serial": receiver.serial,
+        "path": receiver.path,
+    }
+
+
+def _device_json(dev):
+    """Serialize a device as a JSON-friendly dict, or None if the device is gone."""
+    try:
+        online = dev.ping()
+    except exceptions.NoSuchDevice:
+        return None
+    battery = None
+    if online:
+        try:
+            battery = dev.battery()
+        except Exception:
+            battery = None
+    protocol = float(dev.protocol) if dev.protocol else None
+    receiver = getattr(dev, "receiver", None)
+    return {
+        "name": dev.name,
+        "number": dev.number,
+        "receiver": _receiver_json(receiver),
+        "serial": dev.serial,
+        "unitId": dev.unitId,
+        "modelId": dev.modelId,
+        "codename": dev.codename,
+        "kind": str(dev.kind) if dev.kind is not None else None,
+        "protocol": protocol,
+        "online": bool(online),
+        "battery": _battery_json(battery),
+    }
+
+
+def _json_output(devices, device_name, find_receiver, find_device):
+    result = {"solaar_version": __version__, "devices": []}
+
+    def add(device):
+        if device is not None:
+            result["devices"].append(device)
+
+    if device_name == "all":
+        for d in devices:
+            if isinstance(d, (receiver.Receiver, CenturionReceiver)):
+                for dev in d:
+                    add(_device_json(dev))
+            else:
+                add(_device_json(d))
+    else:
+        dev = find_receiver(devices, device_name)
+        if dev and not dev.isDevice:
+            for child in dev:
+                add(_device_json(child))
+        else:
+            dev = next(find_device(devices, device_name), None)
+            if not dev:
+                raise Exception(f"no device found matching '{device_name}'")
+            add(_device_json(dev))
+    print(json.dumps(result, indent=2))
 
 
 def _print_device(dev, num=None):
@@ -463,6 +556,12 @@ def _print_device(dev, num=None):
 def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
+
+    if args.json:
+        _json_output(devices, args.device.lower(), find_receiver, find_device)
+        for d in Device.instances:
+            d.close()
+        return
 
     print(f"{NAME.lower()} version {__version__}")
     print("")
