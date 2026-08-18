@@ -139,6 +139,43 @@ g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
 thumb_wheel_displacement = 0
+# Spurious Noop suppression on KeyIsDown button release:
+#   When a button used as a KeyIsDown modifier is released, the firmware sends a single-element
+#   MOUSE_GESTURE (Noop) that can incorrectly match MouseGesture rules.
+#   keys_used_while_held / suppress_noop_for_buttons / _suppress_current_noop track and swallow it.
+keys_used_while_held = set()   # button IDs that had a KeyIsDown action fire while held
+suppress_noop_for_buttons = set()  # button IDs whose next single-element MOUSE_GESTURE should be suppressed
+_suppress_current_noop = False  # reset each notification in evaluate_rules, checked in MouseGesture.evaluate
+
+# Per-evaluation focus/pointer cache.
+#
+# Process and MouseProcess conditions call gnome_dbus_focus_prog() / x11_focus_prog() (and pointer
+# equivalents) on every evaluate(). When multiple Process rules exist, that means multiple DBus or
+# X11 round-trips per notification — typically 3+ on a normal config. At ~2 ms each those calls
+# dominate the cost of evaluate_rules and cause the GLib idle queue to back up under fast scroll.
+#
+# Fix: _UNSET is a sentinel that evaluate_rules writes to both caches at the start of each call.
+# The first Process/MouseProcess condition that fires does the IPC and caches the result; every
+# subsequent condition in the same evaluation reads the cache and skips the IPC entirely.
+_UNSET = object()
+_focus_prog_cache = _UNSET
+_pointer_prog_cache = _UNSET
+
+# HIRES_WHEEL idle-callback coalescing.
+#
+# process_notification is called from the device thread for every firmware notification.
+# For each HIRES_WHEEL event it schedules GLib.idle_add(evaluate_rules, ...) — one callback per
+# event. When the MX Master free-spins, the device generates events faster than the GLib main loop
+# can drain them (evaluate_rules is slow because of the IPC above). The backlog causes scrolling
+# to continue for 1-2 s after the wheel physically stops, proportional to spin duration.
+#
+# Fix: only one evaluate_rules callback is ever in flight for HIRES_WHEEL at a time.
+# _hires_wheel_ref always holds the latest notification; if a flush is already pending, new events
+# just update the ref and return. The single queued _flush_hires_wheel drains the latest delta.
+# When the wheel stops the firmware stops sending — no more events update the ref, the pending
+# flush fires once, and scrolling stops immediately.
+_hires_wheel_pending = False
+_hires_wheel_ref = None
 
 _dbus_interface = None
 
@@ -570,6 +607,9 @@ class And(Condition):
 
 
 def x11_focus_prog():
+    global _focus_prog_cache
+    if _focus_prog_cache is not _UNSET:  # return cached result for this evaluate_rules call
+        return _focus_prog_cache
     if not x11_setup():
         return None
     pid = wm_class = None
@@ -584,10 +624,14 @@ def x11_focus_prog():
         name = psutil.Process(pid.value[0]).name() if pid else ""
     except Exception:
         name = ""
-    return (wm_class[0], wm_class[1], name) if wm_class else (name,)
+    _focus_prog_cache = (wm_class[0], wm_class[1], name) if wm_class else (name,)
+    return _focus_prog_cache
 
 
 def x11_pointer_prog():
+    global _pointer_prog_cache
+    if _pointer_prog_cache is not _UNSET:  # return cached result for this evaluate_rules call
+        return _pointer_prog_cache
     if not x11_setup():
         return None
     pid = wm_class = None
@@ -598,21 +642,30 @@ def x11_pointer_prog():
         if wm_class:
             break
     name = psutil.Process(pid.value[0]).name() if pid else ""
-    return (wm_class[0], wm_class[1], name) if wm_class else (name,)
+    _pointer_prog_cache = (wm_class[0], wm_class[1], name) if wm_class else (name,)
+    return _pointer_prog_cache
 
 
 def gnome_dbus_focus_prog():
+    global _focus_prog_cache
+    if _focus_prog_cache is not _UNSET:  # return cached result for this evaluate_rules call
+        return _focus_prog_cache
     if not gnome_dbus_interface_setup():
         return None
     wm_class = _dbus_interface.ActiveWindow()
-    return (wm_class,) if wm_class else None
+    _focus_prog_cache = (wm_class,) if wm_class else None
+    return _focus_prog_cache
 
 
 def gnome_dbus_pointer_prog():
+    global _pointer_prog_cache
+    if _pointer_prog_cache is not _UNSET:  # return cached result for this evaluate_rules call
+        return _pointer_prog_cache
     if not gnome_dbus_interface_setup():
         return None
     wm_class = _dbus_interface.PointerOverWindow()
-    return (wm_class,) if wm_class else None
+    _pointer_prog_cache = (wm_class,) if wm_class else None
+    return _pointer_prog_cache
 
 
 class Process(Condition):
@@ -878,7 +931,19 @@ class KeyIsDown(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        return key_is_down(self.key)
+        result = key_is_down(self.key)
+        if result:
+            # Mark the button as "used while held" so its release Noop gesture can be suppressed.
+            # Skip button-down notifications (REPROG_CONTROLS_V4 etc.) — only record when a non-button
+            # action (e.g. scroll, gesture) co-fires with the held button.
+            if feature not in (
+                SupportedFeature.REPROG_CONTROLS_V4,
+                SupportedFeature.GKEY,
+                SupportedFeature.MKEYS,
+                SupportedFeature.MR,
+            ):
+                keys_used_while_held.add(int(self.key))
+        return result
 
     def data(self):
         return {"KeyIsDown": str(self.key)}
@@ -996,6 +1061,8 @@ class MouseGesture(Condition):
         if feature == SupportedFeature.MOUSE_GESTURE:
             d = notification.data
             data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and _suppress_current_noop:  # swallow Noop from a button that had a KeyIsDown action
+                return False
             data_offset = 1
             movement_offset = 0
             if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
@@ -1436,9 +1503,33 @@ def key_is_down(key: NamedInt) -> bool:
 
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
+    global _suppress_current_noop, _focus_prog_cache, _pointer_prog_cache
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s %s", feature, notification)
+    _suppress_current_noop = False
+    _focus_prog_cache = _UNSET    # invalidate per-evaluation cache (see globals block above)
+    _pointer_prog_cache = _UNSET
+    # If this is a single-element Noop gesture from a button that was used as a KeyIsDown modifier,
+    # set the flag so MouseGesture.evaluate ignores it.
+    if feature == SupportedFeature.MOUSE_GESTURE:
+        d = notification.data
+        try:
+            data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and int(data[0]) in suppress_noop_for_buttons:
+                _suppress_current_noop = True
+                suppress_noop_for_buttons.discard(int(data[0]))
+        except struct.error:
+            pass
     rules.evaluate(feature, notification, device, True)
+
+
+def _flush_hires_wheel(device):
+    # GLib idle callback: drains the single coalesced HIRES_WHEEL event.
+    # Clears the pending flag first so that any new notification arriving while evaluate_rules
+    # runs will queue a fresh flush rather than being silently dropped.
+    global _hires_wheel_pending
+    _hires_wheel_pending = False
+    evaluate_rules(SupportedFeature.HIRES_WHEEL, _hires_wheel_ref, device)
 
 
 def process_notification(device, notification: HIDPPNotification, feature) -> None:
@@ -1452,9 +1543,13 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
             for key in new_keys_down:
                 if key and key not in keys_down:
                     key_down = key
+                    suppress_noop_for_buttons.discard(int(key))  # re-press clears any pending noop suppression
             for key in keys_down:
                 if key and key not in new_keys_down:
                     key_up = key
+                    if int(key) in keys_used_while_held:  # was used as a KeyIsDown modifier; its release will Noop
+                        keys_used_while_held.discard(int(key))
+                        suppress_noop_for_buttons.add(int(key))
             keys_down = new_keys_down
         # and also G keys down
         elif feature == SupportedFeature.GKEY:
@@ -1487,6 +1582,17 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
             if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
                 thumb_wheel_displacement = 0
             thumb_wheel_displacement += signed(notification.data[0:2])
+        # Coalesce rapid HIRES_WHEEL notifications into a single evaluate_rules call.
+        # Always update _hires_wheel_ref to the latest notification so the queued flush uses
+        # the most recent delta; if a flush is already pending just return — the existing
+        # callback will fire and consume _hires_wheel_ref before a new one is queued.
+        elif feature == SupportedFeature.HIRES_WHEEL:
+            global _hires_wheel_pending, _hires_wheel_ref
+            _hires_wheel_ref = notification
+            if not _hires_wheel_pending:
+                _hires_wheel_pending = True
+                GLib.idle_add(_flush_hires_wheel, device)
+            return
 
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
