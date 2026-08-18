@@ -194,6 +194,12 @@ def _print_device(dev, num=None):
         for fw in dev.firmware:
             print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
 
+    layout_code = dev.keyboard_layout
+    if layout_code is not None:
+        layout_name = hidpp20_constants.KEYBOARD_LAYOUT_2_NAMES.get(layout_code)
+        layout_text = layout_name if layout_name else f"unknown code 0x{layout_code:02X}"
+        print(f"     Keyboard layout: {layout_text}")
+
     if dev.power_switch_location:
         print(f"     The power switch is located on the {dev.power_switch_location}.")
 

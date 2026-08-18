@@ -2144,9 +2144,9 @@ class Hidpp20:
     def get_keyboard_layout(self, device: Device):
         """Return the device's keyboard layout country code, or None.
 
-        Country code semantics match the HID HUT keyboard country codes that
-        Logitech's KEYBOARD_LAYOUT_2 (0x4540) feature reports in the first byte.
-        Used by the per-key painter to pick the matching regional layout.
+        Codes are Logitech-private (see hidpp20_constants.KEYBOARD_LAYOUT_2_NAMES),
+        NOT USB HID HUT country codes. Used by the per-key painter to pick the
+        matching regional layout.
         """
         result = device.feature_request(SupportedFeature.KEYBOARD_LAYOUT_2, 0x00)
         if result:

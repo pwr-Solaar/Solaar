@@ -174,17 +174,33 @@ MAIN_ISO: tuple[Cell, ...] = tuple(c for c in MAIN_ANSI if not (c.row == 2 and c
 #     actually addresses. Phantom zones (e.g. G515's 47, 97, 99-103, 254) drop.
 EXTRAS_ALLOWLIST: frozenset[int] = frozenset(
     {
+        132,  # Intl1 (0x8080 boards enumerate a canonical superset;
+        133,  # Intl2  absent keys stay dark and are harmless to paint)
+        134,  # Intl3
+        135,  # Intl4
+        136,  # Intl5
         153,  # Brightness
         155,  # Play/Pause
         156,  # Mute
         157,  # Next
         158,  # Previous
+        159,  # Stop (G810/G610 media block)
         180,  # G1
         181,  # G2
         182,  # G3
         183,  # G4
         184,  # G5
+        185,  # G6 (G910)
+        186,  # G7
+        187,  # G8
+        188,  # G9
         210,  # Logo
+        211,  # Nameplate (G910)
+        240,  # Backlight key (0x8080 indicator 0x01)
+        241,  # Game mode indicator
+        242,  # Caps lock indicator
+        243,  # Scroll lock indicator
+        244,  # Num lock indicator
     }
 )
 

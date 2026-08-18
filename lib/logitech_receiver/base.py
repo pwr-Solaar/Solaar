@@ -89,11 +89,14 @@ class HIDProtocol(typing.Protocol):
 
 SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
+_VERY_LONG_MESSAGE_SIZE = 64
 _MEDIUM_MESSAGE_SIZE = 15
-_MAX_READ_SIZE = 32
+_DJ_LONG_MESSAGE_SIZE = 32
+_MAX_READ_SIZE = 64
 
 HIDPP_SHORT_MESSAGE_ID = 0x10
 HIDPP_LONG_MESSAGE_ID = 0x11
+HIDPP_VERY_LONG_MESSAGE_ID = 0x12
 DJ_MESSAGE_ID = 0x20
 
 # Centurion transport (used by PRO X 2 LIGHTSPEED headset and similar)
@@ -446,11 +449,15 @@ def write(handle, devnumber, data, long_message=False):
     been physically removed from the machine, or the kernel driver has been
     unloaded. The handle will be closed automatically.
     """
-    # the data is padded to either 5 or 18 bytes
+    # the data is padded to 5, 18, or 62 bytes
     assert data is not None
     assert isinstance(data, bytes), (repr(data), type(data))
 
-    if long_message or len(data) > SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
+    if len(data) > _LONG_MESSAGE_SIZE - 2:
+        # payload too large for a long report — very-long (0x12) report,
+        # e.g. PER_KEY_LIGHTING (0x8080) SetKeyColors frames
+        wdata = struct.pack("!BB62s", HIDPP_VERY_LONG_MESSAGE_ID, devnumber, data)
+    elif long_message or len(data) > SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
         wdata = struct.pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
         wdata = struct.pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
@@ -542,8 +549,9 @@ def _is_relevant_message(data: bytes) -> bool:
     report_lengths = {
         HIDPP_SHORT_MESSAGE_ID: (SHORT_MESSAGE_SIZE,),
         HIDPP_LONG_MESSAGE_ID: (_LONG_MESSAGE_SIZE, _CENTURION_MSG_SIZE),
+        HIDPP_VERY_LONG_MESSAGE_ID: (_VERY_LONG_MESSAGE_SIZE,),
         DJ_MESSAGE_ID: (_MEDIUM_MESSAGE_SIZE,),
-        0x21: (_MAX_READ_SIZE,),
+        0x21: (_DJ_LONG_MESSAGE_SIZE,),
     }
 
     report_id = ord(data[:1])

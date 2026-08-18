@@ -87,7 +87,7 @@ Feature                                | ID       | Status             | Notes
 `KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | Unsupported        |
 `DUALPLATFORM`                         | `0x4530` | Supported          | `Dualplatform`, untested
 `MULTIPLATFORM`                        | `0x4531` | Supported          | `Multiplatform`
-`KEYBOARD_LAYOUT_2`                    | `0x4540` | Unsupported        | read only
+`KEYBOARD_LAYOUT_2`                    | `0x4540` | Supported          | read only; layout shown by `solaar show`, used by the per-key editor
 `CROWN`                                | `0x4600` | Supported          | `DivertCrown`, `CrownSmooth`
 `TOUCHPAD_FW_ITEMS`                    | `0x6010` | Unsupported        |
 `TOUCHPAD_SW_ITEMS`                    | `0x6011` | Unsupported        |
@@ -109,7 +109,7 @@ Feature                                | ID       | Status             | Notes
 `EXTENDED_ADJUSTABLE_REPORT_RATE`      | `0x8061` | Supported          | `report_rate_extended` (sub-millisecond polling up to 8000 Hz)
 `COLOR_LED_EFFECTS`                    | `0x8070` | Supported          | `LEDControl`, `LEDZoneSetting`
 `RGB_EFFECTS`                          | `0X8071` | Supported          | `RGBControl`, `RGBEffectSetting`
-`PER_KEY_LIGHTING`                     | `0x8080` | Unsupported        |
+`PER_KEY_LIGHTING`                     | `0x8080` | Supported          | `PerKeyLightingV1`
 `PER_KEY_LIGHTING_V2`                  | `0x8081` | Supported          | `PerKeyLighting`
 `MODE_STATUS`                          | `0x8090` | Unsupported        |
 `ONBOARD_PROFILES`                     | `0x8100` | Supported          |

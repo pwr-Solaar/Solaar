@@ -28,6 +28,8 @@ from collections.abc import Callable
 from ..layout import Layout
 from . import headset_g522
 from . import keyboard_ansi
+from . import keyboard_g512
+from . import keyboard_g810_family
 from . import keyboard_iso_azerty
 from . import keyboard_iso_qwerty
 from . import keyboard_iso_qwertz
@@ -73,28 +75,47 @@ def _name_contains(*needles: str) -> Callable[[dict], bool]:
 
 # --- Keyboard region routing ---
 # Country code → layout family. Codes from HID++ feature 0x4540 KeyboardLayout.
+# These are Logitech-private codes taken from the official application's layout
+# enum — NOT USB HID HUT country codes (an earlier version of this table assumed
+# HUT semantics and routed German boards to AZERTY). 0x38 = Brazilian ABNT2 is
+# hardware-confirmed on a G512 ABNT2. Codes absent here fall back to ANSI.
 _KEYBOARD_FAMILY_BY_COUNTRY: dict[int, str] = {
-    1: "ansi",
-    # ISO QWERTY (UK + ES/IT/PT/BE/Nordic — same shape, different keycap legends)
-    2: "iso_qwerty",
-    5: "iso_qwerty",
-    8: "iso_qwerty",
-    0x0B: "iso_qwerty",
-    0x0D: "iso_qwerty",
-    0x0E: "iso_qwerty",
-    0x0F: "iso_qwerty",
-    0x16: "iso_qwerty",
-    0x1D: "iso_qwerty",
-    0x21: "iso_qwerty",
-    0x24: "iso_qwerty",
-    # ISO QWERTZ (DE/Swiss)
-    3: "iso_qwertz",
-    7: "iso_qwertz",
-    # ISO AZERTY (FR)
-    4: "iso_azerty",
+    0x01: "ansi",  # US
+    # ANSI-framed regional boards (local legends on a US frame)
+    0x09: "ansi",  # Korean
+    0x0B: "ansi",  # Chinese
+    0x3E: "ansi",  # Korean
+    # ISO QWERTY (UK/ES/IT/PT/BE... same shape, different keycap legends)
+    0x02: "iso_qwerty",  # International
+    0x03: "iso_qwerty",  # UK
+    0x07: "iso_qwerty",  # Russian
+    0x08: "iso_qwerty",  # Nordic
+    0x0E: "iso_qwerty",  # Turkish
+    0x0F: "iso_qwerty",  # Spanish
+    0x10: "iso_qwerty",  # Arabic
+    0x16: "iso_qwerty",  # Nordic
+    0x1A: "iso_qwerty",  # Italian
+    0x1D: "iso_qwerty",  # Nordic
+    0x1F: "iso_qwerty",  # Portuguese
+    0x21: "iso_qwerty",  # Nordic
+    0x24: "iso_qwerty",  # Turkish
+    0x28: "iso_qwerty",  # Bulgarian
+    0x37: "iso_qwerty",  # International 2
+    0x3A: "iso_qwerty",  # Arabic
+    # ABNT2 is ISO-framed with an extra slash key; ISO QWERTY is the closest
+    # canvas we have (dedicated ABNT2 layout is a possible follow-up).
+    0x38: "iso_qwerty",  # Brazilian (ABNT2)
+    # ISO QWERTZ
+    0x04: "iso_qwertz",  # German
+    0x0D: "iso_qwertz",  # Swiss
+    0x14: "iso_qwertz",  # Czech
+    0x19: "iso_qwertz",  # Hungarian
+    0x41: "iso_qwertz",  # Czech
+    # ISO AZERTY
+    0x05: "iso_azerty",  # French
+    0x11: "iso_azerty",  # Belgian
     # JIS
-    9: "jis",
-    0x3E: "jis",
+    0x0A: "jis",  # Japanese
 }
 
 _FAMILY_LAYOUTS = {
@@ -159,10 +180,43 @@ def _pro_x_rapid_matcher(family: str) -> Callable[[dict], bool]:
 for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
     register_layout(0x8081, _pro_x_rapid_matcher(_family), keyboard_pro_x_rapid.with_media_top_row(_tkl))
 
-# PER_KEY_LIGHTING_V2 = 0x8081
+
+def _named_keyboard_matcher(needles: tuple[str, ...], family: str, full_size: bool) -> Callable[[dict], bool]:
+    """Model-specific keyboard matcher: name/codename substring + frame size
+    + regional family. Extras wiring is per-model on the 0x8080 family (G512
+    two indicators, G810 media cluster, G910 G-keys/nameplate), so each known
+    model registers its own variant ahead of the generic family matchers."""
+    named = _name_contains(*needles)
+
+    def match(hint: dict) -> bool:
+        if hint.get("kind") != "keyboard":
+            return False
+        if not named(hint):
+            return False
+        if _has_numpad(hint) != full_size:
+            return False
+        return _keyboard_family(hint) == family
+
+    return match
+
+
+# 0x8080 model variants — regional base + the model's special-key strip.
+# Registered ahead of the generic family matchers so they win for these
+# models. "PRO" alone is safe here: within the 0x8080 family the wired
+# G Pro is the only TKL board.
 for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
-    register_layout(0x8081, _keyboard_matcher(_family, full_size=True), _full)
-    register_layout(0x8081, _keyboard_matcher(_family, full_size=False), _tkl)
+    register_layout(0x8080, _named_keyboard_matcher(("G512", "G513"), _family, True), keyboard_g512.with_indicators(_full))
+    register_layout(0x8080, _named_keyboard_matcher(("G810", "G610"), _family, True), keyboard_g810_family.g810_layout(_full))
+    register_layout(0x8080, _named_keyboard_matcher(("G910",), _family, True), keyboard_g810_family.g910_layout(_full))
+    register_layout(0x8080, _named_keyboard_matcher(("PRO",), _family, False), keyboard_g810_family.gpro_layout(_tkl))
+
+# PER_KEY_LIGHTING = 0x8080 (G810 family) and PER_KEY_LIGHTING_V2 = 0x8081
+# share Solaar's per-key zone numbering (0x8080 wire addressing is translated
+# in settings_templates), so both use the same regional layouts.
+for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
+    for _feature in (0x8080, 0x8081):
+        register_layout(_feature, _keyboard_matcher(_family, full_size=True), _full)
+        register_layout(_feature, _keyboard_matcher(_family, full_size=False), _tkl)
 
 register_layout(0x8081, _name_contains("G502 X"), mouse_g502x.LAYOUT)
 # HEADSET_RGB_HOSTMODE = 0x0620

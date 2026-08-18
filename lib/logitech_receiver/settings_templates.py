@@ -4176,6 +4176,233 @@ class PerKeyLighting(settings.Settings):
             return cls(choices_map) if choices_map else None
 
 
+# --- PER_KEY_LIGHTING (0x8080, V1) — G810/G610/G512/G910/G Pro wired family ---
+#
+# Keys are addressed as (keyType u16 BE, keyId u8). keyType is a single-bit
+# value from fn0 GetInfo's typeFlags bitmask; on the keyboard keyType the
+# keyIds are USB HID Keyboard/Keypad usages. SetKeyColors (fn3) rides the
+# 0x12 very-long report; FlushLEDS (fn5) commits. No claim/init sequence is
+# needed on this family — per-key writes simply override firmware effects.
+#
+# Solaar's canonical per-key zone numbering (special_keys.KEYCODES, shared
+# with 0x8081) happens to be HID usage - 3 for the standard block and
+# HID usage - 120 for the modifiers, so the editor layouts and persisted
+# maps are feature-agnostic; translation to the wire happens here.
+
+_PERKEY_V1_KEY_TYPES = (0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0040)
+_PERKEY_V1_KT_KEYBOARD = 0x0001
+_PERKEY_V1_KT_CONSUMER = 0x0002
+_PERKEY_V1_KT_GKEY = 0x0004
+_PERKEY_V1_KT_LOGO = 0x0010
+_PERKEY_V1_KT_INDICATOR = 0x0040
+# consumer usage → KEYCODES zone (Play/Pause, Mute, Next, Previous, Stop)
+_PERKEY_V1_CONSUMER_TO_ZONE = {0xCD: 155, 0xE2: 156, 0xB5: 157, 0xB6: 158, 0xB7: 159}
+_PERKEY_V1_LOGO_TO_ZONE = {0x01: 210, 0x02: 211}  # 0x02 = G910 nameplate
+# 0x01 lighting key, 0x02 game mode, 0x03 caps, 0x04 scroll, 0x05 num
+_PERKEY_V1_INDICATOR_TO_ZONE = {0x01: 240, 0x02: 241, 0x03: 242, 0x04: 243, 0x05: 244}
+_PERKEY_V1_ENTRIES_PER_FRAME = 14
+
+
+def _perkey_v1_key_to_zone(key_type: int, key_id: int) -> int:
+    """Map a 0x8080 (keyType, keyId) address to Solaar's per-key zone id.
+    Unknown pairs get a synthesized id >= 256 so they never collide with
+    real KEYCODES zones and stay reversible."""
+    if key_type == _PERKEY_V1_KT_KEYBOARD:
+        if 0xE0 <= key_id <= 0xE7:  # modifiers
+            return key_id - 120
+        if 0x04 <= key_id <= 0x67:  # standard block
+            return key_id - 3
+        if 0x87 <= key_id <= 0x8B:  # international keys
+            return key_id - 3
+    elif key_type == _PERKEY_V1_KT_CONSUMER:
+        if key_id in _PERKEY_V1_CONSUMER_TO_ZONE:
+            return _PERKEY_V1_CONSUMER_TO_ZONE[key_id]
+    elif key_type == _PERKEY_V1_KT_GKEY:
+        if 0x01 <= key_id <= 0x09:  # G1..G9
+            return 179 + key_id
+    elif key_type == _PERKEY_V1_KT_LOGO:
+        if key_id in _PERKEY_V1_LOGO_TO_ZONE:
+            return _PERKEY_V1_LOGO_TO_ZONE[key_id]
+    elif key_type == _PERKEY_V1_KT_INDICATOR:
+        if key_id in _PERKEY_V1_INDICATOR_TO_ZONE:
+            return _PERKEY_V1_INDICATOR_TO_ZONE[key_id]
+    return (key_type << 8) | key_id
+
+
+def _perkey_v1_zone_to_key(zone: int) -> tuple[int, int]:
+    """Inverse of _perkey_v1_key_to_zone."""
+    if zone >= 256:
+        return zone >> 8, zone & 0xFF
+    if 104 <= zone <= 111:
+        return _PERKEY_V1_KT_KEYBOARD, zone + 120
+    if 240 <= zone <= 244:
+        return _PERKEY_V1_KT_INDICATOR, zone - 239
+    if zone in (210, 211):
+        return _PERKEY_V1_KT_LOGO, zone - 209
+    if 180 <= zone <= 188:
+        return _PERKEY_V1_KT_GKEY, zone - 179
+    for usage, z in _PERKEY_V1_CONSUMER_TO_ZONE.items():
+        if z == zone:
+            return _PERKEY_V1_KT_CONSUMER, usage
+    return _PERKEY_V1_KT_KEYBOARD, zone + 3
+
+
+class PerKeyLightingV1(PerKeyLighting):
+    name = "per-key-lighting"
+    label = _("Per-key Lighting")
+    description = _("Control per-key lighting.")
+    feature = _F.PER_KEY_LIGHTING
+    keys_universe = special_keys.KEYCODES
+    editor_class = "solaar.ui.perkey.control:PerKeyControl"
+    # fn2 GetKeyColors exists, but the canonical value is still the in-memory
+    # map (mirrors PerKeyLighting semantics; see that class's read()).
+    live_readable = False
+
+    def apply(self):
+        # Connect-time apply is gated on LED Control (0x8070) when present —
+        # off means "leave the lighting alone", another app may own it.
+        # Interactive writes are never gated.
+        for s in self._device.settings:
+            if s.name == LEDControl.name:
+                if not s._value:
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s: %s off — not applying on %s", self.name, s.name, self._device)
+                    return
+                break
+        super().apply()
+
+    def _send_v1_entries(self, key_type, entries):
+        """Send one keyType's [(keyId, color), ...] list in fn3 frames of up
+        to 14 entries. Payload is padded to 60 bytes so the request always
+        rides the 0x12 very-long report — the count field bounds parsing, so
+        the padding is inert. Returns True if every frame was accepted."""
+        ok = True
+        for off in range(0, len(entries), _PERKEY_V1_ENTRIES_PER_FRAME):
+            chunk = entries[off : off + _PERKEY_V1_ENTRIES_PER_FRAME]
+            data = struct.pack("!HH", key_type, len(chunk))
+            for key_id, color in chunk:
+                data += struct.pack("!BBBB", key_id, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
+            data += b"\x00" * (60 - len(data))
+            if not self._send_with_retry(0x30, data):
+                ok = False
+        return ok
+
+    def _send_v1_frame(self, colors_by_zone):
+        """Translate {zone: color} to per-keyType fn3 batches and commit with
+        fn5 FlushLEDS. Nothing appears on the keys until the flush."""
+        by_type = {}
+        for zone, color in colors_by_zone.items():
+            wire = rgb_power.translate_for_device(self._device, int(color))
+            if wire is None:
+                return True  # SLEEPING — wake re-pushes
+            key_type, key_id = _perkey_v1_zone_to_key(int(zone))
+            by_type.setdefault(key_type, []).append((key_id, int(wire)))
+        ok = True
+        for key_type, entries in by_type.items():
+            if not self._send_v1_entries(key_type, entries):
+                ok = False
+        if ok:
+            if not self._send_with_retry(0x50, b""):
+                logger.warning("%s: per-key FlushLEDS failed; frame not committed", self._device)
+                ok = False
+        else:
+            logger.warning(
+                "%s: per-key frame had failed sub-packets; suppressing FlushLEDS to avoid partial commit",
+                self._device,
+            )
+        return ok
+
+    def write(self, map, save=True):
+        if self._device.online:
+            self.update(map, save)
+            no_change = special_keys.COLORSPLUS["No change"]
+            painted = {k: v for k, v in map.items() if v != no_change and isinstance(v, int) and int(v) >= 0}
+            if painted:
+                self._send_v1_frame(painted)
+        return map
+
+    def write_key_value(self, key, value, save=True):
+        no_change = special_keys.COLORSPLUS["No change"]
+        zone_id = int(key)
+        if value != no_change:
+            self.update_key_value(zone_id, value, save)
+            if self._device.online:
+                self._send_v1_frame({zone_id: int(value)})
+            return value
+        # Un-set: store the sentinel only. There is no zone-base concept on
+        # this family — the firmware keeps whatever was last flushed.
+        self.update_key_value(zone_id, no_change, save)
+        return no_change
+
+    class rw_class(settings.FeatureRWMap):
+        pass
+
+    class validator_class(settings_validator.MapRangeValidator):
+        _COLOR_RANGE = settings_validator.Range(min=0, max=0xFFFFFF, byte_count=3, value_type=common.ColorInt)
+
+        @classmethod
+        def _enumerate_key_ids(cls, device, feature, key_type, key_count):
+            """fn2 GetKeyColors pagination: 14 entries per response after a
+            4-byte header; keyId 0x00 entries are padding. Entry count is
+            derived from the actual payload length. With a known keyCount
+            reads exactly ceil(keyCount/14) pages (the official app's walk);
+            without one, probes until a page yields nothing."""
+            key_ids = []
+            if key_count:
+                pages = (key_count + _PERKEY_V1_ENTRIES_PER_FRAME - 1) // _PERKEY_V1_ENTRIES_PER_FRAME
+            else:
+                pages = 16  # probe mode guard
+            start_index = 0
+            for _page in range(pages):
+                try:
+                    reply = device.feature_request(feature, 0x20, struct.pack("!HHB", key_type, start_index, 0x00))
+                except exceptions.FeatureCallError:
+                    break
+                if not reply or len(reply) <= 4:
+                    break
+                found = [reply[4 + 4 * e] for e in range((len(reply) - 4) // 4) if reply[4 + 4 * e] != 0]
+                key_ids += found
+                if not found:
+                    break
+                start_index += _PERKEY_V1_ENTRIES_PER_FRAME
+            return key_ids
+
+        @classmethod
+        def build(cls, setting_class, device):
+            try:
+                info = device.feature_request(setting_class.feature, 0x00)
+            except exceptions.FeatureCallError:
+                return None
+            if not info:
+                return None
+            # typeFlags (bytes 0-1) is the only fn0 field trusted across
+            # feature versions — V2 firmware rearranges the count fields.
+            type_flags = struct.unpack("!H", info[0:2])[0]
+            choices_map = {}
+            for key_type in _PERKEY_V1_KEY_TYPES:
+                if not type_flags & key_type:
+                    continue
+                key_count = None
+                try:
+                    reply = device.feature_request(setting_class.feature, 0x10, struct.pack("!H", key_type))
+                    if reply:
+                        # bytes 0-1 are this keyType's keyCount, NOT an echo
+                        key_count = struct.unpack("!H", reply[0:2])[0]
+                except exceptions.FeatureCallError:
+                    key_count = None
+                if key_count == 0:
+                    continue  # valid empty success — never probe fn2 for it
+                for key_id in cls._enumerate_key_ids(device, setting_class.feature, key_type, key_count):
+                    zone = _perkey_v1_key_to_zone(key_type, key_id)
+                    key = (
+                        setting_class.keys_universe[zone]
+                        if zone in setting_class.keys_universe
+                        else common.NamedInt(zone, f"KEY {str(zone)}")
+                    )
+                    choices_map[key] = cls._COLOR_RANGE
+            return cls(choices_map) if choices_map else None
+
+
 # Allow changes to force sensing buttons
 class ForceSensing(settings_new.Settings):
     name = "force-sensing"
@@ -4469,6 +4696,7 @@ SETTINGS: list[settings.Setting] = [
     RGBControl,
     RGBEffectSetting,
     PerKeyLighting,
+    PerKeyLightingV1,
     BrightnessControl,
     RGBIdleEffect,
     RGBIdleTimeout,

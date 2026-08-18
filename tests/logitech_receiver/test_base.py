@@ -127,6 +127,32 @@ def test_make_notification(report_id, sub_id, address, valid_notification):
         assert result is None
 
 
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        (bytes([0x12]) + b"\x00" * 63, True),  # very-long, 64 bytes
+        (bytes([0x12]) + b"\x00" * 31, False),  # very-long, truncated
+        (bytes([0x11]) + b"\x00" * 19, True),  # long, 20 bytes
+        (bytes([0x21]) + b"\x00" * 31, True),  # DJ long, 32 bytes
+        (bytes([0x21]) + b"\x00" * 63, False),  # DJ long, wrong size
+    ],
+)
+def test_is_relevant_message_sizes(data, expected):
+    assert base._is_relevant_message(data) == expected
+
+
+def test_write_picks_report_type_by_payload_size(mocker):
+    sent = []
+    mocker.patch.object(base.hidapi, "write", side_effect=lambda handle, wdata: sent.append(wdata))
+
+    base.write(0x11, 0x01, b"\x08\x30" + b"\xab" * 3)  # 5 bytes -> short
+    base.write(0x11, 0x01, b"\x08\x30" + b"\xab" * 10)  # 12 bytes -> long
+    base.write(0x11, 0x01, b"\x08\x30" + b"\xab" * 58)  # 60 bytes -> very long
+
+    assert [w[0] for w in sent] == [0x10, 0x11, 0x12]
+    assert [len(w) for w in sent] == [7, 20, 64]
+
+
 def test_get_next_sw_id():
     assert base._get_next_sw_id() == base.SOLAAR_SOFTWARE_ID
     assert base._get_next_sw_id() == base.SOLAAR_SOFTWARE_ID

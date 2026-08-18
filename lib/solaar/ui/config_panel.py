@@ -846,6 +846,25 @@ def _sw_control_blocked(device):
     return value not in (True, 3)
 
 
+def _led_control_blocked(device):
+    """True when the 0x8070 LED Control is off (Device/firmware mode) — the
+    per-key buffer it pairs with has no effect. Reads setting._value first,
+    then the persister; accepts the current bool or a legacy int 0/1."""
+    persister = getattr(device, "persister", None)
+    if persister is None:
+        return False
+    value = None
+    for s in getattr(device, "settings", []) or []:
+        if s.name == "led_control":
+            value = s._value
+            break
+    if value is None:
+        value = persister.get("led_control")
+    if value is None:
+        return False
+    return value not in (True, 1)
+
+
 def _headset_led_blocked(device):
     """True when the headset's LED Control is off (Device/firmware mode).
     Reads setting._value first, then the persister; accepts the current bool
@@ -920,6 +939,13 @@ def _gate_blocks(device, name):
     if name in _SW_CONTROL_DEPENDENT_NAMES or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES):
         return _sw_control_blocked(device)
     if name == "per-key-lighting":
+        # Generations pair 0x8070 zones with 0x8080 per-key and 0x8071 zones
+        # with 0x8081 per-key — gate V1 on led_control, V2 on rgb_control.
+        for s in getattr(device, "settings", []) or []:
+            if s.name == name:
+                if getattr(s, "feature", None) == hidpp20.SupportedFeature.PER_KEY_LIGHTING:
+                    return _led_control_blocked(device)
+                break
         return _sw_control_blocked(device) or _zone_effect_blocks_perkey(device)
     if name in _HEADSET_LED_DEPENDENT_NAMES:
         if _headset_led_blocked(device):

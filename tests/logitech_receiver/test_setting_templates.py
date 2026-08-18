@@ -799,6 +799,39 @@ key_tests = [
         fake_hidpp.Response("7100FF00", 0x0410, "7100FF00"),  # write one value
         fake_hidpp.Response("00", 0x0470, "00"),  # finish
     ),
+    Setup(  # PER_KEY_LIGHTING (0x8080, V1): keyboard + indicator keyTypes
+        FeatureTest(
+            settings_templates.PerKeyLightingV1,
+            {1: -1, 2: -1, 38: -1, 104: -1, 133: -1, 241: -1, 242: -1},
+            {2: 0xFF0000},
+            2,
+        ),
+        {
+            common.NamedInt(1, "A"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(2, "B"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(38, "ESC"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(104, "LEFT CTRL"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(133, "INTL 2"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(241, "GAME MODE"): _PERKEY_COLOR_RANGE,
+            common.NamedInt(242, "CAPS LOCK INDICATOR"): _PERKEY_COLOR_RANGE,
+        },
+        # fn0 GetInfo: typeFlags 0x0041 (keyboard | indicators); count fields untrusted
+        fake_hidpp.Response("00410038000200000000000000000000", 0x0400),
+        # fn1 GetKeyTypeInfo keyboard: keyCount=5 at bytes 0-1 (not an echo)
+        fake_hidpp.Response("00050000000000000000000000000000", 0x0410, "0001"),
+        # fn2 GetKeyColors keyboard page 0: 4-byte header, then [keyId,R,G,B] entries —
+        # A, B, Esc, LeftCtrl, Intl2 (the ABNT2 slash lights on 0x88)
+        fake_hidpp.Response("00010000040000000500000029000000E000000088000000", 0x0420, "0001000000"),
+        # fn1 GetKeyTypeInfo indicators: keyCount=2
+        fake_hidpp.Response("00020000000000000000000000000000", 0x0410, "0040"),
+        # fn2 GetKeyColors indicators page 0: game mode (0x02), caps lock (0x03)
+        fake_hidpp.Response("0001000002000000" + "03000000", 0x0420, "0040000000"),
+        # fn3 SetKeyColors: keyType 0x0001, count 1, [0x05 (B), FF0000]; padded to 60
+        # bytes so the request rides the 0x12 very-long report
+        fake_hidpp.Response("00", 0x0430, "0001000105FF0000" + "00" * 52),
+        # fn5 FlushLEDS: empty payload commit
+        fake_hidpp.Response("00", 0x0450, ""),
+    ),
     Setup(
         FeatureTest(settings_templates.ExtendedAdjustableDpi, {0: 256}, {0: 512}, 2, offset=0x9),
         {common.NamedInt(0, "X"): common.NamedInts.list([256, 512])},
@@ -876,6 +909,35 @@ def test_key_template(test, mocker):
         write_value = setting.write(value)
 
     fake_hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
+
+
+@pytest.mark.parametrize(
+    "key_type, key_id, zone",
+    [
+        (0x0001, 0x04, 1),  # A — standard block is HID usage - 3
+        (0x0001, 0x28, 37),  # Enter
+        (0x0001, 0x53, 80),  # NumLock
+        (0x0001, 0x63, 96),  # Keypad . (ABNT2 numpad comma lives here too)
+        (0x0001, 0x87, 132),  # Intl1
+        (0x0001, 0x88, 133),  # Intl2 — what the ABNT2 slash key lights on
+        (0x0001, 0xE0, 104),  # LeftCtrl — modifiers are HID usage - 120
+        (0x0001, 0xE7, 111),  # RightGUI
+        (0x0002, 0xCD, 155),  # Play/Pause (consumer)
+        (0x0002, 0xB5, 157),  # Next (consumer)
+        (0x0002, 0xB7, 159),  # Stop (consumer, G810/G610 media block)
+        (0x0004, 0x01, 180),  # G1
+        (0x0004, 0x09, 188),  # G9 (G910)
+        (0x0010, 0x01, 210),  # Logo
+        (0x0010, 0x02, 211),  # Nameplate (G910)
+        (0x0040, 0x02, 241),  # Game mode indicator
+        (0x0040, 0x05, 244),  # Num lock indicator
+        (0x0002, 0x30, 0x0230),  # unknown consumer usage -> synthesized id
+        (0x0008, 0x01, 0x0801),  # generic button -> synthesized id
+    ],
+)
+def test_perkey_v1_zone_translation_round_trip(key_type, key_id, zone):
+    assert settings_templates._perkey_v1_key_to_zone(key_type, key_id) == zone
+    assert settings_templates._perkey_v1_zone_to_key(zone) == (key_type, key_id)
 
 
 @pytest.mark.parametrize(

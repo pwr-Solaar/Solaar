@@ -365,6 +365,44 @@ class ParamId(IntEnum):
     SCALE_FACTOR = 4  # 2-byte integer, with 256 as normal scale
 
 
+# Keyboard layout country codes reported by KEYBOARD_LAYOUT_2 (0x4540) fn0
+# byte 0. Logitech-private codes from the official application's layout enum —
+# NOT USB HID HUT country codes. 0x38 (Brazilian ABNT2) hardware-confirmed on a
+# G512 ABNT2. Codes not listed here are unknown to the official application too.
+KEYBOARD_LAYOUT_2_NAMES = {
+    0x01: "US",
+    0x02: "International",
+    0x03: "UK",
+    0x04: "German",
+    0x05: "French",
+    0x07: "Russian",
+    0x08: "Nordic",
+    0x09: "Korean",
+    0x0A: "Japanese",
+    0x0B: "Chinese",
+    0x0D: "Swiss",
+    0x0E: "Turkish",
+    0x0F: "Spanish",
+    0x10: "Arabic",
+    0x11: "Belgian",
+    0x14: "Czech",
+    0x16: "Nordic",
+    0x18: "Hebrew",
+    0x19: "Hungarian",
+    0x1A: "Italian",
+    0x1D: "Nordic",
+    0x1F: "Portuguese",
+    0x21: "Nordic",
+    0x24: "Turkish",
+    0x28: "Bulgarian",
+    0x33: "Thai",
+    0x37: "International 2",
+    0x38: "Brazilian (ABNT2)",
+    0x3A: "Arabic",
+    0x3E: "Korean",
+    0x41: "Czech",
+}
+
 HapticWaveForms = NamedInts(
     SHARP_STATE_CHANGE=0x00,
     DAMP_STATE_CHANGE=0x01,
