@@ -156,7 +156,7 @@ class Setting:
         self._value = value
         self._pre_write(save)
 
-    def write(self, value, save=True):
+    def write(self, value, save=True, volatile=False):
         assert hasattr(self, "_value")
         assert hasattr(self, "_device")
         assert value is not None
@@ -165,7 +165,7 @@ class Setting:
             logger.debug("%s: write %r to %s", self.name, value, self._device)
 
         if self._device.online:
-            if self._value != value:
+            if self._value != value and not volatile:
                 self.update(value, save)
 
             current_value = None

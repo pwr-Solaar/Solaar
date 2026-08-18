@@ -35,6 +35,9 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants
 from logitech_receiver import listener
 from logitech_receiver import notifications
+from logitech_receiver import rgb_power
+from logitech_receiver import settings_templates as st
+from logitech_receiver.hidpp20 import LEDEffectSetting
 
 from . import configuration
 from . import dbus
@@ -450,6 +453,52 @@ def ping_all(resuming=False):
                         logger.debug("can't ping device on resume: %s", dev)
                     if not count:
                         break
+
+
+def suspend_leds():
+    """Turn off LEDs for all connected devices."""
+    logger.info("screen locked, suspending LED lighting on all devices")
+
+    for listener_thread in _all_listeners.values():
+        devices = [listener_thread.receiver] if listener_thread.receiver.isDevice else list(listener_thread.receiver)
+        for dev in devices:
+            if not dev.online:
+                continue
+
+            if mgr := rgb_power.get_manager(dev):
+                mgr.suspend_leds()
+                return
+
+            for s in dev.settings:
+                if s.name in (st.Backlight.name, st.Backlight2.name, st.Backlight2Level.name):
+                    s.write(0, save=False, volatile=True)
+                elif s.name.startswith(st.LEDZoneSetting.name) or s.name.startswith(st.RGBEffectSetting.name):
+                    s.write(LEDEffectSetting(ID=0), save=False, volatile=True)
+                elif s.name == st.PerKeyLighting.name and s.read():
+                    s.write({k: 0 for k in s._value.keys()}, save=False, volatile=True)
+
+
+def restore_leds():
+    """Restore LED lighting for all connected devices to their saved states."""
+    logger.info("screen unlocked, restoring LED lighting on all devices")
+
+    for listener_thread in _all_listeners.values():
+        devices = [listener_thread.receiver] if listener_thread.receiver.isDevice else list(listener_thread.receiver)
+        for dev in devices:
+            if not dev.online:
+                continue
+
+            if mgr := rgb_power.get_manager(dev):
+                mgr.restore_leds()
+                return
+
+            for s in dev.settings:
+                if (
+                    s.name in (st.Backlight.name, st.Backlight2.name, st.Backlight2Level.name, st.PerKeyLighting.name)
+                    or s.name.startswith(st.LEDZoneSetting.name)
+                    or s.name.startswith(st.RGBEffectSetting.name)
+                ):
+                    s.apply()
 
 
 _status_callback = None  # GUI callback to change UI in response to changes to receiver or device status
