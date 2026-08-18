@@ -157,7 +157,8 @@ def _handlesig(signl, stack):
 
 
 def main():
-    if platform.system() not in ("Darwin", "Windows"):
+    # Only the Linux HID backend uses pyudev; other platforms use the hidapi backend.
+    if platform.system() == "Linux":
         _require("pyudev", "python3-pyudev")
 
     args = _parse_arguments()
