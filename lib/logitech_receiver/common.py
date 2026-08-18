@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import binascii
 import dataclasses
+import re
 import typing
 
 from enum import Flag
@@ -635,6 +636,27 @@ class FirmwareInfo:
     name: str
     version: str
     extras: str | None
+
+
+_FIRMWARE_VERSION_RE = re.compile(r"^(\d+)\.(\d+)(?:\.B?(\d+))?$")
+
+
+def firmware_version_tuple(firmware: FirmwareInfo) -> tuple[int, int, int] | None:
+    """A firmware's comparable (number, revision, build).
+
+    The number field only holds two digits, so a version past 99 carries its
+    hundreds digit in the name prefix ("U1 " is 1xx). That is why this takes
+    the whole FirmwareInfo: the version string alone sorts a pre-rollover
+    98.xx above a post-rollover 122.xx.
+    """
+    match = _FIRMWARE_VERSION_RE.match(firmware.version.strip())
+    if not match:
+        return None
+    number, revision, build = int(match.group(1)), int(match.group(2)), int(match.group(3) or 0)
+    name = firmware.name
+    if len(name) == 3 and name[0] == "U" and name[1].isdigit() and name[2] == " ":
+        number += int(name[1]) * 100
+    return number, revision, build
 
 
 class BatteryStatus(Flag):

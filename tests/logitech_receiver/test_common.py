@@ -337,3 +337,27 @@ def test_battery_offline():
     assert battery.ok()
     assert not battery.charging()
     assert battery.to_str() == "Battery: 58% (offline)"
+
+
+@pytest.mark.parametrize(
+    "name, version, expected",
+    [
+        # the G-audio family carries a version past 99 in its name prefix
+        ("U1 ", "22.04.B0370", (122, 4, 370)),  # G560
+        ("U1 ", "37.00.B0131", (137, 0, 131)),  # G733
+        ("U  ", "98.03.B0027", (98, 3, 27)),  # G933, no hundreds digit yet
+        # "BL1" is a bootloader name, not a version prefix: no fold
+        ("BL1", "42.00.B0016", (42, 0, 16)),
+        ("MPM", "27.00.B0016", (27, 0, 16)),
+        ("MPM", "27.00", (27, 0, 0)),
+        ("", "1.16", (1, 16, 0)),  # Centurion two-part form
+        ("", "3.02.15", (3, 2, 15)),  # build without the B marker
+        ("MPM", "", None),
+        ("MPM", "nonsense", None),
+        ("MPM", "1A.2B", None),  # a device reporting non-BCD is not comparable
+    ],
+)
+def test_firmware_version_tuple(name, version, expected):
+    firmware = common.FirmwareInfo(common.FirmwareKind.Firmware, name, version, None)
+
+    assert common.firmware_version_tuple(firmware) == expected

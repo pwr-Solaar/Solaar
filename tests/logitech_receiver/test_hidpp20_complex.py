@@ -692,6 +692,19 @@ def test_LEDEffectSetting(hex, ID, color, speed, period, intensity, ramp, form):
     assert yaml.safe_load(str(setting)) == setting
 
 
+def test_LEDEffectSetting_audio_visualizer():
+    # G560 factory readback: cycle on, BE16 period 0x1388 (5000 ms)
+    byt = bytes.fromhex("0701000000001388000000")
+    setting = hidpp20.LEDEffectSetting.from_bytes(byt)
+
+    assert setting.ID == common.NamedInt(0x7, "Audio Visualizer")
+    assert setting.cycle == 1
+    assert setting.color == 0
+    assert setting.period == 0x1388  # regression: mis-split as intensity/period pre-0x07
+    assert setting.to_bytes() == byt
+    assert yaml.safe_load(str(setting)) == setting
+
+
 @pytest.mark.parametrize(
     "feature, function, response, ID, capabilities, period",
     [
@@ -744,6 +757,17 @@ def test_LEDZoneInfo(feature, function, offset, effect_function, responses, inde
     assert zone.effects[1].ID == id_1
 
 
+def test_LEDZoneInfo_speaker_locations():
+    feature = hidpp20_constants.SupportedFeature.COLOR_LED_EFFECTS
+    device = fake_hidpp.Device(feature=feature, responses=fake_hidpp.zone_responses_1, offset=0x07)
+    device.kind = "speaker"
+
+    zone = hidpp20.LEDZoneInfo(feature, 0x10, 0, 0x20, device, 0)
+
+    assert zone.location == 1
+    assert str(zone.location) == "Left Front"
+
+
 @pytest.mark.parametrize(
     "responses, setting, expected_command",
     [
@@ -753,6 +777,11 @@ def test_LEDZoneInfo(feature, function, offset, effect_function, responses, inde
             fake_hidpp.zone_responses_1,
             hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20),
             "000180808000002000000000",
+        ],
+        [
+            fake_hidpp.zone_responses_speaker,
+            hidpp20.LEDEffectSetting(ID=0x7, cycle=1, color=0, period=0x1388),
+            "000101000000001388000000",
         ],
     ],
 )

@@ -52,14 +52,23 @@ def test_get_ids():
     assert tid_map == {"btid": "1234", "wpid": "5678", "usbid": "9ABC"}
 
 
-def test_get_kind():
-    responses = [fake_hidpp.Response("00", 0x0420)]
+@pytest.mark.parametrize(
+    "response, name, value",
+    [
+        ("00", "keyboard", 0x01),
+        ("08", "headset", 0x0D),
+        ("0E", "speaker", 0x13),
+        ("13", "adapter", 0x18),
+    ],
+)
+def test_get_kind(response, name, value):
+    responses = [fake_hidpp.Response(response, 0x0420)]
     device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_NAME)
 
     result = _hidpp20.get_kind(device)
 
-    assert result == "keyboard"
-    assert result == 1
+    assert result == name
+    assert result == value
 
 
 def test_get_name():

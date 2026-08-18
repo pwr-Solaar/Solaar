@@ -1,4 +1,4 @@
-"""Per-device-model quirks for RGB lighting.
+"""Per-device-model quirks for RGB lighting and firmware-gated settings.
 
 Keyed by ``device.modelId``. For normal HID++ devices that is the string
 Logitech composes by concatenating every transport PID (btid + btleid + wpid
@@ -19,6 +19,12 @@ Two postures, by feature class:
   field is hidden and every slot suppressed unless the exact model is listed
   here as known-good.
 
+* **Settings a firmware revision stubbed out** — default-ALLOW, suppressed only
+  over the firmware ranges named in ``SETTING_INERT_FIRMWARE``. A feature that
+  is advertised and round-trips cleanly but does nothing is indistinguishable
+  from a working one over the wire, so the version boundary has to be recorded
+  by hand.
+
 Setting ``SOLAAR_EXPERIMENTAL`` truthy bypasses the allowlists entirely — for
 testers / reverse-engineering on devices not yet validated.
 
@@ -27,7 +33,12 @@ Entries are hand-curated; document the observation in a comment.
 
 from __future__ import annotations
 
+import logging
 import os
+
+from . import common
+
+logger = logging.getLogger(__name__)
 
 _ALL_NVCONFIG_FIELDS = {"color1", "color2", "speed"}
 
@@ -67,6 +78,62 @@ HEADSET_SIGNATURE_EFFECTS_ALLOWED: dict[str, dict[int, set[str]]] = {
         1: {"color1", "color2"},
     },
 }
+
+
+# Settings the firmware only backs over part of a device's version history.
+# modelId -> setting name -> (inert_from, inert_before), each a
+# (number, revision, build) tuple or None for an open end. The setting is
+# suppressed at or above `inert_from`, and below `inert_before`.
+SETTING_INERT_FIRMWARE: dict[str, dict[str, tuple[tuple | None, tuple | None]]] = {
+    # G560 Gaming Speaker — firmware 122.3.23 retired the hardware equalizer
+    # (0x8310) and brought up subwoofer level (0x8305). From that version on
+    # the EQ still advertises and round-trips but is audibly silent; verified
+    # inert on 122.4.370, where bass does work. Older firmware appears not to
+    # carry 0x8305 at all, so that bound is defensive.
+    "000000000A78": {
+        "equalizer": ((122, 3, 23), None),
+        "bass_tone": (None, (122, 3, 23)),
+    },
+}
+
+
+def _main_firmware_version(device) -> tuple[int, int, int] | None:
+    """Highest main-firmware version on the device, the entity G HUB reports."""
+    versions = [
+        version
+        for fw in getattr(device, "firmware", None) or ()
+        if fw.kind == common.FirmwareKind.Firmware
+        for version in (common.firmware_version_tuple(fw),)
+        if version is not None
+    ]
+    return max(versions, default=None)
+
+
+def setting_inert(device, setting_name: str) -> bool:
+    """True when this device's firmware is known not to back the named setting.
+
+    Fails open: firmware that can't be read or parsed exposes the setting rather
+    than risk hiding a working control.
+    """
+    if _experimental():
+        return False
+    model_id = getattr(device, "modelId", None) or ""
+    bounds = SETTING_INERT_FIRMWARE.get(model_id, {}).get(setting_name)
+    if bounds is None:
+        return False
+    version = _main_firmware_version(device)
+    if version is None:
+        return False
+    inert_from, inert_before = bounds
+    inert = (inert_from is not None and version >= inert_from) or (inert_before is not None and version < inert_before)
+    if inert:
+        logger.info(
+            "%s: hiding %s — firmware %s does not back it",
+            model_id,
+            setting_name,
+            ".".join(str(part) for part in version),
+        )
+    return inert
 
 
 def rgb_effects_nvconfig_allowed_fields(device, cap_id: int) -> set[str] | None:

@@ -239,11 +239,9 @@ def _print_device(dev, num=None):
             # For centurion child, skip dongle features (already shown on the receiver)
             if is_centurion_child and not in_sub_device:
                 continue
-            if isinstance(feature, str):
-                feature_bytes = bytes.fromhex(feature[-4:])
-            else:
-                feature_bytes = feature.to_bytes(2, byteorder="little")
-            feature_int = int.from_bytes(feature_bytes, byteorder="little")
+            # ROOT.getFeature takes the feature ID big-endian.
+            feature_int = int(feature[-4:], 16) if isinstance(feature, str) else int(feature)
+            feature_bytes = feature_int.to_bytes(2, byteorder="big")
             display_name = feature
             if is_centurion_child and in_sub_device:
                 # Use cached version — skip slow bridge ROOT queries
