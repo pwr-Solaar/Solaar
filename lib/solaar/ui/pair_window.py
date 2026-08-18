@@ -16,7 +16,10 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
+import math
+import time
 
+from dataclasses import dataclass
 from enum import Enum
 
 from gi.repository import GLib
@@ -33,19 +36,51 @@ logger = logging.getLogger(__name__)
 _PAIRING_TIMEOUT = 30  # seconds
 _STATUS_CHECK = 500  # milliseconds
 
+# steps the user has to perform to enter a passkey
+_STEP_LEFT = "left"
+_STEP_RIGHT = "right"
+_STEP_BOTH = "both"
+_STEP_ENTER = "enter"
+
+# widget state kept between the periodic checks, stashed on the widgets themselves
+_PASSKEY_PAGE = "_solaar_passkey_page"
+_PAIRED_ADDRESS = "_solaar_paired_address"
+_ON_RETRY = "_solaar_on_retry"
+_COUNTDOWN = "_solaar_countdown"
+_STEPS = "_solaar_steps"
+_PROGRESS = "_solaar_progress"
+
+# step strip metrics, in pixels
+_CELL_WIDTH = 28
+_CELL_HEIGHT = 38
+_CELL_GAP = 8
+_CELL_RADIUS = 9
+_NUMBER_GAP = 6
+_NUMBER_HEIGHT = 12
+_ROW_GAP = 8
+_SEPARATOR_GAP = 10
+_STRIP_MARGIN = 8
+_STEPS_PER_ROW = 5
+_FINAL_STEP_SCALE = 1.25
+_LABEL_WIDTH_CHARS = 40  # keeps the wrapped labels inside the width of the dialog
+
 
 class GtkSignal(Enum):
     CANCEL = "cancel"
     CLOSE = "close"
+    CLICKED = "clicked"
+    DRAW = "draw"
 
 
-def create(receiver):
+def create(receiver, on_retry=None):
     receiver.reset_pairing()  # clear out any information on previous pairing
     title = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
     if receiver.receiver_kind == "bolt":
         text = _("Bolt receivers are only compatible with Bolt devices.")
         text += "\n\n"
         text += _("Press a pairing button or key until the pairing light flashes quickly.")
+        text += "\n"
+        text += _("Press and hold the pairing button on the device for about three seconds.")
     else:
         if receiver.receiver_kind == "unifying":
             text = _("Unifying receivers are only compatible with Unifying devices.")
@@ -77,10 +112,33 @@ def create(receiver):
         )
         text += _("\nCancelling at this point will not use up a pairing.")
     ok = prepare(receiver)
-    assistant = _create_assistant(receiver, ok, _finish, title, text)
+    assistant = _create_assistant(receiver, ok, _finish, title, text, on_retry)
     if ok:
         GLib.timeout_add(_STATUS_CHECK, check_lock_state, assistant, receiver)
+        deadline = time.monotonic() + _PAIRING_TIMEOUT
+        GLib.timeout_add(_STATUS_CHECK, _update_countdown, assistant, receiver, deadline)
     return assistant
+
+
+def _update_countdown(assistant, receiver, deadline):
+    """Counts down the time left to find a device.
+
+    Only this phase gets a countdown: Solaar sets its timeout itself, whereas the
+    passkey entry timeout lives in the receiver's firmware and is never reported,
+    so any timer shown during entry would be made up.
+    """
+    countdown = getattr(assistant, _COUNTDOWN, None)
+    if countdown is None:
+        return False
+    remaining = deadline - time.monotonic()
+    found = receiver.pairing.device_address or getattr(assistant, _PASSKEY_PAGE, None) is not None
+    if not assistant.is_drawable() or remaining <= 0 or found:
+        countdown.hide()
+        return False
+    seconds = int(math.ceil(remaining))
+    countdown.set_fraction(remaining / _PAIRING_TIMEOUT)
+    countdown.set_text(ngettext("%d second left", "%d seconds left", seconds) % seconds)
+    return True
 
 
 def prepare(receiver):
@@ -124,7 +182,10 @@ def _check_lock_state(assistant, receiver, count):
         return True
     elif receiver.pairing.discovering and receiver.pairing.device_address and receiver.pairing.device_name:
         add = receiver.pairing.device_address
+        if getattr(assistant, _PAIRED_ADDRESS, None) == add:
+            return True  # pairing was already requested for this device
         ent = 20 if receiver.pairing.device_kind == hidpp10_constants.DEVICE_KIND.keyboard else 10
+        setattr(assistant, _PAIRED_ADDRESS, add)
         if receiver.pair_device(address=add, authentication=receiver.pairing.device_authentication, entropy=ent):
             return True
         else:
@@ -136,7 +197,7 @@ def _check_lock_state(assistant, receiver, count):
 def _pairing_failed(assistant, receiver, error):
     assistant.remove_page(0)  # needed to reset the window size
     logger.debug("%s fail: %s", receiver, error)
-    _create_failure_page(assistant, error)
+    _create_failure_page(assistant, receiver, error)
 
 
 def _pairing_succeeded(assistant, receiver, device):
@@ -160,22 +221,294 @@ def _finish(assistant, receiver):
         receiver.pairing.error = None
 
 
+def _passkey_steps(passkey, authentication):
+    """Returns the ordered steps needed to enter the passkey on the device.
+
+    Mice and touchpads take the passkey as ten button presses followed by a
+    simultaneous press of both buttons, keyboards as its digits followed by the
+    enter key. Returns None when the passkey cannot be interpreted, so that
+    callers running inside a periodic check never have to handle an exception.
+    """
+    if passkey is None:
+        return None
+    if authentication & 0x01:  # keyboards spell the passcode out
+        return [character for character in str(passkey)] + [_STEP_ENTER]
+    try:
+        bits = f"{int(passkey):010b}"
+    except (TypeError, ValueError):
+        return None
+    # keep this mapping as it is: the receiver never reports which button was
+    # pressed, so a changed polarity cannot be validated from inside Solaar
+    return [_STEP_RIGHT if bit == "1" else _STEP_LEFT for bit in bits] + [_STEP_BOTH]
+
+
+def _passkey_description(steps, passkey, authentication):
+    """Renders the steps as the sentence used for the tooltip and for screen readers."""
+    if authentication & 0x01:
+        return _("Type %(passcode)s and then press the enter key.") % {"passcode": passkey}
+    passcode = ", ".join(_("right") if step == _STEP_RIGHT else _("left") for step in steps[:-1])
+    return _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
+
+
+def _entry_progress_text(steps, done, total):
+    """Describes how much of the passkey the receiver has accepted, in the words of the device.
+
+    A mouse is clicked and a keyboard is typed on, so the two cannot share a sentence.
+    Both wordings are spelled out in full rather than assembled from fragments, so that
+    each one reaches the translators as a complete sentence.
+    """
+    if steps[-1] == _STEP_BOTH:  # mice and touchpads enter the passcode by clicking
+        if done <= 0:
+            return _("Waiting for the first click…")
+        return _("Clicks registered by the receiver: %(done)d of %(total)d") % {"done": done, "total": total}
+    if done <= 0:
+        return _("Waiting for the first key press…")
+    return _("Key presses registered by the receiver: %(done)d of %(total)d") % {"done": done, "total": total}
+
+
+@dataclass
+class _StepCell:
+    """Placement of a single step inside the step strip."""
+
+    x: float
+    y: float
+    width: float
+    height: float
+    step: str
+    index: int
+
+
+def _step_strip_cells(steps):
+    """Lays the steps out in rows, with the final step alone below a separator."""
+    leading = steps[:-1]  # the final step gets a band of its own, below the separator
+    rows = [leading[index : index + _STEPS_PER_ROW] for index in range(0, len(leading), _STEPS_PER_ROW)]
+    columns = max((len(row) for row in rows), default=1)
+    width = 2 * _STRIP_MARGIN + columns * _CELL_WIDTH + (columns - 1) * _CELL_GAP
+    row_height = _CELL_HEIGHT + _NUMBER_GAP + _NUMBER_HEIGHT
+    cells = []
+    index = 0
+    y = float(_STRIP_MARGIN)
+    for row in rows:
+        row_width = len(row) * _CELL_WIDTH + (len(row) - 1) * _CELL_GAP
+        x = (width - row_width) / 2
+        for step in row:
+            cells.append(_StepCell(x, y, _CELL_WIDTH, _CELL_HEIGHT, step, index))
+            x += _CELL_WIDTH + _CELL_GAP
+            index += 1
+        y += row_height + _ROW_GAP
+    separator_y = y - _ROW_GAP + _SEPARATOR_GAP
+    final_width = _CELL_WIDTH * _FINAL_STEP_SCALE
+    final_height = _CELL_HEIGHT * _FINAL_STEP_SCALE
+    final_y = separator_y + _SEPARATOR_GAP
+    cells.append(_StepCell((width - final_width) / 2, final_y, final_width, final_height, steps[-1], index))
+    height = final_y + final_height + _NUMBER_GAP + _NUMBER_HEIGHT + _STRIP_MARGIN
+    return cells, separator_y, width, height
+
+
+def _strip_accent_color(style):
+    """Takes the highlight colour from the theme, so the strip stays legible everywhere."""
+    found, color = style.lookup_color("theme_selected_bg_color")
+    if found:
+        return color
+    color = style.get_color(Gtk.StateFlags.SELECTED)
+    if color is not None:
+        return color
+    return style.get_color(Gtk.StateFlags.NORMAL)
+
+
+def _rounded_rectangle(cr, x, y, width, height, radius):
+    radius = min(radius, width / 2, height / 2)
+    cr.new_sub_path()
+    cr.arc(x + width - radius, y + radius, radius, -0.5 * math.pi, 0.0)
+    cr.arc(x + width - radius, y + height - radius, radius, 0.0, 0.5 * math.pi)
+    cr.arc(x + radius, y + height - radius, radius, 0.5 * math.pi, math.pi)
+    cr.arc(x + radius, y + radius, radius, math.pi, 1.5 * math.pi)
+    cr.close_path()
+
+
+def _draw_mouse_cell(cr, cell, accent, outline, fill_alpha, outline_alpha):
+    """Draws a mouse seen from above, with the buttons this step needs filled in."""
+    radius = _CELL_RADIUS * cell.width / _CELL_WIDTH
+    split_y = cell.y + cell.height * 0.42
+    split_x = cell.x + cell.width / 2
+    cr.save()
+    _rounded_rectangle(cr, cell.x, cell.y, cell.width, cell.height, radius)
+    cr.clip()
+    cr.set_source_rgba(accent.red, accent.green, accent.blue, fill_alpha)
+    if cell.step in (_STEP_LEFT, _STEP_BOTH):
+        cr.rectangle(cell.x, cell.y, cell.width / 2, split_y - cell.y)
+        cr.fill()
+    if cell.step in (_STEP_RIGHT, _STEP_BOTH):
+        cr.rectangle(split_x, cell.y, cell.width / 2, split_y - cell.y)
+        cr.fill()
+    cr.restore()
+    wheel_width = cell.width * 0.20
+    wheel_height = cell.height * 0.28
+    cr.set_source_rgba(outline.red, outline.green, outline.blue, outline_alpha)
+    _rounded_rectangle(cr, cell.x, cell.y, cell.width, cell.height, radius)
+    cr.stroke()
+    cr.move_to(cell.x, split_y)
+    cr.line_to(cell.x + cell.width, split_y)
+    cr.stroke()
+    cr.move_to(split_x, cell.y)
+    cr.line_to(split_x, split_y - wheel_height / 2)
+    cr.stroke()
+    _rounded_rectangle(cr, split_x - wheel_width / 2, split_y - wheel_height / 2, wheel_width, wheel_height, wheel_width / 2)
+    cr.stroke()
+
+
+def _draw_key_cell(cr, cell, accent, outline, fill_alpha, outline_alpha):
+    """Draws a key cap carrying either a digit of the passcode or an enter arrow."""
+    radius = _CELL_RADIUS * cell.width / _CELL_WIDTH / 2
+    cr.set_source_rgba(accent.red, accent.green, accent.blue, fill_alpha)
+    _rounded_rectangle(cr, cell.x, cell.y, cell.width, cell.height, radius)
+    cr.fill()
+    cr.set_source_rgba(outline.red, outline.green, outline.blue, outline_alpha)
+    _rounded_rectangle(cr, cell.x, cell.y, cell.width, cell.height, radius)
+    cr.stroke()
+    if cell.step == _STEP_ENTER:
+        # an arrow pointing down and then left, the usual shape of an enter key
+        top = cell.y + cell.height * 0.32
+        bottom = cell.y + cell.height * 0.62
+        left = cell.x + cell.width * 0.28
+        right = cell.x + cell.width * 0.72
+        cr.move_to(right, top)
+        cr.line_to(right, bottom)
+        cr.line_to(left, bottom)
+        cr.stroke()
+        head = cell.width * 0.14
+        cr.move_to(left + head, bottom - head)
+        cr.line_to(left, bottom)
+        cr.line_to(left + head, bottom + head)
+        cr.stroke()
+    else:
+        cr.set_font_size(cell.height * 0.46)
+        extents = cr.text_extents(cell.step)
+        cr.move_to(
+            cell.x + (cell.width - extents.width) / 2 - extents.x_bearing,
+            cell.y + (cell.height - extents.height) / 2 - extents.y_bearing,
+        )
+        cr.show_text(cell.step)
+
+
+def _draw_check_mark(cr, cell, outline, outline_alpha):
+    """Marks a step the receiver has already accepted."""
+    size = cell.width * 0.22
+    x = cell.x + cell.width * 0.72
+    y = cell.y + cell.height * 0.78
+    cr.set_source_rgba(outline.red, outline.green, outline.blue, outline_alpha)
+    cr.move_to(x - size, y)
+    cr.line_to(x - size / 3, y + size * 0.7)
+    cr.line_to(x + size, y - size * 0.8)
+    cr.stroke()
+
+
+def _draw_step_strip(area, cr):
+    """Paints which button every step needs, and how far entry has got.
+
+    The two are kept apart on purpose: the filled quadrant always says which
+    button to press, and only the emphasis says where the user is.
+    """
+    steps = getattr(area, _STEPS, None)
+    if not steps:
+        return False
+    progress = getattr(area, _PROGRESS, None)
+    # the strip is the whole sequence, numbered and always readable, whether or not a
+    # count is known; without one no step is singled out and nothing is marked done
+    done = 0 if progress is None else min(progress, len(steps))
+    current = None if progress is None else min(progress, len(steps) - 1)
+    cells, separator_y, width, _height = _step_strip_cells(steps)
+    style = area.get_style_context()
+    accent = _strip_accent_color(style)
+    outline = style.get_color(Gtk.StateFlags.NORMAL)
+    is_mouse = steps[-1] == _STEP_BOTH
+    cr.save()
+    cr.translate(max(0, (area.get_allocated_width() - width) / 2), 0)
+    cr.set_line_width(1.0)
+    cr.set_line_join(0)  # cairo.LINE_JOIN_MITER, spelled out to avoid importing cairo
+    cr.select_font_face("sans-serif")
+    cr.set_source_rgba(outline.red, outline.green, outline.blue, 0.25)
+    cr.move_to(_STRIP_MARGIN, separator_y)
+    cr.line_to(width - _STRIP_MARGIN, separator_y)
+    cr.stroke()
+    for cell in cells:
+        if cell.index < done:
+            fill_alpha, outline_alpha = 0.45, 0.35
+        elif cell.index == current:
+            fill_alpha, outline_alpha = 1.0, 1.0
+        else:
+            fill_alpha, outline_alpha = 0.22, 0.55
+        if cell.index == current:
+            cr.set_source_rgba(accent.red, accent.green, accent.blue, 1.0)
+            cr.set_line_width(2.0)
+            _rounded_rectangle(cr, cell.x - 3, cell.y - 3, cell.width + 6, cell.height + 6, _CELL_RADIUS)
+            cr.stroke()
+            cr.set_line_width(1.0)
+        if is_mouse:
+            _draw_mouse_cell(cr, cell, accent, outline, fill_alpha, outline_alpha)
+        else:
+            _draw_key_cell(cr, cell, accent, outline, fill_alpha, outline_alpha)
+        if cell.index < done:
+            _draw_check_mark(cr, cell, outline, 0.8)
+        number = str(cell.index + 1)
+        cr.set_font_size(_NUMBER_HEIGHT)
+        cr.set_source_rgba(outline.red, outline.green, outline.blue, outline_alpha)
+        extents = cr.text_extents(number)
+        cr.move_to(
+            cell.x + (cell.width - extents.width) / 2 - extents.x_bearing,
+            cell.y + cell.height + _NUMBER_GAP - extents.y_bearing,
+        )
+        cr.show_text(number)
+    cr.restore()
+    return False
+
+
+def _create_step_strip(steps, description):
+    area = Gtk.DrawingArea()
+    setattr(area, _STEPS, steps)
+    setattr(area, _PROGRESS, 0)
+    _cells, _separator_y, width, height = _step_strip_cells(steps)
+    area.set_size_request(width, int(math.ceil(height)))
+    area.connect(GtkSignal.DRAW.value, _draw_step_strip)
+    # a drawing area carries no text of its own, so name it after the sequence it
+    # draws; screen readers announce the name first, and the caller also keeps the
+    # sequence in a label of its own
+    area.set_tooltip_text(description)
+    accessible = area.get_accessible()
+    accessible.set_name(description)
+    accessible.set_description(description)
+    return area
+
+
 def _show_passcode(assistant, receiver, passkey):
+    """Shows the passkey page, creating it on the first check and refreshing it afterwards."""
+    page = getattr(assistant, _PASSKEY_PAGE, None)
+    if page is None:
+        page = _create_passcode_page(assistant, receiver, passkey)
+        setattr(assistant, _PASSKEY_PAGE, page)
+        assistant.set_page_complete(page, True)
+        assistant.next_page()
+    _update_passcode_page(page, receiver)
+
+
+def _create_passcode_page(assistant, receiver, passkey):
     logger.debug("%s show passkey: %s", receiver, passkey)
     name = receiver.pairing.device_name
     authentication = receiver.pairing.device_authentication
     intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
     page_text = _("Enter passcode on %(name)s.") % {"name": name}
-    page_text += "\n"
-    if authentication & 0x01:
-        page_text += _("Type %(passcode)s and then press the enter key.") % {
-            "passcode": receiver.pairing.device_passkey,
-        }
-    else:
-        passcode = ", ".join(
-            [_("right") if bit == "1" else _("left") for bit in f"{int(receiver.pairing.device_passkey):010b}"]
-        )
-        page_text += _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
+    steps = _passkey_steps(passkey, authentication)
+    if steps is None:
+        # every step is derived from the passcode, so an unreadable one leaves nothing
+        # to instruct with. Only non-keyboards can get here with a passcode at all, so
+        # say what happened instead of naming an action the device cannot perform.
+        page_text += "\n"
+        page_text += _("Solaar cannot read the passcode this receiver sent, so it cannot show how to enter it.")
+        page_text += "\n"
+        page_text += _("Press the pairing button on your device again and retry.")
+    elif authentication & 0x01:  # for keyboards the passcode is meant to be read
+        page_text += "\n"
+        page_text += _passkey_description(steps, passkey, authentication)
     page = _create_page(
         assistant,
         Gtk.AssistantPageType.PROGRESS,
@@ -183,17 +516,81 @@ def _show_passcode(assistant, receiver, passkey):
         "preferences-desktop-peripherals",
         page_text,
     )
-    assistant.set_page_complete(page, True)
-    assistant.next_page()
+    if steps is None:
+        return page
+    description = _passkey_description(steps, passkey, authentication)
+    strip = _create_step_strip(steps, description)
+    page.pack_start(strip, False, False, 0)
+    if not authentication & 0x01:
+        # the strip is drawn, not written, so the sequence also stays on the page as a
+        # sentence: a tooltip needs a pointer and an accessible description is not text
+        sequence = Gtk.Label(label=description)
+        sequence.set_line_wrap(True)
+        sequence.set_max_width_chars(_LABEL_WIDTH_CHARS)
+        sequence.set_halign(Gtk.Align.CENTER)
+        sequence.get_style_context().add_class("dim-label")
+        page.pack_start(sequence, False, False, 0)
+    status = Gtk.Label(label=_entry_progress_text(steps, 0, len(steps) - 1))
+    status.set_line_wrap(True)
+    status.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    status.set_halign(Gtk.Align.CENTER)
+    page.pack_start(status, False, False, 0)
+    if steps[-1] == _STEP_BOTH:
+        # the receiver reports that a button was pressed but never which one,
+        # so say so rather than let a counted click look like a checked one
+        honesty = Gtk.Label(label=_("Solaar cannot tell which button was pressed — only that the receiver accepted a click."))
+        honesty.set_line_wrap(True)
+        honesty.set_max_width_chars(_LABEL_WIDTH_CHARS)
+        honesty.set_halign(Gtk.Align.CENTER)
+        honesty.get_style_context().add_class("dim-label")
+        page.pack_start(honesty, False, False, 0)
+    reminder = Gtk.Label(label=_("Keep the device switched on and within range until pairing finishes."))
+    reminder.set_line_wrap(True)
+    reminder.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    reminder.set_halign(Gtk.Align.CENTER)
+    reminder.get_style_context().add_class("dim-label")
+    page.pack_start(reminder, False, False, 0)
+    page.show_all()
+    page.strip = strip
+    page.status = status
+    return page
 
 
-def _create_assistant(receiver, ok, finish, title, text):
+def _update_passcode_page(page, receiver):
+    """Refreshes the page in place, so that the periodic check never appends another one."""
+    strip = getattr(page, "strip", None)
+    if strip is None:
+        return
+    steps = getattr(strip, _STEPS)
+    total = len(steps) - 1  # the receiver counts presses, not the final combined one
+    entered = receiver.pairing.passkey_entered
+    # a receiver that reports nothing and a user who has not pressed anything yet look
+    # exactly alike from here, so never claim either: the count stands at zero and the
+    # first step stays highlighted until the receiver says otherwise
+    if receiver.pairing.passkey_complete:
+        progress = len(steps)
+        text = _("The receiver is checking the sequence…")
+    elif entered >= total and steps[-1] == _STEP_BOTH:
+        progress = entered
+        text = _("Finally, press the left and right buttons at the same time.")
+    else:
+        progress = entered
+        text = _entry_progress_text(steps, min(entered, total), total)
+    page.status.set_label(text)
+    setattr(strip, _PROGRESS, progress)
+    strip.queue_draw()
+
+
+def _create_assistant(receiver, ok, finish, title, text, on_retry=None):
     assistant = Gtk.Assistant()
     assistant.set_title(title)
     assistant.set_icon_name("list-add")
     assistant.set_size_request(400, 240)
     assistant.set_resizable(False)
     assistant.set_role("pair-device")
+    # stash the callback before any page is built, so that a failure while preparing
+    # also gets a retry button
+    setattr(assistant, _ON_RETRY, on_retry)
     if ok:
         page_intro = _create_page(
             assistant,
@@ -202,13 +599,18 @@ def _create_assistant(receiver, ok, finish, title, text):
             "preferences-desktop-peripherals",
             text,
         )
+        countdown = Gtk.ProgressBar()
+        countdown.set_show_text(True)
+        countdown.set_visible(True)
+        page_intro.pack_end(countdown, False, False, 0)
+        setattr(assistant, _COUNTDOWN, countdown)
         spinner = Gtk.Spinner()
         spinner.set_visible(True)
         spinner.start()
         page_intro.pack_end(spinner, True, True, 24)
         assistant.set_page_complete(page_intro, True)
     else:
-        page_intro = _create_failure_page(assistant, receiver.pairing.error)
+        page_intro = _create_failure_page(assistant, receiver, receiver.pairing.error)
     assistant.connect(GtkSignal.CANCEL.value, finish, receiver)
     assistant.connect(GtkSignal.CLOSE.value, finish, receiver)
     return assistant
@@ -243,19 +645,65 @@ def _create_success_page(assistant, device):
     assistant.commit()
 
 
-def _create_failure_page(assistant, error) -> None:
-    header = _("Pairing failed") + ": " + _(str(error)) + "."
-    if "timeout" in str(error):
-        text = _("Make sure your device is within range, and has a decent battery charge.")
-    elif str(error) == "device not supported":
-        text = _("A new device was detected, but it is not compatible with this receiver.")
-    elif "many" in str(error):
-        text = _("More paired devices than receiver can support.")
-    else:
-        text = _("No further details are available about the error.")
-    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, "dialog-error", text)
+def _failure_text(label):
+    """Describes a pairing failure, matching the error labels exactly.
+
+    The cause has to be chosen from literals rather than translated at runtime,
+    because gettext can only translate strings it saw when the catalogs were built.
+    """
+    if label == "device timeout" or label == "failed to open pairing lock":
+        return _("Make sure your device is within range, and has a decent battery charge.")
+    if label == "device not supported":
+        return _("A new device was detected, but it is not compatible with this receiver.")
+    if label == "too many devices":
+        return _("More paired devices than receiver can support.")
+    if label == "sequence timeout":
+        return _("Sequence entry timed out.") + "\n" + _("Press the pairing button on your device again and retry.")
+    if label == "failed":
+        # the receiver reports nothing beyond this, so do not guess at a cause: a
+        # wrong button, a mistimed press and a wrong sequence all arrive as "failed"
+        return (
+            _("The click sequence was not accepted.")
+            + "\n"
+            + _("The receiver only reports that verification failed; it cannot tell which buttons were pressed.")
+            + "\n"
+            + _("Press the pairing button on your device again and retry.")
+        )
+    return _("No further details are available about the error.")
+
+
+def _retry_pairing(_button, assistant, receiver, on_retry):
+    _finish(assistant, receiver)
+    on_retry()
+
+
+def _create_failure_page(assistant, receiver, error) -> Gtk.VBox:
+    page = _create_page(
+        assistant,
+        Gtk.AssistantPageType.SUMMARY,
+        _("Pairing failed"),
+        "dialog-error",
+        _failure_text(str(error)),
+    )
+    token = Gtk.Label()
+    token.set_markup(f"<small><tt>{GLib.markup_escape_text(str(error))}</tt></small>")
+    token.set_line_wrap(True)
+    token.set_max_width_chars(_LABEL_WIDTH_CHARS)
+    token.set_halign(Gtk.Align.CENTER)
+    token.get_style_context().add_class("dim-label")
+    page.pack_start(token, False, False, 0)
+    on_retry = getattr(assistant, _ON_RETRY, None)
+    if on_retry is not None:
+        # packed into the page rather than added as an assistant action widget, so
+        # that this path keeps working wherever the assistant is only duck-typed
+        retry = Gtk.Button(label=_("Try again"))
+        retry.set_halign(Gtk.Align.CENTER)
+        retry.connect(GtkSignal.CLICKED.value, _retry_pairing, assistant, receiver, on_retry)
+        page.pack_start(retry, False, False, 0)
+    page.show_all()
     assistant.next_page()
     assistant.commit()
+    return page
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None) -> Gtk.VBox:

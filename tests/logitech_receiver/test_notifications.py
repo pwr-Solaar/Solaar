@@ -325,14 +325,59 @@ def test_handle_passkey_request(mocker):
     result = notifications.handle_passkey_request(receiver_mock, notification)
 
     assert result is True
+    assert receiver_mock.pairing.passkey_entered == 0
+    assert receiver_mock.pairing.passkey_complete is False
 
 
-def test_handle_passkey_pressed(mocker):
-    receiver = mocker.Mock()
-    sub_id = Registers.DISCOVERY_STATUS_NOTIFICATION
+@pytest.mark.parametrize(
+    "address, presses, expected_entered, expected_complete",
+    [
+        (0x00, 1, 0, False),  # entry started
+        (0x01, 3, 3, False),  # one press accepted per notification
+        (0x04, 1, 0, True),  # entry terminated, receiver is verifying
+        (0x07, 3, 0, False),  # undocumented address, both fields left alone
+    ],
+)
+def test_handle_passkey_pressed(address, presses, expected_entered, expected_complete):
+    receiver: Receiver = Receiver(MockLowLevelInterface(), None, {}, True, None, None)
+    sub_id = Registers.PASSKEY_PRESSED_NOTIFICATION
     data = b"\x01\x02\x03\x04\x05\x06"
-    notification = HIDPPNotification(0, 0, sub_id, 0, data)
+    notification = HIDPPNotification(0, 0, sub_id, address, data)
 
-    result = notifications.handle_passkey_pressed(receiver, notification)
+    for _ in range(presses):
+        assert notifications.handle_passkey_pressed(receiver, notification) is True
 
-    assert result is True
+    assert receiver.pairing.passkey_entered == expected_entered
+    assert receiver.pairing.passkey_complete is expected_complete
+
+
+def test_handle_passkey_pressed_does_not_notify(mocker):
+    """Entry progress must not reach the tray, main window or desktop notifications."""
+    receiver: Receiver = Receiver(MockLowLevelInterface(), None, {}, True, None, None)
+    spy_changed = mocker.spy(receiver, "changed")
+    notification = HIDPPNotification(0, 0, Registers.PASSKEY_PRESSED_NOTIFICATION, 0x01, b"\x00" * 6)
+
+    notifications.handle_passkey_pressed(receiver, notification)
+
+    assert spy_changed.call_count == 0
+
+
+@pytest.mark.parametrize(
+    "handler, sub_id, address, data",
+    [
+        (notifications.handle_pairing_status, Registers.PAIRING_STATUS_NOTIFICATION, 0x00, b"\x00" * 8),
+        (notifications.handle_discovery_status, Registers.DISCOVERY_STATUS_NOTIFICATION, 0x00, b"\x00" * 8),
+    ],
+)
+def test_passkey_progress_reset(handler, sub_id, address, data):
+    """A retry or a second device must never inherit a stale press count."""
+    receiver: Receiver = Receiver(MockLowLevelInterface(), None, {}, True, None, None)
+    receiver.pairing.passkey_entered = 7
+    receiver.pairing.passkey_complete = True
+    notification = HIDPPNotification(0, 0, sub_id, address, data)
+
+    assert handler(receiver, notification) is True
+
+    assert receiver.pairing.device_passkey is None
+    assert receiver.pairing.passkey_entered == 0
+    assert receiver.pairing.passkey_complete is False

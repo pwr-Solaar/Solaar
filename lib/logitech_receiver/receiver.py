@@ -79,6 +79,8 @@ class Pairing:
     device_kind: Optional[int] = None
     device_name: Optional[str] = None
     device_passkey: Optional[str] = None
+    passkey_entered: int = 0
+    passkey_complete: bool = False
     new_device: Optional[Device] = None
     error: Optional[any] = None
 

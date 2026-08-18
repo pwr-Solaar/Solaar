@@ -1,3 +1,5 @@
+import time
+
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
@@ -8,6 +10,8 @@ import gi
 import pytest
 
 from logitech_receiver import receiver
+from logitech_receiver.hidpp10_constants import BoltPairingError
+from logitech_receiver.hidpp10_constants import PairingError
 from solaar.ui import pair_window
 
 gi.require_version("Gtk", "3.0")
@@ -243,3 +247,395 @@ def test_create_failure_page(error, mocker):
     pair_window._pairing_failed(Assistant(True), Receiver("nano", "nano"), error)
 
     assert spy_create.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "passkey, authentication, expected",
+    [
+        ("50", 0x02, ["left"] * 4 + ["right"] * 2 + ["left"] * 2 + ["right"] + ["left"] + ["both"]),
+        (50, 0x02, ["left"] * 4 + ["right"] * 2 + ["left"] * 2 + ["right"] + ["left"] + ["both"]),
+        ("0", 0x02, ["left"] * 10 + ["both"]),
+        ("1023", 0x02, ["right"] * 10 + ["both"]),
+        ("000918", 0x01, ["0", "0", "0", "9", "1", "8", "enter"]),
+        ("abcdef", 0x02, None),
+        ("", 0x02, None),
+        (None, 0x02, None),
+    ],
+)
+def test_passkey_steps(passkey, authentication, expected):
+    assert pair_window._passkey_steps(passkey, authentication) == expected
+
+
+def test_passkey_steps_bit_polarity():
+    """The receiver never reports which button was pressed, so this mapping cannot be
+    validated from inside Solaar and must not be flipped without hardware evidence."""
+    steps = pair_window._passkey_steps(f"{0b1010101010:d}", 0x02)
+
+    assert steps == ["right", "left"] * 5 + ["both"]
+
+
+@pytest.mark.parametrize("steps, expected_cells", [(["left"] * 10 + ["both"], 11), (["1", "2", "enter"], 3)])
+def test_step_strip_cells(steps, expected_cells):
+    cells, separator_y, width, height = pair_window._step_strip_cells(steps)
+
+    assert [cell.step for cell in cells] == steps
+    assert [cell.index for cell in cells] == list(range(expected_cells))
+    assert cells[-1].width > cells[0].width  # the final step is drawn larger
+    assert cells[-1].y > separator_y  # and below the separator
+    assert width > 0 and height > cells[-1].y
+
+
+def _page_labels(page):
+    return [child.get_label() for child in page.get_children() if isinstance(child, Gtk.Label)]
+
+
+@pytest.mark.parametrize(
+    "passkey, authentication, forbidden",
+    [("50", 0x02, "key press"), ("000918", 0x01, "click")],
+)
+def test_entry_progress_text_uses_the_words_of_the_device(passkey, authentication, forbidden):
+    """A mouse is clicked and a keyboard is typed on, so neither may borrow the other's
+    vocabulary — the wrong one reaches the translators as well as the user."""
+    steps = pair_window._passkey_steps(passkey, authentication)
+    total = len(steps) - 1
+
+    waiting = pair_window._entry_progress_text(steps, 0, total)
+    counted = pair_window._entry_progress_text(steps, 3, total)
+
+    assert forbidden not in waiting.lower()
+    assert forbidden not in counted.lower()
+    assert "3" in counted and str(total) in counted
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_appends_a_single_page():
+    """The periodic check keeps running while the passkey is shown, so the page has to
+    be created once and refreshed afterwards instead of being appended again."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    first = pair_window._check_lock_state(assistant, r, 0)
+    second = pair_window._check_lock_state(assistant, r, 0)
+
+    assert first is True
+    assert second is True
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_updates_status_in_place():
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    waiting = page.status.get_label()
+
+    r.pairing.passkey_entered = 4
+    pair_window._check_lock_state(assistant, r, 0)
+    counted = page.status.get_label()
+
+    r.pairing.passkey_complete = True
+    pair_window._check_lock_state(assistant, r, 0)
+    checking = page.status.get_label()
+
+    assert waiting != counted != checking
+    assert "4" in counted
+    assert getattr(page.strip, pair_window._PROGRESS) == len(getattr(page.strip, pair_window._STEPS))
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_clamps_overshoot():
+    """The receiver owns the verdict, so more presses than steps must not raise."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02, passkey_entered=99),
+    )
+    assistant = Assistant(True)
+
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    assert getattr(page.strip, pair_window._PROGRESS) == 99  # clamped when drawn, not when stored
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_never_blames_the_receiver_for_a_slow_user(monkeypatch):
+    """A receiver that reports nothing and a user who has not pressed anything yet look
+    exactly alike from the page, so no amount of elapsed time may turn one into a claim
+    about the other, and the current step must keep its highlight throughout."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    waiting = page.status.get_label()
+
+    real_monotonic = time.monotonic
+    monkeypatch.setattr(time, "monotonic", lambda: real_monotonic() + 3600)
+    pair_window._update_passcode_page(page, r)
+
+    assert page.status.get_label() == waiting
+    assert getattr(page.strip, pair_window._PROGRESS) == 0
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_passcode_page_keeps_the_click_sequence_as_text():
+    """The strip is a drawing area, so it carries no text: the sequence has to stay on
+    the page as a sentence, since a tooltip needs a pointer to be seen at all."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    steps = pair_window._passkey_steps("50", 0x02)
+    sequence = pair_window._passkey_description(steps, "50", 0x02)
+    assert sequence in _page_labels(page)
+    assert page.strip.get_accessible().get_name() == sequence
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_show_passcode_survives_unreadable_passkey():
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="oops", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+    assert pair_window._check_lock_state(assistant, r, 0) is True
+    assert len(assistant.pages) == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_unreadable_passkey_does_not_ask_a_mouse_to_type():
+    """Keyboards always yield steps, so this path is only ever reached by a device with
+    no keys to type on and no enter key to press."""
+    r = Receiver(
+        "passcode",
+        "bolt",
+        True,
+        receiver.Pairing(lock_open=True, device_passkey="oops", device_authentication=0x02),
+    )
+    assistant = Assistant(True)
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    text = "\n".join(_page_labels(page))
+    assert "enter key" not in text
+    assert "cannot read the passcode" in text
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_pair_device_issued_once(mocker):
+    r = Receiver("discovered", "bolt", True, receiver.Pairing(discovering=True, device_address=2, device_name=5))
+    spy_pair_device = mocker.spy(r, "pair_device")
+    assistant = Assistant(True)
+
+    first = pair_window._check_lock_state(assistant, r, 2)
+    second = pair_window._check_lock_state(assistant, r, 2)
+
+    assert first is True
+    assert second is True
+    assert spy_pair_device.call_count == 1
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize("progress", [None, 0, 5, 10, 11, 15])
+@pytest.mark.parametrize("passkey, authentication", [("50", 0x02), ("000918", 0x01)])
+def test_draw_step_strip(passkey, authentication, progress):
+    """Draws against an image surface, so cairo misuse and a bad highlight clamp are
+    caught without needing a display."""
+    import cairo
+
+    steps = pair_window._passkey_steps(passkey, authentication)
+    strip = pair_window._create_step_strip(steps, "sequence")
+    _cells, _separator_y, width, height = pair_window._step_strip_cells(steps)
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(width), int(height))
+    setattr(strip, pair_window._PROGRESS, progress)
+
+    assert pair_window._draw_step_strip(strip, cairo.Context(surface)) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_draw_step_strip_without_steps():
+    import cairo
+
+    strip = Gtk.DrawingArea()
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+
+    assert pair_window._draw_step_strip(strip, cairo.Context(surface)) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize(
+    "error",
+    [
+        PairingError.DEVICE_TIMEOUT.label,
+        PairingError.DEVICE_NOT_SUPPORTED.label,
+        PairingError.TOO_MANY_DEVICES.label,
+        PairingError.SEQUENCE_TIMEOUT.label,
+        BoltPairingError.DEVICE_TIMEOUT.label,
+        BoltPairingError.FAILED.label,
+        "discovery did not start",
+        "the pairing lock did not open",
+        "failed to open pairing lock",
+    ],
+)
+def test_create_failure_page_covers_every_error(error, mocker):
+    spy_create = mocker.spy(pair_window, "_create_page")
+
+    pair_window._pairing_failed(Assistant(True), Receiver("nano", "nano"), error)
+
+    assert spy_create.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        PairingError.DEVICE_TIMEOUT.label,
+        PairingError.DEVICE_NOT_SUPPORTED.label,
+        PairingError.TOO_MANY_DEVICES.label,
+        PairingError.SEQUENCE_TIMEOUT.label,
+        BoltPairingError.FAILED.label,
+        "failed to open pairing lock",
+    ],
+)
+def test_failure_text_is_specific(error):
+    """A protocol error must never fall through to the generic message."""
+    assert pair_window._failure_text(error) != pair_window._failure_text("something unheard of")
+
+
+def test_failure_text_explains_a_rejected_sequence():
+    """Bolt reports only that verification failed, so the page must not diagnose a cause."""
+    text = pair_window._failure_text(BoltPairingError.FAILED.label)
+
+    assert "not accepted" in text
+    assert "cannot tell which buttons were pressed" in text
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_failure_page_has_no_retry_button_without_a_callback(mocker):
+    """The periodic check reaches this path with a duck-typed assistant, which must
+    never be asked for anything beyond the methods it already provides."""
+    spy_create = mocker.spy(pair_window, "_create_page")
+    assistant = Assistant(True)
+
+    pair_window._pairing_failed(assistant, Receiver("nano", "nano"), "failed")
+
+    assert spy_create.call_count == 1
+    assert not any(isinstance(child, Gtk.Button) for child in assistant.pages[0].get_children())
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_failure_page_offers_retry_when_wired():
+    r = Receiver("nano", "nano")
+    retried = []
+    assistant = Gtk.Assistant()
+    setattr(assistant, pair_window._ON_RETRY, lambda: retried.append(True))
+
+    page = pair_window._create_failure_page(assistant, r, "failed")
+    buttons = [child for child in page.get_children() if isinstance(child, Gtk.Button)]
+
+    assert len(buttons) == 1
+    assert buttons[0].get_label() == "Try again"
+
+    buttons[0].clicked()
+
+    assert retried == [True]
+
+
+def _countdown_assistant(drawable=True):
+    assistant = Assistant(drawable)
+    countdown = Gtk.ProgressBar()
+    setattr(assistant, pair_window._COUNTDOWN, countdown)
+    return assistant, countdown
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+@pytest.mark.parametrize("receiver_kind", ["bolt", "unifying"])
+def test_create_adds_a_discovery_countdown(receiver_kind):
+    r = Receiver(receiver_kind, receiver_kind, True)
+
+    assistant = pair_window.create(r)
+
+    countdown = getattr(assistant, pair_window._COUNTDOWN, None)
+    assert isinstance(countdown, Gtk.ProgressBar)
+    assert countdown in assistant.get_nth_page(0).get_children()
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_drains_and_stops():
+    r = Receiver("bolt", "bolt", True)
+    assistant, countdown = _countdown_assistant()
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(assistant, r, deadline) is True
+    assert 0 < countdown.get_fraction() <= 1
+    assert countdown.get_text()
+
+    # a device was found, so the discovery timeout no longer applies
+    r.pairing.device_address = b"\x01\x02\x03\x04\x05\x06"
+    assert pair_window._update_countdown(assistant, r, deadline) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_stops_when_the_deadline_passes():
+    assistant, _countdown = _countdown_assistant()
+
+    assert pair_window._update_countdown(assistant, Receiver("bolt", "bolt", True), time.monotonic() - 1) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_update_countdown_stops_when_the_dialog_is_gone():
+    assistant, _countdown = _countdown_assistant(drawable=False)
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(assistant, Receiver("bolt", "bolt", True), deadline) is False
+
+
+def test_update_countdown_without_a_progress_bar():
+    deadline = time.monotonic() + pair_window._PAIRING_TIMEOUT
+
+    assert pair_window._update_countdown(Assistant(True), Receiver("bolt", "bolt", True), deadline) is False
+
+
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
+def test_no_countdown_during_passkey_entry():
+    """The entry timeout lives in the receiver's firmware and is never reported, so
+    showing a countdown there would mean inventing one."""
+    r = Receiver("bolt", "bolt", True, receiver.Pairing(lock_open=True, device_passkey="50", device_authentication=0x02))
+    assistant, _countdown = _countdown_assistant()
+
+    pair_window._check_lock_state(assistant, r, 0)
+
+    assert pair_window._update_countdown(assistant, r, time.monotonic() + pair_window._PAIRING_TIMEOUT) is False
+    page = getattr(assistant, pair_window._PASSKEY_PAGE)
+    assert not any(isinstance(child, Gtk.ProgressBar) for child in page.get_children())

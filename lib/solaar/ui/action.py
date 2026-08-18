@@ -67,7 +67,7 @@ def pair(window, receiver):
     assert receiver
     assert receiver.kind is None
 
-    pair_dialog = pair_window.create(receiver)
+    pair_dialog = pair_window.create(receiver, on_retry=lambda: pair(window, receiver))
     pair_dialog.set_transient_for(window)
     pair_dialog.set_destroy_with_parent(True)
     pair_dialog.set_modal(True)
