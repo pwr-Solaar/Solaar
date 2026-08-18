@@ -139,6 +139,13 @@ g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
 thumb_wheel_displacement = 0
+# Spurious Noop suppression on KeyIsDown button release:
+#   When a button used as a KeyIsDown modifier is released, the firmware sends a single-element
+#   MOUSE_GESTURE (Noop) that can incorrectly match MouseGesture rules.
+#   keys_used_while_held / suppress_noop_for_buttons / _suppress_current_noop track and swallow it.
+keys_used_while_held = set()   # button IDs that had a KeyIsDown action fire while held
+suppress_noop_for_buttons = set()  # button IDs whose next single-element MOUSE_GESTURE should be suppressed
+_suppress_current_noop = False  # reset each notification in evaluate_rules, checked in MouseGesture.evaluate
 
 _dbus_interface = None
 
@@ -878,7 +885,19 @@ class KeyIsDown(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        return key_is_down(self.key)
+        result = key_is_down(self.key)
+        if result:
+            # Mark the button as "used while held" so its release Noop gesture can be suppressed.
+            # Skip button-down notifications (REPROG_CONTROLS_V4 etc.) — only record when a non-button
+            # action (e.g. scroll, gesture) co-fires with the held button.
+            if feature not in (
+                SupportedFeature.REPROG_CONTROLS_V4,
+                SupportedFeature.GKEY,
+                SupportedFeature.MKEYS,
+                SupportedFeature.MR,
+            ):
+                keys_used_while_held.add(int(self.key))
+        return result
 
     def data(self):
         return {"KeyIsDown": str(self.key)}
@@ -996,6 +1015,8 @@ class MouseGesture(Condition):
         if feature == SupportedFeature.MOUSE_GESTURE:
             d = notification.data
             data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and _suppress_current_noop:  # swallow Noop from a button that had a KeyIsDown action
+                return False
             data_offset = 1
             movement_offset = 0
             if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
@@ -1436,8 +1457,21 @@ def key_is_down(key: NamedInt) -> bool:
 
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
+    global _suppress_current_noop
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s %s", feature, notification)
+    _suppress_current_noop = False
+    # If this is a single-element Noop gesture from a button that was used as a KeyIsDown modifier,
+    # set the flag so MouseGesture.evaluate ignores it.
+    if feature == SupportedFeature.MOUSE_GESTURE:
+        d = notification.data
+        try:
+            data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
+            if len(data) == 1 and int(data[0]) in suppress_noop_for_buttons:
+                _suppress_current_noop = True
+                suppress_noop_for_buttons.discard(int(data[0]))
+        except struct.error:
+            pass
     rules.evaluate(feature, notification, device, True)
 
 
@@ -1452,9 +1486,13 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
             for key in new_keys_down:
                 if key and key not in keys_down:
                     key_down = key
+                    suppress_noop_for_buttons.discard(int(key))  # re-press clears any pending noop suppression
             for key in keys_down:
                 if key and key not in new_keys_down:
                     key_up = key
+                    if int(key) in keys_used_while_held:  # was used as a KeyIsDown modifier; its release will Noop
+                        keys_used_while_held.discard(int(key))
+                        suppress_noop_for_buttons.add(int(key))
             keys_down = new_keys_down
         # and also G keys down
         elif feature == SupportedFeature.GKEY:
