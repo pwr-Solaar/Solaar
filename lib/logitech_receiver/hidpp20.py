@@ -1891,7 +1891,7 @@ class Hidpp20:
                     logger.error("failed to read whole name of %s (expected %d chars)", device, name_length)
                     return None
 
-            return name.decode("utf-8")
+            return name.decode("utf-8", errors="replace")
 
     def get_battery_status(self, device: Device):
         report = device.feature_request(SupportedFeature.BATTERY_STATUS)

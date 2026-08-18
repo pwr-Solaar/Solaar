@@ -497,7 +497,7 @@ class BoltReceiver(Receiver):
         codename = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.BOLT_DEVICE_NAME + n, 0x01)
         if codename:
             codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
-            return codename.decode("ascii")
+            return codename.decode("ascii", errors="replace")
 
     def device_pairing_information(self, n: int) -> dict:
         pair_info = self.read_register(Registers.RECEIVER_INFO, InfoSubRegisters.BOLT_PAIRING_INFORMATION + n)
