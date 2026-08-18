@@ -129,7 +129,7 @@ NET_WM_PID = None
 WM_CLASS = None
 
 
-udevice = None
+udevices = {"keyboard": None, "mouse": None}
 
 key_down = None
 key_up = None
@@ -239,33 +239,40 @@ if evdev:
         "forward": (11, evdev.ecodes.ecodes["BTN_EXTRA"]),
     }
 
-    # uinput capability for keyboard keys, mouse buttons, and scrolling
+    # uinput capabilities for keyboard keys, mouse buttons, and scrolling
     key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n != "KEY_CNT"]
+    button_events = []
     for _, evcode in buttons.values():
         if evcode:
-            key_events.append(evcode)
-    devicecap = {
-        evdev.ecodes.EV_KEY: key_events,
-        evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+            button_events.append(evcode)
+    devicecaps = {
+        "keyboard": {
+            evdev.ecodes.EV_KEY: key_events,
+            evdev.ecodes.EV_REP: [],
+        },
+        "mouse": {
+            evdev.ecodes.EV_KEY: button_events,
+            evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+        },
     }
 else:
     # Just mock these since they won't be useful without evdev anyway
     buttons = {}
     key_events = []
-    devicecap = {}
+    button_events = []
+    devicecaps = {"keyboard": {}, "mouse": {}}
 
 
-def setup_uinput():
-    global udevice
-    if udevice is not None:
-        return udevice
+def setup_uinput(kind):
+    if udevices[kind] is not None:
+        return udevices[kind]
     try:
-        udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
+        udevices[kind] = evdev.uinput.UInput(events=devicecaps[kind], name=f"solaar-{kind}")
         if logger.isEnabledFor(logging.INFO):
-            logger.info("uinput device set up")
-        return True
+            logger.info("uinput %s device set up", kind)
+        return udevices[kind]
     except Exception as e:
-        logger.warning("cannot create uinput device: %s", e)
+        logger.warning("cannot create uinput %s device: %s", kind, e)
 
 
 def kbdgroup():
@@ -316,22 +323,22 @@ def xy_direction(_x, _y):
         return "noop"
 
 
-def simulate_uinput(what, code, arg):
-    global udevice
-    if setup_uinput():
+def simulate_uinput(kind, what, code, arg):
+    device = setup_uinput(kind)
+    if device:
         try:
-            udevice.write(what, code, arg)
-            udevice.syn()
+            device.write(what, code, arg)
+            device.syn()
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("uinput simulated input %s %s %s", what, code, arg)
+                logger.debug("uinput %s simulated input %s %s %s", kind, what, code, arg)
             return True
         except Exception as e:
-            udevice = None
-            logger.warning("uinput write failed: %s", e)
+            udevices[kind] = None
+            logger.warning("uinput %s write failed: %s", kind, e)
 
 
 def simulate_key(code, event):  # X11 keycode but Solaar event code
-    if evdev and simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
+    if evdev and simulate_uinput("keyboard", evdev.ecodes.EV_KEY, code - 8, event):
         return True
     logger.warning("no way to simulate key input")
 
@@ -339,16 +346,16 @@ def simulate_key(code, event):  # X11 keycode but Solaar event code
 def click_uinput(button, count):
     if isinstance(count, int):
         for _ in range(count):
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+            if not simulate_uinput("mouse", evdev.ecodes.EV_KEY, button[1], 1):
                 return False
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+            if not simulate_uinput("mouse", evdev.ecodes.EV_KEY, button[1], 0):
                 return False
     else:
         if count != RELEASE:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+            if not simulate_uinput("mouse", evdev.ecodes.EV_KEY, button[1], 1):
                 return False
         if count != DEPRESS:
-            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+            if not simulate_uinput("mouse", evdev.ecodes.EV_KEY, button[1], 0):
                 return False
     return True
 
@@ -361,14 +368,13 @@ def click(button, count):
 
 
 def simulate_scroll(dx, dy):
-    if setup_uinput():
-        success = True
-        if dx:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
-        if dy and success:
-            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
-        if success:
-            return True
+    success = True
+    if dx:
+        success = simulate_uinput("mouse", evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+    if dy and success:
+        success = simulate_uinput("mouse", evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+    if success:
+        return True
     logger.warning("no way to simulate scrolling")
 
 
