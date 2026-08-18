@@ -178,6 +178,12 @@ is sent to the Solaar rule system so that rules can detect these notifications.
 For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
+Setting a button to `Live Mouse Gestures` instead emits a separate `MOUSE_GESTURE`
+notification as soon as the mouse crosses a movement threshold. Continuing to move
+the mouse emits more notifications, with a short delay between them. Diverted key
+presses are also emitted immediately. Releasing the initiating button stops tracking
+and discards any movement that has not crossed the threshold.
+
 ### Keyboard Key Names and Locations
 
 Solaar uses the standard Logitech names for keyboard keys.  Some Logitech keyboards have different icons on some of their keys and have different functionality than suggested by these names.

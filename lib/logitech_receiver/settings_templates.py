@@ -17,10 +17,12 @@ from __future__ import annotations
 
 import enum
 import logging
+import math
 import socket
 import struct
 import traceback
 
+from time import monotonic
 from time import sleep
 from time import time
 from typing import Callable
@@ -58,6 +60,9 @@ logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
 _F = hidpp20_constants.SupportedFeature
+
+LIVE_GESTURE_MOVEMENT_THRESHOLD = 2.5
+LIVE_GESTURE_REPEAT_DELAY = 0.35
 
 
 def halving_marks(max_value, step_count):
@@ -214,8 +219,7 @@ class RegisterSideScroll(settings.Setting):
     name = "side-scroll"
     label = _("Side Scrolling")
     description = _(
-        "When disabled, pushing the wheel sideways sends custom button events\n"
-        "instead of the standard side-scrolling events."
+        "When disabled, pushing the wheel sideways sends custom button events\ninstead of the standard side-scrolling events."
     )
     register = Registers.MOUSE_BUTTON_FLAGS
     validator_options = {"true_value": 0x02, "mask": 0x02}
@@ -699,8 +703,7 @@ class SmartShift(settings.Setting):
     name = "smart-shift"
     label = _("Scroll Wheel Ratchet Speed")
     description = _(
-        "Use the mouse wheel speed to switch between ratcheted and freespinning.\n"
-        "The mouse wheel is always ratcheted at 50."
+        "Use the mouse wheel speed to switch between ratcheted and freespinning.\nThe mouse wheel is always ratcheted at 50."
     )
     feature = _F.SMART_SHIFT
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
@@ -964,14 +967,106 @@ class MouseGesturesXY(settings.RawXYProcessing):
             logger.debug("mouse gesture move event %d %d %s", x, y, self.data)
 
 
+class LiveMouseGesturesXY(settings.RawXYProcessing):
+    """Emit mouse gesture notifications while the initiating button is held."""
+
+    def activate_action(self):
+        self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
+        self.fsmState = State.IDLE
+        self.starting = False
+        self.gesture_key = None
+        self.last_emit = float("-inf")
+        self.reset_motion()
+
+    def deactivate_action(self):
+        self.fsmState = State.IDLE
+        self.starting = False
+        self.gesture_key = None
+        self.reset_motion()
+
+    def reset_motion(self):
+        self.dx = 0.0
+        self.dy = 0.0
+
+    def press_action(self, key):
+        if self.fsmState == State.IDLE:
+            self.fsmState = State.PRESSED
+            self.starting = True
+            self.gesture_key = int(key.key)
+            self.last_emit = float("-inf")
+            self.reset_motion()
+
+    def release_action(self):
+        # Live events have already been emitted.  Discard sub-threshold motion
+        # rather than generating a second event when the button is released.
+        self.fsmState = State.IDLE
+        self.starting = False
+        self.gesture_key = None
+        self.reset_motion()
+
+    def emit_event(self, event):
+        if self.gesture_key is None:
+            return
+        data = [self.gesture_key, *event]
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("live mouse gesture notification %s", data)
+        payload = struct.pack("!" + (len(data) * "h"), *data)
+        notification = base.HIDPPNotification(0, 0, 0, 0, payload)
+        diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
+
+    def move_action(self, dx, dy):
+        if self.fsmState != State.PRESSED:
+            return
+
+        if (self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) or 0) >= 5 and self.starting:
+            self.starting = False  # hack to ignore strange first movement report from MX Master 3S
+            return
+        self.starting = False
+
+        dpi = self.dpiSetting.read() if self.dpiSetting else 1000
+        dpi = dpi if isinstance(dpi, (int, float)) and dpi > 0 else 1000
+        scale = 15.0 / float(dpi)  # yields a more-or-less DPI-independent movement of about 5 units/cm
+        self.dx += float(dx) * scale
+        self.dy += float(dy) * scale
+
+        distance = math.hypot(self.dx, self.dy)
+        if distance < LIVE_GESTURE_MOVEMENT_THRESHOLD:
+            return
+
+        now = monotonic()
+        if now - self.last_emit < LIVE_GESTURE_REPEAT_DELAY:
+            # Preserve one threshold of pending movement without allowing a
+            # large movement to overflow the signed shorts in the notification.
+            factor = LIVE_GESTURE_MOVEMENT_THRESHOLD / distance
+            self.dx *= factor
+            self.dy *= factor
+            return
+
+        move_x = int(self.dx)
+        move_y = int(self.dy)
+        self.last_emit = now
+        self.reset_motion()
+        self.emit_event([0, move_x, move_y])
+
+    def key_action(self, key):
+        self.emit_event([1, key])
+
+
 class DivertKeys(settings.Settings):
     name = "divert-keys"
     label = _("Key/Button Diversion")
-    description = _("Make the key or button send HID++ notifications (Diverted) or initiate Mouse Gestures or Sliding DPI")
+    description = _(
+        "Make the key or button send HID++ notifications (Diverted) or initiate Mouse Gestures, "
+        "Live Mouse Gestures, or Sliding DPI"
+    )
     feature = _F.REPROG_CONTROLS_V4
     keys_universe = special_keys.CONTROL
-    choices_universe = common.NamedInts(**{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2, _("Sliding DPI"): 3})
-    choices_gesture = common.NamedInts(**{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2})
+    choices_universe = common.NamedInts(
+        **{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2, _("Sliding DPI"): 3, _("Live Mouse Gestures"): 4}
+    )
+    choices_gesture = common.NamedInts(
+        **{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2, _("Live Mouse Gestures"): 4}
+    )
     choices_divert = common.NamedInts(**{_("Regular"): 0, _("Diverted"): 1})
 
     class rw_class:
@@ -997,17 +1092,21 @@ class DivertKeys(settings.Settings):
         def prepare_write(self, key, new_value):
             if self.gestures and new_value != 2:  # mouse gestures
                 self.gestures.stop(key)
+            if self.live_gestures and new_value != 4:  # live mouse gestures
+                self.live_gestures.stop(key)
             if self.sliding and new_value != 3:  # sliding DPI
                 self.sliding.stop(key)
             if self.gestures and new_value == 2:  # mouse gestures
                 self.gestures.start(key)
+            if self.live_gestures and new_value == 4:  # live mouse gestures
+                self.live_gestures.start(key)
             if self.sliding and new_value == 3:  # sliding DPI
                 self.sliding.start(key)
             return super().prepare_write(key, new_value)
 
         @classmethod
         def build(cls, setting_class, device):
-            sliding = gestures = None
+            sliding = gestures = live_gestures = None
             choices = {}
             if device.keys:
                 for key in device.keys:
@@ -1016,6 +1115,8 @@ class DivertKeys(settings.Settings):
                             choices[key.key] = setting_class.choices_gesture
                             if gestures is None:
                                 gestures = MouseGesturesXY(device, name="MouseGestures")
+                            if live_gestures is None:
+                                live_gestures = LiveMouseGesturesXY(device, name="LiveMouseGestures")
                             if _F.ADJUSTABLE_DPI in device.features:
                                 choices[key.key] = setting_class.choices_universe
                                 if sliding is None:
@@ -1029,6 +1130,7 @@ class DivertKeys(settings.Settings):
             validator = cls(choices, key_byte_count=2, byte_count=1, mask=0x01)
             validator.sliding = sliding
             validator.gestures = gestures
+            validator.live_gestures = live_gestures
             return validator
 
 
@@ -3109,8 +3211,7 @@ def _logivoice_make_parameters_class(feature: hidpp20_constants.SupportedFeature
         "name": f"logivoice-{slug}-parameters",
         "label": f"LogiVoice {module_name}: Parameters (read-only)",
         "description": (
-            f"Decoded {module_name} GetParameters fields. "
-            "Opaque raw values shown where the wire encoding isn't confirmed yet."
+            f"Decoded {module_name} GetParameters fields. Opaque raw values shown where the wire encoding isn't confirmed yet."
         ),
         "feature": feature,
     }
@@ -3732,7 +3833,7 @@ class RgbShutdownAnimation(_RgbBootEffectSetting):
     name = "rgb_shutdown_animation"
     label = _("Shutdown Animation")
     description = (
-        _("Firmware-played animation when the keyboard powers off.\n" "Setting persists on the device (non-volatile).")
+        _("Firmware-played animation when the keyboard powers off.\nSetting persists on the device (non-volatile).")
         + "\n"
         + _("Device default: Primary #FF0081, Secondary #80AAFF.")
     )

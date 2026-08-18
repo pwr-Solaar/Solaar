@@ -1,5 +1,6 @@
 # 1.1.20
 
+* Add live mouse gestures that trigger rules while their button is held
 * Add Irish translation
 * Don't use old settings when reusing sboxes
 * Add POUND and ISO_BACKSLASH cells to MAIN_ISO key layout
