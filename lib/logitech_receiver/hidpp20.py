@@ -1170,10 +1170,15 @@ class LEDParam:
     form = "form"
     saturation = "saturation"
     direction = "direction"
+    cycle = "cycle"
 
 
 # NamedInts (not IntEnum) so the GTK ComboBoxText shows readable labels.
 LedRampChoice = common.NamedInts(Default=0, Yes=1, No=2)
+
+# Audio Visualizer color mode: values >= 2 select unmapped non-pulsing
+# sub-modes, so only the two known ones are exposed.
+LedCycleChoices = common.NamedInts(Off=0, On=1)
 
 LedFormChoices = common.NamedInts(
     Default=0,
@@ -1211,6 +1216,7 @@ LEDParamSize = {
     LEDParam.form: 1,
     LEDParam.saturation: 1,
     LEDParam.direction: 1,
+    LEDParam.cycle: 1,
 }
 # Entry: [NamedInt, params, defaults, ranges] — trailing dicts optional.
 # ranges overrides a field's global min/max, e.g. period: (2, 200).
@@ -1228,6 +1234,13 @@ LEDEffects = {
     0x04: [
         NamedInt(0x04, _("Wave")),
         {LEDParam.period: 6, LEDParam.direction: 9},
+        {LEDParam.period: 5000},
+    ],
+    # G560 factory default: pulses brightness with audio; cycle On
+    # self-cycles hue (color ignored), Off pulses the fixed color.
+    0x07: [
+        NamedInt(0x07, _("Audio Visualizer")),
+        {LEDParam.cycle: 0, LEDParam.color: 1, LEDParam.period: 5},
         {LEDParam.period: 5000},
     ],
     0x08: [NamedInt(0x08, _("Boot")), {}],
@@ -1350,13 +1363,23 @@ LEDZoneLocations[0x09] = _("Primary 4")
 LEDZoneLocations[0x0A] = _("Primary 5")
 LEDZoneLocations[0x0B] = _("Primary 6")
 
+# Location codes mean different things per device kind; these override the
+# mouse/keyboard table above, falling back to it for codes they don't name.
+LEDZoneLocationsByKind = {"speaker": common.NamedInts()}
+LEDZoneLocationsByKind["speaker"][0x01] = _("Left Front")
+LEDZoneLocationsByKind["speaker"][0x02] = _("Right Front")
+LEDZoneLocationsByKind["speaker"][0x03] = _("Left Rear")
+LEDZoneLocationsByKind["speaker"][0x04] = _("Right Rear")
+
 
 class LEDZoneInfo:  # effects that a zone can do
     def __init__(self, feature, function, offset, effect_function, device, index):
         info = device.feature_request(feature, function, index, 0xFF, 0x00)
         self.location, self.count = struct.unpack("!HB", info[1 + offset : 4 + offset])
         self.index = index
-        self.location = LEDZoneLocations[self.location] if LEDZoneLocations[self.location] else self.location
+        kind_locations = LEDZoneLocationsByKind.get(str(getattr(device, "kind", None)))
+        location = kind_locations[self.location] if kind_locations else None
+        self.location = location or LEDZoneLocations[self.location] or self.location
         self.effects = []
         for i in range(0, self.count):
             self.effects.append(LEDEffectInfo(feature, effect_function, device, index, i))

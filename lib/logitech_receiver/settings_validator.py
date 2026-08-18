@@ -583,17 +583,18 @@ class HeteroValidator(Validator):
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
 
-    def __init__(self, data_class=None, options=None, readable=True):
+    def __init__(self, data_class=None, options=None, readable=True, read_skip_byte_count=0):
         # options=None for purely host-side settings — data_class handles bytes[0] as the ID.
         assert data_class is not None
         self.data_class = data_class
         self.options = options
         self.readable = readable
+        self.read_skip_byte_count = read_skip_byte_count  # e.g. request-echo bytes before the payload
         self.needs_current_value = False
 
     def validate_read(self, reply_bytes):
         if self.readable:
-            reply_value = self.data_class.from_bytes(reply_bytes, options=self.options)
+            reply_value = self.data_class.from_bytes(reply_bytes[self.read_skip_byte_count :], options=self.options)
             return reply_value
 
     def prepare_write(self, new_value, current_value=None):

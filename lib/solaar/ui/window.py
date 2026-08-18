@@ -23,6 +23,7 @@ from enum import IntEnum
 import gi
 
 from gi.repository.GObject import TYPE_PYOBJECT
+from logitech_receiver import common
 from logitech_receiver import hidpp10_constants
 from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
@@ -554,11 +555,11 @@ def _update_details(button):
                     yield _("Unit ID"), device.unitId
 
             if read_all:
-                if device.firmware:
-                    for fw in list(device.firmware):
-                        yield "  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip()
+                main_firmware = common.main_firmware(device.firmware)
+                if main_firmware:
+                    yield _("Firmware"), common.firmware_display_version(main_firmware)
             elif device.kind is None or device.online:
-                yield f"  {_('Firmware')}", "..."
+                yield _("Firmware"), "..."
 
             flag_bits = device.notification_flags
             if flag_bits is not None:

@@ -337,3 +337,75 @@ def test_battery_offline():
     assert battery.ok()
     assert not battery.charging()
     assert battery.to_str() == "Battery: 58% (offline)"
+
+
+@pytest.mark.parametrize(
+    "name, version, expected",
+    [
+        # the G-audio family carries a version past 99 in its name prefix
+        ("U1 ", "22.04.B0370", (122, 4, 370)),  # G560
+        ("U1 ", "37.00.B0131", (137, 0, 131)),  # G733
+        ("U  ", "98.03.B0027", (98, 3, 27)),  # G933, no hundreds digit yet
+        # "BL1" is a bootloader name, not a version prefix: no fold
+        ("BL1", "42.00.B0016", (42, 0, 16)),
+        ("MPM", "27.00.B0016", (27, 0, 16)),
+        ("MPM", "27.00", (27, 0, 0)),
+        ("", "1.16", (1, 16, 0)),  # Centurion two-part form
+        ("", "3.02.15", (3, 2, 15)),  # build without the B marker
+        ("MPM", "", None),
+        ("MPM", "nonsense", None),
+        ("MPM", "1A.2B", None),  # a device reporting non-BCD is not comparable
+    ],
+)
+def test_firmware_version_tuple(name, version, expected):
+    firmware = common.FirmwareInfo(common.FirmwareKind.Firmware, name, version, None)
+
+    assert common.firmware_version_tuple(firmware) == expected
+
+
+def _fw(name, version, kind=common.FirmwareKind.Firmware):
+    return common.FirmwareInfo(kind, name, version, None)
+
+
+@pytest.mark.parametrize(
+    "name, version, expected",
+    [
+        ("U1 ", "22.04.B0370", "122.4.370"),  # G560, hundreds digit folded in
+        ("U  ", "98.03.B0027", "98.3.27"),  # G933
+        ("MPM", "27.00.B0016", "27.0.16"),  # prefix dropped, as Logitech writes it
+        ("MPM", "27.00", "27.0"),  # no build reported, none invented
+        ("", "1.16", "1.16"),  # Centurion two-part form
+        ("", "04.02.B0009", "4.2.9"),  # HID++ 1.0 receiver, as the official app writes it
+        ("MPM", "1A.2B", "MPM 1A.2B"),  # unparsable falls back to the raw fields
+        ("", "5", "5"),  # hardware revision is a bare integer
+        ("", "", ""),
+    ],
+)
+def test_firmware_display_version(name, version, expected):
+    assert common.firmware_display_version(_fw(name, version)) == expected
+
+
+def test_main_firmware_skips_bootloader():
+    bootloader = _fw("BL2", "19.00.B0010", kind=common.FirmwareKind.Bootloader)
+    main = _fw("MPK", "25.02.B0013")
+
+    assert common.main_firmware([bootloader, main, _fw("", "", kind=common.FirmwareKind.Other)]) is main
+
+
+def test_main_firmware_takes_the_highest():
+    older = _fw("U1 ", "22.02.B0001")
+    newer = _fw("U1 ", "22.04.B0370")
+
+    assert common.main_firmware([newer, older]) is newer
+    assert common.main_firmware([older, newer]) is newer
+
+
+def test_main_firmware_falls_back_to_an_unparsable_entry():
+    odd = _fw("MPM", "nonsense")
+
+    assert common.main_firmware([odd]) is odd
+
+
+@pytest.mark.parametrize("firmware", [None, (), [_fw("BL1", "42.00.B0016", kind=common.FirmwareKind.Bootloader)]])
+def test_main_firmware_absent(firmware):
+    assert common.main_firmware(firmware) is None

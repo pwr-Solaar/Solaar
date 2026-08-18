@@ -272,6 +272,11 @@ simple_tests = [
         fake_hidpp.Response("0A", 0x0410, "0A"),
     ),
     Setup(
+        FeatureTest(settings_templates.BassTone, 0x46, 0x50),
+        fake_hidpp.Response("46", 0x0400),
+        fake_hidpp.Response("50", 0x0410, "50"),
+    ),
+    Setup(
         FeatureTest(settings_templates.ADCPower, 5, 0xA, version=0x03),
         fake_hidpp.Response("05", 0x0410),
         fake_hidpp.Response("0A", 0x0420, "0A"),
@@ -280,6 +285,11 @@ simple_tests = [
         FeatureTest(settings_templates.LEDControl, False, True),
         fake_hidpp.Response("00", 0x0470),
         fake_hidpp.Response("01", 0x0480, "01"),
+    ),
+    Setup(  # NvConfig startup toggle: GetNvConfig echoes the cap ID; 0x01 on / 0x02 off
+        FeatureTest(settings_templates.LEDStartupAnimation, False, True, version=5),
+        fake_hidpp.Response("00010200000000000000", 0x0440, "0001"),
+        fake_hidpp.Response("000101", 0x0450, "000101"),
     ),
     Setup(
         FeatureTest(
@@ -291,7 +301,7 @@ simple_tests = [
         fake_hidpp.Response("00000102", 0x0410, "00FF00"),
         fake_hidpp.Response("0000000300040005", 0x0420, "000000"),
         fake_hidpp.Response("0001000B00080009", 0x0420, "000100"),
-        fake_hidpp.Response("000000000000010050", 0x04E0, "00"),
+        fake_hidpp.Response("00000000000000010050", 0x04E0, "00"),  # GetEffect echoes the zone index
         fake_hidpp.Response("000000000000000101500000", 0x0430, "000000000000000101500000"),
     ),
     Setup(
@@ -661,6 +671,15 @@ key_tests = [
         fake_hidpp.Response("E010", 0x0420, "00"),
         fake_hidpp.Response("E010", 0x0430, "02E010"),
         fake_hidpp.Response("E018", 0x0430, "02E018"),
+    ),
+    Setup(  # signed asymmetric dB range as reported by the G560 (-20..+6, bounds exclusive)
+        FeatureTest(settings_templates.Equalizer, {0: -4, 1: 2}, {1: 5}, 2),
+        [-19, 5],
+        fake_hidpp.Response("021A00EC06", 0x0400),
+        fake_hidpp.Response("0000200040", 0x0410, "00"),
+        fake_hidpp.Response("FC02", 0x0420, "00"),
+        fake_hidpp.Response("FC02", 0x0430, "02FC02"),
+        fake_hidpp.Response("FC05", 0x0430, "02FC05"),
     ),
     Setup(  # HeadsetOnboardEQ: 2 bands, 128Hz/-2dB/Q10 and 256Hz/+3dB/Q10
         FeatureTest(settings_templates.HeadsetOnboardEQ, {0: -2, 1: 3}, {1: 5}, 2),
@@ -1053,3 +1072,49 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+def _led_lighting_device():
+    responses = [
+        fake_hidpp.Response("0100000001", 0x0400),
+        fake_hidpp.Response("00000102", 0x0410, "00FF00"),
+        fake_hidpp.Response("0000000300040005", 0x0420, "000000"),
+        fake_hidpp.Response("0001000B00080009", 0x0420, "000100"),
+        fake_hidpp.Response("01", 0x0480, "01"),
+        fake_hidpp.Response("000000000000000020500000", 0x0430, "000000000000000020500000"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.SupportedFeature.COLOR_LED_EFFECTS, offset=4)
+    control = settings_templates.check_feature(device, settings_templates.LEDControl)
+    zones = settings_templates.check_feature(device, settings_templates.LEDZoneSetting)
+    device.settings = [control] + zones
+    return device
+
+
+def test_lighting_apply_led_control_off_leaves_lighting_alone(mocker):
+    """With led_control persisted off, connect-time apply must not send any
+    lighting traffic — the device or another app (e.g. OpenRGB) owns it."""
+    device = _led_lighting_device()
+    device.persister["led_control"] = False
+    device.persister[device.settings[1].name] = hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50)
+    spy = mocker.spy(device, "request")
+
+    for s in device.settings:
+        s.apply()
+
+    assert spy.call_count == 0
+
+
+def test_lighting_apply_led_control_on_claims_and_repaints(mocker):
+    """With led_control persisted on, apply claims SW control and pushes the
+    saved zone effect."""
+    device = _led_lighting_device()
+    device.persister["led_control"] = True
+    device.persister[device.settings[1].name] = hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50)
+    spy = mocker.spy(device, "request")
+
+    for s in device.settings:
+        s.apply()
+
+    request_ids = [c.args[0] for c in spy.call_args_list]
+    assert 0x0480 in request_ids  # SetSWControl claim
+    assert 0x0430 in request_ids  # zone effect write

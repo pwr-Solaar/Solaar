@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import binascii
 import dataclasses
+import re
 import typing
 
 from enum import Flag
@@ -635,6 +636,54 @@ class FirmwareInfo:
     name: str
     version: str
     extras: str | None
+
+
+_FIRMWARE_VERSION_RE = re.compile(r"^(\d+)\.(\d+)(?:\.B?(\d+))?$")
+
+
+def firmware_version_tuple(firmware: FirmwareInfo) -> tuple[int, int, int] | None:
+    """A firmware's comparable (number, revision, build).
+
+    The number field only holds two digits, so a version past 99 carries its
+    hundreds digit in the name prefix ("U1 " is 1xx). That is why this takes
+    the whole FirmwareInfo: the version string alone sorts a pre-rollover
+    98.xx above a post-rollover 122.xx.
+    """
+    match = _FIRMWARE_VERSION_RE.match(firmware.version.strip())
+    if not match:
+        return None
+    number, revision, build = int(match.group(1)), int(match.group(2)), int(match.group(3) or 0)
+    name = firmware.name
+    if len(name) == 3 and name[0] == "U" and name[1].isdigit() and name[2] == " ":
+        number += int(name[1]) * 100
+    return number, revision, build
+
+
+def main_firmware(firmware: Iterable[FirmwareInfo] | None) -> FirmwareInfo | None:
+    """The main firmware entity, the one Logitech versions a device by.
+
+    Several entities can report kind Firmware; take the highest, as G HUB does.
+    """
+    candidates = [fw for fw in firmware or () if fw.kind == FirmwareKind.Firmware]
+    parsed = [fw for fw in candidates if firmware_version_tuple(fw) is not None]
+    if parsed:
+        return max(parsed, key=firmware_version_tuple)
+    return candidates[0] if candidates else None
+
+
+def firmware_display_version(firmware: FirmwareInfo) -> str:
+    """A firmware version written the way Logitech writes it, e.g. "122.4.370".
+
+    Unparsable versions fall back to the raw name and version, so nothing is
+    ever hidden just because a device numbers itself unusually.
+    """
+    parsed = firmware_version_tuple(firmware)
+    if parsed is None:
+        return (firmware.name + " " + firmware.version).strip()
+    number, revision, build = parsed
+    if len(firmware.version.strip().split(".")) < 3:
+        return f"{number}.{revision}"
+    return f"{number}.{revision}.{build}"
 
 
 class BatteryStatus(Flag):
