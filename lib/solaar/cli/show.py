@@ -105,7 +105,7 @@ def _print_centurion_dongle_features(receiver):
             hw_info = _hidpp20.get_hardware_info_centurion(receiver)
             if fw_list:
                 for fw in fw_list:
-                    print(f"          Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+                    print(f"          Firmware: {(fw.name + ' ' + fw.version).strip()}")
             if serial and serial.strip() and serial.strip().isprintable():
                 print(f"          Serial: {serial}")
             if hw_info:
@@ -344,7 +344,7 @@ def _print_device(dev, num=None):
                     hw_info = _hidpp20.get_hardware_info_centurion(dev)
                 if fw_list:
                     for fw in fw_list:
-                        print(f"            Firmware: {(str(fw.kind) + ' ' + fw.name).strip()} {fw.version}")
+                        print(f"            Firmware: {(fw.name + ' ' + fw.version).strip()}")
                 if serial and serial.strip() and serial.strip().isprintable():
                     print(f"            Serial: {serial}")
                 if hw_info:

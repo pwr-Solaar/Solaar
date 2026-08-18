@@ -50,10 +50,33 @@ logger = logging.getLogger(__name__)
 # --- Centurion protocol functions (standalone, operate on any device-like object) ---
 
 
-def get_firmware_centurion(device):
-    """Reads firmware info from a Centurion device via DeviceInfo (0x0100) function 1."""
+def _parse_centurion_firmware(report):
+    """Builds a FirmwareInfo from a DeviceInfo (0x0100) function 1 response.
+
+    The response is a plain binary major.minor.build triple -- not BCD, and
+    nothing like the Feature 0x0003 encoding:
+
+        byte 0     major
+        byte 1     minor
+        bytes 2-3  build (BE16)
+        byte 4     nameLen
+        bytes 5+   name
+
+    A PRO X 2 LIGHTSPEED and its dongle both answer 01 02 00 02 00, which G HUB
+    shows as 1.2.2.  There is no firmware-type field, so the kind is chosen
+    rather than read.
+    """
     from . import common
 
+    major, minor = report[0], report[1]
+    build = struct.unpack("!H", report[2:4])[0]
+    name_len = report[4]
+    name = report[5 : 5 + name_len].decode("ascii", errors="replace").rstrip("\x00") if name_len else ""
+    return common.FirmwareInfo(FirmwareKind.Firmware, name, f"{major}.{minor}.{build}", None)
+
+
+def get_firmware_centurion(device):
+    """Reads firmware info from a Centurion device via DeviceInfo (0x0100) function 1."""
     fw = []
     seen = set()  # track response signatures to detect duplicates
     for index in range(0, 8):  # try up to 8 entities
@@ -68,13 +91,7 @@ def get_firmware_centurion(device):
         if sig in seen:
             break
         seen.add(sig)
-        fw_type = report[0]
-        version = struct.unpack("!H", report[2:4])[0]
-        name_len = report[4]
-        name = report[5 : 5 + name_len].decode("ascii", errors="replace").rstrip("\x00") if name_len else ""
-        version_str = f"{version >> 8}.{version & 0xFF:02d}"
-        kind = FirmwareKind(fw_type) if fw_type <= 3 else FirmwareKind.Other
-        fw.append(common.FirmwareInfo(kind, name, version_str, None))
+        fw.append(_parse_centurion_firmware(report))
     return tuple(fw) if fw else None
 
 
@@ -118,8 +135,6 @@ def _centurion_sub_device_info_request(device, function=0x00, *params):
 
 def get_firmware_centurion_sub(device):
     """Reads firmware info from the Centurion sub-device (headset) via bridge."""
-    from . import common
-
     fw = []
     seen = set()
     for index in range(0, 8):
@@ -130,13 +145,7 @@ def get_firmware_centurion_sub(device):
         if sig in seen:
             break
         seen.add(sig)
-        fw_type = report[0]
-        version = struct.unpack("!H", report[2:4])[0]
-        name_len = report[4]
-        name = report[5 : 5 + name_len].decode("ascii", errors="replace").rstrip("\x00") if name_len else ""
-        version_str = f"{version >> 8}.{version & 0xFF:02d}"
-        kind = FirmwareKind(fw_type) if fw_type <= 3 else FirmwareKind.Other
-        fw.append(common.FirmwareInfo(kind, name, version_str, None))
+        fw.append(_parse_centurion_firmware(report))
     return tuple(fw) if fw else None
 
 

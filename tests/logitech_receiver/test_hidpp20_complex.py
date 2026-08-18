@@ -1039,7 +1039,7 @@ def test_centurion_bridge_request_write():
 def test_centurion_firmware_dedup():
     """get_firmware_centurion() deduplicates identical firmware entries."""
     # Simulate parent device that returns the same firmware for every entity index
-    fw_response = "00" + "00" + "0105" + "04" + "44303031" + "00" * 20  # type=0, ver=1.05, name="D001"
+    fw_response = "01" + "02" + "0105" + "04" + "44303031" + "00" * 20  # ver 1.2.261, name="D001"
     responses = fake_hidpp.r_centurion_headset + [fake_hidpp.Response(fw_response, 0x0210, f"{i:02X}") for i in range(8)]
     dev = fake_hidpp.Device("CENT_DEDUP", True, 2.6, responses, centurion=True)
 
@@ -1049,6 +1049,33 @@ def test_centurion_firmware_dedup():
     assert fw is not None
     assert len(fw) == 1
     assert fw[0].name == "D001"
+    assert fw[0].version == "1.2.261"
+    assert fw[0].kind == common.FirmwareKind.Firmware
+
+
+@pytest.mark.parametrize(
+    "codename, response, version",
+    [
+        # PRO X 2 LIGHTSPEED and its dongle both answer this; G HUB shows 1.2.2.
+        ("CENT_PROX2", "0102000200", "1.2.2"),
+        # G325 LIGHTSPEED. Byte 2 is non-zero here, which is what pins the build
+        # to a BE16: a uint8 build in byte 3 would read 129, and published G HUB
+        # screenshots of this model read 1.0.2177.
+        ("CENT_G325", "0100088100", "1.0.2177"),
+    ],
+)
+def test_centurion_firmware_version(codename, response, version):
+    responses = fake_hidpp.r_centurion_headset + [
+        fake_hidpp.Response(response + "00" * 11, 0x0210, f"{i:02X}") for i in range(8)
+    ]
+    dev = fake_hidpp.Device(codename, True, 2.6, responses, centurion=True)
+
+    fw = _hidpp20.get_firmware_centurion(dev)
+
+    assert len(fw) == 1
+    assert fw[0].version == version
+    assert fw[0].kind == common.FirmwareKind.Firmware
+    assert fw[0].name == ""
 
 
 def test_centurion_sub_device_firmware():
@@ -1057,10 +1084,10 @@ def test_centurion_sub_device_firmware():
     dev._centurion_bridge_index = 3
     dev._centurion_sub_features = set()
     dev._centurion_sub_indices = {hidpp20_constants.SupportedFeature.CENTURION_DEVICE_INFO: 2}
-    # Sub-device firmware: type=0 (firmware), ver=3.02, name="H001"
+    # Sub-device firmware: version 3.2.4, name="H001"
     dev._bridge_responses = {
-        (2, 0x10, "00"): bytes([0x00, 0x00, 0x03, 0x02, 0x04]) + b"H001",
-        (2, 0x10, "01"): bytes([0x00, 0x00, 0x03, 0x02, 0x04]) + b"H001",  # duplicate → dedup stops
+        (2, 0x10, "00"): bytes([0x03, 0x02, 0x00, 0x04, 0x04]) + b"H001",
+        (2, 0x10, "01"): bytes([0x03, 0x02, 0x00, 0x04, 0x04]) + b"H001",  # duplicate → dedup stops
     }
 
     fw = _hidpp20.get_firmware_centurion_sub(dev)
@@ -1068,7 +1095,7 @@ def test_centurion_sub_device_firmware():
     assert fw is not None
     assert len(fw) == 1
     assert fw[0].name == "H001"
-    assert fw[0].version == "3.02"
+    assert fw[0].version == "3.2.4"
 
 
 def test_centurion_sub_device_serial():
