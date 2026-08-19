@@ -268,6 +268,20 @@ def setup_uinput():
         logger.warning("cannot create uinput device: %s", e)
 
 
+def teardown_uinput():
+    global udevice
+    if udevice is None:
+        return
+    try:
+        udevice.close()
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("uinput device closed")
+    except Exception as e:
+        logger.warning("cannot close uinput device: %s", e)
+    finally:
+        udevice = None
+
+
 def kbdgroup():
     if xkb_setup():
         state = XkbStateRec()
