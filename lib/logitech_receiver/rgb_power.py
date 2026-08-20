@@ -380,6 +380,11 @@ class RGBPowerManager:
 
     _DIM_INTERVAL_MS = 200
     _DIM_STEPS = 25  # ~5s dim ramp
+    # Let the wake-key HID report reach the kernel before we send HID++.
+    # Immediate SetRgbPowerMode / color restore on G515 races with that
+    # report and drops the first key — especially modifiers held into the
+    # next character (Shift at a password prompt).
+    _WAKE_DELAY_MS = 120
 
     def __init__(self, device):
         self._device = device
@@ -391,6 +396,7 @@ class RGBPowerManager:
         self._idle_effect = None
         self._sleep_timer_id = None
         self._dim_timer_id = None
+        self._wake_timer_id = None
         self._dim_step = 0
         self._dim_zones = []
         self._dim_perkey = None
@@ -409,6 +415,7 @@ class RGBPowerManager:
     def stop(self):
         self._cancel_dim_timer()
         self._cancel_sleep_timer()
+        self._cancel_wake_timer()
         if self._state != self.ACTIVE:
             try:
                 self._wake()
@@ -423,6 +430,7 @@ class RGBPowerManager:
         are picked up even when our settings are ignored."""
         self._cancel_dim_timer()
         self._cancel_sleep_timer()
+        self._cancel_wake_timer()
         self._state = self.ACTIVE
         self._read_firmware_timers()
         if logger.isEnabledFor(logging.DEBUG):
@@ -514,7 +522,8 @@ class RGBPowerManager:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: firmware ACTIVE event — waking", self._device)
             self._cancel_sleep_timer()
-            self._wake()
+            self._cancel_dim_timer()
+            self._schedule_wake()
 
     def _sleep_timer_fired(self):
         """GLib callback — software sleep timer expired after IDLE."""
@@ -527,6 +536,35 @@ class RGBPowerManager:
         if self._sleep_timer_id is not None:
             GLib.source_remove(self._sleep_timer_id)
             self._sleep_timer_id = None
+
+    def _schedule_wake(self):
+        """Defer HID++ wake so it does not race with the HID report of the
+        key that generated this onUserActivity event.
+
+        Running SetSWControl / color restore on the listener thread in the
+        same notification that the wake key produced has been observed on
+        G515 LS TKL to drop that first key. Modifiers are the painful case:
+        Shift is typically held into the next character, so a dropped
+        Shift-down makes the following letter unshifted (e.g. at a
+        password prompt).
+        """
+        if self._wake_timer_id is not None:
+            return  # already scheduled (firmware sends a burst)
+        if _has_glib:
+            self._wake_timer_id = GLib.timeout_add(self._WAKE_DELAY_MS, self._deferred_wake)
+        else:
+            self._wake()
+
+    def _deferred_wake(self):
+        self._wake_timer_id = None
+        if self._state != self.ACTIVE and self._device.online:
+            self._wake()
+        return False  # One-shot timer
+
+    def _cancel_wake_timer(self):
+        if self._wake_timer_id is not None:
+            GLib.source_remove(self._wake_timer_id)
+            self._wake_timer_id = None
 
     def _read_firmware_timers(self):
         """Read idle/sleep timeouts from firmware as the manager's defaults."""
@@ -551,13 +589,17 @@ class RGBPowerManager:
                 logger.debug("%s: could not read firmware timers, using defaults: %s", self._device, e)
 
     def _write_firmware_idle_timeout(self, seconds):
-        """Push idle/sleep timeouts back to firmware so it fires IDLE on time."""
+        """Push the idle timeout to firmware so it fires IDLE on time.
+
+        Firmware sleep is written as 0. Host-driven LED blanking handles
+        'sleep' (see ``_start_sleep``); leaving a non-zero firmware sleep
+        timer would let the G515 park its HID key-scan independently and
+        drop the wake key the same way SetRgbPowerMode(3) did.
+        """
         try:
             idle_hi = (seconds >> 8) & 0xFF
             idle_lo = seconds & 0xFF
-            sleep_hi = (self._sleep_timeout >> 8) & 0xFF
-            sleep_lo = self._sleep_timeout & 0xFF
-            payload = bytes([0x01, 0x00, 0x00, idle_hi, idle_lo, sleep_hi, sleep_lo])
+            payload = bytes([0x01, 0x00, 0x00, idle_hi, idle_lo, 0x00, 0x00])
             self._device.feature_request(SupportedFeature.RGB_EFFECTS, 0x70, payload)
         except Exception as e:
             if logger.isEnabledFor(logging.DEBUG):
@@ -774,16 +816,47 @@ class RGBPowerManager:
     # --- Sleep ---
 
     def _start_sleep(self):
-        """Enter firmware-managed sleep. Firmware fades from current level."""
+        """Turn LEDs off in software without changing firmware RGB power mode.
+
+        SetRgbPowerMode(3) (0x8071 function 8) is the G Hub "idle dim"
+        command. On G515 LS TKL it also parks the HID key-scan: the first
+        key that wakes the device is consumed as a wake event and is not
+        reported to the host. Modifiers are the worst case — Shift is
+        typically held into the next character, so a dropped Shift-down
+        makes that character unshifted.
+
+        Blanking the LEDs from the host keeps HID fully awake so the wake
+        key is a normal HID report. ``_restore_colors`` on wake turns them
+        back on.
+        """
         self._cancel_dim_timer()
         try:
-            self._device.feature_request(SupportedFeature.RGB_EFFECTS, 0x80, b"\x01\x03\x00")
             self._state = self.SLEEPING
+            self._blank_leds()
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("%s: RGB entering sleep (firmware power-down)", self._device)
+                logger.debug("%s: RGB entering sleep (software LED off)", self._device)
         except Exception as e:
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning("%s: failed to enter RGB sleep: %s", self._device, e)
+
+    def _blank_leds(self):
+        """Push black so the device goes dark without SetRgbPowerMode."""
+        perkey_setting, has_paint = perkey_has_paint(self._device)
+        if has_paint and perkey_setting is not None and zone_effect_is_static(self._device):
+            feat = SupportedFeature.PER_KEY_LIGHTING_V2
+            remaining = [int(k) for k in perkey_setting._validator.choices]
+            while remaining:
+                batch = remaining[:13]
+                remaining = remaining[13:]
+                self._device.feature_request(feat, 0x60, bytes([0, 0, 0]) + bytes(batch))
+            self._device.feature_request(feat, 0x70, b"\x00\x00\x00\x00\x00")
+            return
+        infos = getattr(self._device, "led_effects", None)
+        if not infos or not infos.zones:
+            return
+        for zone in infos.zones:
+            if 0x01 in (e.ID for e in zone.effects):
+                self._push_static_effect(zone, 0)
 
     # --- Wake ---
 
@@ -794,13 +867,15 @@ class RGBPowerManager:
         prev_state = self._state
         self._cancel_dim_timer()
         self._cancel_sleep_timer()
+        self._cancel_wake_timer()
         # State must be ACTIVE before _restore_colors() — the paint paths
         # translate through it, and writes would otherwise go at the old dim.
         self._state = self.ACTIVE
         try:
-            if prev_state == self.SLEEPING:
-                self._set_power_mode_with_retry(1)
-            # Re-claim full LED pipeline control
+            # Do not send SetRgbPowerMode(1) here. Sleep no longer uses
+            # SetRgbPowerMode(3), and that command pair is what dropped the
+            # wake-key HID report on G515 (see _start_sleep). Re-claim SW
+            # control and re-push colors; the LED pipeline is already on.
             self._device.feature_request(SupportedFeature.RGB_EFFECTS, 0x50, SW_ACTIVE)
             # Firmware engine has re-engaged during sleep — re-arm per-key
             # one-shots so the next write re-fires the prep + double-send.

@@ -711,3 +711,167 @@ def test_rgb_control_off_falls_back_to_persister():
 
     dev = _SettingsPropertyExplodes(settings_list=None, persister={})
     assert rgb_power._rgb_control_off(dev) is False
+
+
+# --- Wake-from-sleep must not race the wake-key HID report -----------------
+
+
+class _RecordingDevice:
+    """Device stand-in that records feature_request calls."""
+
+    def __init__(self):
+        self.online = True
+        self.settings = []
+        self.led_effects = None
+        self.persister = None
+        self.calls = []
+
+    def feature_request(self, feature, function, *params):
+        data = params[0] if params else b""
+        self.calls.append((int(feature), int(function), bytes(data) if data else b""))
+        return b"\x00" * 16
+
+
+def _mgr_for_wake(device, state, monkeypatch, glib=None):
+    """RGBPowerManager wired for on_user_activity tests, no GLib main loop."""
+    mgr = M.__new__(M)
+    mgr._device = device
+    mgr._state = state
+    mgr._idle_timeout = 60
+    mgr._sleep_timeout = 300
+    mgr._idle_effect = _dim(50)
+    mgr._sleep_timer_id = None
+    mgr._dim_timer_id = None
+    mgr._wake_timer_id = None
+    mgr._dim_step = 0
+    mgr._dim_zones = []
+    mgr._dim_perkey = None
+    if glib is None:
+        monkeypatch.setattr(rgb_power, "_has_glib", False)
+    else:
+        monkeypatch.setattr(rgb_power, "_has_glib", True)
+        monkeypatch.setattr(rgb_power, "GLib", glib)
+    return mgr
+
+
+def test_activity_wake_from_sleep_is_deferred(monkeypatch):
+    """ACTIVE onUserActivity must not send HID++ immediately — that races
+    with the HID report of the wake key (Shift at a password prompt)."""
+    scheduled = []
+
+    class _GLib:
+        @staticmethod
+        def timeout_add(ms, cb):
+            scheduled.append((ms, cb))
+            return 99
+
+        @staticmethod
+        def source_remove(_sid):
+            pass
+
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.SLEEPING, monkeypatch, glib=_GLib)
+    mgr.on_user_activity(0xFF)  # non-zero = ACTIVE
+    assert mgr._state == M.SLEEPING  # not woken yet
+    assert device.calls == []
+    assert len(scheduled) == 1
+    assert scheduled[0][0] == M._WAKE_DELAY_MS
+
+
+def test_activity_wake_burst_schedules_once(monkeypatch):
+    scheduled = []
+
+    class _GLib:
+        @staticmethod
+        def timeout_add(ms, cb):
+            scheduled.append((ms, cb))
+            return 7
+
+        @staticmethod
+        def source_remove(_sid):
+            pass
+
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.SLEEPING, monkeypatch, glib=_GLib)
+    mgr.on_user_activity(1)
+    mgr.on_user_activity(1)
+    mgr.on_user_activity(1)
+    assert len(scheduled) == 1
+
+
+def test_deferred_wake_from_sleep_does_not_set_power_mode(monkeypatch):
+    """Sleep no longer uses SetRgbPowerMode(3), so wake must not poke
+    function 0x80 either — that command pair dropped the G515 wake key."""
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.SLEEPING, monkeypatch)
+    mgr._wake()
+    assert mgr._state == M.ACTIVE
+    power_mode_writes = [c for c in device.calls if c[1] == 0x80]
+    assert power_mode_writes == []
+    # Still re-claims SW control so the LED pipeline stays host-owned.
+    sw = [c for c in device.calls if c[1] == 0x50]
+    assert sw, device.calls
+    assert sw[0][2] == rgb_power.SW_ACTIVE
+
+
+def test_start_sleep_does_not_set_power_mode(monkeypatch):
+    """Software sleep blanks LEDs; it must not send SetRgbPowerMode(3)."""
+    from types import SimpleNamespace
+
+    device = _RecordingDevice()
+    zone = SimpleNamespace(index=0, location=1, effects=[SimpleNamespace(ID=0x01, index=0)])
+    device.led_effects = SimpleNamespace(zones=[zone])
+    mgr = _mgr_for_wake(device, M.IDLE, monkeypatch)
+    mgr._start_sleep()
+    assert mgr._state == M.SLEEPING
+    power_mode_writes = [c for c in device.calls if c[1] == 0x80]
+    assert power_mode_writes == []
+    # One Static-black push for the zone.
+    static_off = [c for c in device.calls if c[1] == 0x10]
+    assert static_off, device.calls
+
+
+def test_activity_while_already_active_is_noop(monkeypatch):
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.ACTIVE, monkeypatch)
+    mgr.on_user_activity(1)
+    assert device.calls == []
+    assert mgr._state == M.ACTIVE
+
+
+def test_firmware_idle_timeout_write_disables_firmware_sleep(monkeypatch):
+    """Firmware sleep timer must stay 0 so the keyboard HID scan is not
+    parked independently of Solaar's software LED-off."""
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.ACTIVE, monkeypatch)
+    mgr._sleep_timeout = 300
+    mgr._write_firmware_idle_timeout(60)
+    writes = [c for c in device.calls if c[1] == 0x70]
+    assert len(writes) == 1
+    payload = writes[0][2]
+    assert payload[3:5] == b"\x00\x3c"  # idle = 60s
+    assert payload[5:7] == b"\x00\x00"  # firmware sleep disabled
+
+
+def test_deferred_wake_callback_runs_wake(monkeypatch):
+    scheduled = []
+
+    class _GLib:
+        @staticmethod
+        def timeout_add(ms, cb):
+            scheduled.append(cb)
+            return 1
+
+        @staticmethod
+        def source_remove(_sid):
+            pass
+
+    device = _RecordingDevice()
+    mgr = _mgr_for_wake(device, M.IDLE, monkeypatch, glib=_GLib)
+    mgr.on_user_activity(1)
+    assert mgr._state == M.IDLE
+    assert scheduled
+    result = scheduled[0]()
+    assert result is False
+    assert mgr._state == M.ACTIVE
+    assert mgr._wake_timer_id is None
