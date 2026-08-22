@@ -38,6 +38,7 @@ from typing_extensions import Protocol
 
 from . import centurion as _centurion
 from . import common
+from . import device_quirks
 from . import exceptions
 from . import hidpp10_constants
 from . import special_keys
@@ -769,6 +770,8 @@ class KeysArrayV4(KeysArrayV2):
         if keydata:
             cid, task_id, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
+            if device_quirks.ignore_gmask(self.device):
+                gmask = 0xFF
             self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, task_id, flags, pos, group, gmask)
             self.cid_to_tid[cid] = task_id
             if group != 0:  # 0 = does not belong to a group
