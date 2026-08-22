@@ -1,4 +1,4 @@
-"""Per-device-model quirks for RGB lighting.
+"""Per-device-model quirks.
 
 Keyed by ``device.modelId``. For normal HID++ devices that is the string
 Logitech composes by concatenating every transport PID (btid + btleid + wpid
@@ -90,3 +90,24 @@ def headset_signature_allowed_fields(device, effect_id: int) -> set[str] | None:
         return set(_ALL_NVCONFIG_FIELDS)
     model_id = getattr(device, "modelId", None) or ""
     return HEADSET_SIGNATURE_EFFECTS_ALLOWED.get(model_id, {}).get(effect_id)
+
+
+# This table lists devices that support remapping each button to all other
+# buttons.
+IGNORE_GMASK: set[str] = {
+    # LIFT VERTICAL ERGONOMIC MOUSE (FW RBM 21.10.B0011). This device reports
+    # a 0 gmask for the left and right buttons and some of the other physical
+    # buttons don't report all other physical buttons. The Logi Tune application
+    # under windows seems to ignore the gmask to swap the left and right button.
+    # Manual testing has shown that this device/firmware supports all-to-all
+    # remapping.
+    "B03100000000",
+}
+
+
+def ignore_gmask(device) -> bool:
+    """True if the firmware supports all-to-all key remapping."""
+    if _experimental():
+        return True
+    model_id = getattr(device, "modelId", None) or ""
+    return model_id in IGNORE_GMASK
