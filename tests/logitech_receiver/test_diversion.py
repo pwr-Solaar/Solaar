@@ -100,6 +100,64 @@ def test_feature():
     assert result.data() == expected_data
 
 
+@pytest.mark.skipif(diversion.evdev is None, reason="uinput is unavailable")
+def test_uinput_capabilities_separate_keyboard_repeat_from_mouse_buttons():
+    keyboard = diversion.devicecaps["keyboard"]
+    mouse = diversion.devicecaps["mouse"]
+
+    assert diversion.evdev.ecodes.EV_REP in keyboard
+    assert keyboard[diversion.evdev.ecodes.EV_REP] == []
+    assert diversion.evdev.ecodes.EV_REL not in keyboard
+    assert diversion.evdev.ecodes.EV_REP not in mouse
+    assert diversion.evdev.ecodes.EV_REL in mouse
+    assert diversion.buttons["left"][1] in mouse[diversion.evdev.ecodes.EV_KEY]
+
+
+@pytest.mark.skipif(diversion.evdev is None, reason="uinput is unavailable")
+def test_uinput_routes_keyboard_and_mouse_events_to_separate_devices():
+    keyboard = mock.Mock()
+    mouse = mock.Mock()
+    devices = {"solaar-keyboard": keyboard, "solaar-mouse": mouse}
+
+    with mock.patch.dict(diversion.udevices, {"keyboard": None, "mouse": None}, clear=True):
+        with mock.patch.object(
+            diversion.evdev.uinput,
+            "UInput",
+            side_effect=lambda *, events, name: devices[name],
+        ) as create:
+            assert diversion.simulate_key(diversion.evdev.ecodes.KEY_DELETE + 8, 1)
+            assert diversion.click_uinput(diversion.buttons["left"], 1)
+            assert diversion.simulate_scroll(3, -2)
+            assert diversion.setup_uinput("keyboard") is keyboard
+            assert diversion.setup_uinput("mouse") is mouse
+
+    create.assert_has_calls(
+        [
+            mock.call(events=diversion.devicecaps["keyboard"], name="solaar-keyboard"),
+            mock.call(events=diversion.devicecaps["mouse"], name="solaar-mouse"),
+        ]
+    )
+    assert create.call_count == 2
+    keyboard.write.assert_called_once_with(diversion.evdev.ecodes.EV_KEY, diversion.evdev.ecodes.KEY_DELETE, 1)
+    assert mouse.write.call_args_list == [
+        mock.call(diversion.evdev.ecodes.EV_KEY, diversion.buttons["left"][1], 1),
+        mock.call(diversion.evdev.ecodes.EV_KEY, diversion.buttons["left"][1], 0),
+        mock.call(diversion.evdev.ecodes.EV_REL, diversion.evdev.ecodes.REL_HWHEEL, 3),
+        mock.call(diversion.evdev.ecodes.EV_REL, diversion.evdev.ecodes.REL_WHEEL, -2),
+    ]
+
+
+@pytest.mark.skipif(diversion.evdev is None, reason="uinput is unavailable")
+def test_uinput_write_failure_only_resets_the_failed_device():
+    keyboard = mock.Mock()
+    mouse = mock.Mock()
+    keyboard.write.side_effect = OSError("write failed")
+
+    with mock.patch.dict(diversion.udevices, {"keyboard": keyboard, "mouse": mouse}, clear=True):
+        assert not diversion.simulate_uinput("keyboard", diversion.evdev.ecodes.EV_KEY, diversion.evdev.ecodes.KEY_A, 1)
+        assert diversion.udevices == {"keyboard": None, "mouse": mouse}
+
+
 @pytest.mark.parametrize(
     "feature, data",
     [
