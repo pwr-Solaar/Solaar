@@ -19,6 +19,10 @@ Two postures, by feature class:
   field is hidden and every slot suppressed unless the exact model is listed
   here as known-good.
 
+* **Hardware the firmware leaves broken** — ``GKEYS_ARE_FKEYS``, models whose
+  F-row only exists while an onboard profile is loaded. A compatibility shim
+  rather than a safety allowlist, so it ignores ``SOLAAR_EXPERIMENTAL``.
+
 Setting ``SOLAAR_EXPERIMENTAL`` truthy bypasses the allowlists entirely — for
 testers / reverse-engineering on devices not yet validated.
 
@@ -90,3 +94,24 @@ def headset_signature_allowed_fields(device, effect_id: int) -> set[str] | None:
         return set(_ALL_NVCONFIG_FIELDS)
     model_id = getattr(device, "modelId", None) or ""
     return HEADSET_SIGNATURE_EFFECTS_ALLOWED.get(model_id, {}).get(effect_id)
+
+
+# Models whose F-row is physically G1..Gn with no hardware F-key fallback — the
+# onboard profile is what makes those keys report as F-keys. With profiles
+# disabled (by Solaar's own SW-control claim, or by another app such as OpenRGB)
+# the row goes dead, so Solaar diverts the G-keys and synthesizes F-keys from
+# them. modelId -> number of G-keys in the F-row.
+GKEYS_ARE_FKEYS: dict[str, int] = {
+    # G915 TKL — the F-row is G1..G12 (pwr-Solaar/Solaar#3266).
+    "B35F408EC343": 12,
+}
+
+
+def gkeys_are_fkeys(device) -> int:
+    """Number of leading G-keys that stand in for this model's F-row, or 0.
+
+    Not gated on SOLAAR_EXPERIMENTAL: this is a compatibility shim for broken
+    hardware, not an allowlist protecting against bad writes.
+    """
+    model_id = getattr(device, "modelId", None) or ""
+    return GKEYS_ARE_FKEYS.get(model_id, 0)

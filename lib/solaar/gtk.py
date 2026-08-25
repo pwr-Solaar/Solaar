@@ -29,6 +29,8 @@ import tempfile
 
 from traceback import format_exc
 
+from logitech_receiver import alerts
+
 from solaar import NAME
 from solaar import __version__
 from solaar import cli
@@ -192,6 +194,7 @@ def main():
         logger.warning("See https://pwr-solaar.github.io/Solaar/installation for more information")
     try:
         listener.setup_scanner(ui.status_changed, ui.setting_changed, ui.common.error_dialog)
+        alerts.set_handler(ui.common.alert_dialog)
 
         if args.restart_on_wake_up:
             dbus.watch_suspend_resume(listener.start_all, listener.stop_all)

@@ -1053,3 +1053,108 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+G915_TKL = "B35F408EC343"
+_DIVERT_ON = b"\x01"
+
+
+class _RecordingRW:
+    """Captures the bytes a setting puts on the wire."""
+
+    kind = 2  # settings.FeatureRW.kind
+
+    def __init__(self):
+        self.written = []
+
+    def read(self, device):
+        return b"\x00"  # DivertGkeys cannot be read back
+
+    def write(self, device, data_bytes):
+        self.written.append(data_bytes)
+        return b""
+
+
+class _GkeysDevice:
+    def __init__(self, model_id):
+        self.modelId = model_id
+        self.online = True
+        # a real persister always carries device identity, and Setting._pre_write
+        # skips an empty one
+        self.persister = {"_name": "Test Keyboard"}
+        self.settings = []
+
+
+def _divert_gkeys(monkeypatch, model_id=G915_TKL, uinput=True):
+    monkeypatch.setattr(settings_templates.diversion, "uinput_writable", lambda: uinput)
+    device = _GkeysDevice(model_id)
+    rw = _RecordingRW()
+    validator = settings_validator.BooleanValidator(**settings_templates.DivertGkeys.validator_options)
+    setting = settings_templates.DivertGkeys(device, rw, validator)
+    device.settings = [setting]
+    return device, setting, rw
+
+
+def test_divert_gkeys_normal_device_writes_what_the_user_asked(monkeypatch):
+    device, setting, rw = _divert_gkeys(monkeypatch, model_id="000000000A78")
+
+    setting.write(True)
+    setting.write(False)
+
+    assert rw.written == [b"\x01", b"\x00"]
+    assert setting._value is False
+
+
+def test_divert_gkeys_forced_on_when_fkeys_are_gkeys(monkeypatch):
+    """The switch selects rule routing on these models; the wire divert has to
+    stay on or the user loses their whole F-row."""
+    device, setting, rw = _divert_gkeys(monkeypatch)
+
+    setting.write(False)
+
+    assert rw.written == [_DIVERT_ON]
+    assert setting._value is False  # the switch still records the user's choice
+    assert device.persister["divert-gkeys"] is False
+
+
+def test_divert_gkeys_forced_on_with_switch_on(monkeypatch):
+    device, setting, rw = _divert_gkeys(monkeypatch)
+
+    setting.write(True)
+
+    assert rw.written == [_DIVERT_ON]
+    assert setting._value is True
+
+
+def test_divert_gkeys_apply_forces_divert_on_connect(monkeypatch):
+    """SETTINGS order runs other settings first, so apply must not let a saved
+    False reach the wire."""
+    device, setting, rw = _divert_gkeys(monkeypatch)
+    device.persister["divert-gkeys"] = False
+
+    setting.apply()
+
+    assert rw.written == [_DIVERT_ON]
+    assert setting._value is False
+
+
+def test_divert_gkeys_leaves_device_alone_without_uinput(monkeypatch, mocker):
+    """Without uinput the F-keys cannot be synthesized, so diverting the row
+    would only take it away from the firmware."""
+    notify = mocker.patch.object(settings_templates.alerts, "notify")
+    device, setting, rw = _divert_gkeys(monkeypatch, uinput=False)
+
+    setting.write(False)
+
+    assert rw.written == [b"\x00"]
+    assert setting._value is False
+    assert notify.call_args.args[0] is settings_templates.alerts.AlertReason.GKEYS_NEED_UINPUT
+
+
+def test_divert_gkeys_does_not_alert_on_normal_devices(monkeypatch, mocker):
+    notify = mocker.patch.object(settings_templates.alerts, "notify")
+    device, setting, rw = _divert_gkeys(monkeypatch, model_id="000000000A78", uinput=False)
+
+    setting.write(True)
+
+    notify.assert_not_called()

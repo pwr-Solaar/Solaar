@@ -274,6 +274,32 @@ This rule turns
 `Brightness Down` key press notifications into `XF86_MonBrightnessDown` key taps
 and `Brightness Up` key press notifications into `XF86_MonBrightnessUp` key taps.
 
+### Keyboards whose F-keys are really G-keys
+
+A few gaming keyboards, such as the G915 TKL, have no F-keys in hardware — their
+top row is really `G1` to `G12`, and it is the onboard profile that makes those
+keys report as `F1` to `F12`.
+Whenever no onboard profile is loaded that row stops working.
+That happens when you turn on `LED Control` or set `Onboard Profiles` to
+`Disabled` in Solaar, and it can also be done by another program such as OpenRGB
+without Solaar being involved at all.
+
+On these keyboards Solaar keeps the G-keys diverted for the whole session and has
+a built-in rule that turns each one back into the matching F-key press and
+release, which is what Logitech's own software does.
+This needs write access to `/dev/uinput`, as described near the top of this page;
+without it Solaar leaves the keyboard alone and warns you, because the mapping
+could not work anyway.
+Note that the F-keys then only work while Solaar is running.
+
+The `Divert G and M Keys` setting behaves as it does on any other keyboard.
+Left off, the top row acts as `F1` to `F12`.
+Turned on, your own rules see the G-keys — and any G-key your rules do not
+mention still falls back to its F-key, so remapping `G12` does not cost you
+`F1` through `F11`.
+The fallback is dropped per key for every `Gn` named by a `Key` or `KeyIsDown`
+condition anywhere in your rule file, whichever device that rule is scoped to.
+
 ## Example Solaar Rule File
 
 Solaar reads rules from a YAML configuration file (normally `~/.config/solaar/rules.yaml`).

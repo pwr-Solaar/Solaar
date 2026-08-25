@@ -46,6 +46,7 @@ if platform.system() in ("Darwin", "Windows"):
 else:
     import evdev
 
+from . import device_quirks
 from .common import NamedInt
 from .hidpp20 import SupportedFeature
 from .special_keys import CONTROL
@@ -253,6 +254,19 @@ else:
     buttons = {}
     key_events = []
     devicecap = {}
+
+
+_UINPUT_PATH = "/dev/uinput"
+
+
+def uinput_writable() -> bool:
+    """True when simulated input can actually reach the system.
+
+    Side-effect free, unlike setup_uinput() below, which creates the device —
+    so this is safe as a precondition check. os.access reflects ACL grants,
+    which is how Solaar's udev rule hands out /dev/uinput.
+    """
+    return evdev is not None and os.access(_UINPUT_PATH, os.W_OK)
 
 
 def setup_uinput():
@@ -1412,16 +1426,60 @@ COMPONENTS = {
 }
 
 
-built_in_rules = Rule(
-    [
-        {
-            "Rule": [  # Implement problematic keys for Craft and MX Master
-                {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
-                {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
-            ]
-        },
-    ]
-)
+class GKeysAreFKeys(Condition):
+    """True when `device`'s F-row is really its first `index` G-keys.
+
+    Gates the built-in G-key -> F-key block below. Deliberately absent from
+    COMPONENTS: it exists only inside built_in_rules and must never be
+    writable from a user's rules.yaml.
+    """
+
+    def __init__(self, index=1, warn=True):
+        self.index = index if isinstance(index, int) and index > 0 else 1
+
+    def __str__(self):
+        return f"GKeysAreFKeys: {self.index}"
+
+    def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
+        return device_quirks.gkeys_are_fkeys(device) >= self.index
+
+    def data(self):
+        return {"GKeysAreFKeys": self.index}
+
+
+def _gkeys_as_fkeys_rules(overridden: set[int]) -> dict:
+    """Rules restoring the F-row on models whose F-keys are really G-keys.
+
+    One pressed/released pair per key so hold and auto-repeat work, mirroring
+    what LGHUB does. G-keys named by the user's own rules are left out so their
+    rules win — see _overridden_gkeys.
+    """
+    components = [GKeysAreFKeys(1)]
+    for i in range(1, max(device_quirks.GKEYS_ARE_FKEYS.values(), default=0) + 1):
+        if i in overridden:
+            continue
+        gkey, fkey = f"G{i}", f"F{i}"
+        for gaction, faction in ((Key.DOWN, DEPRESS), (Key.UP, RELEASE)):
+            # The per-key gate keeps a shorter F-row's macro G-keys out of this.
+            components.append({"Rule": [GKeysAreFKeys(i), {"Key": [gkey, gaction]}, {"KeyPress": [fkey, faction]}]})
+    return {"Rule": components}
+
+
+def _build_built_in_rules(overridden_gkeys: set[int] = frozenset()) -> Rule:
+    return Rule(
+        [
+            {
+                "Rule": [  # Implement problematic keys for Craft and MX Master
+                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+                ]
+            },
+            _gkeys_as_fkeys_rules(overridden_gkeys),
+        ]
+    )
+
+
+built_in_rules = _build_built_in_rules()
 
 
 def key_is_down(key: NamedInt) -> bool:
@@ -1435,9 +1493,28 @@ def key_is_down(key: NamedInt) -> bool:
     return key in keys_down
 
 
+def _gkeys_owned_by_built_ins(feature, device) -> bool:
+    """True when this device's G-keys are standing in for its F-row and the
+    user has left the divert switch off.
+
+    Divert is forced on for those models (see DivertGkeys), so their G-keys
+    reach the rule engine whatever the switch says. With the switch off they
+    are meant to be plain F-keys, so only the built-in mapping may run.
+    """
+    if feature != SupportedFeature.GKEY or not device_quirks.gkeys_are_fkeys(device):
+        return False
+    for s in getattr(device, "settings", None) or ():
+        if s.name == "divert-gkeys":  # settings_templates imports us, so no constant to share
+            return not s._value
+    return True
+
+
 def evaluate_rules(feature, notification: HIDPPNotification, device):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s %s", feature, notification)
+    if _gkeys_owned_by_built_ins(feature, device):
+        built_in_rules.evaluate(feature, notification, device, True)
+        return
     rules.evaluate(feature, notification, device, True)
 
 
@@ -1553,7 +1630,28 @@ def load_config_rule_file():
         rules = _load_rule_config(_file_path)
 
 
+def _overridden_gkeys(component) -> set[int]:
+    """G-key indices the user's own rules already act on.
+
+    Those keys lose their built-in F-key mapping so the user's rules win, per
+    key — remapping G12 must not cost anyone F1..F11. Device scoping is not
+    considered: a rule naming G5 on some other keyboard also releases G5 here.
+    """
+    found = set()
+    if isinstance(component, (Rule, Or, And)):
+        for c in component.components:
+            found |= _overridden_gkeys(c)
+    elif isinstance(component, Not):
+        found |= _overridden_gkeys(component.component)
+    elif isinstance(component, (Key, KeyIsDown)):
+        key = getattr(component, "key", None)
+        if key and CONTROL.G1 <= key <= CONTROL.G32:
+            found.add(int(key) - int(CONTROL.G1) + 1)
+    return found
+
+
 def _load_rule_config(file_path: str) -> Rule:
+    global built_in_rules
     loaded_rules = []
     try:
         with open(file_path) as config_file:
@@ -1567,7 +1665,9 @@ def _load_rule_config(file_path: str) -> Rule:
                 logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
     except Exception as e:
         logger.error("failed to load from %s\n%s", file_path, e)
-    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
+    user_rules = Rule(loaded_rules, source=file_path)
+    built_in_rules = _build_built_in_rules(_overridden_gkeys(user_rules))
+    return Rule([user_rules, built_in_rules])
 
 
 load_config_rule_file()

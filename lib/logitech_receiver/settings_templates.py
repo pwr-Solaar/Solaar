@@ -30,6 +30,7 @@ import yaml
 
 from solaar.i18n import _
 
+from . import alerts
 from . import base
 from . import common
 from . import descriptors
@@ -683,6 +684,35 @@ class DivertGkeys(settings.Setting):
 
         def read(self, device):  # no way to read, so just assume not diverted
             return b"\x00"
+
+    def _fkeys_need_divert(self) -> bool:
+        """True when this model's F-row is really its G-keys.
+
+        Those keys only reach diversion's built-in G->F mapping while the wire
+        divert is on, and Solaar is not the only thing that can put the device
+        into G-key mode (OpenRGB's SW control does too), so the divert is held
+        on for the whole session rather than tracked against a claim.
+        """
+        if not device_quirks.gkeys_are_fkeys(self._device):
+            return False
+        if diversion.uinput_writable():
+            return True
+        # Without uinput the F-keys cannot be synthesized, so leave the row to
+        # the firmware rather than diverting it into a dead end.
+        alerts.notify(alerts.AlertReason.GKEYS_NEED_UINPUT, self._device)
+        return False
+
+    def write(self, value, save=True):
+        # On these models the wire divert is not the user's to turn off — doing
+        # so would kill their F-row. The switch keeps its label and its felt
+        # meaning but selects rule routing instead: off leaves the keys to the
+        # built-in F-key mapping, on lets the user's own rules see them first
+        # (see diversion._gkeys_owned_by_built_ins).
+        if not self._fkeys_need_divert():
+            return super().write(value, save)
+        result = super().write(True, save=False)
+        self.update(value, save)
+        return value if result is not None else result
 
 
 class ScrollRatchet(settings.Setting):

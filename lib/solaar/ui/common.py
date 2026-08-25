@@ -21,6 +21,8 @@ from typing import Tuple
 
 import gi
 
+from logitech_receiver.alerts import AlertReason
+
 from solaar.i18n import _
 from solaar.tasks import TaskRunner
 
@@ -79,6 +81,55 @@ def _error_dialog(reason: ErrorReason, object_):
 
 def error_dialog(reason: ErrorReason, object_):
     GLib.idle_add(_error_dialog, reason, object_)
+
+
+_RULES_DOC_URL = "https://pwr-solaar.github.io/Solaar/rules"
+_ALERT_DISMISSED = "_gkeys_alert_dismissed"
+_alerts_shown = set()  # (reason, device path) pairs already shown this session
+
+
+def _create_alert_text(reason: AlertReason, device) -> Tuple[str, str]:
+    if reason == AlertReason.GKEYS_NEED_UINPUT:
+        title = _("Function keys need setup")
+        text = (
+            _("Your %s has no F-keys in hardware.") % device.name
+            + "\n"
+            + _("Solaar maps its G-keys to F1-F12, which needs write access to /dev/uinput.")
+            + "\n\n"
+            + _("Setup: %s") % _RULES_DOC_URL
+        )
+        return title, text
+    raise Exception("ui.alert_dialog: don't know how to handle (%s, %s)", reason.name, device)
+
+
+def _alert_dialog(reason: AlertReason, device):
+    title, text = _create_alert_text(reason, device)
+
+    m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, text)
+    m.set_title(title)
+    never = Gtk.CheckButton.new_with_label(_("Never show this again"))
+    never.set_halign(Gtk.Align.START)
+    never.show()
+    m.get_content_area().pack_end(never, False, False, 6)
+    m.run()
+    dismissed = never.get_active()
+    m.destroy()
+
+    persister = getattr(device, "persister", None)
+    if dismissed and persister is not None:
+        persister[_ALERT_DISMISSED] = True
+
+
+def alert_dialog(reason: AlertReason, device):
+    """Warn about `device`, once per session unless the user dismissed it for good."""
+    persister = getattr(device, "persister", None)
+    if persister is not None and persister.get(_ALERT_DISMISSED):
+        return
+    key = (reason, getattr(device, "path", None), getattr(device, "number", None))
+    if key in _alerts_shown:
+        return
+    _alerts_shown.add(key)
+    GLib.idle_add(_alert_dialog, reason, device)
 
 
 _task_runner = None
