@@ -568,8 +568,7 @@ class RGBPowerManager:
     def _start_idle_effect(self):
         idle_id = self._idle_effect_id()
         if idle_id == 0x80:  # Dim
-            dim_pct = int(getattr(self._idle_effect, "intensity", 50) or 50)
-            self._start_dim_ramp(dim_pct)
+            self._start_dim_ramp(self._current_dim_pct())
         elif idle_id == 0x01:  # Static — snap to idle color
             self._start_static_idle()
         elif idle_id != 0x00:
@@ -899,7 +898,8 @@ class RGBPowerManager:
         """100 unless we're in Dim mode — animations run at firmware brightness."""
         if self._idle_effect_id() != 0x80:
             return 100
-        return int(getattr(self._idle_effect, "intensity", 50) or 50)
+        intensity = getattr(self._idle_effect, "intensity", None)
+        return 50 if intensity is None else int(intensity)  # 0 is a legal dim target
 
     def translate_color(self, color):
         """Map a saved (undimmed) per-key color to what should be displayed
