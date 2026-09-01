@@ -4312,7 +4312,7 @@ class _AnalogButtonSetting(settings.Setting):
 class AnalogButtonTuning(settings.Setting):
     """Analog button tuning: actuation point, rapid trigger, and haptics configuration."""
 
-    name = "analog-button-tuning"
+    name = "analog-button-tuning_"
     label = _("Analog Button Tuning")
     description = _("Configure analog button settings including actuation point, rapid trigger, and haptics.")
     feature = _F.ANALOG_BUTTONS

@@ -1053,3 +1053,32 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+# --- multi-setting templates must be resolvable by child name -------------
+# A template whose build() returns a list of settings is only reachable from
+# the CLI if its own name ends in "_", because check_feature_setting falls back
+# to a prefix match solely in that case (cf. RGBEffectSetting / "rgb_zone_").
+# AnalogButtonTuning emits "analog-button-tuning_haptics-0" and friends, so
+# dropping the trailing underscore makes every one of them unsettable.
+
+
+def test_check_feature_setting_resolves_multi_setting_children():
+    # 0x00 capabilities: flags, button count, max actuation << 2,
+    # max rapid-trigger << 2, max haptics << 2
+    responses = [fake_hidpp.Response("0002281414", 0x0400)]
+    device = fake_hidpp.Device(
+        responses=responses,
+        feature=hidpp20_constants.SupportedFeature.ANALOG_BUTTONS,
+        offset=0x04,
+    )
+
+    for name in (
+        "analog-button-tuning_actuation-0",
+        "analog-button-tuning_rapid-trigger-1",
+        "analog-button-tuning_haptics-0",
+    ):
+        setting = settings_templates.check_feature_setting(device, name)
+
+        assert setting is not None, f"{name} is not resolvable by name"
+        assert setting.name == name
