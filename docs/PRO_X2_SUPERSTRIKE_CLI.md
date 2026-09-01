@@ -139,8 +139,8 @@ Controls how deep the button must be pressed to register a click.
 
 | Property | Value |
 |----------|-------|
-| Setting Name (Left) | `superstrike-tuning_actuation-0` |
-| Setting Name (Right) | `superstrike-tuning_actuation-1` |
+| Setting Name (Left) | `analog-button-tuning_actuation-0` |
+| Setting Name (Right) | `analog-button-tuning_actuation-1` |
 | Type | Range |
 | Range | 1 - 10 |
 | Default | 5 |
@@ -153,19 +153,19 @@ Controls how deep the button must be pressed to register a click.
 
 ```bash
 # Read left button actuation
-solaar config 1 superstrike-tuning_actuation-0
+solaar config 1 analog-button-tuning_actuation-0
 
 # Read right button actuation
-solaar config 1 superstrike-tuning_actuation-1
+solaar config 1 analog-button-tuning_actuation-1
 
 # Set left button to shallow actuation (hair trigger)
-solaar config 1 superstrike-tuning_actuation-0 1
+solaar config 1 analog-button-tuning_actuation-0 1
 
 # Set left button to deep actuation
-solaar config 1 superstrike-tuning_actuation-0 10
+solaar config 1 analog-button-tuning_actuation-0 10
 
 # Set right button to medium actuation
-solaar config 1 superstrike-tuning_actuation-1 5
+solaar config 1 analog-button-tuning_actuation-1 5
 ```
 
 ---
@@ -176,8 +176,8 @@ Controls the rapid trigger sensitivity, which allows the button to re-actuate qu
 
 | Property | Value |
 |----------|-------|
-| Setting Name (Left) | `superstrike-tuning_rapid-trigger-level-0` |
-| Setting Name (Right) | `superstrike-tuning_rapid-trigger-level-1` |
+| Setting Name (Left) | `analog-button-tuning_rapid-trigger-0` |
+| Setting Name (Right) | `analog-button-tuning_rapid-trigger-1` |
 | Type | Range |
 | Range | 1 - 5 |
 | Default | 3 |
@@ -192,19 +192,19 @@ Controls the rapid trigger sensitivity, which allows the button to re-actuate qu
 
 ```bash
 # Read left button rapid trigger level
-solaar config 1 superstrike-tuning_rapid-trigger-level-0
+solaar config 1 analog-button-tuning_rapid-trigger-0
 
 # Read right button rapid trigger level
-solaar config 1 superstrike-tuning_rapid-trigger-level-1
+solaar config 1 analog-button-tuning_rapid-trigger-1
 
 # Set left button to fastest rapid trigger
-solaar config 1 superstrike-tuning_rapid-trigger-level-0 1
+solaar config 1 analog-button-tuning_rapid-trigger-0 1
 
 # Set left button to slowest rapid trigger
-solaar config 1 superstrike-tuning_rapid-trigger-level-0 5
+solaar config 1 analog-button-tuning_rapid-trigger-0 5
 
 # Set right button to medium rapid trigger
-solaar config 1 superstrike-tuning_rapid-trigger-level-1 3
+solaar config 1 analog-button-tuning_rapid-trigger-1 3
 ```
 
 ---
@@ -215,8 +215,8 @@ Controls the intensity of the haptic feedback when clicking.
 
 | Property | Value |
 |----------|-------|
-| Setting Name (Left) | `superstrike-tuning_haptics-0` |
-| Setting Name (Right) | `superstrike-tuning_haptics-1` |
+| Setting Name (Left) | `analog-button-tuning_haptics-0` |
+| Setting Name (Right) | `analog-button-tuning_haptics-1` |
 | Type | Range |
 | Range | 0 - 5 |
 | Default | 3 |
@@ -233,19 +233,19 @@ Controls the intensity of the haptic feedback when clicking.
 
 ```bash
 # Read left button haptics level
-solaar config 1 superstrike-tuning_haptics-0
+solaar config 1 analog-button-tuning_haptics-0
 
 # Read right button haptics level
-solaar config 1 superstrike-tuning_haptics-1
+solaar config 1 analog-button-tuning_haptics-1
 
 # Disable haptics on left button
-solaar config 1 superstrike-tuning_haptics-0 0
+solaar config 1 analog-button-tuning_haptics-0 0
 
 # Set left button to maximum haptics
-solaar config 1 superstrike-tuning_haptics-0 5
+solaar config 1 analog-button-tuning_haptics-0 5
 
 # Set right button to medium haptics
-solaar config 1 superstrike-tuning_haptics-1 3
+solaar config 1 analog-button-tuning_haptics-1 3
 ```
 
 ---
@@ -257,9 +257,9 @@ solaar config 1 superstrike-tuning_haptics-1 3
 | Onboard Profiles | `onboard_profiles` | Choice | `Disabled`, `Profile 1` | No |
 | Report Rate | `report_rate_extended` | Choice | `8ms` to `125us` | No |
 | Sensitivity | `dpi_extended` | Complex | 100-32000 DPI | No |
-| Actuation Point | `superstrike-tuning_actuation-{0,1}` | Range | 1-10 | Yes |
-| Rapid Trigger | `superstrike-tuning_rapid-trigger-level-{0,1}` | Range | 1-5 | Yes |
-| Click Haptics | `superstrike-tuning_haptics-{0,1}` | Range | 0-5 | Yes |
+| Actuation Point | `analog-button-tuning_actuation-{0,1}` | Range | 1-10 | Yes |
+| Rapid Trigger | `analog-button-tuning_rapid-trigger-{0,1}` | Range | 1-5 | Yes |
+| Click Haptics | `analog-button-tuning_haptics-{0,1}` | Range | 0-5 | Yes |
 
 ---
 
@@ -276,14 +276,14 @@ solaar config 1 report_rate_extended 125us
 solaar config 1 dpi_extended "{X:800, Y:800, LOD:HIGH}"
 
 # Left button - hair trigger
-solaar config 1 superstrike-tuning_actuation-0 1
-solaar config 1 superstrike-tuning_rapid-trigger-level-0 1
-solaar config 1 superstrike-tuning_haptics-0 3
+solaar config 1 analog-button-tuning_actuation-0 1
+solaar config 1 analog-button-tuning_rapid-trigger-0 1
+solaar config 1 analog-button-tuning_haptics-0 3
 
 # Right button - hair trigger
-solaar config 1 superstrike-tuning_actuation-1 1
-solaar config 1 superstrike-tuning_rapid-trigger-level-1 1
-solaar config 1 superstrike-tuning_haptics-1 3
+solaar config 1 analog-button-tuning_actuation-1 1
+solaar config 1 analog-button-tuning_rapid-trigger-1 1
+solaar config 1 analog-button-tuning_haptics-1 3
 ```
 
 ### Productivity Profile (Comfortable)
@@ -297,14 +297,14 @@ solaar config 1 report_rate_extended 1ms
 solaar config 1 dpi_extended "{X:1600, Y:1600, LOD:HIGH}"
 
 # Left button - comfortable click
-solaar config 1 superstrike-tuning_actuation-0 7
-solaar config 1 superstrike-tuning_rapid-trigger-level-0 4
-solaar config 1 superstrike-tuning_haptics-0 5
+solaar config 1 analog-button-tuning_actuation-0 7
+solaar config 1 analog-button-tuning_rapid-trigger-0 4
+solaar config 1 analog-button-tuning_haptics-0 5
 
 # Right button - comfortable click
-solaar config 1 superstrike-tuning_actuation-1 7
-solaar config 1 superstrike-tuning_rapid-trigger-level-1 4
-solaar config 1 superstrike-tuning_haptics-1 5
+solaar config 1 analog-button-tuning_actuation-1 7
+solaar config 1 analog-button-tuning_rapid-trigger-1 4
+solaar config 1 analog-button-tuning_haptics-1 5
 ```
 
 ### Silent Profile (No Haptics)
@@ -313,8 +313,8 @@ solaar config 1 superstrike-tuning_haptics-1 5
 #!/bin/bash
 # Silent profile: no haptic feedback
 
-solaar config 1 superstrike-tuning_haptics-0 0
-solaar config 1 superstrike-tuning_haptics-1 0
+solaar config 1 analog-button-tuning_haptics-0 0
+solaar config 1 analog-button-tuning_haptics-1 0
 ```
 
 ---
@@ -336,14 +336,14 @@ done
 
 ```bash
 # Extract just the value
-solaar config 1 superstrike-tuning_actuation-0 2>/dev/null | grep "^superstrike" | cut -d'=' -f2 | tr -d ' '
+solaar config 1 analog-button-tuning_actuation-0 2>/dev/null | grep "^superstrike" | cut -d'=' -f2 | tr -d ' '
 ```
 
 ### Error Handling
 
 ```bash
 # Check if command succeeded
-if solaar config 1 superstrike-tuning_actuation-0 5 2>/dev/null; then
+if solaar config 1 analog-button-tuning_actuation-0 5 2>/dev/null; then
     echo "Setting applied successfully"
 else
     echo "Failed to apply setting"
