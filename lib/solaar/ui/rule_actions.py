@@ -198,6 +198,24 @@ class MouseScrollUI(ActionUI):
         return f"{x}, {y}"
 
 
+class MouseScrollHiResUI(MouseScrollUI):
+    CLASS = diversion.MouseScrollHiRes
+
+    def create_widgets(self):
+        super().create_widgets()
+        self.label.set_text(
+            _(
+                "Simulate a high-resolution scroll.\n"
+                'One detent click, or "regular" scroll unit, is represented by 120 high resolution scroll units.\n'
+                "Always requires write access to /dev/uinput."
+            )
+        )
+
+    @classmethod
+    def left_label(cls, component):
+        return _("Mouse scroll (hi-res)")
+
+
 class MouseClickUI(ActionUI):
     CLASS = diversion.MouseClick
     MIN_VALUE = 1
