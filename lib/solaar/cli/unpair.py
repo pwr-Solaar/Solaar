@@ -18,6 +18,9 @@
 def run(receivers, args, find_receiver, find_device):
     assert receivers
 
+    if getattr(args, "dry_run", False) and getattr(args, "slot", None) is None:
+        raise Exception("--dry-run is only supported with --slot")
+
     if getattr(args, "slot", None) is not None:
         _run_slot_unpair(receivers, args, find_receiver)
         return
