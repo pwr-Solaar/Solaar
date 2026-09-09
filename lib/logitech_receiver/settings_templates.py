@@ -532,6 +532,61 @@ class ThumbInvert(settings.Setting):
     validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
 
 
+# ---------------------------------------------------------------------------
+# MX Master 2S — Side Scroll Wheel (Feature 0x2201 / SIDE_SCROLL_WHEEL)
+# Verified from macOS devio_cache (devio_cache/B019_*.xml), firmware MPM v12.01_B0006
+#
+# getCapabilities raw: 11FF0B1A0000C8E0320FA0000000000000000000
+#   divertedRes=0xE0 (224 steps/rev when diverted), capabilities=0xA0 (has_timestamp, has_rawXY)
+# getReporting raw:    11FF0B2A0003E803E80000000000000000000000
+#   divert=0x00, invert=0x03, period=1000ms, delta=1000
+#
+# Function IDs: getReporting=0x20, setReporting=0x30
+# ---------------------------------------------------------------------------
+
+
+class SideScrollMode(settings.Setting):
+    """Enable HID++ diversion of the MX Master 2S lateral thumb wheel.
+
+    When diverted, the wheel generates SIDE_SCROLL_WHEEL HID++ notifications
+    that Solaar rules can intercept. Without diversion, the wheel sends
+    standard REL_HWHEEL kernel events directly.
+
+    Byte layout for setReporting (Feature 0x2201, fn 0x30):
+      Byte 0: divert   (0x01 = diverted, 0x00 = native)
+      Byte 1: invert   (0x01 = invert, 0x00 = natural)
+    """
+
+    name = "side-scroll-mode"
+    label = _("Side Scroll Wheel Diversion")
+    description = _(
+        "Make the MX Master 2S lateral thumb wheel send HID++ notifications "
+        "(enables Solaar rules for horizontal scrolling). "
+        "Device-verified: feature 0x2201, divert byte=0, invert byte=1."
+    )
+    feature = _F.SIDE_SCROLL_WHEEL
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
+    validator_options = {"true_value": b"\x01\x00", "false_value": b"\x00\x00", "mask": b"\x01\x00"}
+
+
+class SideScrollInvert(settings.Setting):
+    """Control horizontal scroll direction on the MX Master 2S thumb wheel.
+
+    Natural direction (macOS default): clockwise rotation scrolls right.
+    When inverted: clockwise rotation scrolls left.
+
+    Byte layout: bit 0 of byte 1 in the getReporting/setReporting payload.
+    Raw invert value from device: 0x03 (bits: has_timestamp=1, invert=1).
+    """
+
+    name = "side-scroll-invert"
+    label = _("Side Scroll Wheel Direction")
+    description = _("Invert the MX Master 2S lateral thumb wheel scroll direction (natural vs. standard).")
+    feature = _F.SIDE_SCROLL_WHEEL
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
+    validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
+
+
 # change UI to show result of onboard profile change
 def profile_change(device, profile_sector):
     if device.setting_callback:
@@ -4450,6 +4505,8 @@ SETTINGS: list[settings.Setting] = [
     SmartShiftEnhanced,  # simple
     ThumbInvert,  # working
     ThumbMode,  # working
+    SideScrollInvert,  # MX Master 2S lateral wheel direction (feature 0x2201)
+    SideScrollMode,  # MX Master 2S lateral wheel diversion (feature 0x2201)
     OnboardProfiles,
     ReportRate,  # working
     ExtendedReportRate,

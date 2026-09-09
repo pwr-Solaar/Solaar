@@ -100,7 +100,8 @@ class SupportedFeature(IntEnum):
     LOWRES_WHEEL = 0x2130
     THUMB_WHEEL = 0x2150
     MOUSE_POINTER = 0x2200
-    ADJUSTABLE_DPI = 0x2201
+    ADJUSTABLE_DPI = 0x2201       # Standard DPI feature on gaming mice
+    SIDE_SCROLL_WHEEL = 0x2201    # Lateral thumb wheel on MX Master 2S (same code, context-dependent)
     EXTENDED_ADJUSTABLE_DPI = 0x2202
     POINTER_SPEED = 0x2205
     ANGLE_SNAPPING = 0x2230
