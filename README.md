@@ -49,7 +49,7 @@ one of these packages:
 
 - Arch solaar package in the [extra repository][arch]
 - Ubuntu/Kubuntu package in [Solaar stable ppa][ppa stable]
-- NixOS Flake package in [Svenum/Solaar-Flake][nix flake]
+- NixOS package and module `programs.solaar` NixOS version >= 26.11 [NixOS module][nixos]
 
 Solaar is available from some other repositories
 but may be several versions behind the current version:
@@ -64,5 +64,5 @@ but may be several versions behind the current version:
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [ubuntu universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
-[nix flake]: https://github.com/Svenum/Solaar-Flake
+[nixos]: https://search.nixos.org/options?channel=unstable&query=solaar&type=options
 [debian]: https://packages.debian.org/search?keywords=solaar&searchon=names&suite=all&section=all
