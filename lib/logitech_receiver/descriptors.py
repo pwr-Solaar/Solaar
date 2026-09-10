@@ -395,10 +395,10 @@ _D("Wireless Mouse M510", codename="M510v2", protocol=2.0, wpid="4051")
 _D("Wireless Mouse M185 new", codename="M185n", protocol=4.5, wpid="4054")
 _D("Wireless Mouse M185/M235/M310", codename="M185/M235/M310", protocol=4.5, wpid="4055")
 _D(  # MX Master 2S — HID++ 2.0, firmware MPM v12.01_B0006, PID B019 / BLE 6B019
-    # Features autodiscovered at runtime via HID++ root query (12 features):
+    # Selected features autodiscovered at runtime via HID++ root query:
     # 0x0001 FeatureSet, 0x0003 FirmwareInfo, 0x0005 DeviceName, 0x1814 ChangeHost,
-    # 0x1B04 SpecialKeys(8 buttons), 0x2201 SideScrollWheel, 0x2110 SmartShift,
-    # 0x2121 HiResWheel (SmartShift Enhanced), 0x6501 ProfileManagement/Gestures
+    # 0x1B04 ReprogrammableControlsV4 (8 buttons), 0x2201 SideScrollWheel, 0x2110 SmartShift,
+    # 0x2121 HiResWheel (SmartShift Enhanced), 0x6501 Gesture2
     "Wireless Mouse MX Master 2S",
     codename="MX Master 2S",
     protocol=4.5,

@@ -568,6 +568,19 @@ class SideScrollMode(settings.Setting):
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     validator_options = {"true_value": b"\x01\x00", "false_value": b"\x00\x00", "mask": b"\x01\x00"}
 
+    @classmethod
+    def build(cls, device):
+        # Feature 0x2201 is shared between ADJUSTABLE_DPI (gaming mice) and
+        # SIDE_SCROLL_WHEEL on the MX Master 2S.
+        # Only instantiate side-scroll controls for the MX Master 2S (WPID 4069, BTID B019).
+        if (
+            getattr(device, "wpid", None) != "4069"
+            and getattr(device, "codename", None) != "MX Master 2S"
+            and getattr(getattr(device, "descriptor", None), "btid", None) != 0xB019
+        ):
+            return None
+        return super().build(device)
+
 
 class SideScrollInvert(settings.Setting):
     """Control horizontal scroll direction on the MX Master 2S thumb wheel.
@@ -585,6 +598,19 @@ class SideScrollInvert(settings.Setting):
     feature = _F.SIDE_SCROLL_WHEEL
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
+
+    @classmethod
+    def build(cls, device):
+        # Feature 0x2201 is shared between ADJUSTABLE_DPI (gaming mice) and
+        # SIDE_SCROLL_WHEEL on the MX Master 2S.
+        # Only instantiate side-scroll controls for the MX Master 2S (WPID 4069, BTID B019).
+        if (
+            getattr(device, "wpid", None) != "4069"
+            and getattr(device, "codename", None) != "MX Master 2S"
+            and getattr(getattr(device, "descriptor", None), "btid", None) != 0xB019
+        ):
+            return None
+        return super().build(device)
 
 
 # change UI to show result of onboard profile change

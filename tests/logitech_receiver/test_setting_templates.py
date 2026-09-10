@@ -1053,3 +1053,51 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+def test_side_scroll_settings_gating_and_payloads():
+    """Verify SideScrollMode and SideScrollInvert:
+    1. Are gated to MX Master 2S (wpid 4069) and not instantiated on ordinary 0x2201 (DPI) devices.
+    2. Correctly handle 2-byte read/write payloads while preserving non-target flags."""
+    # 1. Gaming mouse with 0x2201 (ADJUSTABLE_DPI) must NOT instantiate side-scroll settings
+    gaming_dev = fake_hidpp.Device(wpid="4024", feature=hidpp20_constants.SupportedFeature.ADJUSTABLE_DPI)
+    assert settings_templates.SideScrollMode.build(gaming_dev) is None
+    assert settings_templates.SideScrollInvert.build(gaming_dev) is None
+
+    # Generic device with default wpid must also not instantiate
+    generic_dev = fake_hidpp.Device(wpid="0000", feature=hidpp20_constants.SupportedFeature.SIDE_SCROLL_WHEEL)
+    assert settings_templates.SideScrollMode.build(generic_dev) is None
+    assert settings_templates.SideScrollInvert.build(generic_dev) is None
+
+    # 2. MX Master 2S (wpid 4069) instantiates and handles SideScrollMode
+    responses_mode = [
+        fake_hidpp.Response("0103", 0x0420),
+        fake_hidpp.Response("0003", 0x0430, "0003"),
+    ]
+    mx_dev = fake_hidpp.Device(
+        wpid="4069",
+        feature=hidpp20_constants.SupportedFeature.SIDE_SCROLL_WHEEL,
+        responses=responses_mode,
+    )
+    mode_setting = settings_templates.SideScrollMode.build(mx_dev)
+    assert mode_setting is not None
+    assert mode_setting.read(cached=False) is True
+    # Writing False clears divert bit (byte 0) while preserving byte 1 (0x03)
+    assert mode_setting.write(False) is False
+
+    # 3. MX Master 2S instantiates and handles SideScrollInvert
+    responses_invert = [
+        fake_hidpp.Response("0103", 0x0420),
+        fake_hidpp.Response("0102", 0x0430, "0102"),
+    ]
+    mx_dev2 = fake_hidpp.Device(
+        wpid="4069",
+        feature=hidpp20_constants.SupportedFeature.SIDE_SCROLL_WHEEL,
+        responses=responses_invert,
+    )
+    invert_setting = settings_templates.SideScrollInvert.build(mx_dev2)
+    assert invert_setting is not None
+    assert invert_setting.read(cached=False) is True
+    # Writing False clears invert bit while preserving divert byte (0x01)
+    assert invert_setting.write(False) is False
+
