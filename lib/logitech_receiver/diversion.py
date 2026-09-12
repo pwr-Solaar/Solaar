@@ -1415,9 +1415,10 @@ COMPONENTS = {
 built_in_rules = Rule(
     [
         {
-            "Rule": [  # Implement problematic keys for Craft and MX Master
+            "Rule": [  # Implement problematic keys for Craft, MX Master and ERGO K860 for Business
                 {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
                 {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+                {"Rule": [{"Key": ["Mute Microphone", "pressed"]}, {"KeyPress": "XF86_AudioMicMute"}]},
             ]
         },
     ]
