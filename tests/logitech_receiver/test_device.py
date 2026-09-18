@@ -440,3 +440,31 @@ def test_close_runs_cleanups_once():
     test_device.__del__()
 
     assert calls == [test_device]
+
+
+def test_apply_settings_if_needed_debouncing(mocker):
+    """apply_settings_if_needed debounces rapid duplicates within debounce_seconds,
+    while allowing re-applications after idle/sleep cycles."""
+    handle = 0x1
+    test_device = device.Device(
+        LowLevelInterfaceFake(fake_hidpp.r_empty), None, None, None, handle=handle, device_info=di_CCCC
+    )
+    test_device.online = True
+    test_device._protocol = 2.0
+    test_device._settings = []
+    mocker.patch.object(test_device, "signal_configuration_complete")
+    spy_apply = mocker.patch("logitech_receiver.settings.apply_all_settings")
+
+    # First call: applies settings and sets _last_apply_time
+    assert test_device.apply_settings_if_needed(debounce_seconds=2.0) is True
+    assert spy_apply.call_count == 1
+
+    # Second call immediately after (e.g. rapid duplicate on wake): debounced/skipped
+    assert test_device.apply_settings_if_needed(debounce_seconds=2.0) is False
+    assert spy_apply.call_count == 1
+
+    # Third call simulating wake after idle (> 2.0s): re-applies settings to restore volatile state
+    test_device._last_apply_time -= 5.0
+    assert test_device.apply_settings_if_needed(debounce_seconds=2.0) is True
+    assert spy_apply.call_count == 2
+

@@ -173,6 +173,7 @@ class Device:
 
         self._feature_settings_checked = False
         self._closed = False
+        self._last_apply_time = 0.0
         self._gestures_lock = threading.Lock()
         self._settings_lock = threading.Lock()
         self._persister_lock = threading.Lock()
@@ -464,41 +465,30 @@ class Device:
         if self.persister is not None:
             self.persister["_config_cookie"] = [cookie[0], cookie[1]]
 
-    def apply_settings_if_needed(self):
-        """Cookie-gated dedup helper for repeat WIRELESS_DEVICE_STATUS
-        reconfig notifications on an already-active device. Skips when the
-        live ConfigChange cookie matches the value stored by the most
-        recent apply, otherwise applies and re-records. Must NOT be used as
-        the initial-activation apply path — across power cycles, devices
-        whose firmware resets the cookie to a fixed value would falsely
-        match a stored cookie from a prior session and skip the apply the
-        device actually needs.
+    def apply_settings_if_needed(self, debounce_seconds: float = 2.0):
+        """Helper for WIRELESS_DEVICE_STATUS reconfig notifications on an
+        already-active device. Debounces rapid duplicates (such as repeat
+        notifications sent in quick succession on device wake/power-on).
+        Skips when a reconfig was already processed within debounce_seconds.
+        For reconfig events occurring after sleep, re-applies settings to
+        restore volatile hardware states (e.g. SmartShift clutch).
         Returns True if apply ran, False if it was skipped."""
         if not self.online:
             return False
-        if self.protocol >= 2.0 and self.features and SupportedFeature.CONFIG_CHANGE in self.features:
-            live = _hidpp20.get_configuration_cookie(self)
-            if live and len(live) >= 2:
-                stored = self.persister.get("_config_cookie") if self.persister else None
-                live_pair = [live[0], live[1]]
-                if stored == live_pair:
-                    if logger.isEnabledFor(logging.INFO):
-                        logger.info(
-                            "%s: config cookie %02X%02X matches stored — skip apply_all_settings",
-                            self,
-                            live[0],
-                            live[1],
-                        )
-                    return False
-                if logger.isEnabledFor(logging.INFO):
-                    logger.info(
-                        "%s: config cookie live=%02X%02X stored=%s — apply_all_settings",
-                        self,
-                        live[0],
-                        live[1],
-                        "%02X%02X" % (stored[0], stored[1]) if stored else "None",
-                    )
+        now = time.monotonic()
+        if self._last_apply_time > 0.0 and (now - self._last_apply_time) < debounce_seconds:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "%s: duplicate reconfig notification within %.1fs — skip apply_all_settings",
+                    self,
+                    debounce_seconds,
+                )
+            return False
+
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("%s: applying settings on device reconfiguration request", self)
         settings.apply_all_settings(self)
+        self._last_apply_time = now
         self._record_config_cookie()
         return True
 
@@ -617,6 +607,7 @@ class Device:
                     # signal for repeat reconfig notifications within an
                     # already-active session (see apply_settings_if_needed).
                     settings.apply_all_settings(self)
+                    self._last_apply_time = time.monotonic()
                     self._record_config_cookie()
                 if not was_active:
                     if self.protocol < 2.0:  # Make sure to set notification flags on the device

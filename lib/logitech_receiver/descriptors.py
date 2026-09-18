@@ -394,7 +394,17 @@ _D("Anywhere Mouse MX 2", codename="Anywhere MX 2", protocol=4.5, wpid="404A")
 _D("Wireless Mouse M510", codename="M510v2", protocol=2.0, wpid="4051")
 _D("Wireless Mouse M185 new", codename="M185n", protocol=4.5, wpid="4054")
 _D("Wireless Mouse M185/M235/M310", codename="M185/M235/M310", protocol=4.5, wpid="4055")
-_D("Wireless Mouse MX Master 2S", codename="MX Master 2S", protocol=4.5, wpid="4069", btid=0xB019)
+_D(  # MX Master 2S — HID++ 2.0, firmware MPM v12.01_B0006, PID B019 / BLE 6B019
+    # Selected features autodiscovered at runtime via HID++ root query:
+    # 0x0001 FeatureSet, 0x0003 DeviceFwVersion, 0x0005 DeviceName, 0x1814 ChangeHost,
+    # 0x1B04 ReprogrammableControlsV4 (8 buttons), 0x2110 SmartShift, 0x2121 HiResWheel,
+    # 0x2201 AdjustableDpi (200-4000 DPI), 0x6501 Gesture2 (Thumbwheel & NaturalScrolling)
+    "Wireless Mouse MX Master 2S",
+    codename="MX Master 2S",
+    protocol=4.5,
+    wpid="4069",
+    btid=0xB019,
+)
 _D("Multi Device Silent Mouse M585/M590", codename="M585/M590", protocol=4.5, wpid="406B")
 _D(
     "Marathon Mouse M705 (M-R0073)",

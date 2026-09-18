@@ -155,6 +155,8 @@ def _process_dj_notification(device: Device, notification: HIDPPNotification):
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: DJ connection: %s %s", device, connected, notification)
         device.changed(active=connected, alert=Alert.NONE, reason=_("connected") if connected else _("disconnected"))
+        if connected and hasattr(device, "apply_settings_if_needed"):
+            device.apply_settings_if_needed()
         return True
 
     logger.warning("%s: unrecognized DJ %s", device, notification)
@@ -217,6 +219,8 @@ def _process_hidpp10_notification(device: Device, notification: HIDPPNotificatio
         if not link_established and device.receiver:
             hidpp10.set_configuration_pending_flags(device.receiver, 0xFF)
         device.changed(active=link_established)
+        if link_established and hasattr(device, "apply_settings_if_needed"):
+            device.apply_settings_if_needed()
         return True
 
     if notification.sub_id == Notification.RAW_INPUT:
@@ -231,6 +235,8 @@ def _process_hidpp10_notification(device: Device, notification: HIDPPNotificatio
                 logger.debug("%s: device powered on", device)
             reason = device.status_string() or _("powered on")
             device.changed(active=True, alert=Alert.NOTIFICATION, reason=reason)
+            if hasattr(device, "apply_settings_if_needed"):
+                device.apply_settings_if_needed()
         else:
             logger.warning("%s: unknown %s", device, notification)
         return True
@@ -330,7 +336,8 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                 # the first transition; for follow-up reconfig notifications
                 # on an already-active device, fire the gate here so the
                 # cookie comparison decides whether to re-push.
-                device.apply_settings_if_needed()
+                if hasattr(device, "apply_settings_if_needed"):
+                    device.apply_settings_if_needed()
         else:
             logger.warning("%s: unknown WIRELESS %s", device, notification)
 
@@ -388,7 +395,10 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: WHEEL: ratchet: %d", device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
-                if device.setting_callback:
+                if (
+                    device.setting_callback
+                    and (not device.features or SupportedFeature.SMART_SHIFT not in device.features)
+                ):
                     device.setting_callback(device, settings_templates.ScrollRatchet, [2 if ratchet else 1])
         else:
             if logger.isEnabledFor(logging.INFO):
