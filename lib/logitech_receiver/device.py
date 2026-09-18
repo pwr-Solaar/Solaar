@@ -502,6 +502,24 @@ class Device:
         self._record_config_cookie()
         return True
 
+    def apply_settings_unconditionally(self):
+        """Force a settings push, bypassing the config-cookie dedup.
+
+        Used for an explicit device-initiated reconfiguration request
+        (WIRELESS_DEVICE_STATUS with data[1] == 1) on a device that is
+        already active. That notification is the device itself reporting
+        that its live state may not match what was last pushed, so it must
+        not be second-guessed by apply_settings_if_needed's cookie check —
+        which, on the very notification this exists to handle, can find a
+        "matching" cookie because activation's own apply just wrote it a
+        moment earlier in the same event chain.
+        Returns True if apply ran, False if the device is offline."""
+        if not self.online:
+            return False
+        settings.apply_all_settings(self)
+        self._record_config_cookie()
+        return True
+
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
 

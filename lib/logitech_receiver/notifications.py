@@ -325,12 +325,20 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
             reason = "powered on" if notification.data[2] == 1 else None
             if notification.data[1] == 1:  # device is asking for software reconfiguration
                 alert = Alert.NONE
+                was_active = device.online
                 device.changed(active=True, alert=alert, reason=reason)
-                # changed(active=True) already runs apply_settings_if_needed on
-                # the first transition; for follow-up reconfig notifications
-                # on an already-active device, fire the gate here so the
-                # cookie comparison decides whether to re-push.
-                device.apply_settings_if_needed()
+                if was_active:
+                    # changed(active=True) only pushes settings on the
+                    # inactive-to-active transition, so on an already-active
+                    # device it was a no-op here. This notification is the
+                    # device's own explicit "reconfigure me" request, which
+                    # is itself the signal that a push is needed — honor it
+                    # unconditionally rather than through the cookie-gated
+                    # apply_settings_if_needed, which can spuriously see the
+                    # cookie changed() just wrote moments earlier as already
+                    # "matching" and skip the push this notification exists
+                    # to trigger.
+                    device.apply_settings_unconditionally()
         else:
             logger.warning("%s: unknown WIRELESS %s", device, notification)
 
