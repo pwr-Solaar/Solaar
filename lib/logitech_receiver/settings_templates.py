@@ -589,6 +589,144 @@ class OnboardProfiles(settings.Setting):
             return cls(choices=common.NamedInts.list(profiles_list), byte_count=2) if len(profiles_list) > 1 else None
 
 
+class OnboardProfileButtons(settings.Settings):
+    """Keyboard-key assignments for one onboard profile's button slots.
+
+    Devices that remap buttons through ``ONBOARD_PROFILES`` (most gaming
+    mice) have no ``REPROG_CONTROLS`` / ``PERSISTENT_REMAPPABLE_ACTION``
+    feature for the generic per-key remap UI to attach to -- the assignment
+    lives in onboard flash as an ``hidpp20.OnboardProfile.buttons`` list,
+    previously only reachable via ``solaar profiles <device> [file]`` on
+    the command line.
+
+    This setting reads/writes that list for the profile currently active
+    on the ``onboard_profiles`` setting (falling back to sector 1 when the
+    device is in host/disabled mode, matching the CLI examples in the
+    project docs). Values are whole ``hidpp20.Button`` objects, not plain
+    bytes -- the generic byte-oriented ``FeatureRW``/``Validator`` machinery
+    doesn't fit a structure that varies in shape by behavior (SEND vs
+    FUNCTION vs macro), so, like the sibling ``OnboardProfiles`` setting
+    above, this bypasses it and talks to ``hidpp20.OnboardProfiles``
+    directly.
+
+    v1 scope: this Setting can represent and round-trip any Button the
+    device reports (mouse buttons, functions, macros included), but the
+    bundled GUI editor (``solaar.ui.onboard_buttons``) only offers assigning
+    a keyboard key or a curated Consumer-Control key -- see that package's
+    docstring for why. Editing the other behavior types still requires the
+    CLI.
+    """
+
+    name = "onboard_profile_buttons"
+    label = _("Onboard Profile Buttons")
+    description = _(
+        "Assign a keyboard key or a Consumer-Control key (browser back/forward, volume, "
+        "media controls, ...) to a button on the active onboard profile."
+    )
+    feature = _F.ONBOARD_PROFILES
+    persist = False  # authoritative state lives in the device's onboard flash, not Solaar's config
+    live_readable = True
+    editor_class = "solaar.ui.onboard_buttons.control:OnboardButtonsControl"
+
+    class validator_class:
+        """Enumerates button-slot indices as choices; read/write bypass this validator entirely."""
+
+        needs_current_value = False
+        kind = None
+
+        def __init__(self, choices):
+            self.choices = choices
+
+        @classmethod
+        def build(cls, setting_class, device):
+            profiles = hidpp20.OnboardProfiles.from_device(device)
+            if not profiles or not profiles.profiles:
+                return None
+            choices = common.NamedInts()
+            for i in range(profiles.buttons):
+                choices[i] = f"Button {i + 1}"
+            return cls(choices) if len(choices) else None
+
+        def validate_read(self, reply, key=None):
+            return reply
+
+        def prepare_write(self, key, value):
+            return value
+
+        def acceptable(self, args, current):
+            return True
+
+        def compare(self, args, current):
+            return None
+
+        def to_string(self, value):
+            return str(value)
+
+    def _active_sector(self) -> int:
+        onboard = next((s for s in self._device.settings if s.name == "onboard_profiles"), None)
+        value = getattr(onboard, "_value", None) if onboard is not None else None
+        try:
+            sector = int(value)
+        except (TypeError, ValueError):
+            sector = 0
+        return sector if sector > 0 else 1  # host/disabled mode: fall back to sector 1, as the CLI docs do
+
+    def _active_profile(self, profiles: hidpp20.OnboardProfiles):
+        sector = self._active_sector()
+        for profile in profiles.profiles.values():
+            if profile.sector == sector:
+                return profile
+        return next(iter(profiles.profiles.values()), None)
+
+    def read(self, cached=True):
+        self._pre_read(cached)
+        active_sector = self._active_sector()
+        # A plain "do we already have a value" check isn't enough here: the
+        # active profile can change out from under this setting (someone
+        # switches profile in the onboard_profiles dropdown), and _value
+        # would still be truthy -- just for the sector that used to be
+        # active. Re-read whenever the active sector has moved since the
+        # value we're holding was read, even if the caller asked for a
+        # cached value.
+        if cached and self._value is not None and getattr(self, "_loaded_sector", None) == active_sector:
+            return self._value
+        if not self._device.online:
+            return None
+        profiles = hidpp20.OnboardProfiles.from_device(self._device)
+        if not profiles:
+            return None
+        profile = self._active_profile(profiles)
+        if profile is None:
+            return None
+        self._profiles = profiles
+        self._loaded_sector = active_sector
+        self._value = {i: button for i, button in enumerate(profile.buttons)}
+        return self._value
+
+    def write(self, mapping, save=True):
+        assert mapping is not None
+        if not self._device.online:
+            return None
+        if self._value is None:
+            self._value = {}
+        self._value.update({int(k): v for k, v in mapping.items()})
+        self._pre_write(save)
+        profiles = getattr(self, "_profiles", None) or hidpp20.OnboardProfiles.from_device(self._device)
+        profile = self._active_profile(profiles) if profiles else None
+        if profile is None:
+            return None
+        for index, button in mapping.items():
+            profile.buttons[int(index)] = button
+        profiles.write(self._device)
+        self._profiles = profiles
+        self._loaded_sector = self._active_sector()
+        return mapping
+
+    def write_key_value(self, key, value, save=True):
+        result = self.write({int(key): value}, save)
+        return None if result is None else value
+
+
 class ReportRate(settings.Setting):
     name = "report_rate"
     label = _("Report Rate")
@@ -4451,6 +4589,7 @@ SETTINGS: list[settings.Setting] = [
     ThumbInvert,  # working
     ThumbMode,  # working
     OnboardProfiles,
+    OnboardProfileButtons,
     ReportRate,  # working
     ExtendedReportRate,
     PointerSpeed,  # simple

@@ -1,0 +1,79 @@
+# Maintainer: Jens <jens.aitola@masino.fi>
+#
+# This packages the "onboard-profile-button-editor" feature branch of
+# https://github.com/jjepaah/Solaar (a fork of the official
+# https://github.com/pwr-Solaar/Solaar) as an installable -git package,
+# so people don't have to build it from source by hand while the branch
+# waits to be reviewed/merged upstream.
+#
+# It installs to the exact same paths as the official `solaar` package
+# (Arch's `extra` repo) and the community `solaar-git` AUR package, so it
+# provides/conflicts with both -- only one of the three can be installed
+# at a time. Once the upstream PR merges, this package should either be
+# repointed at upstream master or retired (see the comment at the bottom).
+#
+# NOTE: the dependency list below was built from Solaar's setup.py, not
+# copied from the official PKGBUILD (I couldn't fetch aur.archlinux.org or
+# gitlab.archlinux.org directly -- both sit behind bot-blocking that
+# rejects automated fetches). Before pushing this to the AUR, diff it
+# against the real thing on your own machine, e.g.:
+#   git clone https://gitlab.archlinux.org/archlinux/packaging/packages/solaar.git
+# and compare its PKGBUILD's depends()/package() against this one.
+
+pkgname=solaar-onboard-profiles-git
+_gitname=Solaar
+_gitbranch=feature/onboard-profile-button-editor
+pkgver=1.1.20.r3010.gc9aa84d0
+pkgrel=1
+pkgdesc="Linux device manager for Logitech receivers, keyboards, mice, and tablets -- jjepaah's fork with an onboard-profile button editor (unmerged feature branch)"
+arch=('any')
+url="https://github.com/jjepaah/Solaar/tree/${_gitbranch}"
+license=('GPL2')
+depends=(
+    'python-yaml'
+    'python-pyudev'
+    'python-xlib'
+    'python-psutil'
+    'python-dbus'
+    'python-gobject'
+    'python-cairo'
+    'python-typing_extensions'
+    'python-evdev'
+    'hicolor-icon-theme'
+)
+optdepends=(
+    'libnotify: desktop notifications'
+    'python-hid-parser: decoding HID++ report descriptors'
+)
+makedepends=('git' 'python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+provides=('solaar')
+conflicts=('solaar' 'solaar-git')
+source=("${_gitname}::git+https://github.com/jjepaah/Solaar.git#branch=${_gitbranch}")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$_gitname"
+    # No tags on a feature branch to describe from -- base the version on
+    # the upstream version file plus commit count/hash, the same shape
+    # setup.py itself uses for its own "commit" file.
+    printf "%s.r%s.g%s" "$(cat lib/solaar/version)" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+    cd "$_gitname"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$_gitname"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+
+    # setup.py's data_files (desktop entry, icons, udev rule, appstream
+    # metainfo) land under the wheel's .data/data/ and installer places
+    # them relative to $pkgdir already -- nothing extra to copy by hand
+    # unless that stops being true; verify with:
+    #   find "$pkgdir" -path '*/share/applications/*' -o -path '*/udev/*'
+    # after a local `makepkg` before pushing this to the AUR.
+
+    install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+}
