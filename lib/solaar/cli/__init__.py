@@ -47,6 +47,11 @@ def _create_parser():
         help="device to show information about; may be a device number (1..6), a serial number, "
         'a substring of a device\'s name, or "all" (the default)',
     )
+    sp.add_argument(
+        "--json",
+        action="store_true",
+        help="output the device information as JSON on a single document, for consumption by other programs",
+    )
     sp.set_defaults(action="show")
 
     sp = subparsers.add_parser("probe", description="Probe a receiver (debugging use only).")
