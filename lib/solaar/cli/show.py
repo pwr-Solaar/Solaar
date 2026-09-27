@@ -295,12 +295,12 @@ def _print_device(dev, num=None):
     else:
         print("     Protocol     : unknown (device is offline)")
     if not is_centurion and dev.polling_rate:
-        print("     Report Rate :", dev.polling_rate)
+        print("     Report Rate  :", dev.polling_rate)
     print("     Serial number:", dev.serial)
     if dev.modelId:
-        print("     Model ID:     ", dev.modelId)
+        print("     Model ID     :", dev.modelId)
     if dev.unitId:
-        print("     Unit ID:      ", dev.unitId)
+        print("     Unit ID      :", dev.unitId)
     if dev.firmware:
         for fw in dev.firmware:
             print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
