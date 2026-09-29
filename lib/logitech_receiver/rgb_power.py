@@ -551,10 +551,22 @@ class RGBPowerManager:
                 logger.debug("%s: could not read firmware timers, using defaults: %s", self._device, e)
 
     def _write_firmware_idle_timeout(self, seconds):
-        """Push idle/sleep timeouts back to firmware so it fires IDLE on time."""
+        """Push idle/sleep timeouts back to firmware so it fires IDLE on time.
+
+        A literal 0 does NOT mean "disabled" to the firmware -- it means
+        "idle after zero seconds", i.e. immediately after every keystroke.
+        That causes the firmware to fire a rapid IDLE/ACTIVE event burst on
+        every micro-pause between keypresses, and _wake() repaints the full
+        lighting state on each ACTIVE event, which shows up as the LEDs
+        flickering/fluctuating while actively typing. When the setting means
+        "disabled" (seconds == 0), tell firmware to (practically) never idle
+        instead, and let the Python-side idle_timeout > 0 gate (see
+        on_user_activity) remain the sole authority for "disabled".
+        """
+        fw_seconds = 0xFFFF if seconds == 0 else seconds
         try:
-            idle_hi = (seconds >> 8) & 0xFF
-            idle_lo = seconds & 0xFF
+            idle_hi = (fw_seconds >> 8) & 0xFF
+            idle_lo = fw_seconds & 0xFF
             sleep_hi = (self._sleep_timeout >> 8) & 0xFF
             sleep_lo = self._sleep_timeout & 0xFF
             payload = bytes([0x01, 0x00, 0x00, idle_hi, idle_lo, sleep_hi, sleep_lo])
