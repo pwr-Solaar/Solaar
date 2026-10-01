@@ -914,6 +914,29 @@ def test_check_feature_settings(test, mocker):
     assert already_known
 
 
+def test_check_feature_settings_error(mocker):
+    """A setting whose check raises an error is neither known nor absent, and the previous setting is not added again"""
+    previous, failing = [sclass for sclass in settings_templates.SETTINGS if sclass.feature][:2]
+    previous_setting = mocker.Mock()
+    previous_setting.name = previous.name
+
+    def check_feature(device, sclass):
+        if sclass is failing:
+            raise UnicodeDecodeError("utf-8", b"\xe2\x80", 0, 2, "unexpected end of data")
+        return previous_setting if sclass is previous else None
+
+    mocker.patch.object(settings_templates, "check_feature", side_effect=check_feature)
+    device = fake_hidpp.Device(feature=hidpp20_constants.SupportedFeature.HOSTS_INFO)
+    device.persister["_absent"] = []
+
+    already_known = []
+    result = settings_templates.check_feature_settings(device, already_known)
+
+    assert result is True
+    assert already_known == [previous_setting]
+    assert failing.name not in device.persister["_absent"]
+
+
 @pytest.mark.parametrize(
     "test",
     [
