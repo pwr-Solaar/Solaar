@@ -4710,7 +4710,11 @@ def check_feature_settings(device, already_known) -> bool:
                 if sclass.name in new_absent:
                     new_absent.remove(sclass.name)
             elif setting is None:
-                if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
+                if (
+                    sclass.name not in new_absent
+                    and sclass.name not in absent
+                    and (device.persister is None or sclass.name not in device.persister)
+                ):
                     new_absent.append(sclass.name)
     if device.persister and new_absent:
         absent.extend(new_absent)

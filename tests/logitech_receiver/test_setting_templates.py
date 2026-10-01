@@ -914,6 +914,21 @@ def test_check_feature_settings(test, mocker):
     assert already_known
 
 
+def test_check_feature_settings_without_persister():
+    """Devices without a persister (e.g. headless use of the library) must not crash detection."""
+    tst = simple_tests[0].test
+    device = fake_hidpp.Device(
+        responses=simple_tests[0].responses, feature=tst.sclass.feature, offset=tst.offset, version=tst.version
+    )
+    device.persister = None
+
+    already_known = []
+    result = settings_templates.check_feature_settings(device, already_known)
+
+    assert result is True
+    assert [s.name for s in already_known] == [tst.sclass.name]
+
+
 @pytest.mark.parametrize(
     "test",
     [
