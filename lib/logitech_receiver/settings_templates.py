@@ -4381,6 +4381,8 @@ class HapticLevel(settings.Setting):
 
         def read(self, device, data_bytes=b""):
             result = device.feature_request(self.feature, 0x10)
+            if not result:  # no reply from device
+                return None
             if result[0] & 0x01 == 0:  # disabled, return 0
                 return b"\x00"
             else:  # enabled, return second byte
@@ -4423,12 +4425,13 @@ class PlayHapticWaveForm(settings.Setting):
         @classmethod
         def build(cls, setting_class, device):
             response = device.feature_request(_F.HAPTIC, 0x00)
-            if response:
-                waves = common.NamedInts()
-                waveforms = int.from_bytes(response[4:8])
-                for waveform in hidpp20_constants.HapticWaveForms:
-                    if (1 << int(waveform)) & waveforms:
-                        waves[int(waveform)] = str(waveform)
+            if not response:  # no reply from device, so no waveforms known
+                return None
+            waves = common.NamedInts()
+            waveforms = int.from_bytes(response[4:8])
+            for waveform in hidpp20_constants.HapticWaveForms:
+                if (1 << int(waveform)) & waveforms:
+                    waves[int(waveform)] = str(waveform)
             return cls(choices=waves, byte_count=1)
 
 

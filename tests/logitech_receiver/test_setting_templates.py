@@ -1053,3 +1053,25 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+# --- HAPTIC (0x19B0): tolerate devices that don't reply -------------------
+
+
+def test_HapticLevel_read_without_reply_returns_none():
+    responses = [fake_hidpp.Response("01320000", 0x0410)]  # enabled, level 50, all levels
+    device = fake_hidpp.Device(responses=responses, feature=settings_templates.HapticLevel.feature)
+    setting = settings_templates.check_feature(device, settings_templates.HapticLevel)
+    assert setting is not None
+    assert setting.read(cached=False) == 50
+
+    device.responses.remove(responses[0])  # device stops answering, e.g. it went to sleep
+    setting._value = None
+
+    assert setting.read(cached=False) is None
+
+
+def test_PlayHapticWaveForm_without_reply_is_not_supported():
+    device = fake_hidpp.Device(responses=[], feature=settings_templates.PlayHapticWaveForm.feature)
+
+    assert settings_templates.check_feature(device, settings_templates.PlayHapticWaveForm) is None
