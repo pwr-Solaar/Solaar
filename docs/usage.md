@@ -181,3 +181,10 @@ processed by Solaar rules instead of by Linux.
 
 Different Logitech devices may implement the same functionality in different ways,
 thus the different settings that do the same thing.
+
+Devices that can change hosts also store a name for each host.
+Whenever such a device connects, Solaar sets the name of the current host
+to the short host name of the computer if it is different,
+as some devices reset this name when they connect.
+Logi Options+ on other computers uses these names to switch devices linked to a keyboard
+along with the keyboard (Enhanced Easy-Switch), so each computer should have a different host name.

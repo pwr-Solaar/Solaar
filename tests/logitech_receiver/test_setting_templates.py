@@ -933,6 +933,66 @@ def test_check_feature_setting(test, mocker):
     assert setting
 
 
+responses_change_host = [
+    fake_hidpp.Response("050003", 0x0000, "1815"),  # HOSTS_INFO at 0x05
+    fake_hidpp.Response("030200", 0x0400),  # current host 3 of 3
+    fake_hidpp.Response("13080302", 0x0500),
+    fake_hidpp.Response("000105010D18", 0x0510, "00"),
+    fake_hidpp.Response("0000574F524B2D4C4150544F502D31", 0x0530, "0000"),  # WORK-LAPTOP-1
+    fake_hidpp.Response("010104011418", 0x0510, "01"),
+    fake_hidpp.Response("0100416C6578E2809973204D6163426F", 0x0530, "0100"),  # Alex’s MacBo
+    fake_hidpp.Response("010E6F6B2050726F", 0x0530, "010E"),  # ok Pro
+]
+responses_host_name_reset = [
+    fake_hidpp.Response("020105011618", 0x0510, "02"),
+    fake_hidpp.Response("02004C6F67697465636820426F6C7420", 0x0530, "0200"),  # Logitech Bolt
+    fake_hidpp.Response("020E7265636569766572", 0x0530, "020E"),  # receiver
+    fake_hidpp.Response("020E", 0x0540, "02006F6D61726368792D6465736B746F"),  # omarchy-deskto
+    fake_hidpp.Response("020F", 0x0540, "020E70"),  # p
+]
+responses_host_name_set = [
+    fake_hidpp.Response("020105010F18", 0x0510, "02"),
+    fake_hidpp.Response("02006F6D61726368792D6465736B746F", 0x0530, "0200"),
+    fake_hidpp.Response("020E70", 0x0530, "020E"),
+]
+
+
+@pytest.mark.parametrize(
+    "responses, expected_writes",
+    [
+        (responses_change_host + responses_host_name_reset, [(2, 0x00, b"omarchy-deskto"), (2, 0x0E, b"p")]),
+        (responses_change_host + responses_host_name_set, []),
+        ([fake_hidpp.Response("030200", 0x0400)], []),  # no HOSTS_INFO
+    ],
+)
+def test_ChangeHost_apply(responses, expected_writes, mocker):
+    """Applying the setting, which happens whenever the device becomes active, sets the name of the current host if needed"""
+    mocker.patch("socket.gethostname", return_value="omarchy-desktop.lan")
+    device = fake_hidpp.Device(responses=responses, feature=settings_templates.ChangeHost.feature)
+    setting = settings_templates.check_feature(device, settings_templates.ChangeHost)
+    spy_request = mocker.spy(device, "request")
+
+    setting.apply()
+
+    assert [call.args[1:] for call in spy_request.call_args_list if call.args[0] & 0xFFF0 == 0x0540] == expected_writes
+    assert spy_request.call_args.args[0] == 0x0400  # the current host is read last
+
+
+def test_ChangeHost_apply_offline(mocker):
+    mocker.patch("socket.gethostname", return_value="omarchy-desktop.lan")
+    responses = responses_change_host + responses_host_name_reset
+    device = fake_hidpp.Device(responses=responses, feature=settings_templates.ChangeHost.feature)
+    setting = settings_templates.check_feature(device, settings_templates.ChangeHost)
+    device.online = False
+    spy_request = mocker.spy(device, "request")
+    spy_get_host_names = mocker.spy(settings_templates._hidpp20, "get_host_names")
+
+    setting.apply()
+
+    spy_get_host_names.assert_not_called()
+    spy_request.assert_not_called()
+
+
 # --- RGBIdleEffect._pre_read legacy bare-int migration ---------------------
 # Solaar versions before the HeteroValidator refactor stored
 # `rgb_idle_effect` as a bare int (0 / 25 / 50 / 75 / 0x0A / 0x0B).

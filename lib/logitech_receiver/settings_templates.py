@@ -1317,6 +1317,16 @@ class ChangeHost(settings.Setting):
                 choices[host] = f"{str(host + 1)}:{hostName}" if hostName else str(host + 1)
             return cls(choices=choices, read_skip_byte_count=1) if choices and len(choices) > 1 else None
 
+    def apply(self):
+        # Some devices reset the name of the current host when they connect, but Logi Options+ on other computers
+        # needs the name to switch linked devices along with a keyboard (Enhanced Easy-Switch), so set it again
+        if self._device.online and _F.HOSTS_INFO in self._device.features:
+            try:
+                _hidpp20.get_host_names(self._device)
+            except Exception as e:
+                logger.warning("%s: error setting the name of the current host: %r", self._device, e)
+        super().apply()
+
 
 _GESTURE2_GESTURES_LABELS = {
     GestureId.TAP_1_FINGER: (_("Single tap"), _("Performs a left click.")),
