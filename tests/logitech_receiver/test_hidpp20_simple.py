@@ -261,15 +261,25 @@ def mock_gethostname(mocker):
         (
             [
                 fake_hidpp.Response("03000200", 0x0400),
-                fake_hidpp.Response("FF01FFFF05FFFF", 0x0410, "00"),
-                fake_hidpp.Response("0000414243444500FFFFFFFFFF", 0x0430, "0000"),
-                fake_hidpp.Response("FF01FFFF10FFFF", 0x0410, "01"),
-                fake_hidpp.Response("01004142434445464748494A4B4C4D", 0x0430, "0100"),
-                fake_hidpp.Response("01134E4F5000FFFFFFFFFFFFFFFFFF", 0x0430, "010E"),
-                fake_hidpp.Response("000000000008", 0x0410, "00"),
-                fake_hidpp.Response("0208", 0x0440, "000041424344454647"),
+                fake_hidpp.Response("000105010518", 0x0410, "00"),
+                fake_hidpp.Response("00004142434445", 0x0430, "0000"),
+                fake_hidpp.Response("010105011018", 0x0410, "01"),
+                fake_hidpp.Response("01004142434445464748494A4B4C4D4E", 0x0430, "0100"),
+                fake_hidpp.Response("010E4F50000000000000000000000000", 0x0430, "010E"),
+                fake_hidpp.Response("0007", 0x0440, "000041424344454647"),
             ],
-            {0: (True, "ABCDEFG"), 1: (True, "ABCDEFGHIJKLMNO")},
+            {0: (True, "ABCDEFG"), 1: (True, "ABCDEFGHIJKLMNOP")},
+        ),
+        (  # a character split between two parts of a name
+            [
+                fake_hidpp.Response("03000200", 0x0400),
+                fake_hidpp.Response("000105010718", 0x0410, "00"),
+                fake_hidpp.Response("000041424344454647", 0x0430, "0000"),
+                fake_hidpp.Response("010105011118", 0x0410, "01"),
+                fake_hidpp.Response("01004142434445464748494A4B4C4DE2", 0x0430, "0100"),
+                fake_hidpp.Response("010E809973", 0x0430, "010E"),
+            ],
+            {0: (True, "ABCDEFG"), 1: (True, "ABCDEFGHIJKLM’s")},
         ),
     ],
 )
@@ -281,33 +291,208 @@ def test_get_host_names(responses, expected_result, mock_gethostname):
     assert result == expected_result
 
 
+def test_get_host_names_set_current_host_name(mocker):
+    """A Bolt slot that the device reset to the name of the receiver gets the name of this computer back"""
+    mocker.patch("socket.gethostname", return_value="omarchy-desktop.lan")
+    responses = [
+        fake_hidpp.Response("13080302", 0x0400),
+        fake_hidpp.Response("000105010D18", 0x0410, "00"),
+        fake_hidpp.Response("0000574F524B2D4C4150544F502D31", 0x0430, "0000"),
+        fake_hidpp.Response("010104011418", 0x0410, "01"),
+        fake_hidpp.Response("0100416C6578E2809973204D6163426F", 0x0430, "0100"),
+        fake_hidpp.Response("010E6F6B2050726F", 0x0430, "010E"),
+        fake_hidpp.Response("020105011618", 0x0410, "02"),
+        fake_hidpp.Response("02004C6F67697465636820426F6C7420", 0x0430, "0200"),
+        fake_hidpp.Response("020E7265636569766572", 0x0430, "020E"),
+        fake_hidpp.Response("020E", 0x0440, "02006F6D61726368792D6465736B746F"),
+        fake_hidpp.Response("020F", 0x0440, "020E70"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
+    spy_request = mocker.spy(device, "request")
+
+    result = _hidpp20.get_host_names(device)
+
+    assert result == {0: (True, "WORK-LAPTOP-1"), 1: (True, "Alex’s MacBook Pro"), 2: (True, "omarchy-desktop")}
+    spy_request.assert_any_call(0x0440, 2, 0x00, b"omarchy-deskto", no_reply=False)
+    spy_request.assert_called_with(0x0440, 2, 0x0E, b"p", no_reply=False)
+
+
 @pytest.mark.parametrize(
-    "responses, expected_result",
+    "responses",
     [
-        ([fake_hidpp.Response(None, 0x0400)], None),
+        [  # host index in the reply is wrong
+            fake_hidpp.Response("03000200", 0x0400),
+            fake_hidpp.Response("010105010718", 0x0410, "00"),
+            fake_hidpp.Response("010105010318", 0x0410, "01"),
+            fake_hidpp.Response("0100484A4B", 0x0430, "0100"),
+        ],
+        [  # no reply
+            fake_hidpp.Response("03000200", 0x0400),
+            fake_hidpp.Response("010105010318", 0x0410, "01"),
+            fake_hidpp.Response("0100484A4B", 0x0430, "0100"),
+        ],
+        [  # offset in the reply is wrong
+            fake_hidpp.Response("03000200", 0x0400),
+            fake_hidpp.Response("000105010718", 0x0410, "00"),
+            fake_hidpp.Response("000E41424344454647", 0x0430, "0000"),
+            fake_hidpp.Response("010105010318", 0x0410, "01"),
+            fake_hidpp.Response("0100484A4B", 0x0430, "0100"),
+        ],
+    ],
+)
+def test_get_host_names_bad_replies(responses, mock_gethostname, mocker):
+    """A host whose information is not provided is left out, and the name of the current host is not changed"""
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
+    spy_request = mocker.spy(device, "request")
+
+    result = _hidpp20.get_host_names(device)
+
+    assert result == {1: (True, "HJK")}
+    assert all(call.args[0] != 0x0440 for call in spy_request.call_args_list)
+
+
+def test_get_host_names_reply_to_other_request(mock_gethostname, mocker):
+    """A reply to another program's request is ignored and the request is made again"""
+    responses = [
+        fake_hidpp.Response("01000201", 0x0400),
+        fake_hidpp.Response("000105010718", 0x0410, "00"),
+        fake_hidpp.Response("000041424344454647", 0x0430, "0000"),
+        fake_hidpp.Response("010105010318", 0x0410, "01"),
+        fake_hidpp.Response("0100484A4B", 0x0430, "0100"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
+    feature_request = device.feature_request
+    other_replies = [bytes.fromhex("0100484A4B")]
+
+    def first_reply_for_other_request(feature, function=0x00, *params, **kwargs):
+        if function == 0x30 and other_replies:
+            return other_replies.pop()
+        return feature_request(feature, function, *params, **kwargs)
+
+    mocker.patch.object(device, "feature_request", side_effect=first_reply_for_other_request)
+
+    result = _hidpp20.get_host_names(device)
+
+    assert result == {0: (True, "ABCDEFG"), 1: (True, "HJK")}
+
+
+def test_get_host_names_long_hostname(mocker):
+    """A host name that has to be shortened to fit is not set again when the shortened name is already there"""
+    mocker.patch("socket.gethostname", return_value="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123.foo.org")
+    responses = [
+        fake_hidpp.Response("03000100", 0x0400),
+        fake_hidpp.Response("000105011818", 0x0410, "00"),
+        fake_hidpp.Response("00004142434445464748494A4B4C4D4E", 0x0430, "0000"),
+        fake_hidpp.Response("000E4F505152535455565758", 0x0430, "000E"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
+    spy_request = mocker.spy(device, "request")
+
+    result = _hidpp20.get_host_names(device)
+    _hidpp20.get_host_names(device)
+
+    assert result == {0: (True, "ABCDEFGHIJKLMNOPQRSTUVWX")}
+    assert [call.args[0] for call in spy_request.call_args_list].count(0x0400) == 2  # nothing more to check or set
+    assert all(call.args[0] != 0x0440 for call in spy_request.call_args_list)
+
+
+def test_get_host_names_no_hostname(mocker):
+    """Without a host name for this computer, nothing is set"""
+    mocker.patch("socket.gethostname", return_value="")
+    responses = [
+        fake_hidpp.Response("03000100", 0x0400),
+        fake_hidpp.Response("000105010318", 0x0410, "00"),
+        fake_hidpp.Response("0000484A4B", 0x0430, "0000"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
+    spy_request = mocker.spy(device, "request")
+
+    result = _hidpp20.get_host_names(device)
+
+    assert result == {0: (True, "HJK")}
+    assert [call.args[0] for call in spy_request.call_args_list].count(0x0400) == 1
+
+
+@pytest.mark.parametrize(
+    "responses, name, current_name, expected_result",
+    [
+        ([fake_hidpp.Response(None, 0x0400)], "ABCDEFGHIJKLMNOPQRSTUVWX", "", None),
         (
             [
                 fake_hidpp.Response("03000002", 0x0400),
-                fake_hidpp.Response("000000000008", 0x0410, "02"),
-                fake_hidpp.Response("020E", 0x0440, "02004142434445464748494A4B4C4D4E"),
+                fake_hidpp.Response("020000000008", 0x0410, "02"),
+                fake_hidpp.Response("0208", 0x0440, "02004142434445464748"),
             ],
+            "ABCDEFGHIJKLMNOPQRSTUVWX",
+            "",
             True,
         ),
         (
             [
                 fake_hidpp.Response("03000002", 0x0400),
-                fake_hidpp.Response("000000000014", 0x0410, "02"),
+                fake_hidpp.Response("020000000014", 0x0410, "02"),
                 fake_hidpp.Response("020E", 0x0440, "02004142434445464748494A4B4C4D4E"),
-                fake_hidpp.Response("0214", 0x0440, "020E4F505152535455565758"),
+                fake_hidpp.Response("0214", 0x0440, "020E4F5051525354"),
             ],
+            "ABCDEFGHIJKLMNOPQRSTUVWX",
+            "",
             True,
+        ),
+        (  # shortened without splitting a character
+            [
+                fake_hidpp.Response("03000002", 0x0400),
+                fake_hidpp.Response("020000000018", 0x0410, "02"),
+                fake_hidpp.Response("020E", 0x0440, "02004142434445464748494A4B4C4D4E"),
+                fake_hidpp.Response("0217", 0x0440, "020E4F5051525354555657"),
+            ],
+            "ABCDEFGHIJKLMNOPQRSTUVW’s",
+            "",
+            True,
+        ),
+        (  # the shortened name is already there
+            [
+                fake_hidpp.Response("03000002", 0x0400),
+                fake_hidpp.Response("020000000008", 0x0410, "02"),
+            ],
+            "ABCDEFGHIJKLMNOPQRSTUVWX",
+            "ABCDEFGH",
+            True,
+        ),
+        (  # host index in the reply is wrong
+            [
+                fake_hidpp.Response("03000002", 0x0400),
+                fake_hidpp.Response("020000000008", 0x0410, "02"),
+                fake_hidpp.Response("0108", 0x0440, "02004142434445464748"),
+            ],
+            "ABCDEFGH",
+            "",
+            False,
+        ),
+        (  # name length in the reply is wrong
+            [
+                fake_hidpp.Response("03000002", 0x0400),
+                fake_hidpp.Response("020000000008", 0x0410, "02"),
+                fake_hidpp.Response("0207", 0x0440, "02004142434445464748"),
+            ],
+            "ABCDEFGH",
+            "",
+            False,
+        ),
+        (
+            [
+                fake_hidpp.Response("03000002", 0x0400),
+                fake_hidpp.Response("020000000008", 0x0410, "02"),
+            ],
+            "",
+            "ABCDEFGH",
+            False,
         ),
     ],
 )
-def test_set_host_name(responses, expected_result):
+def test_set_host_name(responses, name, current_name, expected_result):
     device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
 
-    result = _hidpp20.set_host_name(device, "ABCDEFGHIJKLMNOPQRSTUVWX")
+    result = _hidpp20.set_host_name(device, name, current_name)
 
     assert result == expected_result
 
