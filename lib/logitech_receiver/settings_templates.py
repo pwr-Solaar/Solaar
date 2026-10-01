@@ -4699,6 +4699,7 @@ def check_feature_settings(device, already_known) -> bool:
                     return False
                 else:
                     logger.warning(f"ignore feature {sclass.name} because of error {err}")
+                    continue  # not determined, so neither present nor absent
 
             if isinstance(setting, list):
                 for s in setting:
