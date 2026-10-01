@@ -50,8 +50,13 @@ from .common import NamedInt
 from .hidpp20 import SupportedFeature
 from .special_keys import CONTROL
 
-gi.require_version("Gdk", "3.0")  # isort:skip
-from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
+from gi.repository import GLib  # NOQA: E402 # isort:skip
+
+try:  # Gdk is optional: without it (headless) there is no keymap, so KeyPress actions are unavailable
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gdk  # NOQA: E402
+except (ImportError, ValueError):
+    Gdk = None
 
 if typing.TYPE_CHECKING:
     from .base import HIDPPNotification
@@ -98,7 +103,7 @@ _BUTTON_PRESS = 3
 
 CLICK, DEPRESS, RELEASE = "click", "depress", "release"
 
-gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
+gdisplay = Gdk.Display.get_default() if Gdk else None  # None if run without a full window system
 gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if logger.isEnabledFor(logging.INFO):
     logger.info("GDK Keymap %sset up", "" if gkeymap else "not ")
@@ -758,11 +763,11 @@ class Setting(Condition):
         return {"Setting": self.args[:]}
 
 
-MODIFIERS = {
-    "Shift": int(Gdk.ModifierType.SHIFT_MASK),
-    "Control": int(Gdk.ModifierType.CONTROL_MASK),
-    "Alt": int(Gdk.ModifierType.MOD1_MASK),
-    "Super": int(Gdk.ModifierType.MOD4_MASK),
+MODIFIERS = {  # X11/GDK modifier mask bits (Gdk.ModifierType values), fixed so Gdk is not required
+    "Shift": 1 << 0,  # SHIFT_MASK
+    "Control": 1 << 2,  # CONTROL_MASK
+    "Alt": 1 << 3,  # MOD1_MASK
+    "Super": 1 << 6,  # MOD4_MASK
 }
 MODIFIER_MASK = MODIFIERS["Shift"] + MODIFIERS["Control"] + MODIFIERS["Alt"] + MODIFIERS["Super"]
 

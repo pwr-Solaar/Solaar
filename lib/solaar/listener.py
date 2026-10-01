@@ -27,7 +27,6 @@ from collections import namedtuple
 from functools import partial
 from typing import Callable
 
-import gi
 import logitech_receiver
 
 from logitech_receiver import base
@@ -39,12 +38,11 @@ from logitech_receiver import notifications
 from . import configuration
 from . import dbus
 from . import i18n
-from .ui import common
+from .errors import ErrorReason
 
 if typing.TYPE_CHECKING:
     from hidapi.common import DeviceInfo
 
-gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 if typing.TYPE_CHECKING:
@@ -479,11 +477,11 @@ def _process_add(device_info: DeviceInfo, retry):
             if retry:
                 GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
             else:
-                _error_callback(common.ErrorReason.PERMISSIONS, device_info.path)
+                _error_callback(ErrorReason.PERMISSIONS, device_info.path)
         else:
-            _error_callback(common.ErrorReason.NO_DEVICE, device_info.path)
+            _error_callback(ErrorReason.NO_DEVICE, device_info.path)
     except exceptions.NoReceiver:
-        _error_callback(common.ErrorReason.NO_DEVICE, device_info.path)
+        _error_callback(ErrorReason.NO_DEVICE, device_info.path)
 
 
 # receiver add/remove events will start/stop listener threads

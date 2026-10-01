@@ -16,11 +16,11 @@
 
 import logging
 
-from enum import Enum
 from typing import Tuple
 
 import gi
 
+from solaar.errors import ErrorReason  # noqa: F401 - re-exported for UI callers
 from solaar.i18n import _
 from solaar.tasks import TaskRunner
 
@@ -29,12 +29,6 @@ from gi.repository import GLib  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
-
-
-class ErrorReason(Enum):
-    PERMISSIONS = "Permissions"
-    NO_DEVICE = "No device"
-    UNPAIR = "Unpair"
 
 
 def _create_error_text(reason: ErrorReason, object_) -> Tuple[str, str]:
