@@ -1762,6 +1762,11 @@ def feature_request(device, feature, function=0x00, *params, no_reply=False):
         )
 
 
+def _host_name_bytes(name: str, max_length: int) -> bytes:
+    """Encodes a host name in UTF-8 and shortens it to at most max_length bytes without splitting a character."""
+    return name.encode("utf-8")[:max_length].decode("utf-8", "ignore").encode("utf-8")
+
+
 class Hidpp20:
     # Host-side counter for SetComplete cookies (see set_configuration_complete).
     # Seeded to a non-zero random 16-bit value at import so successive sessions
@@ -2053,6 +2058,26 @@ class Hidpp20:
 
             return multi, has_invert, has_ratchet, inv, res, target, ratchet
 
+    def get_change_host_info(self, device: Device):
+        """Returns the number of hosts and the current host of a device that can change hosts."""
+        state = device.feature_request(SupportedFeature.CHANGE_HOST, 0x00)
+        if state:
+            numHosts, currentHost = struct.unpack("!BB", state[:2])
+            return numHosts, currentHost
+
+    def get_host_cookies(self, device: Device, numHosts):
+        """Returns the host cookies of a device that can change hosts, one byte for each host.
+
+        Logi Options+ links a device to a keyboard (Enhanced Easy-Switch) by setting all its host cookies to
+        the easy_switch_cookie of the keyboard."""
+        cookies = device.feature_request(SupportedFeature.CHANGE_HOST, 0x20)
+        if cookies:
+            return cookies[:numHosts]
+
+    def set_current_host(self, device: Device, host):
+        """Makes a device that can change hosts switch to another host."""
+        device.feature_request(SupportedFeature.CHANGE_HOST, 0x10, host, no_reply=True)
+
     def get_new_fn_inversion(self, device: Device):
         state = device.feature_request(SupportedFeature.NEW_FN_INVERSION, 0x00)
         if state:
@@ -2066,49 +2091,76 @@ class Hidpp20:
         host_names = {}
         if state:
             capability_flags, _ignore, numHosts, currentHost = struct.unpack("!BBBB", state[:4])
+            max_lengths = {}
             if capability_flags & 0x01:  # device can get host names
                 for host in range(0, numHosts):
-                    hostinfo = device.feature_request(SupportedFeature.HOSTS_INFO, 0x10, host)
-                    _ignore, status, _ignore, _ignore, nameLen, _ignore = struct.unpack("!BBBBBB", hostinfo[:6])
-                    name = ""
-                    remaining = nameLen
-                    while remaining > 0:
-                        name_piece = device.feature_request(SupportedFeature.HOSTS_INFO, 0x30, host, nameLen - remaining)
-                        if name_piece:
-                            name += name_piece[2 : 2 + min(remaining, 14)].decode()
-                            remaining = max(0, remaining - 14)
-                        else:
-                            remaining = 0
-                    host_names[host] = (bool(status), name)
-            if host_names:  # update the current host's name if it doesn't match the system name
-                hostname = socket.gethostname().partition(".")[0]
-                if host_names[currentHost][1] != hostname:
-                    self.set_host_name(device, hostname, host_names[currentHost][1])
-                    host_names[currentHost] = (host_names[currentHost][0], hostname)
+                    host_info = self._get_host_name(device, host)
+                    if host_info is not None:
+                        host_names[host] = host_info[:2]
+                        max_lengths[host] = host_info[2]
+            if capability_flags & 0x02 and currentHost in host_names:  # set the current host's name to the system name
+                paired, name = host_names[currentHost]
+                hostname = _host_name_bytes(socket.gethostname().partition(".")[0], max_lengths[currentHost]).decode()
+                if hostname and name != hostname:
+                    if self.set_host_name(device, hostname, name):
+                        host_names[currentHost] = (paired, hostname)
+                    else:
+                        logger.warning("%s: failed to set the name of host %d to %s", device, currentHost + 1, hostname)
         return host_names
 
+    def _get_host_name(self, device: Device, host):
+        """Returns whether a host slot is paired, the name of its host and the maximum length of the name in bytes,
+        or None if the device did not provide them."""
+        hostinfo = self._hosts_info_request(device, 0x10, host)
+        if not hostinfo:
+            return None
+        _ignore, status, _ignore, _ignore, nameLen, maxNameLen = struct.unpack("!BBBBBB", hostinfo[:6])
+        name = b""
+        for offset in range(0, nameLen, 14):
+            name_piece = self._hosts_info_request(device, 0x30, host, offset)
+            if not name_piece:
+                return None
+            name += name_piece[2:16]
+        return bool(status), name[:nameLen].decode("utf-8", "replace"), maxNameLen
+
+    def _hosts_info_request(self, device: Device, function, *params):
+        """Makes a HOSTS_INFO request whose reply starts with the parameters of the request (host index and offset).
+
+        Replies are matched to requests only by feature, function and software ID, and other programs that use Solaar's
+        library (like solaar show while Solaar runs) use the same software ID.  So when another program talks to the device
+        at the same time, a reply to its request can be received instead.  Such a reply is ignored and the request made again.
+        """
+        for _ignore in range(2):
+            reply = device.feature_request(SupportedFeature.HOSTS_INFO, function, *params)
+            if not reply or reply[: len(params)] == bytes(params):
+                return reply
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("%s: ignore HOSTS_INFO reply %s to request %s", device, reply.hex(), bytes(params).hex())
+        return None
+
     def set_host_name(self, device: Device, name, currentName=""):
-        name = bytearray(name, "utf-8")
-        currentName = bytearray(currentName, "utf-8")
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("Setting host name to %s", name)
         state = device.feature_request(SupportedFeature.HOSTS_INFO, 0x00)
         if state:
             flags, _ignore, _ignore, currentHost = struct.unpack("!BBBB", state[:4])
             if flags & 0x02:
-                hostinfo = device.feature_request(SupportedFeature.HOSTS_INFO, 0x10, currentHost)
+                hostinfo = self._hosts_info_request(device, 0x10, currentHost)
+                if not hostinfo:
+                    return False
                 _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = struct.unpack("!BBBBBB", hostinfo[:6])
-                if name[:maxNameLen] == currentName[:maxNameLen] and False:
+                name = _host_name_bytes(name, maxNameLen)
+                if not name:
+                    return False
+                if name == _host_name_bytes(currentName, maxNameLen):
                     return True
-                length = min(maxNameLen, len(name))
-                chunk = 0
-                while chunk < length:
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("%s: set name of host %d from %r to %r", device, currentHost + 1, currentName, name.decode())
+                for offset in range(0, len(name), 14):
                     response = device.feature_request(
-                        SupportedFeature.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk : chunk + 14]
+                        SupportedFeature.HOSTS_INFO, 0x40, currentHost, offset, name[offset : offset + 14]
                     )
-                    if not response:
+                    if not response or response[0] != currentHost:
                         return False
-                    chunk += 14
+                return response[1] == len(name)  # the reply has the new length of the name
             return True
 
     def get_onboard_mode(self, device: Device):
@@ -2177,6 +2229,21 @@ class Hidpp20:
     def config_change(self, device: Device, configuration, no_reply=False):
         """Deprecated — use set_configuration_complete() instead."""
         return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
+
+
+def easy_switch_cookie(unit_id):
+    """Returns the host cookie of the devices that Logi Options+ links to the keyboard with this unit ID, or None.
+
+    The cookie is a one-byte hash of the unit ID written as a decimal number (see #3228)."""
+    try:
+        digits = str(int(unit_id, 16)).encode("ascii")
+    except (TypeError, ValueError):
+        return None
+    cookie = 0
+    for digit in digits:
+        cookie ^= digit
+        cookie = ((cookie << 3) | (cookie >> 5)) & 0xFF  # rotate left by three bits
+    return cookie
 
 
 battery_functions = {
