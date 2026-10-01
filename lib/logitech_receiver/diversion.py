@@ -1317,8 +1317,8 @@ class Set(Action):
             setting.write_key_value(args[0], args[1])
         else:
             setting.write(args[0])
-        if device.setting_callback:
-            device.setting_callback(device, type(setting), args)
+        if dev.setting_callback:
+            dev.setting_callback(dev, type(setting), args)
         return None
 
     def data(self):

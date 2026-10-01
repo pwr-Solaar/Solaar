@@ -125,3 +125,23 @@ def test_process_notification(feature, data):
     )
 
     diversion.process_notification(device_mock, notification, feature)
+
+
+@pytest.mark.parametrize("other_device", [False, True])
+def test_set_action_callback(other_device):
+    setting = mock.Mock()
+    setting.name = "change-host"
+    setting.acceptable.return_value = [1]
+    target = mock.Mock(settings=[setting])
+    device = mock.Mock() if other_device else target
+    device.find.return_value = target
+
+    action = diversion.Set(["Other Device" if other_device else None, "change-host", 1])
+    result = action.evaluate(None, None, device, None)
+
+    assert result is None
+    setting.write.assert_called_once_with(1)
+    target.setting_callback.assert_called_once_with(target, type(setting), [1])
+    if other_device:
+        device.find.assert_called_once_with("Other Device")
+        device.setting_callback.assert_not_called()
