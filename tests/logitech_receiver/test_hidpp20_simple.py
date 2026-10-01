@@ -248,6 +248,32 @@ def test_get_new_fn_inversion():
     assert result == (True, False)
 
 
+def test_get_change_host_info():
+    responses = [fake_hidpp.Response("030200", 0x0400)]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CHANGE_HOST)
+
+    result = _hidpp20.get_change_host_info(device)
+
+    assert result == (3, 2)
+
+
+def test_get_host_cookies():
+    responses = [fake_hidpp.Response("B7B7B700000000000000000000000000", 0x0420)]
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CHANGE_HOST, version=1)
+
+    result = _hidpp20.get_host_cookies(device, 3)
+
+    assert result == b"\xb7\xb7\xb7"
+
+
+@pytest.mark.parametrize(
+    "unit_id, expected_cookie",
+    [("59A8D557", 0xA6), ("61965D0E", 0xB7), ("1C283C58", 0x0C), ("48FB07AE", 0xBE), ("", None), (None, None)],
+)
+def test_easy_switch_cookie(unit_id, expected_cookie):
+    assert hidpp20.easy_switch_cookie(unit_id) == expected_cookie
+
+
 @pytest.fixture
 def mock_gethostname(mocker):
     mocker.patch("socket.gethostname", return_value="ABCDEFG.foo.org")

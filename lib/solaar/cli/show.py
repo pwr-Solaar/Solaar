@@ -323,6 +323,19 @@ def _print_device(dev, num=None):
                     inverted, default_inverted = inversion
                     print("            Fn-swap:", "enabled" if inverted else "disabled")
                     print("            Fn-swap default:", "enabled" if default_inverted else "disabled")
+            elif feature == SupportedFeature.CHANGE_HOST:
+                change_host_version = dev.features.get_feature_version(feature_int) or 0
+                try:
+                    change_host_info = _hidpp20.get_change_host_info(dev) if change_host_version >= 1 else None
+                    cookies = _hidpp20.get_host_cookies(dev, change_host_info[0]) if change_host_info else None
+                except exceptions.FeatureCallError:
+                    cookies = None
+                if cookies:
+                    print(f"            Host cookies: {' '.join(f'{cookie:02X}' for cookie in cookies)}")
+                if change_host_version >= 2 and str(dev.kind) == "keyboard":
+                    cookie = hidpp20.easy_switch_cookie(dev.unitId)
+                    if cookie is not None:
+                        print(f"            Host cookie of linked devices: {cookie:02X}")
             elif feature == SupportedFeature.HOSTS_INFO:
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():

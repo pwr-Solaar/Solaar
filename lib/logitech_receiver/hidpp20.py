@@ -2058,6 +2058,22 @@ class Hidpp20:
 
             return multi, has_invert, has_ratchet, inv, res, target, ratchet
 
+    def get_change_host_info(self, device: Device):
+        """Returns the number of hosts and the current host of a device that can change hosts."""
+        state = device.feature_request(SupportedFeature.CHANGE_HOST, 0x00)
+        if state:
+            numHosts, currentHost = struct.unpack("!BB", state[:2])
+            return numHosts, currentHost
+
+    def get_host_cookies(self, device: Device, numHosts):
+        """Returns the host cookies of a device that can change hosts, one byte for each host.
+
+        Logi Options+ links a device to a keyboard (Enhanced Easy-Switch) by setting all its host cookies to
+        the easy_switch_cookie of the keyboard."""
+        cookies = device.feature_request(SupportedFeature.CHANGE_HOST, 0x20)
+        if cookies:
+            return cookies[:numHosts]
+
     def get_new_fn_inversion(self, device: Device):
         state = device.feature_request(SupportedFeature.NEW_FN_INVERSION, 0x00)
         if state:
@@ -2209,6 +2225,21 @@ class Hidpp20:
     def config_change(self, device: Device, configuration, no_reply=False):
         """Deprecated — use set_configuration_complete() instead."""
         return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
+
+
+def easy_switch_cookie(unit_id):
+    """Returns the host cookie of the devices that Logi Options+ links to the keyboard with this unit ID, or None.
+
+    The cookie is a one-byte hash of the unit ID written as a decimal number (see #3228)."""
+    try:
+        digits = str(int(unit_id, 16)).encode("ascii")
+    except (TypeError, ValueError):
+        return None
+    cookie = 0
+    for digit in digits:
+        cookie ^= digit
+        cookie = ((cookie << 3) | (cookie >> 5)) & 0xFF  # rotate left by three bits
+    return cookie
 
 
 battery_functions = {
