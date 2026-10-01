@@ -2074,6 +2074,10 @@ class Hidpp20:
         if cookies:
             return cookies[:numHosts]
 
+    def set_current_host(self, device: Device, host):
+        """Makes a device that can change hosts switch to another host."""
+        device.feature_request(SupportedFeature.CHANGE_HOST, 0x10, host, no_reply=True)
+
     def get_new_fn_inversion(self, device: Device):
         state = device.feature_request(SupportedFeature.NEW_FN_INVERSION, 0x00)
         if state:

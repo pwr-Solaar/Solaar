@@ -179,6 +179,7 @@ class Device:
         self._simple_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
+        self.hosts = None  # hosts of a device that can change hosts, as of its last connection (see easy_switch)
 
         if not self.path:
             self.path = self.low_level.find_paired_node(receiver.path, number, 1) if receiver else None

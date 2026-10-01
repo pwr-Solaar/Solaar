@@ -172,6 +172,7 @@ Divert G Keys			 | Divert G keys to create HID++ events
 Disable keys			 | Disable one or more keys
 Set OS				 | Change keys to match OS
 Change Host			 | Connect to a different host
+Enhanced Easy-Switch		 | Switch devices linked to the keyboard along with it
 Gestures			 | Turn on and off various (mostly touchpad) gestures
 Gesture params			 | Modify parameters for gestures
 
@@ -188,3 +189,12 @@ to the short host name of the computer if it is different,
 as some devices reset this name when they connect.
 Logi Options+ on other computers uses these names to switch devices linked to a keyboard
 along with the keyboard (Enhanced Easy-Switch), so each computer should have a different host name.
+
+Solaar does the same when the Enhanced Easy-Switch setting of a keyboard is on, which it is by default:
+when the Easy-Switch keys of the keyboard change the host,
+Solaar switches each device linked to the keyboard to its host with the same name as the new host of the keyboard.
+Devices are linked to keyboards in Logi Options+.
+This needs a keyboard that announces host changes (CHANGE_HOST version 2 or later),
+and the Change Host setting of the keyboard and of the linked devices must not be ignored,
+as Solaar reads the host names and sets the name of this computer when that setting is applied.
+Rules that switch devices when the keyboard changes the host are then not needed, and would switch the devices a second time.

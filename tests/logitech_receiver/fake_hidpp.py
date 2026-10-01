@@ -387,6 +387,9 @@ class Device:
     wpid: Optional[str] = "0000"
     setting_callback: Any = None
     centurion: bool = False
+    kind: Any = None
+    unitId: Optional[str] = None
+    hosts: Any = None
     path = None
     cleanups = None
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None

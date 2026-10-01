@@ -36,6 +36,7 @@ from . import descriptors
 from . import desktop_notifications
 from . import device_quirks
 from . import diversion
+from . import easy_switch
 from . import exceptions
 from . import headset_rgb
 from . import hidpp10_constants
@@ -1321,11 +1322,56 @@ class ChangeHost(settings.Setting):
         # Some devices reset the name of the current host when they connect, but Logi Options+ on other computers
         # needs the name to switch linked devices along with a keyboard (Enhanced Easy-Switch), so set it again
         if self._device.online and _F.HOSTS_INFO in self._device.features:
+            self._device.hosts = None  # so that nothing from an earlier connection is used if reading fails
             try:
-                _hidpp20.get_host_names(self._device)
+                host_names = _hidpp20.get_host_names(self._device)
+                self._device.hosts = easy_switch.read_hosts(self._device, host_names)
             except Exception as e:
-                logger.warning("%s: error setting the name of the current host: %r", self._device, e)
+                logger.warning("%s: error reading or setting host information: %r", self._device, e)
         super().apply()
+
+
+class EnhancedEasySwitch(settings.Setting):
+    name = "enhanced-easy-switch"
+    label = _("Enhanced Easy-Switch")
+    description = _(
+        "When the Easy-Switch keys of the keyboard change the host, switch the devices linked to the keyboard as well.\n"
+        "Devices are linked to keyboards in Logi Options+."
+    )
+    feature = _F.CHANGE_HOST
+    min_version = 2  # keyboards with version 2 announce host changes
+    live_readable = False  # the setting is kept in Solaar, not in the device
+
+    class rw_class:
+        def __init__(self, feature):
+            self.feature = feature
+            self.kind = settings.FeatureRW.kind
+            self.on = True
+            self.added = False
+
+        def read(self, device):
+            return b"\x01" if self.on else b"\x00"
+
+        def write(self, device, data_bytes):
+            self.on = data_bytes[0] != 0
+            if not self.added:  # add the handler once, so that the handlers don't change while notifications are handled
+                device.add_notification_handler(EnhancedEasySwitch.name, self.handler)
+                self.added = True
+            return True
+
+        def handler(self, device, n):
+            return easy_switch.handler(device, n) if self.on else None
+
+    class validator_class(settings_validator.BooleanValidator):
+        @classmethod
+        def build(cls, setting_class, device):
+            # no device can be linked to a keyboard whose link cookie is 0, as that is the cookie of unlinked devices
+            if (
+                str(device.kind) == "keyboard"
+                and _F.HOSTS_INFO in device.features
+                and hidpp20.easy_switch_cookie(device.unitId)
+            ):
+                return cls()
 
 
 _GESTURE2_GESTURES_LABELS = {
@@ -4501,6 +4547,7 @@ SETTINGS: list[settings.Setting] = [
     Multiplatform,  # working
     DualPlatform,  # simple
     ChangeHost,  # working
+    EnhancedEasySwitch,  # working
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
