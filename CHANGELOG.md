@@ -1,5 +1,7 @@
 # 1.1.20
 
+* Support system key repeat for depressed keys simulated by rules when using evdev 2.0 or later
+* Use separate uinput devices for simulated keyboard and mouse events
 * Add Irish translation
 * Don't use old settings when reusing sboxes
 * Add POUND and ISO_BACKSLASH cells to MAIN_ISO key layout

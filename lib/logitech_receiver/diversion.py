@@ -238,20 +238,27 @@ if evdev:
         "forward": (11, evdev.ecodes.ecodes["BTN_EXTRA"]),
     }
 
-    # uinput capability for keyboard keys, mouse buttons, and scrolling
+    # uinput capabilities for keyboard keys, mouse buttons, and scrolling
     key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith("KEY") and n not in {"KEY_CNT", "KEY_MAX"}]
+    button_events = []
     for _, evcode in buttons.values():
         if evcode:
-            key_events.append(evcode)
-    devicecap = {
+            button_events.append(evcode)
+    keyboard_devicecap = {
         evdev.ecodes.EV_KEY: key_events,
+        evdev.ecodes.EV_REP: [],
+    }
+    mouse_devicecap = {
+        evdev.ecodes.EV_KEY: button_events,
         evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
     }
 else:
     # Just mock these since they won't be useful without evdev anyway
     buttons = {}
     key_events = []
-    devicecap = {}
+    button_events = []
+    keyboard_devicecap = {}
+    mouse_devicecap = {}
 
 
 class UInput:
@@ -259,8 +266,44 @@ class UInput:
         KEYBOARD = enum.auto()
         MOUSE = enum.auto()
 
+    class _Device:
+        def __init__(self, name, capabilities):
+            self.name = name
+            self.capabilities = capabilities
+            self.udevice = None
+
+        def setup(self):
+            if self.udevice is not None:
+                return self.udevice
+            try:
+                self.udevice = evdev.uinput.UInput(events=self.capabilities, name=self.name)
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("%s uinput device set up", self.name)
+                return self.udevice
+            except Exception as e:
+                logger.warning("cannot create %s uinput device: %s", self.name, e)
+
+        def simulate(self, what, code, arg):
+            device = self.setup()
+            if device:
+                try:
+                    device.write(what, code, arg)
+                    device.syn()
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("%s uinput simulated input %s %s %s", self.name, what, code, arg)
+                    return True
+                except Exception as e:
+                    try:
+                        device.close()
+                    except Exception:
+                        pass
+
+                    self.udevice = None
+                    logger.warning("%s uinput write failed: %s", self.name, e)
+
     def __init__(self):
-        self.udevice = None
+        self._keyboard = self._Device("solaar-keyboard", keyboard_devicecap)
+        self._mouse = self._Device("solaar-mouse", mouse_devicecap)
         self.barrier_until = None
         self.barrier_type = None
 
@@ -284,54 +327,26 @@ class UInput:
         self.barrier_type = event_type
         self.barrier_until = time.monotonic() + margin
 
-    def setup(self):
-        if self.udevice is not None:
-            return self.udevice
-        try:
-            self.udevice = evdev.uinput.UInput(events=devicecap, name="solaar-keyboard")
-            if logger.isEnabledFor(logging.INFO):
-                logger.info("uinput device set up")
-            return True
-        except Exception as e:
-            logger.warning("cannot create uinput device: %s", e)
-
-    def simulate(self, what, code, arg):
-        if self.setup():
-            try:
-                self.udevice.write(what, code, arg)
-                self.udevice.syn()
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug("uinput simulated input %s %s %s", what, code, arg)
-                return True
-            except Exception as e:
-                try:
-                    self.udevice.close()
-                except Exception:
-                    pass
-
-                self.udevice = None
-                logger.warning("uinput write failed: %s", e)
-
     def key(self, code, event):  # X11 keycode but Solaar event code
         if evdev:
             self._wait_barrier(self.EventType.KEYBOARD)
-            if self.simulate(evdev.ecodes.EV_KEY, code - 8, event):
+            if self._keyboard.simulate(evdev.ecodes.EV_KEY, code - 8, event):
                 return True
         logger.warning("no way to simulate key input")
 
     def _click(self, button, count):
         if isinstance(count, int):
             for _ in range(count):
-                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                if not self._mouse.simulate(evdev.ecodes.EV_KEY, button[1], 1):
                     return False
-                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                if not self._mouse.simulate(evdev.ecodes.EV_KEY, button[1], 0):
                     return False
         else:
             if count != RELEASE:
-                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 1):
+                if not self._mouse.simulate(evdev.ecodes.EV_KEY, button[1], 1):
                     return False
             if count != DEPRESS:
-                if not self.simulate(evdev.ecodes.EV_KEY, button[1], 0):
+                if not self._mouse.simulate(evdev.ecodes.EV_KEY, button[1], 0):
                     return False
         return True
 
@@ -346,9 +361,9 @@ class UInput:
         self._wait_barrier(self.EventType.MOUSE)
         success = True
         if dx:
-            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+            success = self._mouse.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
         if dy and success:
-            success = self.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+            success = self._mouse.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
         if success:
             return True
         logger.warning("no way to simulate scrolling")
