@@ -14,7 +14,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Editor widget: combines toolbar + palette + canvas into one VBox.
+"""Editor widget: toolbar + canvas + right-hand colour sidebar.
 
 The editor consumes only the PerKeyColorSink protocol — no device imports,
 no Setting imports — preserving the FE/BE seam.
@@ -142,9 +142,12 @@ class PerKeyEditor(Gtk.Box):
             persisted = None
         if persisted is not None:
             initial_active, initial_previous = persisted
-        self._palette = Palette(active=initial_active, previous=initial_previous)
+        self._palette = Palette(
+            active=initial_active,
+            previous=initial_previous,
+            orientation=Gtk.Orientation.VERTICAL,
+        )
         self._palette.connect(GtkSignal.COLOR_CHANGED.value, self._on_color_changed)
-        toolbar.pack_end(self._palette, False, False, 0)
         if self._gradient_swatch is not None:
             self._gradient_swatch.update(self._palette.get_color(), self._palette.get_last_color())
 
@@ -178,7 +181,20 @@ class PerKeyEditor(Gtk.Box):
         self._canvas = KeyboardCanvas()
         self._canvas.connect(GtkSignal.PAINT.value, self._on_canvas_paint)
         scroll.add(self._canvas)
-        self.pack_start(scroll, True, True, 0)
+
+        # Colour sidebar: the active-colour picker, preset swatches and the
+        # colours currently used on the keys live in a vertical strip to the
+        # right of the canvas so they stay within easy reach while painting,
+        # instead of hiding at the end of the top toolbar.
+        body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        body.pack_start(scroll, True, True, 0)
+
+        sidebar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        sidebar.set_valign(Gtk.Align.START)
+        sidebar.pack_start(self._palette, False, False, 0)
+        body.pack_start(sidebar, False, False, 0)
+
+        self.pack_start(body, True, True, 0)
 
         self._canvas.set_active_color(self._palette.get_color())
         if self._gradient_swatch is not None:
@@ -222,9 +238,19 @@ class PerKeyEditor(Gtk.Box):
 
     def _sync_from_sink(self) -> None:
         self._canvas.set_colors(dict(self._sink.current))
+        self._refresh_used_colors()
 
     def _on_sink_update(self, current: dict[int, int]) -> None:
         self._canvas.set_colors(dict(current))
+        self._refresh_used_colors()
+
+    def _refresh_used_colors(self) -> None:
+        try:
+            colors = [c for c in (self._sink.current or {}).values()]
+        except Exception as e:
+            logger.debug("used colors read failed: %s", e)
+            colors = []
+        self._palette.set_used_colors(colors)
 
     def _on_color_changed(self, _palette, color: int) -> None:
         self._canvas.set_active_color(color)
