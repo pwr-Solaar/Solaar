@@ -37,8 +37,8 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gdk  # NOQA: E402
 from gi.repository import Gtk  # NOQA: E402
-
 from logitech_receiver import diversion  # NOQA: E402
+
 from solaar.i18n import _  # NOQA: E402
 
 logger = logging.getLogger(__name__)
@@ -147,6 +147,15 @@ class MacroEditor(Gtk.Dialog):
         controls.pack_start(self._status, True, True, 0)
         content.add(controls)
 
+        # Existing per-G-key macro assignments, so it's visible what's already
+        # recorded before (re-)recording one.
+        self._existing = Gtk.Label()
+        self._existing.set_xalign(0.0)
+        self._existing.set_line_wrap(True)
+        self._existing.get_style_context().add_class("dim-label")
+        content.add(self._existing)
+        self._refresh_existing()
+
         # Recorded steps list
         self._steps = Gtk.Label(label=_("Nothing recorded yet."))
         self._steps.set_xalign(0.0)
@@ -180,11 +189,7 @@ class MacroEditor(Gtk.Dialog):
         if self._active:
             self._status.set_text(_("Recording… type the macro, then click Record again to stop."))
         else:
-            self._status.set_text(
-                _("{n} step(s) recorded.").format(n=len(self._recording))
-                if self._recording
-                else ""
-            )
+            self._status.set_text(_("{n} step(s) recorded.").format(n=len(self._recording)) if self._recording else "")
         self._refresh()
 
     def _on_clear(self, _btn) -> None:
@@ -260,6 +265,35 @@ class MacroEditor(Gtk.Dialog):
         except Exception as e:
             logger.debug("could not enable divert-gkeys: %s", e)
             return False
+
+    @classmethod
+    def _existing_macros(cls, gkeys: list[str]) -> dict[str, int | None]:
+        """Return {G-key: recorded step count (or None if none)} for every
+        G-key in `gkeys`, by scanning the user macro rules already saved."""
+        result: dict[str, int | None] = {g: None for g in gkeys}
+        group = next(
+            (r for r in diversion.rules.components if getattr(r, "source", None) == diversion._file_path),
+            None,
+        )
+        if group is None:
+            return result
+        for rule in getattr(group, "components", []):
+            for g in gkeys:
+                if result[g] is None and cls._is_macro_rule(rule, g):
+                    comps = getattr(rule, "components", [])
+                    result[g] = sum(1 for c in comps[1:] if c.__class__ is diversion.KeyPress)
+        return result
+
+    def _refresh_existing(self) -> None:
+        existing = self._existing_macros(self._gkeys)
+        lines = []
+        for g in self._gkeys:
+            n = existing.get(g)
+            if n is None:
+                lines.append(_("{g}: none").format(g=g))
+            else:
+                lines.append(_("{g}: {n} step(s)").format(g=g, n=n))
+        self._existing.set_text(_("Existing macros:") + "\n" + "\n".join(lines))
 
     @staticmethod
     def _is_macro_rule(rule, gkey: str) -> bool:
