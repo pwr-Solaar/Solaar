@@ -261,4 +261,4 @@ class PerKeyControl(Gtk.Box):
             or id(self._sink)
         )
         dlg = dialog_mod.get_dialog(key)
-        dlg.present(self._sink, layout)
+        dlg.present(self._sink, layout, device)

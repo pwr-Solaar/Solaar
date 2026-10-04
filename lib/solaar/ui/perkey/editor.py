@@ -37,6 +37,7 @@ from . import binding  # NOQA: E402
 from ._icons import attach_themed_icon  # NOQA: E402
 from .canvas import KeyboardCanvas  # NOQA: E402
 from .layout import Layout  # NOQA: E402
+from .macros import MacroEditor  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
 from .palette import Palette  # NOQA: E402
 from .palette import UNSET_COLOR  # NOQA: E402
@@ -68,10 +69,11 @@ _TOOL_ICON_NAMES = {
 
 
 class PerKeyEditor(Gtk.Box):
-    def __init__(self, sink: PerKeyColorSink, layout: Layout | None = None) -> None:
+    def __init__(self, sink: PerKeyColorSink, layout: Layout | None = None, device=None) -> None:
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self._sink = sink
         self._layout = layout
+        self._device = device
         self._unsubscribe = None
 
         # toolbar row
@@ -103,6 +105,12 @@ class PerKeyEditor(Gtk.Box):
                 first = btn
             toolbar.pack_start(btn, False, False, 0)
             self._tool_buttons[name] = btn
+
+        # Macro assignment for the device's G-keys.
+        macros_btn = Gtk.Button(label=_("Macros…"))
+        macros_btn.set_tooltip_text(_("Record a key sequence and assign it to a G-key (G1-G5)"))
+        macros_btn.connect(GtkSignal.CLICKED.value, self._on_macros)
+        toolbar.pack_start(macros_btn, False, False, 0)
 
         # Bulk actions. "Colour all" paints every key with the current colour
         # in one click; single keys can then be painted over it (override),
@@ -259,3 +267,14 @@ class PerKeyEditor(Gtk.Box):
             self._sink.write_one(int(zone), int(color))
         else:
             self._sink.write_bulk({int(z): int(c) for z, c in delta.items()})
+
+    def _on_macros(self, _btn) -> None:
+        window = self.get_toplevel()
+        if not isinstance(window, Gtk.Window):
+            window = None
+        dlg = MacroEditor(window, self._device, gkeys=["G1", "G2", "G3", "G4", "G5"])
+        dlg.show_all()
+        response = dlg.run()
+        if response == Gtk.ResponseType.OK:
+            dlg.apply()
+        dlg.destroy()
