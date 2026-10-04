@@ -309,6 +309,10 @@ def _create_window_layout():
     tree_scroll.add(_tree)
     tree_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     tree_scroll.set_shadow_type(Gtk.ShadowType.IN)
+    # GTK3's default overlay scrollbars float on top of the content and cover
+    # the tree's right-most icons (battery / security "lock" columns). Take
+    # real layout space on the right instead so no icons are hidden.
+    tree_scroll.set_overlay_scrolling(False)
 
     tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
     tree_panel.set_homogeneous(False)
