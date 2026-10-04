@@ -41,6 +41,8 @@ from .macros import MacroEditor  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
 from .palette import Palette  # NOQA: E402
 from .palette import UNSET_COLOR  # NOQA: E402
+from .palette import _int_to_rgba  # NOQA: E402
+from .palette import _rgb_to_int  # NOQA: E402
 from .protocol import PerKeyColorSink  # NOQA: E402
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,7 @@ logger = logging.getLogger(__name__)
 class GtkSignal(Enum):
     CLICKED = "clicked"
     COLOR_CHANGED = "color-changed"
+    EDIT_COLOR = "edit-color"
     PAINT = "paint"
     TOGGLED = "toggled"
 
@@ -148,6 +151,7 @@ class PerKeyEditor(Gtk.Box):
             orientation=Gtk.Orientation.VERTICAL,
         )
         self._palette.connect(GtkSignal.COLOR_CHANGED.value, self._on_color_changed)
+        self._palette.connect(GtkSignal.EDIT_COLOR.value, self._on_edit_color)
         if self._gradient_swatch is not None:
             self._gradient_swatch.update(self._palette.get_color(), self._palette.get_last_color())
 
@@ -263,6 +267,48 @@ class PerKeyEditor(Gtk.Box):
             self._sink.set_palette_state(picker, self._palette.get_last_color())
         except Exception as e:
             logger.debug("set_palette_state failed: %s", e)
+
+    def _on_edit_color(self, _palette, from_color: int) -> None:
+        """Double-click a used colour: open the custom colour editor with that
+        colour loaded. On Select/OK, replace that colour on every key showing
+        it and update the used-colour slot in place to the new colour.
+        """
+        try:
+            current = dict(self._sink.current)
+        except Exception as e:
+            logger.debug("edit-color current read failed: %s", e)
+            return
+        from_color = int(from_color)
+        if from_color < 0:
+            return
+        zones = [z for z, c in current.items() if isinstance(c, int) and c >= 0 and int(c) == from_color]
+        if not zones:
+            return
+        window = self.get_toplevel()
+        if not isinstance(window, Gtk.Window):
+            window = None
+        # The custom colour editor (colour wheel + tone sliders), not the
+        # palette-picker tab.
+        dialog = Gtk.ColorSelectionDialog(title=_("Edit colour"), transient_for=window)
+        dialog.get_color_selection().set_has_opacity_control(False)
+        dialog.get_color_selection().set_current_rgba(_int_to_rgba(from_color))
+
+        def _apply(to_color: int) -> None:
+            delta = {z: int(to_color) for z in zones}
+            self._canvas.update_colors(delta)
+            try:
+                self._sink.write_bulk(delta)
+            except Exception as e:
+                logger.debug("edit-color write failed: %s", e)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            to_color = _rgb_to_int(dialog.get_color_selection().get_current_rgba())
+            # Update the used-colour slot in place before the sink notify
+            # reconciles the row, so the new colour keeps this slot's position.
+            self._palette.replace_used_color(from_color, to_color)
+            _apply(to_color)
+        dialog.destroy()
 
     def _on_tool_toggled(self, btn: Gtk.RadioButton, name: str) -> None:
         if btn.get_active():

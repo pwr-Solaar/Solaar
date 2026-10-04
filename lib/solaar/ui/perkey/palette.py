@@ -44,6 +44,7 @@ class GtkSignal(Enum):
     DRAW = "draw"
     CLICKED = "clicked"
     COLOR_SET = "color-set"
+    BUTTON_PRESS = "button-press-event"
     TOGGLED = "toggled"
 
 
@@ -74,14 +75,27 @@ UNSET_COLOR = -1
 class Palette(Gtk.Box):
     __gsignals__ = {
         "color-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        # Double-click on a swatch: request editing of this colour. The editor
+        # opens the colour dialog and live-replaces this colour on the keys.
+        "edit-color": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
     # Clickable preset swatches offered in the sidebar. A representative
     # spread of common key colours; custom colours can always be picked with
     # the color button above them.
     _PRESET_COLORS: tuple[int, ...] = (
-        0xFF0000, 0xFF6600, 0xFFFF00, 0x00FF00, 0x00CCFF, 0x0000FF,
-        0x9B30FF, 0xFF1493, 0xFFFFFF, 0xCCCCCC, 0x666666, 0x000000,
+        0xFF0000,
+        0xFF6600,
+        0xFFFF00,
+        0x00FF00,
+        0x00CCFF,
+        0x0000FF,
+        0x9B30FF,
+        0xFF1493,
+        0xFFFFFF,
+        0xCCCCCC,
+        0x666666,
+        0x000000,
     )
     _SWATCH_SIZE = 24
     _PRESETS_PER_LINE = 4
@@ -120,6 +134,9 @@ class Palette(Gtk.Box):
 
         # Colours currently used on the keys — visible so any one can be
         # quickly reused (or re-picked in the colour dialog to modify it).
+        # Kept as an ordered list of slots so editing one colour updates that
+        # same swatch in place rather than reshuffling the row.
+        self._used_slots: list[int] = []
         self._used_label = self._section_label(_("Used colours"))
         self._used_flow = self._new_flow()
         self.pack_start(self._used_label, False, False, 0)
@@ -159,6 +176,7 @@ class Palette(Gtk.Box):
         btn.add(GradientSwatch(size=self._SWATCH_SIZE, solid=color))
         btn.set_tooltip_text(_("#%06X") % color)
         btn.connect(GtkSignal.CLICKED.value, self._on_swatch_clicked, color)
+        btn.connect(GtkSignal.BUTTON_PRESS.value, self._on_swatch_press, color)
         return btn
 
     def shutdown(self) -> None:
@@ -170,6 +188,17 @@ class Palette(Gtk.Box):
     def _on_swatch_clicked(self, _btn, color: int) -> None:
         if color == self._color and not self._unset_mode:
             return
+        self._apply_color(color)
+
+    def _on_swatch_press(self, _widget, event, color: int) -> bool:
+        # Double-click requests editing this colour (opens the colour dialog,
+        # loaded with this colour); the single click still just selects it.
+        if event.type == Gdk.EventType._2BUTTON_PRESS:
+            self.emit("edit-color", int(color))
+            return True  # consume the press so no second "select" click fires
+        return False
+
+    def _apply_color(self, color: int) -> None:
         self._last_color = self._color
         self._color = int(color)
         self._unset_mode = False
@@ -198,10 +227,10 @@ class Palette(Gtk.Box):
         self.emit("color-changed", self.get_color())
 
     def set_used_colors(self, colors) -> None:
-        """Rebuild the 'used colours' row from the colours currently on the keys."""
-        # De-duplicate while preserving first-seen order.
+        """Reconcile the 'used colours' slots from the colours currently on
+        the keys, keeping each existing slot in its current position."""
+        incoming = []
         seen = set()
-        ordered = []
         for c in colors:
             try:
                 c = int(c)
@@ -210,13 +239,42 @@ class Palette(Gtk.Box):
             if c < 0 or c in seen:
                 continue
             seen.add(c)
-            ordered.append(c)
+            incoming.append(c)
+        in_set = set(incoming)
+        # Keep surviving slots in their existing order.
+        new_slots = [s for s in self._used_slots if s in in_set]
+        # Append any genuinely new colours (in first-seen order).
+        have = set(new_slots)
+        for c in incoming:
+            if c not in have:
+                new_slots.append(c)
+                have.add(c)
+        self._used_slots = new_slots
+        self._rebuild_used()
+
+    def replace_used_color(self, from_color: int, to_color: int) -> None:
+        """Update one used-colour slot in place: the slot showing `from_color`
+        now shows `to_color` at the same position."""
+        from_color = int(from_color)
+        to_color = int(to_color)
+        if from_color == to_color:
+            return
+        for i, s in enumerate(self._used_slots):
+            if s == from_color:
+                self._used_slots[i] = to_color
+                break
+        else:
+            if to_color not in self._used_slots:
+                self._used_slots.append(to_color)
+        self._rebuild_used()
+
+    def _rebuild_used(self) -> None:
         for child in list(self._used_flow.get_children()):
             self._used_flow.remove(child)
-        for c in ordered:
+        for c in self._used_slots:
             self._used_flow.add(self._make_swatch(c))
-        self._used_label.set_visible(bool(ordered))
-        self._used_flow.set_visible(bool(ordered))
+        self._used_label.set_visible(bool(self._used_slots))
+        self._used_flow.set_visible(bool(self._used_slots))
         self._used_flow.show_all()
 
     def get_color(self) -> int:
