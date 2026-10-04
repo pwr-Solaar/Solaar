@@ -125,9 +125,7 @@ class KeyboardCanvas(Gtk.DrawingArea):
         if not self._bound:
             return []
         return [
-            bc.cell.zone_id
-            for bc in list(self._bound.matrix) + list(self._bound.strip)
-            if bc.bound and bc.cell.zone_id >= 0
+            bc.cell.zone_id for bc in list(self._bound.matrix) + list(self._bound.strip) if bc.bound and bc.cell.zone_id >= 0
         ]
 
     # ---- size / hit-test ----
@@ -240,19 +238,11 @@ class KeyboardCanvas(Gtk.DrawingArea):
         cr.set_source_rgba(0, 0, 0, 0.55)
         cr.set_line_width(1.0)
         cr.stroke()
-        # label
+        # label — clipped to the key interior so lettering can never spill
+        # past the cap's edges (narrow keys with long labels like "Bksp",
+        # "PrtSc" or "ScrLk").
         label = bc.cell.label or str(bc.cell.zone_id)
-        cr.set_source_rgba(*self._label_color(color, bc.bound))
-        cr.select_font_face("Sans")
-        cr.set_font_size(11.0 if len(label) <= 3 else 9.0)
-        try:
-            extents = cr.text_extents(label)
-            tx = x + (w - extents.width) / 2 - extents.x_bearing
-            ty = y + (h + extents.height) / 2 - extents.y_bearing - extents.height
-            cr.move_to(tx, ty)
-            cr.show_text(label)
-        except Exception as e:
-            logger.debug("text rendering failed for %r: %s", label, e)
+        self._draw_label(cr, label, x, y, w, h, self._label_color(color, bc.bound))
 
     def _fill_checker(self, cr, x, y, w, h) -> None:
         # Diagonal hash for "no change" cells. The background is the zone
@@ -333,6 +323,58 @@ class KeyboardCanvas(Gtk.DrawingArea):
         cr.arc(x + r, y + h - r, r, 1.5708, 3.1416)
         cr.arc(x + r, y + r, r, 3.1416, 4.7124)
         cr.close_path()
+
+    def _draw_label(self, cr, label: str, x: float, y: float, w: float, h: float, color) -> None:
+        """Render a keycap label centered on its cell.
+
+        The text is clipped to the cell interior (with a small padding) so
+        longer labels can never run past the key's edges. The font is shrunk
+        until the label fits width and height; if it still overflows at the
+        minimum size, it is truncated with an ellipsis.
+        """
+        cr.save()
+        pad = 2.0
+        max_w = w - 2 * pad
+        max_h = h - 2 * pad
+        if max_w <= 0 or max_h <= 0:
+            cr.restore()
+            return
+        cr.rectangle(x + pad, y + pad, max_w, max_h)
+        cr.clip()
+        cr.select_font_face("Sans")
+        size = min(11.0 if len(label) <= 3 else 9.0, max_h)
+        cr.set_font_size(size)
+        while size > 5.0:
+            extents = cr.text_extents(label)
+            if extents.width <= max_w and extents.height <= max_h:
+                break
+            size -= 0.5
+            cr.set_font_size(size)
+        cr.set_source_rgba(*color)
+        extents = cr.text_extents(label)
+        if extents.width > max_w:
+            label = self._ellipsize(cr, label, max_w)
+            extents = cr.text_extents(label)
+        tx = x + (w - extents.width) / 2 - extents.x_bearing
+        ty = y + (h + extents.height) / 2 - extents.y_bearing - extents.height
+        cr.move_to(tx, ty)
+        cr.show_text(label)
+        cr.restore()
+
+    @staticmethod
+    def _ellipsize(cr, label: str, max_w: float) -> str:
+        """Trim `label` to fit `max_w` at the current font, ending with '…'."""
+        if len(label) <= 1:
+            return label
+        ell = "…"
+        if cr.text_extents(ell).width > max_w:
+            return ""
+        while len(label) > 1:
+            candidate = label[:-1] + ell
+            if cr.text_extents(candidate).width <= max_w:
+                return candidate
+            label = label[:-1]
+        return label
 
     def _label_color(self, color: int, bound: bool) -> tuple[float, float, float, float]:
         if not bound:
