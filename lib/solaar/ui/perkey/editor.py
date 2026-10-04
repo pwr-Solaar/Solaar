@@ -39,12 +39,14 @@ from .canvas import KeyboardCanvas  # NOQA: E402
 from .layout import Layout  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
 from .palette import Palette  # NOQA: E402
+from .palette import UNSET_COLOR  # NOQA: E402
 from .protocol import PerKeyColorSink  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
 
 class GtkSignal(Enum):
+    CLICKED = "clicked"
     COLOR_CHANGED = "color-changed"
     PAINT = "paint"
     TOGGLED = "toggled"
@@ -102,6 +104,28 @@ class PerKeyEditor(Gtk.Box):
             toolbar.pack_start(btn, False, False, 0)
             self._tool_buttons[name] = btn
 
+        # Bulk actions. "Colour all" paints every key with the current colour
+        # in one click; single keys can then be painted over it (override),
+        # leaving the general colour on the rest. "Clear" resets every key back
+        # to the general (base) colour.
+        fill_all = Gtk.Button()
+        if attach_themed_icon(fill_all, "solaar-tool-fillall-symbolic") is not None:
+            fill_all.get_accessible().set_name(_("Colour all"))
+        else:
+            fill_all.set_label(_("Colour all"))
+        fill_all.set_tooltip_text(_("Paint every key on the layout with the current colour. Individual keys can then be overridden."))
+        fill_all.connect(GtkSignal.CLICKED.value, self._on_fill_all)
+        toolbar.pack_end(fill_all, False, False, 0)
+
+        clear_all = Gtk.Button()
+        if attach_themed_icon(clear_all, "solaar-tool-clear-symbolic") is not None:
+            clear_all.get_accessible().set_name(_("Clear"))
+        else:
+            clear_all.set_label(_("Clear"))
+        clear_all.set_tooltip_text(_("Reset every key back to the general (base) colour"))
+        clear_all.connect(GtkSignal.CLICKED.value, self._on_clear_all)
+        toolbar.pack_end(clear_all, False, False, 0)
+
         initial_active, initial_previous = 0xFF0000, 0xFF0000
         try:
             persisted = sink.palette_state()
@@ -118,7 +142,21 @@ class PerKeyEditor(Gtk.Box):
 
         self.pack_start(toolbar, False, False, 0)
 
-        # canvas inside a scrolled window so wide layouts can scroll if the
+        # Compact legend so the editor is self-explanatory: how to paint, and
+        # where the macro / G-keys live (they are the strip below the main
+        # matrix and are individually selectable like every other key).
+        legend = Gtk.Label(
+            label=_(
+                "Paint keys with the current colour. "
+                "G and macro keys are in the strip below the main layout and are selected like any other key."
+            )
+        )
+        legend.set_xalign(0.0)
+        legend.set_line_wrap(True)
+        legend.get_style_context().add_class("dim-label")
+        self.pack_start(legend, False, False, 0)
+
+        # Canvas inside a scrolled window so wide layouts can scroll if the
         # window is shrunk below content size. propagate_natural_size lets the
         # window auto-fit small layouts (e.g. an 8-LED mouse) without forcing
         # an oversized minimum.
@@ -195,6 +233,23 @@ class PerKeyEditor(Gtk.Box):
     def _on_tool_toggled(self, btn: Gtk.RadioButton, name: str) -> None:
         if btn.get_active():
             self._canvas.set_tool(name)
+
+    def _on_fill_all(self, _btn) -> None:
+        zones = self._canvas.bound_zone_ids()
+        if not zones:
+            return
+        color = self._palette.get_picker_color()  # always a real RGB, ignores the unset toggle
+        delta = {z: color for z in zones}
+        self._canvas.update_colors(delta)
+        self._sink.write_bulk(delta)
+
+    def _on_clear_all(self, _btn) -> None:
+        zones = self._canvas.bound_zone_ids()
+        if not zones:
+            return
+        delta = {z: UNSET_COLOR for z in zones}
+        self._canvas.update_colors(delta)
+        self._sink.write_bulk(delta)
 
     def _on_canvas_paint(self, _canvas, delta: dict) -> None:
         if not delta:

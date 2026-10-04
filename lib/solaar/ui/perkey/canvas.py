@@ -115,6 +115,21 @@ class KeyboardCanvas(Gtk.DrawingArea):
         if name in TOOLS:
             self._tool_name = name
 
+    def bound_zone_ids(self) -> list[int]:
+        """Return the zone ids of every currently paintable (bound) cell.
+
+        Used by bulk actions like "colour all" / "clear" so they only touch
+        real, device-reported keys — never disabled cells or phantom anchors
+        (zone_id -1).
+        """
+        if not self._bound:
+            return []
+        return [
+            bc.cell.zone_id
+            for bc in list(self._bound.matrix) + list(self._bound.strip)
+            if bc.bound and bc.cell.zone_id >= 0
+        ]
+
     # ---- size / hit-test ----
 
     def _matrix_size(self) -> tuple[int, int]:
