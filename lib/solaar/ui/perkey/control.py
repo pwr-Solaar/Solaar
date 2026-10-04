@@ -115,6 +115,60 @@ class _SettingSink:
     def _palette_key(self) -> str:
         return f"_palette:{self._setting.name}"
 
+    def _persister(self):
+        device = getattr(self._setting, "_device", None)
+        return getattr(device, "persister", None)
+
+    def _profiles_key(self) -> str:
+        return f"_profiles:{self._setting.name}"
+
+    def _active_profile_key(self) -> str:
+        return f"_active_profile:{self._setting.name}"
+
+    def profiles(self) -> dict:
+        persister = self._persister()
+        if persister is None:
+            return {}
+        raw = persister.get(self._profiles_key())
+        if not isinstance(raw, dict):
+            return {}
+        result = {}
+        for name, colormap in raw.items():
+            if isinstance(colormap, dict):
+                result[str(name)] = {int(z): int(c) for z, c in colormap.items()}
+        return result
+
+    def save_profile(self, name: str, colors: dict) -> None:
+        persister = self._persister()
+        if persister is None:
+            return
+        profiles = self.profiles()
+        profiles[str(name)] = {int(z): int(c) for z, c in colors.items()}
+        persister[self._profiles_key()] = profiles  # __setitem__ triggers a save
+
+    def delete_profile(self, name: str) -> None:
+        persister = self._persister()
+        if persister is None:
+            return
+        profiles = self.profiles()
+        profiles.pop(str(name), None)
+        persister[self._profiles_key()] = profiles
+        if self.active_profile() == str(name):
+            self.set_active_profile(None)
+
+    def active_profile(self) -> str | None:
+        persister = self._persister()
+        if persister is None:
+            return None
+        value = persister.get(self._active_profile_key())
+        return str(value) if value else None
+
+    def set_active_profile(self, name) -> None:
+        persister = self._persister()
+        if persister is None:
+            return
+        persister[self._active_profile_key()] = name
+
     def palette_state(self) -> tuple[int, int] | None:
         device = getattr(self._setting, "_device", None)
         persister = getattr(device, "persister", None)

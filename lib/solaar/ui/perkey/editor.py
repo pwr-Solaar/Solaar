@@ -38,9 +38,9 @@ from ._icons import attach_themed_icon  # NOQA: E402
 from .canvas import KeyboardCanvas  # NOQA: E402
 from .layout import Layout  # NOQA: E402
 from .macros import MacroEditor  # NOQA: E402
+from .palette import UNSET_COLOR  # NOQA: E402
 from .palette import GradientSwatch  # NOQA: E402
 from .palette import Palette  # NOQA: E402
-from .palette import UNSET_COLOR  # NOQA: E402
 from .palette import _int_to_rgba  # NOQA: E402
 from .palette import _rgb_to_int  # NOQA: E402
 from .protocol import PerKeyColorSink  # NOQA: E402
@@ -124,7 +124,9 @@ class PerKeyEditor(Gtk.Box):
             fill_all.get_accessible().set_name(_("Colour all"))
         else:
             fill_all.set_label(_("Colour all"))
-        fill_all.set_tooltip_text(_("Paint every key on the layout with the current colour. Individual keys can then be overridden."))
+        fill_all.set_tooltip_text(
+            _("Paint every key on the layout with the current colour. " "Individual keys can then be overridden.")
+        )
         fill_all.connect(GtkSignal.CLICKED.value, self._on_fill_all)
         toolbar.pack_end(fill_all, False, False, 0)
 
@@ -196,9 +198,12 @@ class PerKeyEditor(Gtk.Box):
         sidebar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         sidebar.set_valign(Gtk.Align.START)
         sidebar.pack_start(self._palette, False, False, 0)
+        sidebar.pack_start(self._build_profiles_section(), False, False, 0)
         body.pack_start(sidebar, False, False, 0)
 
         self.pack_start(body, True, True, 0)
+
+        self._refresh_profiles()
 
         self._canvas.set_active_color(self._palette.get_color())
         if self._gradient_swatch is not None:
@@ -330,6 +335,110 @@ class PerKeyEditor(Gtk.Box):
         delta = {z: UNSET_COLOR for z in zones}
         self._canvas.update_colors(delta)
         self._sink.write_bulk(delta)
+
+    # ---- profiles (save / apply per-device lighting snapshots locally) ----
+
+    def _build_profiles_section(self) -> Gtk.Box:
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        title = Gtk.Label(label=_("Profiles"))
+        title.set_xalign(0.0)
+        title.get_style_context().add_class("dim-label")
+        box.pack_start(title, False, False, 0)
+
+        # Name + Save
+        self._profile_name = Gtk.Entry()
+        self._profile_name.set_placeholder_text(_("Profile name"))
+        save_btn = Gtk.Button(label=_("Save"))
+        save_btn.connect(GtkSignal.CLICKED.value, self._on_save_profile)
+        name_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        name_row.pack_start(self._profile_name, True, True, 0)
+        name_row.pack_start(save_btn, False, False, 0)
+        box.pack_start(name_row, False, False, 0)
+
+        # Pick + Apply / Delete
+        self._profile_combo = Gtk.ComboBoxText()
+        self._profile_combo.set_hexpand(True)
+        apply_btn = Gtk.Button(label=_("Apply"))
+        apply_btn.connect(GtkSignal.CLICKED.value, self._on_apply_profile)
+        del_btn = Gtk.Button(label=_("Delete"))
+        del_btn.connect(GtkSignal.CLICKED.value, self._on_delete_profile)
+        load_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        load_row.pack_start(self._profile_combo, True, True, 0)
+        load_row.pack_start(apply_btn, False, False, 0)
+        load_row.pack_start(del_btn, False, False, 0)
+        box.pack_start(load_row, False, False, 0)
+
+        self._active_profile_label = Gtk.Label(label="")
+        self._active_profile_label.set_xalign(0.0)
+        self._active_profile_label.get_style_context().add_class("dim-label")
+        box.pack_start(self._active_profile_label, False, False, 0)
+        return box
+
+    def _refresh_profiles(self) -> None:
+        try:
+            profiles = self._sink.profiles()
+            active = self._sink.active_profile()
+        except Exception as e:
+            logger.debug("profiles read failed: %s", e)
+            profiles = {}
+            active = None
+        combo = self._profile_combo
+        prior = combo.get_active_text()
+        combo.remove_all()
+        names = sorted(profiles.keys())
+        for n in names:
+            combo.append_text(n)
+        if names:
+            target = prior if prior in names else (active if active in names else names[0])
+            combo.set_active(names.index(target))
+        else:
+            combo.set_active(-1)
+        self._active_profile_label.set_text(_("Active: {name}").format(name=active) if active else "")
+
+    def _on_save_profile(self, _btn) -> None:
+        name = (self._profile_name.get_text() or "").strip()
+        if not name:
+            return
+        try:
+            current = dict(self._sink.current)
+        except Exception as e:
+            logger.debug("save profile current read failed: %s", e)
+            return
+        try:
+            self._sink.save_profile(name, current)
+            self._sink.set_active_profile(name)
+        except Exception as e:
+            logger.debug("save_profile failed: %s", e)
+            return
+        self._refresh_profiles()
+
+    def _on_apply_profile(self, _btn) -> None:
+        name = self._profile_combo.get_active_text()
+        if not name:
+            return
+        try:
+            profiles = self._sink.profiles()
+            colors = profiles.get(name)
+            if not colors:
+                return
+            self._canvas.update_colors(dict(colors))
+            self._sink.write_bulk(dict(colors))
+            self._sink.set_active_profile(name)
+        except Exception as e:
+            logger.debug("apply profile failed: %s", e)
+            return
+        self._refresh_profiles()
+
+    def _on_delete_profile(self, _btn) -> None:
+        name = self._profile_combo.get_active_text()
+        if not name:
+            return
+        try:
+            self._sink.delete_profile(name)
+        except Exception as e:
+            logger.debug("delete profile failed: %s", e)
+            return
+        self._refresh_profiles()
 
     def _on_canvas_paint(self, _canvas, delta: dict) -> None:
         if not delta:
