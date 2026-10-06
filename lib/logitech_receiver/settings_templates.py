@@ -3896,6 +3896,53 @@ class PerKeyLighting(settings.Settings):
                 return bool(s._value)
         return True  # rgb_control not on this device → no gate to enforce
 
+    def _ensure_writable(self) -> bool:
+        """Auto-satisfy the preconditions for painting per-key colours so an
+        apply/paint actually reaches the hardware instead of silently no-oping:
+
+          * LED Control must be on (Solaar owns the RGB pipeline), and
+          * every rgb_zone_* effect must be Static — per-key is a sub-mode of
+            Static, so any zone animation owns the visible layer otherwise.
+
+        These are driven live with save=False: the user's saved LED-Control and
+        zone-effect choices in the config are left untouched, and the device is
+        simply held in the writable state for the duration of the operation.
+        Returns True when the device is writable (or when there's no effect
+        engine to satisfy — e.g. mouse-only per-key hardware)."""
+        device = self._device
+        if not device.online:
+            return False
+        if not getattr(self, "_has_rgb_effects", None):
+            self._has_rgb_effects = bool(device.features and _F.RGB_EFFECTS in device.features)
+        if not self._has_rgb_effects:
+            return True  # no autonomous effect engine → no gate to satisfy
+
+        # 1) Claim software LED control unless it's already on.
+        rgb_ctrl = next((s for s in device.settings if s.name == "rgb_control"), None)
+        if rgb_ctrl is not None and not bool(rgb_ctrl._value):
+            try:
+                rgb_ctrl.write(True, save=False)
+            except Exception as e:
+                logger.warning("%s: per-key auto-ensure: LED Control claim failed: %s", device, e)
+                return False
+
+        # 2) Snap any non-Static zone effect to Static so per-key renders.
+        for s in device.settings:
+            if not s.name.startswith("rgb_zone_"):
+                continue
+            value = getattr(s, "_value", None)
+            if value is not None and int(getattr(value, "ID", 0) or 0) == rgb_power._EFFECT_STATIC:
+                continue
+            base = 0xFFFFFF
+            if value is not None and getattr(value, "color", None) is not None:
+                base = int(value.color)
+            try:
+                s.write(hidpp20.LEDEffectSetting(ID=rgb_power._EFFECT_STATIC, color=base), save=False)
+            except Exception as e:
+                logger.warning("%s: per-key auto-ensure: %s to Static failed: %s", device, s.name, e)
+                return False
+        return True
+
     # BUSY-retry backoff (ms).
     _BUSY_BACKOFF_MS = (30, 60, 90)
 
@@ -4066,12 +4113,8 @@ class PerKeyLighting(settings.Settings):
         if self._device.online:
             # Persist undimmed (single source of truth).
             self.update(map, save)
-            if not self._sw_control_held():
-                return map  # gate is off — keep state in memory, skip the wire
-            # Per-key is a sub-mode of Static — when zone is animating, the
-            # firmware engine owns the visible layer.
-            if not rgb_power.zone_effect_is_static(self._device):
-                return map
+            if not self._ensure_writable():
+                return map  # couldn't make the device writable — state kept in memory
             no_change = special_keys.COLORSPLUS["No change"]
             # SLEEPING — defer wire to wake.
             for value in map.values():
@@ -4104,11 +4147,8 @@ class PerKeyLighting(settings.Settings):
             self.update_key_value(zone_id, value, save)
             if not self._device.online:
                 return value
-            if not self._sw_control_held():
-                return value  # gate is off — state stored, no wire push
-            # Per-key is a sub-mode of Static — defer to firmware animation.
-            if not rgb_power.zone_effect_is_static(self._device):
-                return value
+            if not self._ensure_writable():
+                return value  # couldn't make the device writable — state stored, no wire push
             wire = rgb_power.translate_for_device(self._device, int(value))
             if wire is None:
                 return value  # SLEEPING — wake re-pushes
@@ -4135,10 +4175,8 @@ class PerKeyLighting(settings.Settings):
             self.update_key_value(zone_id, no_change, save)
             if not self._device.online:
                 return no_change
-            if not self._sw_control_held():
-                return no_change  # gate is off — state stored, no wire push
-            if not rgb_power.zone_effect_is_static(self._device):
-                return no_change
+            if not self._ensure_writable():
+                return no_change  # couldn't make the device writable — state stored, no wire push
             zone_base = self._zone_base_color()
             wire_base = rgb_power.translate_for_device(self._device, zone_base)
             if wire_base is None:

@@ -368,6 +368,17 @@ class PerKeyEditor(Gtk.Box):
         load_row.pack_start(del_btn, False, False, 0)
         box.pack_start(load_row, False, False, 0)
 
+        # Copy a lighting profile saved on another keyboard (e.g. G815 -> G915).
+        copy_btn = Gtk.Button(label=_("Copy from another keyboard…"))
+        copy_btn.set_tooltip_text(
+            _("Bring in a per-key lighting profile saved on another keyboard. Keys are "
+              "remapped by position, so it works between full/TKL and ANSI/ISO boards.")
+        )
+        copy_btn.connect(GtkSignal.CLICKED.value, self._on_copy_from_other)
+        copy_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        copy_row.pack_start(copy_btn, True, True, 0)
+        box.pack_start(copy_row, False, False, 0)
+
         self._active_profile_label = Gtk.Label(label="")
         self._active_profile_label.set_xalign(0.0)
         self._active_profile_label.get_style_context().add_class("dim-label")
@@ -439,6 +450,172 @@ class PerKeyEditor(Gtk.Box):
             logger.debug("delete profile failed: %s", e)
             return
         self._refresh_profiles()
+
+    # ---- copy a lighting profile saved on another keyboard ----
+
+    def _source_candidates(self) -> list:
+        """Other keyboards that have saved per-key lighting profiles, read from
+        the shared Solaar config (no need to open the other device). Returns a
+        list of {'name', 'wpid', 'profiles'} dicts, excluding this device."""
+        try:
+            import solaar.configuration as configuration
+        except Exception as e:
+            logger.debug("copy: config import failed: %s", e)
+            return []
+        current_name = getattr(self._device, "name", None)
+        result = []
+        for entry in configuration._config[1:]:
+            if not isinstance(entry, dict):
+                continue
+            name = entry.get("_NAME") or entry.get("_name")
+            if not name or name == current_name:
+                continue
+            raw = entry.get("_profiles:per-key-lighting")
+            if not isinstance(raw, dict) or not raw:
+                continue
+            profiles = {}
+            for pname, colormap in raw.items():
+                if isinstance(colormap, dict):
+                    profiles[str(pname)] = {int(z): int(c) for z, c in colormap.items()}
+            if profiles:
+                result.append({"name": str(name), "wpid": entry.get("_wpid"), "profiles": profiles})
+        return result
+
+    def _source_layout(self, src_name: str, src_wpid, zones) -> Layout | None:
+        """Best-effort reconstruction of the source keyboard's layout so we can
+        remap keys by physical position. Zone country code isn't preserved in
+        the config, so ISO boards fall back to an ANSI shape — acceptable for
+        the alpha/numpad region and noted for future work."""
+        from .layouts import layout_for
+
+        hint = {
+            "kind": "keyboard",
+            "wpid": src_wpid,
+            "codename": src_name,
+            "name": src_name,
+            "keyboard_layout": None,
+            "zones": list(zones),
+            "zone_count": len(zones),
+        }
+        return layout_for(0x8081, hint)
+
+    def _remap_colors(self, src_colors: dict, src_name: str, src_wpid) -> dict:
+        """Map a source keyboard's zone->colour buffer into this keyboard's
+        zone space by physical (group, row, col) position. When the two boards
+        share a layout this is effectively an identity copy. Zones the layout
+        doesn't place (e.g. top-row media keys, or phantom slots) fall back to
+        numeric-id preservation when the target device actually reports them,
+        and are dropped otherwise."""
+        target = self._layout
+        if target is None:
+            return dict(src_colors)
+        # Device-reported zones — the canonical set the target can accept.
+        try:
+            target_zones = set(self._sink.zones)
+        except Exception as e:
+            logger.debug("copy: target zones read failed: %s", e)
+            target_zones = set(target.by_zone())
+        t_pos = {(c.group, c.row, c.col): c.zone_id for c in target.cells}
+        src = self._source_layout(src_name, src_wpid, list(src_colors))
+        if src is None:
+            return {z: c for z, c in src_colors.items() if z in target_zones}
+        s_by_zone = src.by_zone()
+        out = {}
+        for z, color in src_colors.items():
+            cell = s_by_zone.get(z)
+            tz = t_pos.get((cell.group, cell.row, cell.col)) if cell is not None else None
+            if tz is not None and tz != z:
+                out[tz] = color
+            elif z in target_zones:
+                out[z] = color
+        return out
+
+    def _on_copy_from_other(self, _btn) -> None:
+        candidates = self._source_candidates()
+        window = self.get_toplevel() if isinstance(self.get_toplevel(), Gtk.Window) else None
+        dialog = Gtk.Dialog(
+            title=_("Copy profile from another keyboard"),
+            transient_for=window,
+            modal=True,
+            buttons=(_("Cancel"), Gtk.ResponseType.CANCEL, _("Copy"), Gtk.ResponseType.OK),
+        )
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        area = dialog.get_content_area()
+        area.set_spacing(8)
+        area.set_margin_top(8)
+        area.set_margin_bottom(8)
+        area.set_margin_start(8)
+        area.set_margin_end(8)
+
+        if not candidates:
+            lbl = Gtk.Label(
+                label=_(
+                    "No other keyboards with saved per-key lighting profiles were found.\n"
+                    "Open the per-key editor on the source keyboard and save a profile there first."
+                )
+            )
+            lbl.set_xalign(0.0)
+            area.pack_start(lbl, False, False, 0)
+            dialog.get_widget_for_response(Gtk.ResponseType.OK).set_sensitive(False)
+            dialog.show_all()
+            dialog.run()
+            dialog.destroy()
+            return
+
+        # Flatten devices x profiles into one picker list: "DeviceName · Profile".
+        options = []
+        for cand in candidates:
+            for pname in sorted(cand["profiles"]):
+                options.append((cand, pname))
+
+        combo = Gtk.ComboBoxText()
+        for cand, pname in options:
+            combo.append_text(f"{cand['name']} \u00b7 {pname}")
+        combo.set_active(0)
+
+        entry = Gtk.Entry()
+        first_cand, first_pname = options[0]
+        entry.set_text(f"{first_pname} (from {first_cand['name']})")
+
+        def _on_source_changed(*_a):
+            cand, pname = options[max(0, combo.get_active())]
+            entry.set_text(f"{pname} (from {cand['name']})")
+
+        combo.connect(GtkSignal.CHANGED.value, _on_source_changed)
+
+        row1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        l1 = Gtk.Label(label=_("Source profile:"))
+        l1.set_xalign(0.0)
+        row1.pack_start(l1, False, False, 0)
+        row1.pack_start(combo, True, True, 0)
+        row2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        l2 = Gtk.Label(label=_("Save as:"))
+        l2.set_xalign(0.0)
+        row2.pack_start(l2, False, False, 0)
+        row2.pack_start(entry, True, True, 0)
+        area.pack_start(row1, False, False, 0)
+        area.pack_start(row2, False, False, 0)
+
+        dialog.show_all()
+        if dialog.run() == Gtk.ResponseType.OK:
+            cand, pname = options[max(0, combo.get_active())]
+            target_name = (entry.get_text() or "").strip() or pname
+            try:
+                src_colors = dict(cand["profiles"][pname])
+            except Exception as e:
+                logger.debug("copy: profile read failed: %s", e)
+                dialog.destroy()
+                return
+            colors = self._remap_colors(src_colors, cand["name"], cand["wpid"])
+            try:
+                self._sink.save_profile(target_name, colors)
+                self._canvas.update_colors(dict(colors))
+                self._sink.write_bulk(dict(colors))
+                self._sink.set_active_profile(target_name)
+            except Exception as e:
+                logger.debug("copy: apply failed: %s", e)
+            self._refresh_profiles()
+        dialog.destroy()
 
     def _on_canvas_paint(self, _canvas, delta: dict) -> None:
         if not delta:
