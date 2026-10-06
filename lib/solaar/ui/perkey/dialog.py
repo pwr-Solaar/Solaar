@@ -69,7 +69,7 @@ class PerKeyEditorDialog:
             self._wrapper = None
         self._sink = None
 
-    def present(self, sink: PerKeyColorSink, layout: Layout | None) -> None:
+    def present(self, sink: PerKeyColorSink, layout: Layout | None, device=None) -> None:
         # Re-opening for the same sink while the window is already open:
         # just raise it (no rebuild flicker, preserves any in-progress
         # interaction state).
@@ -89,7 +89,7 @@ class PerKeyEditorDialog:
         self._wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self._wrapper.set_border_width(8)
         self._window.add(self._wrapper)
-        self._editor = PerKeyEditor(sink, layout)
+        self._editor = PerKeyEditor(sink, layout, device)
         self._wrapper.pack_start(self._editor, True, True, 0)
         self._wrapper.show_all()
         # Ask GTK what the wrapper actually wants to be — the canvas's

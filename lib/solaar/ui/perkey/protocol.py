@@ -71,3 +71,23 @@ class PerKeyColorSink(Protocol):
         on the keyboard), or None if the device has no zone effect.
         """
         ...
+
+    def profiles(self) -> dict[str, dict[int, int]]:
+        """Return this device's locally saved profiles: {name: {zone: colour}}."""
+        ...
+
+    def save_profile(self, name: str, colors: dict[int, int]) -> None:
+        """Persist a named snapshot of per-zone colours as a profile for this device."""
+        ...
+
+    def delete_profile(self, name: str) -> None:
+        """Remove a saved profile for this device (and unset it as active if it was)."""
+        ...
+
+    def active_profile(self) -> str | None:
+        """Return the name of the currently active saved profile, or None."""
+        ...
+
+    def set_active_profile(self, name: str | None) -> None:
+        """Record which profile is currently applied (pass None to clear)."""
+        ...

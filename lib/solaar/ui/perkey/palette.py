@@ -42,7 +42,9 @@ _UNSET_ICON_NAME = "solaar-tool-palette-off-symbolic"
 
 class GtkSignal(Enum):
     DRAW = "draw"
+    CLICKED = "clicked"
     COLOR_SET = "color-set"
+    BUTTON_PRESS = "button-press-event"
     TOGGLED = "toggled"
 
 
@@ -73,10 +75,38 @@ UNSET_COLOR = -1
 class Palette(Gtk.Box):
     __gsignals__ = {
         "color-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        # Double-click on a swatch: request editing of this colour. The editor
+        # opens the colour dialog and live-replaces this colour on the keys.
+        "edit-color": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
-    def __init__(self, active: int = 0xFF0000, previous: int = 0xFF0000) -> None:
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    # Clickable preset swatches offered in the sidebar. A representative
+    # spread of common key colours; custom colours can always be picked with
+    # the color button above them.
+    _PRESET_COLORS: tuple[int, ...] = (
+        0xFF0000,
+        0xFF6600,
+        0xFFFF00,
+        0x00FF00,
+        0x00CCFF,
+        0x0000FF,
+        0x9B30FF,
+        0xFF1493,
+        0xFFFFFF,
+        0xCCCCCC,
+        0x666666,
+        0x000000,
+    )
+    _SWATCH_SIZE = 24
+    _PRESETS_PER_LINE = 4
+
+    def __init__(
+        self,
+        active: int = 0xFF0000,
+        previous: int = 0xFF0000,
+        orientation: Gtk.Orientation = Gtk.Orientation.HORIZONTAL,
+    ) -> None:
+        super().__init__(orientation=orientation, spacing=8)
         # _color/_last_color are always real RGB values; the unset toggle is
         # a separate channel so the gradient swatch (which mirrors these) is
         # unaffected by switching to "no change" paint mode.
@@ -84,13 +114,35 @@ class Palette(Gtk.Box):
         self._last_color: int = int(previous)
         self._unset_mode: bool = False
 
+        # Active colour swatch: opens the full GTK colour dialog, so any
+        # custom colour can be picked and the current one modified.
         self._color_btn = Gtk.ColorButton()
         self._color_btn.set_use_alpha(False)
         self._color_btn.set_rgba(_int_to_rgba(self._color))
-        self._color_btn.set_tooltip_text(_("Active color"))
+        self._color_btn.set_tooltip_text(_("Choose a colour"))
+        self._color_btn.set_hexpand(True)
+        self._color_btn.set_size_request(-1, 36)
         self._color_btn.connect(GtkSignal.COLOR_SET.value, self._on_color_set)
         self.pack_start(self._color_btn, False, False, 0)
 
+        # Preset colours grid.
+        self.pack_start(self._section_label(_("Presets")), False, False, 0)
+        self._preset_flow = self._new_flow()
+        for c in self._PRESET_COLORS:
+            self._preset_flow.add(self._make_swatch(c))
+        self.pack_start(self._preset_flow, False, False, 0)
+
+        # Colours currently used on the keys — visible so any one can be
+        # quickly reused (or re-picked in the colour dialog to modify it).
+        # Kept as an ordered list of slots so editing one colour updates that
+        # same swatch in place rather than reshuffling the row.
+        self._used_slots: list[int] = []
+        self._used_label = self._section_label(_("Used colours"))
+        self._used_flow = self._new_flow()
+        self.pack_start(self._used_label, False, False, 0)
+        self.pack_start(self._used_flow, False, False, 0)
+
+        # "No change" toggle.
         self._unset_btn = Gtk.ToggleButton()
         self._unset_btn.set_tooltip_text(_("Paint as 'no change' — clears the cell to the zone base color"))
         unset_label = _("Unset")
@@ -101,11 +153,58 @@ class Palette(Gtk.Box):
         self._unset_btn.connect(GtkSignal.TOGGLED.value, self._on_unset_toggled)
         self.pack_start(self._unset_btn, False, False, 0)
 
+    @staticmethod
+    def _section_label(text: str) -> Gtk.Label:
+        label = Gtk.Label(label=text)
+        label.set_xalign(0.0)
+        label.get_style_context().add_class("dim-label")
+        return label
+
+    @staticmethod
+    def _new_flow() -> Gtk.FlowBox:
+        flow = Gtk.FlowBox()
+        flow.set_max_children_per_line(Palette._PRESETS_PER_LINE)
+        flow.set_min_children_per_line(Palette._PRESETS_PER_LINE)
+        flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        flow.set_homogeneous(True)
+        flow.set_row_spacing(4)
+        flow.set_column_spacing(4)
+        return flow
+
+    def _make_swatch(self, color: int) -> Gtk.Button:
+        btn = Gtk.Button()
+        btn.add(GradientSwatch(size=self._SWATCH_SIZE, solid=color))
+        btn.set_tooltip_text(_("#%06X") % color)
+        btn.connect(GtkSignal.CLICKED.value, self._on_swatch_clicked, color)
+        btn.connect(GtkSignal.BUTTON_PRESS.value, self._on_swatch_press, color)
+        return btn
+
     def shutdown(self) -> None:
         # attach_themed_icon connects to the button's own style-updated
         # signal; GTK disconnects it automatically when the button is
         # destroyed, so there is nothing to clean up here.
         pass
+
+    def _on_swatch_clicked(self, _btn, color: int) -> None:
+        if color == self._color and not self._unset_mode:
+            return
+        self._apply_color(color)
+
+    def _on_swatch_press(self, _widget, event, color: int) -> bool:
+        # Double-click requests editing this colour (opens the colour dialog,
+        # loaded with this colour); the single click still just selects it.
+        if event.type == Gdk.EventType._2BUTTON_PRESS:
+            self.emit("edit-color", int(color))
+            return True  # consume the press so no second "select" click fires
+        return False
+
+    def _apply_color(self, color: int) -> None:
+        self._last_color = self._color
+        self._color = int(color)
+        self._unset_mode = False
+        self._unset_btn.set_active(False)
+        self._color_btn.set_rgba(_int_to_rgba(self._color))
+        self.emit("color-changed", self._color)
 
     def _on_color_set(self, btn: Gtk.ColorButton) -> None:
         c = _rgb_to_int(btn.get_rgba())
@@ -127,6 +226,57 @@ class Palette(Gtk.Box):
         self._unset_mode = new_state
         self.emit("color-changed", self.get_color())
 
+    def set_used_colors(self, colors) -> None:
+        """Reconcile the 'used colours' slots from the colours currently on
+        the keys, keeping each existing slot in its current position."""
+        incoming = []
+        seen = set()
+        for c in colors:
+            try:
+                c = int(c)
+            except (TypeError, ValueError):
+                continue
+            if c < 0 or c in seen:
+                continue
+            seen.add(c)
+            incoming.append(c)
+        in_set = set(incoming)
+        # Keep surviving slots in their existing order.
+        new_slots = [s for s in self._used_slots if s in in_set]
+        # Append any genuinely new colours (in first-seen order).
+        have = set(new_slots)
+        for c in incoming:
+            if c not in have:
+                new_slots.append(c)
+                have.add(c)
+        self._used_slots = new_slots
+        self._rebuild_used()
+
+    def replace_used_color(self, from_color: int, to_color: int) -> None:
+        """Update one used-colour slot in place: the slot showing `from_color`
+        now shows `to_color` at the same position."""
+        from_color = int(from_color)
+        to_color = int(to_color)
+        if from_color == to_color:
+            return
+        for i, s in enumerate(self._used_slots):
+            if s == from_color:
+                self._used_slots[i] = to_color
+                break
+        else:
+            if to_color not in self._used_slots:
+                self._used_slots.append(to_color)
+        self._rebuild_used()
+
+    def _rebuild_used(self) -> None:
+        for child in list(self._used_flow.get_children()):
+            self._used_flow.remove(child)
+        for c in self._used_slots:
+            self._used_flow.add(self._make_swatch(c))
+        self._used_label.set_visible(bool(self._used_slots))
+        self._used_flow.set_visible(bool(self._used_slots))
+        self._used_flow.show_all()
+
     def get_color(self) -> int:
         return UNSET_COLOR if self._unset_mode else self._color
 
@@ -145,19 +295,23 @@ class Palette(Gtk.Box):
 
 
 class GradientSwatch(Gtk.DrawingArea):
-    """Small icon: diagonal gradient from `previous` (bottom-left) to `active` (top-right).
+    """Colour swatch drawn with cairo.
 
-    Used as the visual on the gradient tool button so the user can see at a
-    glance which two colors the next gradient stroke will fade between.
+    In gradient mode (default) it shows a diagonal gradient from `previous`
+    (bottom-left) to `active` (top-right), used as the visual on the gradient
+    tool button. With `solid` supplied it renders that single colour and is
+    used as a clickable preset / used-colour swatch in the sidebar.
     """
 
     SIZE = 22
 
-    def __init__(self) -> None:
+    def __init__(self, size: int = SIZE, solid: int | None = None) -> None:
         super().__init__()
-        self.set_size_request(self.SIZE, self.SIZE)
+        self._size = int(size)
+        self.set_size_request(self._size, self._size)
         self._active: int = 0xFF0000
         self._previous: int = 0xFF0000
+        self._solid: int | None = solid
         self.connect(GtkSignal.DRAW.value, self._on_draw)
         # Re-render when the GTK theme changes, so the rounded-square
         # outline (drawn in the theme foreground color) stays in sync
@@ -201,28 +355,34 @@ class GradientSwatch(Gtk.DrawingArea):
         # cairo scale to the swatch's pixel size. Matches the outline
         # style of the tool icons exactly.
         cr.save()
-        cr.scale(self.SIZE / 24.0, self.SIZE / 24.0)
+        cr.scale(self._size / 24.0, self._size / 24.0)
 
-        # Build the rounded-square path once, clip+fill the gradient
-        # inside it, then re-build and stroke the outline in the theme
-        # foreground color.
+        # Build the rounded-square path once, clip+fill the colour
+        # (solid or gradient) inside it, then re-build and stroke the
+        # outline in the theme foreground color.
         self._rounded_rect_path(cr, 3, 3, 18, 18, 2)
         cr.save()
         cr.clip()
-        # Top-left (previous, gradient start) → bottom-right (active, end).
-        # Matches the directional behavior of dragging the line tool TL → BR.
-        # Endpoints are shifted inward by the arc inset (corner radius * (1
-        # - 1/sqrt(2)), ~0.586 for r=2) so t=0 lands on the actual visible
-        # TL corner pixel of the rounded rect — without this, the rendered
-        # corners sample at t≈0.033/0.967 and the displayed colors are
-        # ~8 RGB units short of the true endpoint colors.
-        inset = 2 * (1 - 1 / (2**0.5))
-        pat = cairo.LinearGradient(3 + inset, 3 + inset, 21 - inset, 21 - inset)
-        pat.add_color_stop_rgb(0.0, *rgb(self._previous))
-        pat.add_color_stop_rgb(1.0, *rgb(self._active))
-        cr.set_source(pat)
-        cr.rectangle(3, 3, 18, 18)
-        cr.fill()
+        if self._solid is not None:
+            r, g, b = rgb(self._solid)
+            cr.set_source_rgba(r, g, b, 1.0)
+            cr.rectangle(3, 3, 18, 18)
+            cr.fill()
+        else:
+            # Top-left (previous, gradient start) → bottom-right (active, end).
+            # Matches the directional behavior of dragging the line tool TL → BR.
+            # Endpoints are shifted inward by the arc inset (corner radius * (1
+            # - 1/sqrt(2)), ~0.586 for r=2) so t=0 lands on the actual visible
+            # TL corner pixel of the rounded rect — without this, the rendered
+            # corners sample at t≈0.033/0.967 and the displayed colors are
+            # ~8 RGB units short of the true endpoint colors.
+            inset = 2 * (1 - 1 / (2**0.5))
+            pat = cairo.LinearGradient(3 + inset, 3 + inset, 21 - inset, 21 - inset)
+            pat.add_color_stop_rgb(0.0, *rgb(self._previous))
+            pat.add_color_stop_rgb(1.0, *rgb(self._active))
+            cr.set_source(pat)
+            cr.rectangle(3, 3, 18, 18)
+            cr.fill()
         cr.restore()  # drop clip
 
         self._rounded_rect_path(cr, 3, 3, 18, 18, 2)

@@ -104,6 +104,11 @@ def run_loop(
 ):
     assert use_tray or show_window, "need either tray or visible window"
 
+    # GTK3's default overlay scrollbars float on top of their content on many
+    # desktops, hiding the right-most column (device/setting icons) under the
+    # scrollbar. Disable them so scrollbars take real layout space everywhere.
+    Gtk.Settings.get_default().set_property("gtk-overlay-scrolling", False)
+
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
     application.connect(
