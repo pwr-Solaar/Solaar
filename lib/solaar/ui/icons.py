@@ -55,12 +55,15 @@ def _init_icon_paths():
     logger.debug("battery level icons available: %s (padded scheme: %s)", _has_level_icons, _has_padded_level_icons)
 
 
-def battery(level=None, charging=False):
-    icon_name = _battery_icon_name(level, charging)
+def battery(level=None, charging=False, device=None):
+    if gtk.battery_icons_style == "device" and device is not None:
+        icon_name = _battery_icon_name_device(level, charging, device)
+    else:
+        icon_name = _battery_icon_name(level, charging)
     if not _default_theme.has_icon(icon_name):
         logger.warning("icon %s not found in current theme", icon_name)
         return TRAY_OKAY  # use Solaar icon if battery icon not available
-    logger.debug("battery icon for %s:%s = %s", level, charging, icon_name)
+    logger.debug("battery icon for %s:%s:%s = %s", level, charging, icon_name, device)
     return icon_name
 
 
@@ -69,6 +72,18 @@ def battery(level=None, charging=False):
 def _first_res(val, pairs):
     return next((res for guard, res in pairs if val >= guard), None)
 
+def _battery_icon_name_device(level, charging, device):
+    _init_icon_paths()
+
+    level_names = ((90, "full"), (60, "good"), (20, "low"), (5, "caution"), (0, "empty"))
+
+    level_str = '-' + _first_res(level, level_names) if level is not None else '-missing'
+    charging_str = "-charging" if charging else ""
+    device_str = f"-{device}" if device else ""
+
+    icon_name = f"battery{level_str}{charging_str}-solaar{device_str}"
+    logger.debug("battery level icon for %s:%s:%s = %s", level, charging, device, icon_name)
+    return icon_name
 
 def _battery_icon_name(level, charging):
     _init_icon_paths()
