@@ -22,7 +22,6 @@ from threading import Timer
 
 import gi
 
-from logitech_receiver import common
 from logitech_receiver import hidpp20
 from logitech_receiver import settings
 from logitech_receiver import settings_templates
@@ -247,12 +246,6 @@ class ChoiceControlBig(Gtk.Entry, Control):
 
     def set_choices(self, choices):
         self.choices = choices
-        liststore = Gtk.ListStore(int, str)
-        for v in self.choices:
-            liststore.append((int(v), str(v)))
-        completion = self.get_completion()
-        if completion:
-            completion.set_model(liststore)
 
     def changed(self, *args):
         self.value = self.get_choice()
@@ -913,36 +906,19 @@ def _zone_effect_blocks_perkey(device):
     return False
 
 
-def _is_onboard_disabled(val):
-    if val is None:
-        return True
-    if isinstance(val, bytes):
-        return val in (b"\x00\x00", b"\x00", b"")
-    if isinstance(val, (int, common.NamedInt)):
-        return int(val) == 0
-    if isinstance(val, str):
-        return val.lower() in ("disabled", "0")
-    return False
-
-
 def _onboard_profiles_blocked(device):
     """True when Onboard Profiles is active (not Disabled / Host mode),
     which locks live writes to DPI and Report Rate."""
-    persister = getattr(device, "persister", None)
-    has_onboard_setting = False
-    value = None
-    for s in getattr(device, "settings", []) or []:
-        if s.name == "onboard_profiles":
-            has_onboard_setting = True
-            value = s._value
-            break
-    if not has_onboard_setting:
-        return False
-    if value is None and persister:
-        value = persister.get("onboard_profiles")
-    if value is None:
-        return False
-    return not _is_onboard_disabled(value)
+    s = next((s for s in getattr(device, "settings", []) or [] if s.name == "onboard_profiles"), None)
+    return bool(s and s._value)
+
+def _set_onboard_tooltip(sbox, blocked):
+    desc = sbox.setting.description or ""
+    if blocked:
+        msg = _("Onboard Profiles must be set to Disabled (Host Mode) to control sensitivity and report rate live in Solaar.")
+        sbox.set_tooltip_text(f"{desc}\n\n{msg}" if desc else msg)
+    else:
+        sbox.set_tooltip_text(desc)
 
 
 def _set_row_sensitive(device, name, can_function):
@@ -957,12 +933,7 @@ def _set_row_sensitive(device, name, can_function):
     user_allowed = persister.get_sensitivity(name) if persister else True
     sbox._control.set_sensitive(user_allowed is True and can_function)
     if name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
-        if not can_function:
-            desc = sbox.setting.description or ""
-            msg = _("Onboard Profiles must be set to Disabled (Host Mode) to control sensitivity and report rate live in Solaar.")
-            sbox.set_tooltip_text(f"{desc}\n\n{msg}" if desc else msg)
-        else:
-            sbox.set_tooltip_text(sbox.setting.description)
+        _set_onboard_tooltip(sbox, not can_function)
 
 
 def _gate_blocks(device, name):
@@ -1164,12 +1135,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
     sbox._control.set_sensitive(sensitive is True and can_function)
     _change_icon(sensitive, sbox._change_icon)
     if name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
-        if not can_function:
-            desc = sbox.setting.description or ""
-            msg = _("Onboard Profiles must be set to Disabled (Host Mode) to control sensitivity and report rate live in Solaar.")
-            sbox.set_tooltip_text(f"{desc}\n\n{msg}" if desc else msg)
-        else:
-            sbox.set_tooltip_text(sbox.setting.description)
+        _set_onboard_tooltip(sbox, not can_function)
     # rgb_control / rgb_zone_* gate per-key; headset_led_control and the
     # headset-onboard-effect gate the per-zone row — re-evaluate on a change.
     if name in ("rgb_control", "headset_led_control", "headset-onboard-effect") or name.startswith("rgb_zone_"):

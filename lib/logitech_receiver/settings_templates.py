@@ -532,58 +532,43 @@ class ThumbInvert(settings.Setting):
     validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
 
 
+# onboard profile format 7 stores the report rate as an index (3 = 1 ms ... 0 = 8 ms), older formats in ms
+_RATE_INDEX_TO_MS = {3: 1, 2: 2, 1: 4, 0: 8}
+_RATE_MS_TO_INDEX = {v: k for k, v in _RATE_INDEX_TO_MS.items()}
+
+
+def profile_dpi_value(device, profile, index):
+    """Return (setting class, value) to report the DPI of a stage of an onboard profile."""
+    setting = next((s for s in device.settings if s.name in ("dpi", "dpi_extended")), None)
+    if setting and setting.name == "dpi_extended":
+        value = {0: profile.resolutions[index], 1: getattr(profile, "resolutions_y", profile.resolutions)[index]}
+        if hasattr(profile, "resolutions_lod"):
+            value[2] = profile.resolutions_lod[index]
+        return type(setting), value
+    return (type(setting) if setting else AdjustableDpi), profile.resolutions[index]
+
+
+def _profile_report_rate_value(device, profile):
+    setting = next((s for s in device.settings if s.name in ("report_rate", "report_rate_extended")), None)
+    extended = setting is not None and setting.name == "report_rate_extended"
+    rate = profile.report_rate
+    if getattr(profile, "profile_version", None) == 7:
+        rate = rate if extended else _RATE_INDEX_TO_MS.get(rate, rate)
+    elif extended:
+        rate = _RATE_MS_TO_INDEX.get(rate, rate)
+    return (type(setting) if setting else ReportRate), rate
+
+
 # change UI to show result of onboard profile change
 def profile_change(device, profile_sector):
     if device.setting_callback:
         device.setting_callback(device, OnboardProfiles, [profile_sector])
         for profile in device.profiles.profiles.values() if device.profiles else []:
             if profile.sector == profile_sector:
-                resolution_index = profile.resolution_default_index
-
-                resolutions = getattr(profile, "resolutions_x", profile.resolutions)
-                if not (0 <= resolution_index < len(resolutions)):
-                    resolution_index = 0
-
-                dpi_setting = next(
-                    (s for s in getattr(device, "settings", []) if s.name in ("dpi", "dpi_extended")), None
-                )
-                if dpi_setting and dpi_setting.name == "dpi_extended":
-                    rx = resolutions[resolution_index]
-                    ry = getattr(profile, "resolutions_y", resolutions)[resolution_index]
-                    val = {0: rx, 1: ry}
-                    if hasattr(profile, "resolutions_lod") and profile.resolutions_lod:
-                        if resolution_index < len(profile.resolutions_lod):
-                            val[2] = profile.resolutions_lod[resolution_index]
-                    device.setting_callback(device, type(dpi_setting), [val])
-                elif dpi_setting:
-                    device.setting_callback(device, type(dpi_setting), [resolutions[resolution_index]])
-                else:
-                    device.setting_callback(device, AdjustableDpi, [resolutions[resolution_index]])
-
-                rr_setting = next(
-                    (s for s in getattr(device, "settings", []) if s.name in ("report_rate", "report_rate_extended")),
-                    None,
-                )
-                if rr_setting and rr_setting.name == "report_rate_extended":
-                    if getattr(profile, "profile_version", None) == 7:
-                        rr_val = profile.report_rate
-                    else:
-                        ms_map = {1: 3, 2: 2, 4: 1, 8: 0}
-                        rr_val = ms_map.get(profile.report_rate, profile.report_rate)
-                    device.setting_callback(device, type(rr_setting), [rr_val])
-                elif rr_setting:
-                    if getattr(profile, "profile_version", None) == 7:
-                        idx_map = {3: 1, 2: 2, 1: 4, 0: 8}
-                        rr_val = idx_map.get(profile.report_rate, profile.report_rate)
-                    else:
-                        rr_val = profile.report_rate
-                    device.setting_callback(device, type(rr_setting), [rr_val])
-                else:
-                    rr_val = profile.report_rate
-                    if getattr(profile, "profile_version", None) == 7:
-                        idx_map = {3: 1, 2: 2, 1: 4, 0: 8}
-                        rr_val = idx_map.get(rr_val, rr_val)
-                    device.setting_callback(device, ReportRate, [rr_val])
+                setting_class, value = profile_dpi_value(device, profile, profile.resolution_default_index)
+                device.setting_callback(device, setting_class, [value])
+                setting_class, value = _profile_report_rate_value(device, profile)
+                device.setting_callback(device, setting_class, [value])
                 break
 
 
@@ -608,7 +593,7 @@ class OnboardProfiles(settings.Setting):
             enabled = device.feature_request(_F.ONBOARD_PROFILES, 0x20)
             if enabled and enabled[0] == 0x01:
                 active = device.feature_request(_F.ONBOARD_PROFILES, 0x40)
-                return active[:2] if active else b"\x00\x00"
+                return active[:2]
             else:
                 return b"\x00\x00"
 

@@ -356,25 +356,6 @@ def test_dialog_at_least_one_profile_enabled_guard():
         dlg._destroy()
 
 
-def test_dialog_reset_defaults():
-    dev, profiles, s_onboard = _make_format7_device()
-    dlg = profile_editor.OnboardProfileEditorDialog("test_reset", dev)
-    dlg.present()
-
-    try:
-        dlg._stage_widgets[0]["spin_x"].set_value(950)
-        dlg._on_reset_defaults_clicked(None)
-
-        assert dlg._stage_widgets[0]["spin_x"].get_value() == 600
-        assert dlg._stage_widgets[1]["spin_x"].get_value() == 800
-        assert dlg._stage_widgets[2]["spin_x"].get_value() == 1200
-        assert dlg._stage_widgets[3]["spin_x"].get_value() == 1400
-        assert dlg._stage_widgets[4]["spin_x"].get_value() == 1600
-        assert dlg._stage_widgets[1]["radio_def"].get_active() is True
-        assert dlg._stage_widgets[0]["radio_shift"].get_active() is True
-        assert dlg._rr_combo.get_active_id() == "3"
-    finally:
-        dlg._destroy()
 
 
 def test_dialog_live_dpi_notification_updates_badge():

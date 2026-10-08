@@ -405,32 +405,12 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                     settings_templates.profile_change(device, profile_sector)
             elif notification.address == 0x10:
                 resolution_index = struct.unpack("!B", notification.data[:1])[0]
-                resp = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x40)
-                if not resp or len(resp) < 2:
-                    return
-                profile_sector = struct.unpack("!H", resp[:2])[0]
+                profile_sector = struct.unpack("!H", device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x40)[:2])[0]
                 if device.setting_callback:
                     for profile in device.profiles.profiles.values() if device.profiles else []:
                         if profile.sector == profile_sector:
-                            dpi_setting = next(
-                                (s for s in getattr(device, "settings", []) if s.name in ("dpi", "dpi_extended")), None
-                            )
-                            resolutions = getattr(profile, "resolutions_x", profile.resolutions)
-                            if 0 <= resolution_index < len(resolutions):
-                                if dpi_setting and dpi_setting.name == "dpi_extended":
-                                    rx = resolutions[resolution_index]
-                                    ry = getattr(profile, "resolutions_y", resolutions)[resolution_index]
-                                    val = {0: rx, 1: ry}
-                                    if hasattr(profile, "resolutions_lod") and profile.resolutions_lod:
-                                        if resolution_index < len(profile.resolutions_lod):
-                                            val[2] = profile.resolutions_lod[resolution_index]
-                                    device.setting_callback(device, type(dpi_setting), [val])
-                                elif dpi_setting:
-                                    device.setting_callback(device, type(dpi_setting), [resolutions[resolution_index]])
-                                else:
-                                    device.setting_callback(
-                                        device, settings_templates.AdjustableDpi, [resolutions[resolution_index]]
-                                    )
+                            setting_class, value = settings_templates.profile_dpi_value(device, profile, resolution_index)
+                            device.setting_callback(device, setting_class, [value])
                             break
 
     elif feature == SupportedFeature.BRIGHTNESS_CONTROL:

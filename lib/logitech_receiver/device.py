@@ -1025,7 +1025,7 @@ class Device:
         handle = self.handle or self.receiver.handle
         try:
             protocol = self.low_level.ping(handle, self.number, long_message=long)
-        except (exceptions.NoReceiver, exceptions.NoSuchDevice, exceptions.DeviceUnreachable):  # if ping fails, device is offline
+        except exceptions.NoReceiver:  # if ping fails, device is offline
             protocol = None
         self.online = protocol is not None and self.present
         if protocol:
