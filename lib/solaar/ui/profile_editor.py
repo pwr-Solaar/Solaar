@@ -279,6 +279,9 @@ class OnboardProfileEditorDialog:
         # 1. InfoBar for user notifications / alerts
         self._infobar = Gtk.InfoBar()
         self._infobar_label = Gtk.Label()
+        self._infobar_label.set_line_wrap(True)
+        self._infobar_label.set_xalign(0.0)
+        self._infobar_label.show()
         self._infobar.get_content_area().add(self._infobar_label)
         self._infobar.set_show_close_button(True)
         self._infobar.connect("response", lambda ib, _r: ib.hide())
@@ -614,7 +617,10 @@ class OnboardProfileEditorDialog:
     def _show_info(self, text: str, msg_type=Gtk.MessageType.INFO) -> None:
         self._infobar.set_message_type(msg_type)
         self._infobar_label.set_text(text)
+        self._infobar_label.show()
         self._infobar.show()
+        if msg_type == Gtk.MessageType.INFO:
+            GLib.timeout_add_seconds(6, self._infobar.hide)
 
     def _refresh_all(self) -> None:
         """Full refresh of dialog data from device profiles."""
