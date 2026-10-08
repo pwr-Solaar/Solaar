@@ -336,3 +336,89 @@ def test_handle_passkey_pressed(mocker):
     result = notifications.handle_passkey_pressed(receiver, notification)
 
     assert result is True
+
+
+def test_profile_change_notifies_extended_dpi_and_report_rate(mocker):
+    from logitech_receiver import hidpp20
+    from logitech_receiver import settings_templates
+
+    class FakeDpi(settings_templates.ExtendedAdjustableDpi):
+        name = "dpi_extended"
+
+        def __init__(self):
+            pass
+
+    class FakeReportRate(settings_templates.ExtendedReportRate):
+        name = "report_rate_extended"
+        choices = [0, 1, 2, 3]
+
+        def __init__(self):
+            pass
+
+    dev = mocker.MagicMock()
+    s_dpi = FakeDpi()
+    s_rr = FakeReportRate()
+    dev.settings = [s_dpi, s_rr]
+
+    raw_sec1 = bytes.fromhex(
+        "0303040158025802002003200300b004b004007805780500400640060000000000ff00ffffffffff"
+        "ffffffff3c002c01800100018001000280010004800100088001001090050000ffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffff0300000000001f400000000300000000001f400000000300000000001f403200"
+        "000300000000001f40320000036d41"
+    )
+    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, raw_sec1, profile_version=7)
+    dev.profiles = mocker.MagicMock()
+    dev.profiles.profiles = {1: p1}
+
+    settings_templates.profile_change(dev, 1)
+
+    calls = dev.setting_callback.call_args_list
+    assert len(calls) == 3
+    assert calls[0][0][1] == settings_templates.OnboardProfiles
+    assert calls[0][0][2] == [1]
+    assert issubclass(calls[1][0][1], settings_templates.ExtendedAdjustableDpi)
+    assert calls[1][0][2] == [{0: 1400, 1: 1400, 2: 0}]
+    assert issubclass(calls[2][0][1], settings_templates.ExtendedReportRate)
+    assert calls[2][0][2] == [3]
+
+
+def test_notification_dpi_cycle_notifies_extended_dpi(mocker):
+    from logitech_receiver import hidpp20
+    from logitech_receiver import settings_templates
+
+    class FakeDpi(settings_templates.ExtendedAdjustableDpi):
+        name = "dpi_extended"
+
+        def __init__(self):
+            pass
+
+    dev = mocker.MagicMock()
+    dev.features.get_feature.return_value = SupportedFeature.ONBOARD_PROFILES
+    s_dpi = FakeDpi()
+    dev.settings = [s_dpi]
+
+    raw_sec1 = bytes.fromhex(
+        "0303040158025802002003200300b004b004007805780500400640060000000000ff00ffffffffff"
+        "ffffffff3c002c01800100018001000280010004800100088001001090050000ffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "ffffffffffffffff0300000000001f400000000300000000001f400000000300000000001f403200"
+        "000300000000001f40320000036d41"
+    )
+    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, raw_sec1, profile_version=7)
+    dev.profiles = mocker.MagicMock()
+    dev.profiles.profiles = {1: p1}
+    dev.feature_request.return_value = b"\x00\x01\x00\x00"
+
+    notif = mocker.MagicMock()
+    notif.sub_id = 0x05
+    notif.address = 0x10
+    notif.data = b"\x01"
+
+    notifications._process_feature_notification(dev, notif)
+
+    dev.setting_callback.assert_called_once_with(dev, FakeDpi, [{0: 800, 1: 800, 2: 0}])

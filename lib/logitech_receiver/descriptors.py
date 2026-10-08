@@ -406,6 +406,7 @@ _D("MX Vertical Wireless Mouse", codename="MX Vertical", protocol=4.5, wpid="407
 _D("Wireless Mouse Pebble M350", codename="Pebble", protocol=2.0, wpid="4080")
 _D("MX Master 3 Wireless Mouse", codename="MX Master 3", protocol=4.5, wpid="4082", btid=0xB023)
 _D("PRO X Wireless", kind="mouse", codename="PRO X", wpid="4093", usbid=0xC094)
+_D("G304 X LIGHTSPEED", kind="mouse", codename="G304 X", wpid="40BC", usbid=0xC0A7)
 
 _D("G9 Laser Mouse", codename="G9", usbid=0xC048, interface=1, protocol=1.0)
 _D("G9x Laser Mouse", codename="G9x", usbid=0xC066, interface=1, protocol=1.0)

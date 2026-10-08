@@ -440,3 +440,14 @@ def test_close_runs_cleanups_once():
     test_device.__del__()
 
     assert calls == [test_device]
+
+
+def test_wpid_descriptors():
+    from logitech_receiver import descriptors
+
+    desc = descriptors.DEVICES_WPID.get("40BC")
+    assert desc is not None
+    assert desc.name == "G304 X LIGHTSPEED"
+    assert desc.codename == "G304 X"
+    assert desc.kind == "mouse"
+    assert desc.usbid == 0xC0A7

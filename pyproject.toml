@@ -14,3 +14,6 @@ select = [
 [tool.ruff.lint.isort]
 force-single-line = true
 lines-between-types = 1
+
+[tool.pytest.ini_options]
+pythonpath = ["lib"]

@@ -874,15 +874,51 @@ class RawXYProcessing:
         pass
 
 
+def is_onboard_disabled(val):
+    """Check whether onboard_profiles is set to Disabled / Host mode."""
+    if val is None:
+        return True
+    if isinstance(val, bytes):
+        return val in (b"\x00\x00", b"\x00", b"")
+    if isinstance(val, (int, NamedInt)):
+        return int(val) == 0
+    if isinstance(val, str):
+        return val.lower() in ("disabled", "0")
+    return False
+
+
 def apply_all_settings(device):
     if device.features and hidpp20_constants.SupportedFeature.HIRES_WHEEL in device.features:
         time.sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, "persister", None)
     sensitives = persister.get("_sensitive", {}) if persister else {}
+
+    # Apply onboard_profiles first so the device mode (On-Board vs Host/Disabled)
+    # is established before configuring live DPI or report rate.
+    onboard_setting = next((s for s in device.settings if s.name == "onboard_profiles"), None)
+    if onboard_setting:
+        ignore = sensitives.get(onboard_setting.name, False)
+        if ignore != SENSITIVITY_IGNORE:
+            onboard_setting.apply()
+
+    onboard_active = False
+    if onboard_setting:
+        onboard_val = getattr(onboard_setting, "_value", None)
+        if onboard_val is None:
+            onboard_val = onboard_setting.read()
+        onboard_active = not is_onboard_disabled(onboard_val)
+
     for s in device.settings:
+        if s is onboard_setting:
+            continue
         ignore = sensitives.get(s.name, False)
         if ignore != SENSITIVITY_IGNORE:
-            s.apply()
+            if onboard_active and s.name in ("dpi", "dpi_extended", "report_rate", "report_rate_extended"):
+                # In On-Board mode, Logitech firmware rejects live runtime writes to DPI
+                # and report rate. Read the active values without attempting to write.
+                s.read(False)
+            else:
+                s.apply()
 
 
 Setting.validator_class = settings_validator.BooleanValidator
