@@ -276,10 +276,15 @@ class MapChoiceControl(Gtk.HBox, Control):
         self.keyBox.set_active(0)
         key_choice = int(self.keyBox.get_active_id())
         self.value_choices = self.sbox.setting.choices[key_choice]
-        self.valueBox = _create_choice_control(sbox.setting, choices=self.value_choices, delegate=self)
+        self.valueBox = _create_choice_control(sbox, choices=self.value_choices, delegate=self)
         self.pack_start(self.keyBox, False, False, 0)
         self.pack_end(self.valueBox, False, False, 0)
         self.keyBox.connect(GtkSignal.CHANGED.value, self.map_value_notify_key)
+
+    def set_sensitive(self, sensitive):
+        super().set_sensitive(sensitive)
+        self.keyBox.set_sensitive(sensitive)
+        self.valueBox.set_sensitive(sensitive)
 
     def get_value(self):
         key_choice = int(self.keyBox.get_active_id())
@@ -293,7 +298,7 @@ class MapChoiceControl(Gtk.HBox, Control):
         key = int(self.keyBox.get_active_id())
         if value.get(key) is not None:
             self.valueBox.set_value(value.get(key))
-        self.valueBox.set_sensitive(True)
+        self.valueBox.set_sensitive(self.get_sensitive())
 
     def map_populate_value_box(self, key_choice):
         choices = self.sbox.setting.choices[key_choice]
@@ -823,6 +828,7 @@ _SW_CONTROL_DEPENDENT_PREFIXES = ("rgb_zone_",)
 # needs-rgb_control + zone-Static). The 0x0622 signature effects are stored
 # settings (startup/shutdown colors) and stay ungated.
 _HEADSET_LED_DEPENDENT_NAMES = ("headset_per_zone_lighting", "headset-onboard-effect")
+_ONBOARD_PROFILE_DEPENDENT_NAMES = ("dpi", "dpi_extended", "report_rate", "report_rate_extended")
 
 
 def _sw_control_blocked(device):
@@ -900,6 +906,21 @@ def _zone_effect_blocks_perkey(device):
     return False
 
 
+def _onboard_profiles_blocked(device):
+    """True when Onboard Profiles is active (not Disabled / Host mode),
+    which locks live writes to DPI and Report Rate."""
+    s = next((s for s in getattr(device, "settings", []) or [] if s.name == "onboard_profiles"), None)
+    return bool(s and s._value)
+
+def _set_onboard_tooltip(sbox, blocked):
+    desc = sbox.setting.description or ""
+    if blocked:
+        msg = _("Onboard Profiles must be set to Disabled (Host Mode) to control sensitivity and report rate live in Solaar.")
+        sbox.set_tooltip_text(f"{desc}\n\n{msg}" if desc else msg)
+    else:
+        sbox.set_tooltip_text(desc)
+
+
 def _set_row_sensitive(device, name, can_function):
     """Apply sensitivity to a single setting's control row. Combines the
     user's lock-icon opt-in (persister sensitivity) with the can-function
@@ -911,6 +932,8 @@ def _set_row_sensitive(device, name, can_function):
     persister = getattr(device, "persister", None)
     user_allowed = persister.get_sensitivity(name) if persister else True
     sbox._control.set_sensitive(user_allowed is True and can_function)
+    if name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
+        _set_onboard_tooltip(sbox, not can_function)
 
 
 def _gate_blocks(device, name):
@@ -926,6 +949,8 @@ def _gate_blocks(device, name):
             return True
         # Per-zone painting additionally needs the onboard effect on Static.
         return name == "headset_per_zone_lighting" and _cluster_effect_blocks_perzone(device)
+    if name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
+        return _onboard_profiles_blocked(device)
     return False
 
 
@@ -949,12 +974,20 @@ def _apply_rgb_gates(device):
             _set_row_sensitive(device, name, not _gate_blocks(device, name))
 
 
+def _apply_onboard_profile_gates(device):
+    """Grey out DPI and Report Rate settings when Onboard Profiles is active."""
+    for s in getattr(device, "settings", []) or []:
+        if s.name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
+            _set_row_sensitive(device, s.name, not _gate_blocks(device, s.name))
+
+
 def _change_click(button, sbox):
     icon = button.get_children()[0]
     icon_name, _ = icon.get_icon_name()
     allowed = _icons_allowables.get(icon_name, True)
     new_allowed = _next_allowable[allowed]
-    sbox._control.set_sensitive(new_allowed is True)
+    can_function = not _gate_blocks(sbox.setting._device, sbox.setting.name)
+    sbox._control.set_sensitive(new_allowed is True and can_function)
     _change_icon(new_allowed, icon)
     if sbox.setting._device.persister:  # remember the new setting sensitivity
         sbox.setting._device.persister.set_sensitivity(sbox.setting.name, new_allowed)
@@ -997,6 +1030,8 @@ def _change_click(button, sbox):
         "rgb_zone_"
     ):
         _apply_rgb_gates(sbox.setting._device)
+    if name == "onboard_profiles":
+        _apply_onboard_profile_gates(sbox.setting._device)
     return True
 
 
@@ -1099,10 +1134,18 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True and can_function)
     _change_icon(sensitive, sbox._change_icon)
+    if name in _ONBOARD_PROFILE_DEPENDENT_NAMES:
+        _set_onboard_tooltip(sbox, not can_function)
     # rgb_control / rgb_zone_* gate per-key; headset_led_control and the
     # headset-onboard-effect gate the per-zone row — re-evaluate on a change.
     if name in ("rgb_control", "headset_led_control", "headset-onboard-effect") or name.startswith("rgb_zone_"):
         _apply_rgb_gates(sbox.setting._device)
+    if name in ("dpi", "dpi_extended"):
+        from solaar.ui import profile_editor
+
+        profile_editor.notify_dpi_changed(sbox.setting._device, value)
+    if name == "onboard_profiles":
+        _apply_onboard_profile_gates(sbox.setting._device)
 
 
 def _disable_listbox_highlight_bg(lb):
@@ -1164,6 +1207,7 @@ def update(device, is_online=None):
         _read_async(s, False, sbox, is_online, sensitive)
 
     _apply_rgb_gates(device)
+    _apply_onboard_profile_gates(device)
     _box.set_visible(True)
 
 

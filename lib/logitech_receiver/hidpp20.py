@@ -1482,16 +1482,19 @@ class Button:
                     result = cls(behavior=behavior, type=mapping_type, value=value)
                 elif mapping_type == ButtonMappingType.NO_ACTION:
                     result = cls(behavior=behavior, type=mapping_type)
+                else:
+                    result = cls(behavior=bytes_[0] >> 4, bytes=bytes_)
             except Exception:
-                pass
+                result = cls(behavior=bytes_[0] >> 4, bytes=bytes_)
         elif behavior == ButtonBehavior.FUNCTION:
             second_byte = bytes_[1]
             try:
                 btn_func = ButtonFunctions(second_byte).value
             except ValueError:
                 btn_func = second_byte
+            third_byte = bytes_[2]
             data = bytes_[3]
-            result = cls(behavior=behavior, value=btn_func, data=data)
+            result = cls(behavior=behavior, value=btn_func, third_byte=third_byte, data=data)
         else:
             result = cls(behavior=bytes_[0] >> 4, bytes=bytes_)
         return result
@@ -1500,7 +1503,7 @@ class Button:
         bytes = common.int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
         if self.behavior == ButtonBehavior.MACRO_EXECUTE.value or self.behavior == ButtonBehavior.MACRO_STOP.value:
             bytes = common.int2bytes((self.behavior << 12) + self.sector, 2) + common.int2bytes(self.address, 2)
-        elif self.behavior == ButtonBehavior.SEND.value:
+        elif self.behavior == ButtonBehavior.SEND.value and hasattr(self, "type"):
             bytes += common.int2bytes(self.type, 1)
             if self.type == ButtonMappingType.BUTTON:
                 bytes += common.int2bytes(self.value, 2)
@@ -1512,8 +1515,9 @@ class Button:
             elif self.type == ButtonMappingType.NO_ACTION:
                 bytes += b"\xff\xff"
         elif self.behavior == ButtonBehavior.FUNCTION:
+            third_byte = getattr(self, "third_byte", 0xFF)
             data = common.int2bytes(self.data, 1) if self.data else b"\x00"
-            bytes += common.int2bytes(self.value, 1) + b"\xff" + data
+            bytes += common.int2bytes(self.value, 1) + common.int2bytes(third_byte, 1) + data
         else:
             bytes = self.bytes if self.bytes else b"\xff\xff\xff\xff"
         return bytes
@@ -1545,8 +1549,61 @@ class OnboardProfile:
     def to_yaml(cls, dumper, data):
         return dumper.represent_mapping("!OnboardProfile", data.__dict__)
 
+    @property
+    def res_index(self):
+        return getattr(self, "resolution_default_index", 0)
+
+    @property
+    def res_shift_index(self):
+        return getattr(self, "resolution_shift_index", 0)
+
     @classmethod
-    def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes):
+    def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes, profile_version=None):
+        if profile_version == 0x07:
+            crc = common.crc16(bytes[:-2])
+            expected_crc = int.from_bytes(bytes[-2:], "big")
+            assert crc == expected_crc, f"CRC16 CCITT check failed: {crc:04x} != {expected_crc:04x}"
+
+            report_rate = bytes[0]
+            resolution_default_index = bytes[1]
+            resolution_shift_index = bytes[2]
+            resolutions_x = [struct.unpack("<H", bytes[4 + i * 5 : 6 + i * 5])[0] for i in range(5)]
+            resolutions_y = [struct.unpack("<H", bytes[6 + i * 5 : 8 + i * 5])[0] for i in range(5)]
+            resolutions_lod = [bytes[8 + i * 5] for i in range(5)]
+
+            parsed_buttons = [Button.from_bytes(bytes[48 + i * 4 : 52 + i * 4]) for i in range(buttons)]
+
+            ps_timeout = struct.unpack("<H", bytes[44:46])[0]
+            po_timeout = struct.unpack("<H", bytes[46:48])[0]
+
+            return cls(
+                sector=sector,
+                enabled=enabled,
+                report_rate=report_rate,
+                resolution_default_index=resolution_default_index,
+                resolution_shift_index=resolution_shift_index,
+                dpi_active_index=bytes[3],
+                resolutions=resolutions_x,
+                resolutions_x=resolutions_x,
+                resolutions_y=resolutions_y,
+                resolutions_lod=resolutions_lod,
+                red=0,
+                green=0,
+                blue=0,
+                power_mode=0,
+                angle_snap=0,
+                write_count=0,
+                reserved=bytes[29:44],
+                ps_timeout=ps_timeout,
+                po_timeout=po_timeout,
+                buttons=parsed_buttons,
+                gbuttons=[],
+                name="",
+                lighting=[],
+                profile_version=7,
+                _raw_tail=bytes[112:-2],
+            )
+
         return cls(
             sector=sector,
             enabled=enabled,
@@ -1570,11 +1627,29 @@ class OnboardProfile:
         )
 
     @classmethod
-    def from_dev(cls, dev, i, sector, s, enabled, buttons, gbuttons):
+    def from_dev(cls, dev, i, sector, s, enabled, buttons, gbuttons, profile_version=None):
         bytes = OnboardProfiles.read_sector(dev, sector, s)
-        return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes)
+        return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes, profile_version=profile_version)
 
     def to_bytes(self, length):
+        if getattr(self, "profile_version", None) == 7:
+            bytes = common.int2bytes(self.report_rate, 1)
+            bytes += common.int2bytes(self.resolution_default_index, 1) + common.int2bytes(self.resolution_shift_index, 1)
+            bytes += common.int2bytes(self.dpi_active_index, 1)
+            for i in range(0, 5):
+                bytes += self.resolutions_x[i].to_bytes(2, "little") + self.resolutions_y[i].to_bytes(2, "little")
+                bytes += common.int2bytes(self.resolutions_lod[i], 1)
+            bytes += self.reserved
+            bytes += self.ps_timeout.to_bytes(2, "little") + self.po_timeout.to_bytes(2, "little")
+            for i in range(0, 16):
+                bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b"\xff\xff\xff\xff"
+            bytes += self._raw_tail
+            while len(bytes) < length - 2:
+                bytes += b"\xff"
+            bytes = bytes[: length - 2]
+            bytes += common.int2bytes(common.crc16(bytes), 2)
+            return bytes
+
         bytes = common.int2bytes(self.report_rate, 1)
         bytes += common.int2bytes(self.resolution_default_index, 1) + common.int2bytes(self.resolution_shift_index, 1)
         bytes += b"".join([self.resolutions[i].to_bytes(2, "little") for i in range(0, 5)])
@@ -1664,16 +1739,17 @@ class OnboardProfiles:
             device.ping()
         response = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x00)
         memory, profile, _macro = struct.unpack("!BBB", response[0:3])
-        if memory != 0x01 or profile > 0x05:
+        if memory != 0x01 or (profile > 0x05 and profile != 0x07):
             return
         count, oob, buttons, sectors, size, shift = struct.unpack("!BBBBHB", response[3:10])
-        gbuttons = buttons if (shift & 0x3 == 0x2) else 0
+        gbuttons = buttons if (shift & 0x3 == 0x2 and profile != 0x07) else 0
         headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
         for i, (sector, enabled) in enumerate(headers, start=1):
-            profiles[i] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
+            profiles[i] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons, profile)
         return cls(
             version=OnboardProfilesVersion,
+            profile_version=profile,
             name=device.name,
             count=count,
             buttons=buttons,
@@ -1684,12 +1760,13 @@ class OnboardProfiles:
         )
 
     def to_bytes(self):
+        format7 = getattr(self, "profile_version", None) == 0x07
         bytes = b""
         for i in range(1, len(self.profiles) + 1):
             profiles_sector = common.int2bytes(self.profiles[i].sector, 2)
             profiles_enabled = common.int2bytes(self.profiles[i].enabled, 1)
-            bytes += profiles_sector + profiles_enabled + b"\x00"
-        bytes += b"\xff\xff\x00\x00"  # marker after last profile
+            bytes += profiles_sector + profiles_enabled + (b"\xff" if format7 else b"\x00")
+        bytes += b"\xff\xff\xff\xff" if format7 else b"\xff\xff\x00\x00"  # marker after last profile
         while len(bytes) < self.size - 2:  # leave room for CRC
             bytes += b"\xff"
         bytes += common.int2bytes(common.crc16(bytes), 2)

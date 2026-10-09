@@ -532,15 +532,43 @@ class ThumbInvert(settings.Setting):
     validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
 
 
+# onboard profile format 7 stores the report rate as an index (3 = 1 ms ... 0 = 8 ms), older formats in ms
+_RATE_INDEX_TO_MS = {3: 1, 2: 2, 1: 4, 0: 8}
+_RATE_MS_TO_INDEX = {v: k for k, v in _RATE_INDEX_TO_MS.items()}
+
+
+def profile_dpi_value(device, profile, index):
+    """Return (setting class, value) to report the DPI of a stage of an onboard profile."""
+    setting = next((s for s in device.settings if s.name in ("dpi", "dpi_extended")), None)
+    if setting and setting.name == "dpi_extended":
+        value = {0: profile.resolutions[index], 1: getattr(profile, "resolutions_y", profile.resolutions)[index]}
+        if hasattr(profile, "resolutions_lod"):
+            value[2] = profile.resolutions_lod[index]
+        return type(setting), value
+    return (type(setting) if setting else AdjustableDpi), profile.resolutions[index]
+
+
+def _profile_report_rate_value(device, profile):
+    setting = next((s for s in device.settings if s.name in ("report_rate", "report_rate_extended")), None)
+    extended = setting is not None and setting.name == "report_rate_extended"
+    rate = profile.report_rate
+    if getattr(profile, "profile_version", None) == 7:
+        rate = rate if extended else _RATE_INDEX_TO_MS.get(rate, rate)
+    elif extended:
+        rate = _RATE_MS_TO_INDEX.get(rate, rate)
+    return (type(setting) if setting else ReportRate), rate
+
+
 # change UI to show result of onboard profile change
 def profile_change(device, profile_sector):
     if device.setting_callback:
         device.setting_callback(device, OnboardProfiles, [profile_sector])
         for profile in device.profiles.profiles.values() if device.profiles else []:
             if profile.sector == profile_sector:
-                resolution_index = profile.resolution_default_index
-                device.setting_callback(device, AdjustableDpi, [profile.resolutions[resolution_index]])
-                device.setting_callback(device, ReportRate, [profile.report_rate])
+                setting_class, value = profile_dpi_value(device, profile, profile.resolution_default_index)
+                device.setting_callback(device, setting_class, [value])
+                setting_class, value = _profile_report_rate_value(device, profile)
+                device.setting_callback(device, setting_class, [value])
                 break
 
 
@@ -549,6 +577,7 @@ class OnboardProfiles(settings.Setting):
     label = _("Onboard Profiles")
     description = _("Enable an onboard profile, which controls report rate, sensitivity, and button actions")
     feature = _F.ONBOARD_PROFILES
+    editor_class = "solaar.ui.profile_editor:OnboardProfilesControl"
     choices_universe = common.NamedInts(Disabled=0)
     for i in range(1, 16):
         choices_universe[i] = f"Profile {i}"
@@ -561,8 +590,8 @@ class OnboardProfiles(settings.Setting):
             self.kind = settings.FeatureRW.kind
 
         def read(self, device):
-            enabled = device.feature_request(_F.ONBOARD_PROFILES, 0x20)[0]
-            if enabled == 0x01:
+            enabled = device.feature_request(_F.ONBOARD_PROFILES, 0x20)
+            if enabled and enabled[0] == 0x01:
                 active = device.feature_request(_F.ONBOARD_PROFILES, 0x40)
                 return active[:2]
             else:
@@ -1133,11 +1162,19 @@ class ExtendedAdjustableDpi(settings.Setting):
             return validator
 
         def validate_read(self, reply_bytes):  # special validator to read entire setting
-            dpi_x = common.bytes2int(reply_bytes[3:5]) if reply_bytes[1:3] == 0 else common.bytes2int(reply_bytes[1:3])
+            dpi_x = (
+                common.bytes2int(reply_bytes[3:5])
+                if common.bytes2int(reply_bytes[1:3]) == 0
+                else common.bytes2int(reply_bytes[1:3])
+            )
             assert dpi_x in self.choices[0], f"{self.__class__.__name__}: failed to validate dpi_x value {dpi_x:04X}"
             value = {self.keys["X"]: dpi_x}
             if self.y:
-                dpi_y = common.bytes2int(reply_bytes[7:9]) if reply_bytes[5:7] == 0 else common.bytes2int(reply_bytes[5:7])
+                dpi_y = (
+                    common.bytes2int(reply_bytes[7:9])
+                    if common.bytes2int(reply_bytes[5:7]) == 0
+                    else common.bytes2int(reply_bytes[5:7])
+                )
                 assert dpi_y in self.choices[1], f"{self.__class__.__name__}: failed to validate dpi_y value {dpi_y:04X}"
                 value[self.keys["Y"]] = dpi_y
             if self.lod:
