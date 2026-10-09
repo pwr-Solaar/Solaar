@@ -550,6 +550,30 @@ def test_simple_template(test, mocker, mock_gethostname):
     fake_hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
 
 
+@pytest.mark.parametrize(
+    "waveforms, choices, write_value",
+    [
+        ("00001001", common.NamedInts(SHARP_STATE_CHANGE=0x00, KNOCK=0x0C), 0x0C),
+        ("08000001", common.NamedInts(SHARP_STATE_CHANGE=0x00, WHISPER_COLLISION=0x1B), 0x1B),
+        ("08007FFF", hidpp20_constants.HapticWaveForms, 0x0C),
+    ],
+)
+def test_play_haptic_waveform(waveforms, choices, write_value, mocker):
+    responses = [
+        fake_hidpp.Response("00000000" + waveforms + "FFFFFFFF", 0x0400),
+        fake_hidpp.Response("00", 0x0440, f"{write_value:02X}"),
+    ]
+    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.SupportedFeature.HAPTIC)
+    spy_request = mocker.spy(device, "request")
+
+    setting = settings_templates.check_feature(device, settings_templates.PlayHapticWaveForm)
+
+    assert setting is not None
+    assert setting.choices == choices
+    assert setting.write(write_value) == write_value
+    fake_hidpp.match_requests(1, responses, spy_request.call_args_list)
+
+
 responses_reprog_controls = [
     fake_hidpp.Response("03", 0x0500),
     fake_hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),  # left button

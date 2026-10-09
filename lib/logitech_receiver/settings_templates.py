@@ -4425,7 +4425,7 @@ class PlayHapticWaveForm(settings.Setting):
             response = device.feature_request(_F.HAPTIC, 0x00)
             if response:
                 waves = common.NamedInts()
-                waveforms = int.from_bytes(response[4:8])
+                waveforms = int.from_bytes(response[4:8], byteorder="big")
                 for waveform in hidpp20_constants.HapticWaveForms:
                     if (1 << int(waveform)) & waveforms:
                         waves[int(waveform)] = str(waveform)
