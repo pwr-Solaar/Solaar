@@ -1571,3 +1571,4 @@ def _load_rule_config(file_path: str) -> Rule:
 
 
 load_config_rule_file()
+setup_uinput()
