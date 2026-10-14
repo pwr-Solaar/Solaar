@@ -116,7 +116,7 @@ def select_choice(value, choices, setting, key):
     if val is not None:
         value = val
     elif ivalue is not None and 1 <= ivalue <= len(choices):
-        value = choices[ivalue - 1]
+        value = choices[:][ivalue - 1]
     elif lvalue in ("higher", "lower"):
         old_value = setting.read() if key is None else setting.read_key(key)
         if old_value is None:
