@@ -2129,7 +2129,9 @@ class Hidpp20:
             return f"{str(rate)}ms"
         else:
             rates = ["8ms", "4ms", "2ms", "1ms", "500us", "250us", "125us"]
-            state = device.feature_request(SupportedFeature.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
+            state = device.feature_request(
+                SupportedFeature.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20, device.extended_report_rate_connection
+            )
             if state:
                 rate = struct.unpack("!B", state[:1])[0]
                 return rates[rate]

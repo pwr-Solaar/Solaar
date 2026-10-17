@@ -630,6 +630,11 @@ class ExtendedReportRate(settings.Setting):
     )
     feature = _F.EXTENDED_ADJUSTABLE_REPORT_RATE
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
+
+    class rw_class(settings.FeatureRW):
+        def read(self, device, data_bytes=b""):
+            # reading takes a connection type, and the default of 0 answers for a wired connection
+            return device.feature_request(self.feature, self.read_fnid, device.extended_report_rate_connection)
     choices_universe = common.NamedInts()
     choices_universe[0] = "8ms"
     choices_universe[1] = "4ms"

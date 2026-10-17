@@ -209,6 +209,8 @@ class Device:
             )
             # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
             self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
+            if self.passthrough_dongle:
+                self.number = 0x01  # the dongle itself answers on 0xFF, its single paired device is on 1
             try:  # determine whether a direct-connected device is online
                 self.ping()
             except exceptions.NoSuchDevice as e:
@@ -372,6 +374,16 @@ class Device:
     @property
     def power_switch_location(self):
         return self._power_switch
+
+    @property
+    def passthrough_dongle(self) -> bool:
+        """Whether this is the single device behind a HID++ 2.0 only dongle, which is not a receiver."""
+        return bool(not self.receiver and not self.bluetooth and int(self.product_id or "0", 16) in base.PASSTHROUGH_DONGLE_IDS)
+
+    @property
+    def extended_report_rate_connection(self) -> int:
+        """Connection type for 0x8061 report rate queries: 1 for wireless through a dongle, 0 otherwise."""
+        return 1 if self.passthrough_dongle else 0
 
     @property
     def polling_rate(self):
