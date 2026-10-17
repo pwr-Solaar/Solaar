@@ -164,6 +164,11 @@ class SolaarListener(listener.EventsListener):
             notifications.process(self.receiver, n)
             return
 
+        # a device behind a pass-through dongle is addressed by its own index, so its notifications are its own
+        if self.receiver.isDevice and n.devnumber == self.receiver.number and n.devnumber not in (0x00, 0xFF):
+            notifications.process(self.receiver, n)
+            return
+
         # a notification that came in to the device listener - strange, but nothing needs to be done here
         if self.receiver.isDevice:
             logger.debug("Notification %s via device %s being ignored.", n, self.receiver)

@@ -165,6 +165,9 @@ def _bluetooth_device(product_id: int) -> dict[str, Any]:
     return {"vendor_id": LOGITECH_VENDOR_ID, "product_id": product_id, "bus_id": BusID.BLUETOOTH, "isDevice": True}
 
 
+# Dongles that only speak HID++ 2.0 and relay a single paired device, so they are handled as directly connected devices
+PASSTHROUGH_DONGLE_IDS = (0xC54F,)  # PRO X3 Superstrike
+
 KNOWN_DEVICE_IDS = []
 
 for _ignore, d in descriptors.DEVICES.items():
@@ -253,6 +256,9 @@ def get_known_receiver_info(
 
     If so return the receiver record for further checking.
     """
+    if vendor_id == LOGITECH_VENDOR_ID and bus_id == BusID.USB.value and product_id in PASSTHROUGH_DONGLE_IDS:
+        return _usb_device(product_id, 2)
+
     try:
         record = base_usb.get_receiver_info(product_id)
         if _match_device(record, bus_id, vendor_id, product_id):
