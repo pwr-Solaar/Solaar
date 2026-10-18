@@ -191,7 +191,7 @@ try:
             _ignore, _ignore, name, device = _picked_device
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
-            tray_icon_name = icons.battery(battery_level, battery_charging)
+            tray_icon_name = icons.battery(battery_level, battery_charging, device.kind)
             description = f"{name}: {device.status_string()}"
         else:
             # there may be a receiver, but no peripherals
@@ -241,7 +241,7 @@ except ImportError:
             _ignore, _ignore, name, device = _picked_device
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
-            tray_icon_name = icons.battery(battery_level, battery_charging)
+            tray_icon_name = icons.battery(battery_level, battery_charging, device.kind)
         else:
             # there may be a receiver, but no peripherals
             tray_icon_name = icons.TRAY_OKAY if _devices_info else icons.TRAY_ATTENTION
@@ -390,7 +390,7 @@ def _update_menu_item(index, device):
     menu_item = menu_items[index]
     level = device.battery_info.level if device.battery_info is not None else None
     charging = device.battery_info.charging() if device.battery_info is not None else None
-    icon_name = icons.battery(level, charging)
+    icon_name = icons.battery(level, charging, device.kind)
     menu_item.label.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
     image_widget = menu_item.icon
     image_widget.set_sensitive(bool(device.online))

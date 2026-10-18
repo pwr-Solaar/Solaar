@@ -92,8 +92,8 @@ def create_parser():
     arg_parser.add_argument(
         "-b",
         "--battery-icons",
-        choices=("regular", "symbolic", "solaar"),
-        help="prefer regular battery / symbolic battery / solaar icons",
+        choices=("regular", "symbolic", "solaar", "device"),
+        help="prefer regular battery / symbolic battery / solaar / device battery icons",
     )
     arg_parser.add_argument("--tray-icon-size", type=int, help="explicit size for tray icons")
     arg_parser.add_argument("-V", "--version", action="version", version="%(prog)s " + __version__)
