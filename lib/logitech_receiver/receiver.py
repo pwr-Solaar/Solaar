@@ -189,11 +189,12 @@ class Receiver:
     def close(self):
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: closing - handle %s %s", self, type(self.handle), self.handle)
-        handle, self.handle = self.handle, None
+        # Close paired devices first: their cleanup writes go over this receiver's handle.
         for _n, d in self._devices.items():
             if d:
                 d.close()
         self._devices.clear()
+        handle, self.handle = self.handle, None
         return handle and self.low_level.close(handle)
 
     def __del__(self):

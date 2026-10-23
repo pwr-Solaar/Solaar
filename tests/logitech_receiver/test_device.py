@@ -423,3 +423,20 @@ def test_device_battery(device_info, responses, protocol, expected_battery, chan
     assert test_device.battery() == expected_battery
     test_device.read_battery()
     spy_changed.assert_called_with(**changed)
+
+
+def test_close_runs_cleanups_once():
+    """close() is idempotent: __del__ calls it again at interpreter shutdown,
+    and cleanups must not run a second time (a settings build there fails)."""
+    handle = 0x1
+    test_device = device.Device(
+        LowLevelInterfaceFake(fake_hidpp.r_empty), None, None, None, handle=handle, device_info=di_CCCC
+    )
+    calls = []
+    test_device.cleanups = [lambda d: calls.append(d)]
+
+    test_device.close()
+    test_device.close()  # simulates the __del__ re-entry
+    test_device.__del__()
+
+    assert calls == [test_device]

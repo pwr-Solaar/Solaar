@@ -172,6 +172,7 @@ class Device:
         self.present = True  # used for devices that are integral with their receiver but that separately be disconnected
 
         self._feature_settings_checked = False
+        self._closed = False
         self._gestures_lock = threading.Lock()
         self._settings_lock = threading.Lock()
         self._persister_lock = threading.Lock()
@@ -1037,6 +1038,12 @@ class Device:
         pass
 
     def close(self):
+        # Idempotent: __del__ re-invokes close() at interpreter shutdown, where
+        # re-running cleanups can't safely build settings. Flag, not self.handle
+        # (None for receiver-paired devices that borrow the receiver's handle).
+        if getattr(self, "_closed", False):
+            return None
+        self._closed = True
         # Run device.cleanups before clearing self.handle — cleanup callbacks
         # typically need to issue final feature_request() writes (e.g. release
         # SW control, restore device-side state) and feature_request() relies
