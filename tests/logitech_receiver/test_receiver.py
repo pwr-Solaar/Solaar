@@ -94,12 +94,12 @@ responses_c534 = [
     fake_hidpp.Response("000000", 0x8003, "FF", handle=0x12),
     fake_hidpp.Response("000209", 0x8102, handle=0x12),
     fake_hidpp.Response("0316CC9CB40502220000000000000000", 0x83B5, "03", handle=0x12),
-    fake_hidpp.Response("00000445AB", 0x83B5, "04", handle=0x12),
+    fake_hidpp.Response("040045AB", 0x83B5, "04", handle=0x12),
 ]
 responses_unusual = [
     fake_hidpp.Response("000000", 0x8003, "FF", handle=0x13),
     fake_hidpp.Response("000300", 0x8102, handle=0x13),
-    fake_hidpp.Response("00000445AB", 0x83B5, "04", handle=0x13),
+    fake_hidpp.Response("040045AB", 0x83B5, "04", handle=0x13),
     fake_hidpp.Response("0326CC9CB40508220000000000000000", 0x83B5, "03", handle=0x13),
 ]
 responses_lacking = [

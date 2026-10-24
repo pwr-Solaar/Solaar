@@ -278,7 +278,7 @@ class Receiver:
             device_info = self.read_register(Registers.RECEIVER_INFO, 0x04)  # undocumented
             if device_info:
                 logger.warning("using undocumented register for device wpid")
-                wpid = extract_wpid(device_info[3:5])
+                wpid = extract_wpid(device_info[2:4])
                 kind = extract_device_kind(0x00)  # unknown kind
             else:
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")

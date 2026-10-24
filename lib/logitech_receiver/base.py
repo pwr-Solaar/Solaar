@@ -844,8 +844,8 @@ def ping(handle, devnumber, long_message: bool = False):
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == Hidpp10ErrorCode.INVALID_SUB_ID_COMMAND:
-                            # a valid reply from a HID++ 1.0 device
+                        if error in [Hidpp10ErrorCode.INVALID_SUB_ID_COMMAND, Hidpp10ErrorCode.INVALID_ADDRESS]:
+                            # a valid reply from a HID++ 1.0 device (some old devices, e.g. VX Nano, use INVALID_ADDRESS)
                             return 1.0
                         if error in [Hidpp10ErrorCode.RESOURCE_ERROR, Hidpp10ErrorCode.CONNECTION_REQUEST_FAILED]:
                             return  # device unreachable

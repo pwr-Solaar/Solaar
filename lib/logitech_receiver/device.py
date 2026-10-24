@@ -222,7 +222,7 @@ class Device:
             self._name = self.descriptor.name
             if self._codename is None:
                 self._codename = self.descriptor.codename
-            if self._kind is None:
+            if not self._kind:  # missing or unknown (0) kind from pairing information
                 self._kind = self.descriptor.kind
             self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
             self.registers = self.descriptor.registers if self.descriptor.registers else []

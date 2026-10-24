@@ -173,6 +173,7 @@ def test_request_errors(
     "simulated_error, expected_result",
     [
         (Hidpp10Error.INVALID_SUB_ID_COMMAND, 1.0),
+        (Hidpp10Error.INVALID_ADDRESS, 1.0),
         (Hidpp10Error.RESOURCE_ERROR, None),
         (Hidpp10Error.CONNECTION_REQUEST_FAILED, None),
         (Hidpp10Error.UNKNOWN_DEVICE, exceptions.NoSuchDevice),
