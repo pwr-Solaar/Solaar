@@ -1,0 +1,9 @@
+{
+  "device": "DEVICE_NAME_FROM_SOLAAR_SHOW",
+  "settings": [
+    {
+      "setting": "SETTING_NAME_FROM_SOLAAR_CONFIG",
+      "value": "SUPPORTED_VALUE_FROM_SOLAAR_CONFIG"
+    }
+  ]
+}
