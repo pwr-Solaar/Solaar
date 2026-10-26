@@ -299,6 +299,7 @@ Here is a file with six rules:
 - Execute: [notify-send, Locking]
 - Execute: xflock4
 ...
+---
 - Feature: CROWN
 - Process: quodlibet
 - Rule: [ Test: crown_start_press, KeyPress: XF86_AudioMute ]
