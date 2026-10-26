@@ -15,9 +15,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import contextlib
 import json
 import logging
 import os
+import shutil
 import threading
 
 import yaml
@@ -149,12 +151,23 @@ def do_save():
         if save_timer:
             save_timer.cancel()
             save_timer = None
+        # Write to a temporary file and rename it over config.yaml so that a failed write
+        # (e.g. a full disk) leaves the previous configuration intact instead of truncating it.
+        path = os.path.realpath(_yaml_file_path)  # keep a symlinked config.yaml a symlink
+        tmp_path = f"{path}.{os.getpid()}.tmp"
         try:
-            with open(_yaml_file_path, "w") as config_file:
+            with open(tmp_path, "w") as config_file:
                 yaml.dump(_config, config_file, default_flow_style=None, width=150)
+                config_file.flush()
+                os.fsync(config_file.fileno())
+            if os.path.exists(path):
+                shutil.copymode(path, tmp_path)
+            os.replace(tmp_path, path)
             logger.info("saved %s to %s", _config, _yaml_file_path)
         except Exception as e:
             logger.error("failed to save to %s: %s", _yaml_file_path, e)
+            with contextlib.suppress(OSError):
+                os.remove(tmp_path)
 
 
 def _convert_json(json_dict):
