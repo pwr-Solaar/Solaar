@@ -19,9 +19,11 @@ import dataclasses
 import logging
 import queue
 import threading
+import time
 
 from . import base
 from . import exceptions
+from . import hidpp20
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +116,10 @@ class _ThreadedHandle:
 # Forcibly closing the file handle on another thread does _not_ interrupt the read on Linux systems.
 _EVENT_READ_TIMEOUT = 1.0  # in seconds
 
+# How long to wait before retrying a start-up that a device rejected, and how many times to retry it.
+_START_RETRY_DELAY = 2.0  # in seconds
+_START_RETRIES = 5
+
 
 class EventsListener(threading.Thread):
     """Listener thread for notifications from the Unifying Receiver.
@@ -138,13 +144,17 @@ class EventsListener(threading.Thread):
         self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
         if logger.isEnabledFor(logging.INFO):
             logger.info("started with %s (%d)", self.receiver, int(self.receiver.handle))
-        self.has_started()
-
-        if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
-            if self.receiver.ping():
-                self.receiver.changed(active=True, reason="initialization")
+        started = self._start()
+        retries = _START_RETRIES
+        retry_at = time.time() + _START_RETRY_DELAY
 
         while self._active:
+            if not started and retries and time.time() >= retry_at:
+                retries -= 1
+                started = self._start()
+                retry_at = time.time() + _START_RETRY_DELAY
+                if not started and not retries:
+                    logger.warning("%s: start-up failed %d times, not retrying", self.receiver, _START_RETRIES + 1)
             if self._queued_notifications.empty():
                 try:
                     n = base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
@@ -165,6 +175,22 @@ class EventsListener(threading.Thread):
 
         del self._queued_notifications
         self.has_stopped()
+
+    def _start(self):
+        """Runs the start-up steps. Returns False if a device rejected a feature call,
+        so that the start-up is retried instead of the thread dying."""
+        try:
+            self.has_started()
+            if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
+                if self.receiver.ping():
+                    self.receiver.changed(active=True, reason="initialization")
+            return True
+        except exceptions.FeatureCallError as e:
+            logger.warning("%s: start-up failed: %s", self.receiver, e)
+            if isinstance(getattr(self.receiver, "features", None), hidpp20.FeaturesArray):
+                # the error can come from a wrong cached feature index, so read the features again
+                self.receiver.features = hidpp20.FeaturesArray(self.receiver)
+            return False
 
     def stop(self):
         """Tells the listener to stop as soon as possible."""
