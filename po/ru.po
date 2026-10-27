@@ -2103,3 +2103,388 @@ msgstr  "Беспроводное соединение между этим ус�
 #, python-format
 msgid   "%(light_level)d lux"
 msgstr  "%(light_level)d люкс"
+
+#: lib/logitech_receiver/hidpp20.py:1190
+msgid   "Right"
+msgstr  "Вправо"
+
+#: lib/logitech_receiver/hidpp20.py:1191
+msgid   "Down"
+msgstr  "Вниз"
+
+#: lib/logitech_receiver/hidpp20.py:1192
+msgid   "Center Out"
+msgstr  "От центра"
+
+#: lib/logitech_receiver/hidpp20.py:1193
+msgid   "In"
+msgstr  "Внутрь"
+
+#: lib/logitech_receiver/hidpp20.py:1194
+msgid   "Out"
+msgstr  "Наружу"
+
+#: lib/logitech_receiver/hidpp20.py:1196
+msgid   "Up"
+msgstr  "Вверх"
+
+#: lib/logitech_receiver/hidpp20.py:1197
+msgid   "Center In"
+msgstr  "К центру"
+
+#: lib/logitech_receiver/hidpp20.py:1229 lib/logitech_receiver/hidpp20.py:1255
+msgid   "Wave"
+msgstr  "Волна"
+
+#: lib/logitech_receiver/hidpp20.py:1268
+msgid   "Dim"
+msgstr  "Приглушение"
+
+#: lib/logitech_receiver/settings_templates.py:1634
+msgid   "Eco Mode"
+msgstr  "Экорежим"
+
+#: lib/logitech_receiver/settings_templates.py:1635
+msgid   "Battery saver mode."
+msgstr  "Режим энергосбережения."
+
+#: lib/logitech_receiver/settings_templates.py:1653
+msgid   "Do Not Disturb"
+msgstr  "Не беспокоить"
+
+#: lib/logitech_receiver/settings_templates.py:1654
+msgid   "Suppress notification sounds."
+msgstr  "Отключить звуки уведомлений."
+
+#: lib/logitech_receiver/settings_templates.py:1661
+msgid   "Mic Mute"
+msgstr  "Отключение микрофона"
+
+#: lib/logitech_receiver/settings_templates.py:1662
+msgid   "Mute the microphone."
+msgstr  "Выключить микрофон."
+
+#: lib/logitech_receiver/settings_templates.py:1681
+msgid   "Mic SNR"
+msgstr  "Отношение сигнал/шум микрофона"
+
+#: lib/logitech_receiver/settings_templates.py:1682
+msgid   "Microphone signal-to-noise ratio enhancement."
+msgstr  "Повышение отношения сигнал/шум микрофона."
+
+#: lib/logitech_receiver/settings_templates.py:1689
+msgid   "AI Noise Reduction"
+msgstr  "Шумоподавление с помощью ИИ"
+
+#: lib/logitech_receiver/settings_templates.py:1690
+msgid   "Enable AI noise reduction."
+msgstr  "Включить шумоподавление с помощью ИИ."
+
+#: lib/logitech_receiver/settings_templates.py:1697
+msgid   "AI Noise Reduction Level"
+msgstr  "Уровень шумоподавления с помощью ИИ"
+
+#: lib/logitech_receiver/settings_templates.py:1698
+msgid   "AI noise reduction intensity."
+msgstr  "Интенсивность шумоподавления с помощью ИИ."
+
+#: lib/logitech_receiver/settings_templates.py:1707
+msgid   "Headset Sidetone"
+msgstr  "Самопрослушивание гарнитуры"
+
+#: lib/logitech_receiver/settings_templates.py:1708
+msgid   "Sidetone level (0 = off, 100 = max)."
+msgstr  "Уровень самопрослушивания (0 — выключено, 100 — максимум)."
+
+#: lib/logitech_receiver/settings_templates.py:1771
+msgid   "Mic Gain"
+msgstr  "Усиление микрофона"
+
+#: lib/logitech_receiver/settings_templates.py:1772
+msgid   "Microphone gain level."
+msgstr  "Уровень усиления микрофона."
+
+#: lib/logitech_receiver/settings_templates.py:1824
+msgid   "Audio Mix Balance"
+msgstr  "Баланс звука игры и чата"
+
+#: lib/logitech_receiver/settings_templates.py:1825
+msgid   "Balance between game and chat audio."
+msgstr  "Баланс громкости звука игры и голосового чата."
+
+#: lib/logitech_receiver/settings_templates.py:1876
+msgid   "Auto Sleep Timeout"
+msgstr  "Тайм-аут автоматического сна"
+
+#: lib/logitech_receiver/settings_templates.py:1877
+msgid   "Idle time in minutes before the headset enters sleep mode (0 = "
+        "disabled)."
+msgstr  "Время бездействия в минутах до перехода гарнитуры в спящий режим (0 — отключено)."
+
+#: lib/logitech_receiver/settings_templates.py:1901
+msgid   "Headset Equalizer"
+msgstr  "Эквалайзер гарнитуры"
+
+#: lib/logitech_receiver/settings_templates.py:1996
+msgid   "Headset Advanced EQ"
+msgstr  "Расширенный эквалайзер гарнитуры"
+
+#: lib/logitech_receiver/settings_templates.py:1997
+msgid   "Per-band gain for the headset's active parametric EQ."
+msgstr  "Усиление каждой полосы активного параметрического эквалайзера гарнитуры."
+
+#: lib/logitech_receiver/settings_templates.py:2268
+msgid   "EQ Preset"
+msgstr  "Предустановка эквалайзера"
+
+#: lib/logitech_receiver/settings_templates.py:2269
+msgid   "Switch the active EQ preset. Factory presets are read-only."
+msgstr  "Смена активной предустановки эквалайзера. Заводские предустановки доступны только для чтения."
+
+#: lib/logitech_receiver/settings_templates.py:2294
+msgid   "Slot"
+msgstr  "Слот"
+
+#: lib/logitech_receiver/settings_templates.py:2296
+msgid   "(factory)"
+msgstr  "(заводская)"
+
+#: lib/logitech_receiver/settings_templates.py:2430
+msgid   "Allow Solaar to control the headset LED zones."
+msgstr  "Разрешить Solaar управлять зонами подсветки гарнитуры."
+
+#: lib/logitech_receiver/settings_templates.py:2478
+msgid   "Per-zone Lighting"
+msgstr  "Подсветка отдельных зон"
+
+#: lib/logitech_receiver/settings_templates.py:2480
+msgid   "Override individual zone colors. 'No change' inherits the LEDs "
+        "Primary color.\n"
+        "LED Control needs to be set to Solaar to be effective."
+msgstr  "Переопределить цвета отдельных зон. Значение «Без изменений» наследует основной цвет светодиодов.\nЧтобы настройка действовала, выберите «Solaar» для управления подсветкой."
+
+#: lib/logitech_receiver/settings_templates.py:2498
+msgid   "Zone"
+msgstr  "Зона"
+
+#: lib/logitech_receiver/settings_templates.py:2620
+#: lib/logitech_receiver/settings_templates.py:2908
+#: lib/logitech_receiver/settings_templates.py:3648
+msgid   "Secondary"
+msgstr  "Дополнительный"
+
+#: lib/logitech_receiver/settings_templates.py:2688
+msgid   "Startup Effect"
+msgstr  "Эффект при включении"
+
+#: lib/logitech_receiver/settings_templates.py:2690
+msgid   "Firmware lighting effect played when the headset powers on or wakes."
+msgstr  "Эффект подсветки, воспроизводимый прошивкой при включении или пробуждении гарнитуры."
+
+#: lib/logitech_receiver/settings_templates.py:2692
+#: lib/logitech_receiver/settings_templates.py:2703
+msgid   "Device default: Primary #00B8FC, Secondary #FF00AB, Speed 100."
+msgstr  "По умолчанию: основной цвет #00B8FC, дополнительный #FF00AB, скорость 100."
+
+#: lib/logitech_receiver/settings_templates.py:2699
+msgid   "Shutdown Effect"
+msgstr  "Эффект при выключении"
+
+#: lib/logitech_receiver/settings_templates.py:2701
+msgid   "Firmware lighting effect played when the headset powers off or "
+        "sleeps."
+msgstr  "Эффект подсветки, воспроизводимый прошивкой при выключении гарнитуры или переходе в спящий режим."
+
+#: lib/logitech_receiver/settings_templates.py:2710
+msgid   "Passive Effect"
+msgstr  "Фоновый эффект"
+
+#: lib/logitech_receiver/settings_templates.py:2712
+msgid   "Firmware lighting effect played while the headset is idle."
+msgstr  "Эффект подсветки, воспроизводимый прошивкой во время бездействия гарнитуры."
+
+#: lib/logitech_receiver/settings_templates.py:2714
+msgid   "Device default: Primary #00B8FC, Secondary #FF00AB, Speed 75."
+msgstr  "По умолчанию: основной цвет #00B8FC, дополнительный #FF00AB, скорость 75."
+
+#: lib/logitech_receiver/settings_templates.py:2833
+msgid   "Onboard Effect"
+msgstr  "Встроенный эффект"
+
+#: lib/logitech_receiver/settings_templates.py:2834
+msgid   "Firmware RGB effect the headset plays on its own."
+msgstr  "Эффект RGB-подсветки, который гарнитура воспроизводит автономно."
+
+#: lib/logitech_receiver/settings_templates.py:2910
+#: lib/logitech_receiver/settings_templates.py:3245
+msgid   "Saturation"
+msgstr  "Насыщенность"
+
+#: lib/logitech_receiver/settings_templates.py:2919
+#: lib/logitech_receiver/settings_templates.py:3250
+msgid   "Direction"
+msgstr  "Направление"
+
+#: lib/logitech_receiver/settings_templates.py:3207
+#: lib/logitech_receiver/settings_templates.py:3299
+msgid   "Allow Solaar to control LED zones."
+msgstr  "Разрешить Solaar управлять зонами подсветки."
+
+#: lib/logitech_receiver/settings_templates.py:3231
+#: lib/logitech_receiver/settings_templates.py:3399
+#: lib/logitech_receiver/settings_templates.py:3439
+#: lib/logitech_receiver/settings_templates.py:3546
+#: lib/logitech_receiver/settings_templates.py:3745
+msgid   "LED Control needs to be enabled."
+msgstr  "Необходимо включить управление подсветкой."
+
+#: lib/logitech_receiver/settings_templates.py:3246
+msgid   "Waveform"
+msgstr  "Форма волны"
+
+#: lib/logitech_receiver/settings_templates.py:3398
+msgid   "Idle Timeout"
+msgstr  "Тайм-аут бездействия"
+
+#: lib/logitech_receiver/settings_templates.py:3399
+msgid   "Time without input before LED idle effect starts."
+msgstr  "Время бездействия до запуска эффекта подсветки."
+
+#: lib/logitech_receiver/settings_templates.py:3435
+msgid   "Idle Effect"
+msgstr  "Эффект при бездействии"
+
+#: lib/logitech_receiver/settings_templates.py:3437
+msgid   "What happens to LEDs when idle — dim to a percentage, change the "
+        "base color, or play an animation."
+msgstr  "Поведение подсветки при бездействии: снижение яркости до заданного процента, смена основного цвета или воспроизведение анимации."
+
+#: lib/logitech_receiver/settings_templates.py:3520
+msgid   "No change"
+msgstr  "Без изменений"
+
+#: lib/logitech_receiver/settings_templates.py:3545
+msgid   "Sleep Timeout"
+msgstr  "Тайм-аут перехода в сон"
+
+#: lib/logitech_receiver/settings_templates.py:3546
+msgid   "Time without input before LEDs fade off completely."
+msgstr  "Время бездействия до полного отключения подсветки."
+
+#: lib/logitech_receiver/settings_templates.py:3719
+msgid   "Startup Animation"
+msgstr  "Анимация при включении"
+
+#: lib/logitech_receiver/settings_templates.py:3722
+msgid   "Firmware-played animation when the keyboard wakes from deep sleep or "
+        "powers on.\n"
+        "Setting persists on the device (non-volatile)."
+msgstr  "Анимация, воспроизводимая прошивкой при выходе клавиатуры из глубокого сна или при включении.\nНастройка сохраняется в энергонезависимой памяти устройства."
+
+#: lib/logitech_receiver/settings_templates.py:3726
+#: lib/logitech_receiver/settings_templates.py:3737
+msgid   "Device default: Primary #FF0081, Secondary #80AAFF."
+msgstr  "Заводские цвета: основной #FF0081, дополнительный #80AAFF."
+
+#: lib/logitech_receiver/settings_templates.py:3733
+msgid   "Shutdown Animation"
+msgstr  "Анимация при выключении"
+
+#: lib/logitech_receiver/settings_templates.py:3735
+msgid   "Firmware-played animation when the keyboard powers off.\n"
+        "Setting persists on the device (non-volatile)."
+msgstr  "Анимация, воспроизводимая прошивкой при выключении клавиатуры.\nНастройка сохраняется в энергонезависимой памяти устройства."
+
+#: lib/logitech_receiver/settings_templates.py:3851
+msgid   "LED Control needs to be enabled and the zone effect set to Static "
+        "for per-key paint to be visible."
+msgstr  "Чтобы окраска отдельных клавиш была видна, включите управление подсветкой и установите для зоны эффект «Статичный»."
+
+#: lib/logitech_receiver/settings_templates.py:4316
+msgid   "Analog Button Tuning"
+msgstr  "Настройка аналоговых кнопок"
+
+#: lib/logitech_receiver/settings_templates.py:4317
+msgid   "Configure analog button settings including actuation point, rapid "
+        "trigger, and haptics."
+msgstr  "Настройка аналоговых кнопок: точки срабатывания, быстрого повторного срабатывания и тактильной отдачи."
+
+#: lib/logitech_receiver/settings_templates.py:4347
+#, python-format
+msgid   "Actuation point depth (1=shallow, %d=deep)."
+msgstr  "Глубина точки срабатывания (1 — минимальная, %d — максимальная)."
+
+#: lib/logitech_receiver/settings_templates.py:4355
+#, python-format
+msgid   "Rapid trigger sensitivity (1..%d)."
+msgstr  "Чувствительность быстрого повторного срабатывания (1…%d)."
+
+#: lib/logitech_receiver/settings_templates.py:4363
+#, python-format
+msgid   "Click haptic feedback intensity (0=off, %d=max)."
+msgstr  "Интенсивность тактильной отдачи при нажатии (0 — выключено, %d — максимум)."
+
+#: lib/logitech_receiver/settings_templates.py:4371
+msgid   "Haptic Feedback Level"
+msgstr  "Уровень тактильной отдачи"
+
+#: lib/solaar/ui/perkey/control.py:178
+msgid   "(not loaded)"
+msgstr  "(не загружено)"
+
+#: lib/solaar/ui/perkey/control.py:182
+msgid   "Open editor…"
+msgstr  "Открыть редактор…"
+
+#: lib/solaar/ui/perkey/control.py:183
+msgid   "Paint key colors on a keyboard layout"
+msgstr  "Настроить цвета клавиш на схеме клавиатуры"
+
+#: lib/solaar/ui/perkey/control.py:229
+msgid   "(no zones)"
+msgstr  "(нет зон)"
+
+#: lib/solaar/ui/perkey/control.py:233
+#, python-brace-format
+msgid   "{painted} / {total} keys painted"
+msgstr  "Окрашено клавиш: {painted} из {total}"
+
+#: lib/solaar/ui/perkey/editor.py:54
+msgid   "Brush"
+msgstr  "Кисть"
+
+#: lib/solaar/ui/perkey/editor.py:54
+msgid   "Click or drag to paint individual keys"
+msgstr  "Нажмите или перетащите указатель, чтобы окрасить отдельные клавиши"
+
+#: lib/solaar/ui/perkey/editor.py:55
+msgid   "Drag to select a rectangle of keys, painted on release"
+msgstr  "Перетащите указатель, чтобы выделить прямоугольную область клавиш; окрашивание произойдёт после отпускания кнопки."
+
+#: lib/solaar/ui/perkey/editor.py:55
+msgid   "Rect"
+msgstr  "Прямоугольник"
+
+#: lib/solaar/ui/perkey/editor.py:56
+msgid   "Fill"
+msgstr  "Заливка"
+
+#: lib/solaar/ui/perkey/editor.py:56
+msgid   "Flood-fill connected keys of the same color with the active color"
+msgstr  "Залить соседние клавиши одного цвета выбранным цветом"
+
+#: lib/solaar/ui/perkey/editor.py:59
+msgid   "Drag to fade from previous color to active color"
+msgstr  "Перетащите указатель для плавного перехода от предыдущего цвета к выбранному"
+
+#: lib/solaar/ui/perkey/palette.py:90
+msgid   "Active color"
+msgstr  "Активный цвет"
+
+#: lib/solaar/ui/perkey/palette.py:95
+msgid   "Paint as 'no change' — clears the cell to the zone base color"
+msgstr  "Задать «Без изменений» — сбросить цвет ячейки к основному цвету зоны"
+
+#: lib/solaar/ui/perkey/palette.py:96
+msgid   "Unset"
+msgstr  "Сбросить"
