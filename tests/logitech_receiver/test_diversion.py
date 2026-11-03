@@ -166,6 +166,89 @@ def test_uinput_write_failure_only_resets_the_failed_device():
     assert uinput._mouse.udevice is mouse
 
 
+@pytest.fixture
+def simulated_input(monkeypatch):
+    if diversion.evdev is None:
+        pytest.skip("uinput is unavailable")
+    keyboard, mouse = mock.Mock(), mock.Mock()
+    devices = {"solaar-keyboard": keyboard, "solaar-mouse": mouse}
+    monkeypatch.setattr(diversion.evdev.uinput, "UInput", lambda *, events, name: devices[name])
+    uinput = diversion.UInput()
+    monkeypatch.setattr(diversion, "uinput", uinput)
+    return uinput, keyboard, mouse
+
+
+def test_cleanup_releases_only_held_keys_in_reverse_press_order(simulated_input):
+    uinput, keyboard, mouse = simulated_input
+    codes = diversion.evdev.ecodes
+    assert uinput.key(codes.KEY_LEFTCTRL + 8, 1)
+    assert uinput.key(codes.KEY_DELETE + 8, 1)
+    assert uinput.key(codes.KEY_A + 8, 1)
+    assert uinput.key(codes.KEY_A + 8, 0)
+    assert uinput.click(diversion.buttons["left"], diversion.DEPRESS)
+    keyboard.write.reset_mock()
+    mouse.write.reset_mock()
+
+    uinput.release_all()
+
+    assert keyboard.write.call_args_list == [
+        mock.call(codes.EV_KEY, codes.KEY_DELETE, 0),
+        mock.call(codes.EV_KEY, codes.KEY_LEFTCTRL, 0),
+    ]
+    mouse.write.assert_called_once_with(codes.EV_KEY, diversion.buttons["left"][1], 0)
+    assert not uinput._keyboard._held_keys
+    assert not uinput._mouse._held_keys
+    keyboard.write.reset_mock()
+    mouse.write.reset_mock()
+    uinput.release_all()
+    keyboard.write.assert_not_called()
+    mouse.write.assert_not_called()
+
+
+def test_idle_cleanup_does_not_create_virtual_devices():
+    uinput = diversion.UInput()
+    with mock.patch.object(uinput._keyboard, "setup") as keyboard, mock.patch.object(uinput._mouse, "setup") as mouse:
+        uinput.release_all()
+    keyboard.assert_not_called()
+    mouse.assert_not_called()
+
+
+def test_failed_cleanup_closes_device_and_does_not_recreate_it(simulated_input):
+    uinput, keyboard, mouse = simulated_input
+    assert uinput.key(diversion.evdev.ecodes.KEY_DELETE + 8, 1)
+    keyboard.write.side_effect = OSError("disconnected")
+    uinput.release_all()
+    keyboard.close.assert_called_once_with()
+    assert uinput._keyboard.udevice is None
+    assert not uinput._keyboard._held_keys
+    with mock.patch.object(uinput._keyboard, "setup") as setup:
+        uinput.release_all()
+    setup.assert_not_called()
+
+
+@pytest.mark.parametrize("operation", ["reload", "save", "edit", "stop"])
+def test_rule_lifecycle_releases_held_input(operation, simulated_input, monkeypatch, tmp_path):
+    uinput, keyboard, mouse = simulated_input
+    codes = diversion.evdev.ecodes
+    assert uinput.key(codes.KEY_DELETE + 8, 1)
+    keyboard.write.reset_mock()
+    if operation == "reload":
+        monkeypatch.setattr(diversion, "_file_path", str(tmp_path / "missing.yaml"))
+        diversion.load_config_rule_file()
+    elif operation == "save":
+        assert diversion._save_config_rule_file(str(tmp_path / "rules.yaml"))
+    elif operation == "edit":
+        from solaar.ui.diversion_rules import DiversionDialog
+
+        DiversionDialog.on_update(mock.Mock())
+    else:
+        from solaar import listener
+
+        monkeypatch.setattr(listener, "_all_listeners", {})
+        listener.stop_all()
+    keyboard.write.assert_called_once_with(codes.EV_KEY, codes.KEY_DELETE, 0)
+
+
 @pytest.mark.parametrize(
     "feature, data",
     [

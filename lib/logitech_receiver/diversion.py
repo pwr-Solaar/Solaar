@@ -271,6 +271,7 @@ class UInput:
             self.name = name
             self.capabilities = capabilities
             self.udevice = None
+            self._held_keys = {}
 
         def setup(self):
             if self.udevice is not None:
@@ -289,6 +290,11 @@ class UInput:
                 try:
                     device.write(what, code, arg)
                     device.syn()
+                    if what == evdev.ecodes.EV_KEY:
+                        if arg == _KEY_PRESS:
+                            self._held_keys[code] = None
+                        elif arg == _KEY_RELEASE:
+                            self._held_keys.pop(code, None)
                     if logger.isEnabledFor(logging.DEBUG):
                         logger.debug("%s uinput simulated input %s %s %s", self.name, what, code, arg)
                     return True
@@ -299,7 +305,14 @@ class UInput:
                         pass
 
                     self.udevice = None
+                    self._held_keys.clear()
                     logger.warning("%s uinput write failed: %s", self.name, e)
+
+        def release_all(self):
+            # Use the codes actually emitted, even if the keymap has since changed.
+            for code in reversed(tuple(self._held_keys)):
+                if not self.simulate(evdev.ecodes.EV_KEY, code, _KEY_RELEASE):
+                    break
 
     def __init__(self):
         self._keyboard = self._Device("solaar-keyboard", keyboard_devicecap)
@@ -326,6 +339,14 @@ class UInput:
     def barrier(self, margin: float, event_type: EventType):
         self.barrier_type = event_type
         self.barrier_until = time.monotonic() + margin
+
+    def release_all(self):
+        """Release only keys and buttons held on Solaar's virtual devices."""
+        for device, event_type in ((self._keyboard, self.EventType.KEYBOARD), (self._mouse, self.EventType.MOUSE)):
+            if device._held_keys:
+                self._wait_barrier(event_type)
+                device.release_all()
+                self.barrier(0.01, event_type)
 
     def key(self, code, event):  # X11 keycode but Solaar event code
         if evdev:
@@ -1561,6 +1582,8 @@ rules = built_in_rules
 
 
 def _save_config_rule_file(file_name: str = _file_path):
+    uinput.release_all()
+
     # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
     class inline_list(list):
         pass
@@ -1611,6 +1634,8 @@ def _save_config_rule_file(file_name: str = _file_path):
 def load_config_rule_file():
     """Loads user configured rules."""
     global rules
+
+    uinput.release_all()
 
     if os.path.isfile(_file_path):
         rules = _load_rule_config(_file_path)
