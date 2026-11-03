@@ -250,6 +250,19 @@ to go wrong under Wayland than under X11.
 ### Mouse scroll
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
+It can instead take that sequence followed by `'click'`, `'depress'`, or `'release'`.
+The `depress` action scrolls once and then repeats after a short delay until a matching `release` action is processed.
+This is useful for diverted mouse-wheel tilt controls, which report distinct press and release notifications.
+Repeated scrolling requires a diverted key notification; use a `Key` condition for the originating control.
+The first repeat occurs after 250 ms and subsequent repeats are scheduled every 33 ms.
+These fixed timings are independent of keyboard repeat settings and may be delayed by a busy main loop.
+For example, `MouseScroll: [[-1, 0], depress]` starts scrolling left and
+`MouseScroll: [[-1, 0], release]` stops it.
+Repeats are associated with the originating device, control, and configured amounts, independently of numeric multipliers.
+Solaar also cancels scrolling on the originating control's release even if a rule condition no longer matches,
+on rule edits/save/reload, when the device is reported offline, and when listeners stop.
+Use depress and release with extreme care: if the hardware stops reporting events without a disconnect notification,
+Solaar cannot detect the missing release. Keep release rules unconditional as described for `KeyPress`.
 
 ### Mouse click
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.

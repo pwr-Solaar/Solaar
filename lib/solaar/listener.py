@@ -91,6 +91,7 @@ class SolaarListener(listener.EventsListener):
         r, self.receiver = self.receiver, None
         assert r is not None
         logger.info("%s: notifications listener has stopped", r)
+        GLib.idle_add(diversion.uinput.release_scroll, r)
 
         # because udev is not notifying us about device removal, make sure to clean up in _all_listeners
         _all_listeners.pop(r.path, None)
@@ -134,6 +135,8 @@ class SolaarListener(listener.EventsListener):
             return
 
         # not true for wired devices - assert device.receiver == self.receiver
+        if not device or not device.online:
+            GLib.idle_add(diversion.uinput.release_scroll, device)
         if not device:
             # Device was unpaired, and isn't valid anymore.
             # We replace it with a ghost so that the UI has something to work with while cleaning up.

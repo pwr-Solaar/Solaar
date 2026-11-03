@@ -249,6 +249,186 @@ def test_rule_lifecycle_releases_held_input(operation, simulated_input, monkeypa
     keyboard.write.assert_called_once_with(codes.EV_KEY, codes.KEY_DELETE, 0)
 
 
+@pytest.mark.skipif(diversion.evdev is None, reason="uinput is unavailable")
+def test_uinput_repeats_depressed_scroll_until_release(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    source = (mock.Mock(receiver=None), 123, (-1, 0))
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, source)
+    repeat = next(iter(uinput._scroll_repeats.values()))
+    timeout_add.assert_called_once_with(250, uinput._repeat_scroll, repeat)
+    assert not uinput._repeat_scroll(repeat)
+    assert timeout_add.call_args_list[-1] == mock.call(33, uinput._repeat_scroll, repeat)
+    assert uinput.scroll(-1, 0, diversion.RELEASE, source)
+    assert mouse.write.call_count == 2
+    source_remove.assert_called_once_with(102)
+    assert not uinput._scroll_repeats
+
+
+@pytest.fixture
+def scroll_input(simulated_input, monkeypatch):
+    uinput, keyboard, mouse = simulated_input
+    timeout_add = mock.Mock(side_effect=range(101, 1001))
+    source_remove = mock.Mock()
+    monkeypatch.setattr(diversion.GLib, "timeout_add", timeout_add)
+    monkeypatch.setattr(diversion.GLib, "source_remove", source_remove)
+    return uinput, mouse, timeout_add, source_remove
+
+
+def test_scroll_release_is_independent_of_numeric_multiplier(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    device = mock.Mock(receiver=None)
+    uinput._scroll_keys = (123, None)
+    diversion.MouseScroll([[1, 0], diversion.DEPRESS]).evaluate(None, None, device, 2)
+    repeat = next(iter(uinput._scroll_repeats.values()))
+    assert repeat.amounts == (2, 0)
+    uinput._scroll_keys = (None, 123)
+    diversion.MouseScroll([[1, 0], diversion.RELEASE]).evaluate(None, None, device, 1)
+    assert not uinput._scroll_repeats
+    source_remove.assert_called_once_with(101)
+    assert mouse.write.call_count == 1
+
+
+def test_duplicate_depress_cancels_old_timer_and_ignores_stale_callback(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    source = (mock.Mock(receiver=None), 123, (-1, 0))
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, source)
+    old = next(iter(uinput._scroll_repeats.values()))
+    assert uinput.scroll(-2, 0, diversion.DEPRESS, source)
+    assert len(uinput._scroll_repeats) == 1
+    source_remove.assert_called_once_with(101)
+    mouse.write.reset_mock()
+    assert not uinput._repeat_scroll(old)
+    mouse.write.assert_not_called()
+    assert timeout_add.call_count == 2
+
+
+def test_scroll_repeat_write_failure_stops_timer(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (mock.Mock(receiver=None), 123, (-1, 0)))
+    repeat = next(iter(uinput._scroll_repeats.values()))
+    mouse.write.side_effect = OSError("device gone")
+    assert not uinput._repeat_scroll(repeat)
+    assert not uinput._scroll_repeats
+    assert timeout_add.call_count == 1
+    mouse.close.assert_called_once_with()
+
+
+def test_scroll_release_without_a_hold_and_zero_depress_are_idle(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    source = (mock.Mock(receiver=None), 123, (0, 0))
+    assert uinput.scroll(0, 0, diversion.RELEASE, source)
+    assert uinput.scroll(0, 0, diversion.DEPRESS, source)
+    mouse.write.assert_not_called()
+    timeout_add.assert_not_called()
+    source_remove.assert_not_called()
+
+
+def test_scroll_repeat_observes_barriers_on_both_sides(scroll_input, monkeypatch):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    monkeypatch.setattr(diversion.time, "monotonic", lambda: 100)
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (mock.Mock(receiver=None), 123, (-1, 0)))
+    repeat = next(iter(uinput._scroll_repeats.values()))
+    uinput.barrier(0.01, uinput.EventType.KEYBOARD)
+    with mock.patch.object(diversion.time, "sleep") as sleep:
+        assert not uinput._repeat_scroll(repeat)
+        assert sleep.call_count == 1
+        assert sleep.call_args.args[0] == pytest.approx(0.01)
+        assert uinput.barrier_type == uinput.EventType.MOUSE
+        uinput.key(diversion.evdev.ecodes.KEY_LEFTCTRL + 8, 0)
+        assert sleep.call_count == 2
+
+
+def test_equal_devices_and_same_direction_do_not_share_scroll_holds(scroll_input):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    first, second = mock.MagicMock(receiver=None), mock.MagicMock(receiver=None)
+    first.__eq__.return_value = True
+    second.__eq__.return_value = True
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (first, 123, (-1, 0)))
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (second, 123, (-1, 0)))
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (first, 456, (-1, 0)))
+    uinput.release_scroll(first, 123)
+    assert len(uinput._scroll_repeats) == 2
+    source_remove.assert_called_once_with(101)
+    assert {r.source_id for r in uinput._scroll_repeats.values()} == {102, 103}
+
+
+def test_physical_release_cancels_scroll_even_when_rule_no_longer_matches(scroll_input, monkeypatch):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    device = mock.Mock(receiver=None)
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (device, 123, (-1, 0)))
+    monkeypatch.setattr(diversion, "rules", mock.Mock())
+    diversion.rules.evaluate.return_value = False
+    diversion.evaluate_rules(None, None, device, (None, 123))
+    assert not uinput._scroll_repeats
+    source_remove.assert_called_once_with(101)
+    assert uinput._scroll_keys == (None, None)
+
+
+def test_queued_notifications_retain_their_scroll_control_snapshot(scroll_input, monkeypatch):
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    device = mock.Mock(receiver=None)
+    queued, observed = [], []
+    monkeypatch.setattr(diversion.GLib, "idle_add", lambda callback, *args: queued.append((callback, args)))
+    monkeypatch.setattr(diversion, "keys_down", ())
+    monkeypatch.setattr(diversion, "rules", mock.Mock())
+    diversion.rules.evaluate.side_effect = lambda *args: observed.append(uinput._scroll_keys)
+    for data in (bytes.fromhex("007b000000000000"), bytes(8)):
+        notification = HIDPPNotification(report_id=1, devnumber=1, sub_id=0x13, address=0, data=data)
+        diversion.process_notification(device, notification, SupportedFeature.REPROG_CONTROLS_V4)
+    for callback, args in queued:
+        callback(*args)
+    assert observed == [(123, None), (None, 123)]
+
+
+@pytest.mark.parametrize("operation", ["reload", "save", "edit", "stop", "offline", "receiver_removed"])
+def test_scroll_cleanup_on_lifecycle_boundaries(operation, scroll_input, monkeypatch, tmp_path):
+    from solaar import listener
+    from solaar.ui.diversion_rules import DiversionDialog
+
+    uinput, mouse, timeout_add, source_remove = scroll_input
+    receiver = mock.Mock()
+    device = mock.Mock(receiver=receiver, online=False)
+    assert uinput.scroll(-1, 0, diversion.DEPRESS, (device, 123, (-1, 0)))
+    if operation == "reload":
+        monkeypatch.setattr(diversion, "_file_path", str(tmp_path / "missing.yaml"))
+        diversion.load_config_rule_file()
+    elif operation == "save":
+        assert diversion._save_config_rule_file(str(tmp_path / "rules.yaml"))
+    elif operation == "edit":
+        DiversionDialog.on_update(mock.Mock())
+    elif operation == "stop":
+        monkeypatch.setattr(listener, "_all_listeners", {})
+        listener.stop_all()
+    else:
+        with mock.patch.object(diversion.GLib, "idle_add", side_effect=lambda callback, *args: callback(*args)):
+            if operation == "offline":
+                listener.SolaarListener._status_changed(mock.Mock(), device)
+            else:
+                state = mock.Mock(receiver=receiver)
+                listener.SolaarListener.has_stopped(state)
+    assert not uinput._scroll_repeats
+    source_remove.assert_called_once_with(101)
+
+
+def test_mouse_scroll_supports_click_depress_and_release_actions():
+    click = diversion.MouseScroll([2, -1])
+    depress = diversion.MouseScroll([[2, -1], diversion.DEPRESS])
+    release = diversion.MouseScroll([[2, -1], diversion.RELEASE])
+
+    assert click.action == diversion.CLICK
+    assert click.data() == {"MouseScroll": [2, -1]}
+    assert depress.action == diversion.DEPRESS
+    assert depress.data() == {"MouseScroll": [[2, -1], diversion.DEPRESS]}
+    assert release.action == diversion.RELEASE
+    assert release.data() == {"MouseScroll": [[2, -1], diversion.RELEASE]}
+
+    device = mock.Mock()
+    with mock.patch.object(diversion.uinput, "scroll") as scroll:
+        depress.evaluate(None, mock.Mock(), device, True)
+
+    scroll.assert_called_once_with(2, -1, diversion.DEPRESS, (device, None, (2, -1)))
+
+
 @pytest.mark.parametrize(
     "feature, data",
     [

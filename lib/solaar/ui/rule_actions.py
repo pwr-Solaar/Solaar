@@ -168,6 +168,20 @@ class MouseScrollUI(ActionUI):
         self.widgets[self.field_x] = (1, 1, 1, 1)
         self.widgets[self.label_y] = (2, 1, 1, 1)
         self.widgets[self.field_y] = (3, 1, 1, 1)
+        self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
+        self.action_clicked_radio.connect(GtkSignal.TOGGLED.value, self._on_update, CLICK)
+        self.widgets[self.action_clicked_radio] = (0, 2, 1, 1)
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _("Depress"))
+        self.action_pressed_radio.connect(GtkSignal.TOGGLED.value, self._on_update, DEPRESS)
+        self.widgets[self.action_pressed_radio] = (1, 2, 1, 1)
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Release"))
+        self.action_released_radio.connect(GtkSignal.TOGGLED.value, self._on_update, RELEASE)
+        self.widgets[self.action_released_radio] = (2, 2, 1, 1)
+        self.repeat_hint = Gtk.Label(
+            label=_("Depress starts repeated scrolling; release stops it."),
+            halign=Gtk.Align.CENTER,
+        )
+        self.widgets[self.repeat_hint] = (0, 3, 4, 1)
 
     @classmethod
     def __parse(cls, v):
@@ -182,9 +196,18 @@ class MouseScrollUI(ActionUI):
         with self.ignore_changes():
             self.field_x.set_value(self.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0))
             self.field_y.set_value(self.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0))
+            {
+                CLICK: self.action_clicked_radio,
+                DEPRESS: self.action_pressed_radio,
+                RELEASE: self.action_released_radio,
+            }[component.action].set_active(True)
 
     def collect_value(self):
-        return [int(self.field_x.get_value()), int(self.field_y.get_value())]
+        amounts = [int(self.field_x.get_value()), int(self.field_y.get_value())]
+        action = (
+            CLICK if self.action_clicked_radio.get_active() else DEPRESS if self.action_pressed_radio.get_active() else RELEASE
+        )
+        return amounts if action == CLICK else [amounts, action]
 
     @classmethod
     def left_label(cls, component):
@@ -195,7 +218,7 @@ class MouseScrollUI(ActionUI):
         x = y = 0
         x = cls.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0)
         y = cls.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0)
-        return f"{x}, {y}"
+        return f"{x}, {y}" + (f"  ({component.action})" if component.action != CLICK else "")
 
 
 class MouseClickUI(ActionUI):

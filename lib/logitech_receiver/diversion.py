@@ -99,6 +99,10 @@ _BUTTON_PRESS = 3
 
 CLICK, DEPRESS, RELEASE = "click", "depress", "release"
 
+# Linux input subsystem default repeat timings, in milliseconds.
+_MOUSE_SCROLL_REPEAT_DELAY = 250
+_MOUSE_SCROLL_REPEAT_INTERVAL = 33
+
 gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
 gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if logger.isEnabledFor(logging.INFO):
@@ -266,6 +270,13 @@ class UInput:
         KEYBOARD = enum.auto()
         MOUSE = enum.auto()
 
+    class _ScrollRepeat:
+        def __init__(self, source, amounts):
+            self.source = source  # Retain the originating device, not just its identity.
+            self.key = (id(source[0]), source[1], source[2])
+            self.amounts = amounts
+            self.source_id = None
+
     class _Device:
         def __init__(self, name, capabilities):
             self.name = name
@@ -317,6 +328,8 @@ class UInput:
     def __init__(self):
         self._keyboard = self._Device("solaar-keyboard", keyboard_devicecap)
         self._mouse = self._Device("solaar-mouse", mouse_devicecap)
+        self._scroll_repeats = {}
+        self._scroll_keys = (None, None)
         self.barrier_until = None
         self.barrier_type = None
 
@@ -342,6 +355,8 @@ class UInput:
 
     def release_all(self):
         """Release only keys and buttons held on Solaar's virtual devices."""
+        for key in tuple(self._scroll_repeats):
+            self._stop_scroll_repeat(key)
         for device, event_type in ((self._keyboard, self.EventType.KEYBOARD), (self._mouse, self.EventType.MOUSE)):
             if device._held_keys:
                 self._wait_barrier(event_type)
@@ -378,8 +393,7 @@ class UInput:
         logger.warning("no way to simulate mouse click")
         return False
 
-    def scroll(self, dx, dy):
-        self._wait_barrier(self.EventType.MOUSE)
+    def _scroll(self, dx, dy):
         success = True
         if dx:
             success = self._mouse.simulate(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
@@ -388,6 +402,47 @@ class UInput:
         if success:
             return True
         logger.warning("no way to simulate scrolling")
+
+    def _stop_scroll_repeat(self, key):
+        repeat = self._scroll_repeats.pop(key, None)
+        if repeat is not None:
+            GLib.source_remove(repeat.source_id)
+
+    def release_scroll(self, device, control=None):
+        """Cancel repeats for a released control, an offline device, or its receiver."""
+        for key, repeat in tuple(self._scroll_repeats.items()):
+            origin, origin_control, _binding = repeat.source
+            if (origin is device or origin.receiver is device) and (control is None or origin_control == control):
+                self._stop_scroll_repeat(key)
+
+    def _repeat_scroll(self, repeat):
+        if self._scroll_repeats.get(repeat.key) is not repeat:
+            return False
+        self._wait_barrier(self.EventType.MOUSE)
+        if not self._scroll(*repeat.amounts):
+            self._scroll_repeats.pop(repeat.key, None)
+            return False
+        self.barrier(0.01, self.EventType.MOUSE)
+        repeat.source_id = GLib.timeout_add(_MOUSE_SCROLL_REPEAT_INTERVAL, self._repeat_scroll, repeat)
+        return False
+
+    def scroll(self, dx, dy, action=CLICK, source=None):
+        self._wait_barrier(self.EventType.MOUSE)
+        if action != CLICK:
+            if source is None or source[1] is None:
+                logger.warning("repeated scrolling requires a diverted key press or release")
+                return False
+            key = (id(source[0]), source[1], source[2])
+            self._stop_scroll_repeat(key)
+            if action == RELEASE:
+                return True
+        if not self._scroll(dx, dy):
+            return False
+        if action == DEPRESS and (dx or dy):
+            repeat = self._ScrollRepeat(source, (dx, dy))
+            repeat.source_id = GLib.timeout_add(_MOUSE_SCROLL_REPEAT_DELAY, self._repeat_scroll, repeat)
+            self._scroll_repeats[repeat.key] = repeat
+        return True
 
 
 uinput = UInput()
@@ -1298,7 +1353,10 @@ class KeyPress(Action):
 
 class MouseScroll(Action):
     def __init__(self, amounts, warn=True):
-        if len(amounts) == 1 and isinstance(amounts[0], list):
+        self.action = CLICK
+        if len(amounts) == 2 and isinstance(amounts[0], list) and amounts[1] in [CLICK, DEPRESS, RELEASE]:
+            amounts, self.action = amounts
+        elif len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([is_number(a) for a in amounts])):
             if warn:
@@ -1307,7 +1365,7 @@ class MouseScroll(Action):
         self.amounts = amounts
 
     def __str__(self):
-        return "MouseScroll: " + " ".join([str(a) for a in self.amounts])
+        return "MouseScroll: " + " ".join([str(a) for a in self.amounts]) + " " + self.action
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         amounts = self.amounts
@@ -1316,12 +1374,15 @@ class MouseScroll(Action):
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
-        uinput.scroll(dx, dy)
+        control = uinput._scroll_keys[1 if self.action == RELEASE else 0]
+        source = (device, control, tuple(self.amounts))
+        uinput.scroll(dx, dy, self.action, source)
         uinput.barrier(0.01, uinput.EventType.MOUSE)
         return None
 
     def data(self):
-        return {"MouseScroll": self.amounts[:]}
+        amounts = self.amounts[:]
+        return {"MouseScroll": amounts if self.action == CLICK else [amounts, self.action]}
 
 
 class MouseClick(Action):
@@ -1519,10 +1580,18 @@ def key_is_down(key: NamedInt) -> bool:
     return key in keys_down
 
 
-def evaluate_rules(feature, notification: HIDPPNotification, device):
+def evaluate_rules(feature, notification: HIDPPNotification, device, scroll_keys=(None, None)):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s %s", feature, notification)
-    rules.evaluate(feature, notification, device, True)
+    # Snapshot the originating control before a later notification updates the globals.
+    uinput._scroll_keys = scroll_keys
+    try:
+        rules.evaluate(feature, notification, device, True)
+    finally:
+        if scroll_keys[1] is not None:
+            # A changed Process/Modifiers condition must not prevent cancellation.
+            uinput.release_scroll(device, scroll_keys[1])
+        uinput._scroll_keys = (None, None)
 
 
 def process_notification(device, notification: HIDPPNotification, feature) -> None:
@@ -1572,7 +1641,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                 thumb_wheel_displacement = 0
             thumb_wheel_displacement += signed(notification.data[0:2])
 
-    GLib.idle_add(evaluate_rules, feature, notification, device)
+    GLib.idle_add(evaluate_rules, feature, notification, device, (key_down, key_up))
 
 
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
