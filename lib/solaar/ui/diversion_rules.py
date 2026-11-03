@@ -714,6 +714,8 @@ class DiversionDialog:
         return col1, col2
 
     def on_update(self):
+        # Edits change live rules before they are saved to disk.
+        diversion.uinput.release_all()
         self.view.queue_draw()
         self.dirty = True
         self.save_btn.set_sensitive(True)

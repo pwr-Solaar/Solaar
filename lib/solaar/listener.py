@@ -31,6 +31,7 @@ import gi
 import logitech_receiver
 
 from logitech_receiver import base
+from logitech_receiver import diversion
 from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants
 from logitech_receiver import listener
@@ -422,6 +423,7 @@ def stop_all():
     if listeners:
         for listener_thread in listeners:
             listener_thread.join()
+    diversion.uinput.release_all()
 
 
 # after a resume, the device may have been off so mark its saved status to ensure

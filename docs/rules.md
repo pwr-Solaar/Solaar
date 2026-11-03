@@ -216,9 +216,18 @@ Use separate `KeyPress` actions for multiple characters,
 i.e., don't use a single `KeyPress` like 'a+b'.
 The `KeyPress` action normally both depresses and releases (clicks) the keys,
 but can also just depress the keys or just release the keys.
+On Linux with evdev 2.0 or later, the virtual keyboard supports kernel autorepeat for held keys.
+Repetition ends when a corresponding release action is processed. The desktop may manage its own repeat settings. With older evdev
+versions, depressed keys retain their previous non-repeating behavior.
 Use the depress or release options with extreme care,
 ensuring that the depressed keys are later released,
 otherwise it may become difficult to use your system.
+Release rules should depend only on the originating device and key release, not on conditions
+that can change during the hold, such as the active application or modifiers.
+Solaar releases simulated held keys and buttons when rules are edited, saved, or reloaded,
+and when receiver listeners stop (including suspend and shutdown).
+These safeguards do not detect every missing release, including an individual device disconnect
+while its receiver stays connected. Use an unconditional release rule even with these safeguards.
 The keys are depressed in forward order and released in reverse order.
 
 If a key symbol can only be produced by a shfited or level 3 keypress, e.g., "A",
