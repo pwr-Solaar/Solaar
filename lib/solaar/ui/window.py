@@ -665,7 +665,14 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 def _update_device_panel(device, panel, buttons, full=False):
     assert device
     is_online = bool(device.online)
-    panel.set_sensitive(is_online)
+    # Don't grey out the whole panel when the device is offline. The per-setting
+    # lock buttons live inside this panel, and GTK propagates insensitivity to
+    # children, so disabling the panel also disabled the one control whose job is
+    # to let the user change a setting anyway - the lock icon couldn't be clicked
+    # while the device slept, leaving no way to unlock a setting (issue #1944).
+    # Offline greying is per control instead: config_panel._update_setting_item
+    # greys each value widget while the device is offline, and the battery and
+    # link rows below set their own sensitivity.
 
     if device.battery_info is None or device.battery_info.level is None:
         device.read_battery()
