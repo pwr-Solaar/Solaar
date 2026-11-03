@@ -216,9 +216,18 @@ Use separate `KeyPress` actions for multiple characters,
 i.e., don't use a single `KeyPress` like 'a+b'.
 The `KeyPress` action normally both depresses and releases (clicks) the keys,
 but can also just depress the keys or just release the keys.
+On Linux with evdev 2.0 or later, the virtual keyboard supports kernel autorepeat for held keys.
+Repetition ends when a corresponding release action is processed. The desktop may manage its own repeat settings. With older evdev
+versions, depressed keys retain their previous non-repeating behavior.
 Use the depress or release options with extreme care,
 ensuring that the depressed keys are later released,
 otherwise it may become difficult to use your system.
+Release rules should depend only on the originating device and key release, not on conditions
+that can change during the hold, such as the active application or modifiers.
+Solaar releases simulated held keys and buttons when rules are edited, saved, or reloaded,
+and when receiver listeners stop (including suspend and shutdown).
+These safeguards do not detect every missing release, including an individual device disconnect
+while its receiver stays connected. Use an unconditional release rule even with these safeguards.
 The keys are depressed in forward order and released in reverse order.
 
 If a key symbol can only be produced by a shfited or level 3 keypress, e.g., "A",
@@ -241,6 +250,19 @@ to go wrong under Wayland than under X11.
 ### Mouse scroll
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
+It can instead take that sequence followed by `'click'`, `'depress'`, or `'release'`.
+The `depress` action scrolls once and then repeats after a short delay until a matching `release` action is processed.
+This is useful for diverted mouse-wheel tilt controls, which report distinct press and release notifications.
+Repeated scrolling requires a diverted key notification; use a `Key` condition for the originating control.
+The first repeat occurs after 250 ms and subsequent repeats are scheduled every 33 ms.
+These fixed timings are independent of keyboard repeat settings and may be delayed by a busy main loop.
+For example, `MouseScroll: [[-1, 0], depress]` starts scrolling left and
+`MouseScroll: [[-1, 0], release]` stops it.
+Repeats are associated with the originating device, control, and configured amounts, independently of numeric multipliers.
+Solaar also cancels scrolling on the originating control's release even if a rule condition no longer matches,
+on rule edits/save/reload, when the device is reported offline, and when listeners stop.
+Use depress and release with extreme care: if the hardware stops reporting events without a disconnect notification,
+Solaar cannot detect the missing release. Keep release rules unconditional as described for `KeyPress`.
 
 ### Mouse click
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.

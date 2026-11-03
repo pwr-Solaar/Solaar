@@ -1,5 +1,11 @@
-# 1.1.20
+# Unreleased
 
+* Support system key repeat for depressed keys simulated by rules when using evdev 2.0 or later
+* Use separate uinput devices for simulated keyboard and mouse events
+* Release simulated held keys and buttons when rules change or receiver listeners stop
+* Support repeating mouse scroll actions using depress and release actions
+
+# 1.1.20
 * Add Irish translation
 * Don't use old settings when reusing sboxes
 * Add POUND and ISO_BACKSLASH cells to MAIN_ISO key layout
