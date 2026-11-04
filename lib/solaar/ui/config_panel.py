@@ -910,7 +910,7 @@ def _set_row_sensitive(device, name, can_function):
         return
     persister = getattr(device, "persister", None)
     user_allowed = persister.get_sensitivity(name) if persister else True
-    sbox._control.set_sensitive(user_allowed is True and can_function)
+    sbox._control.set_sensitive(user_allowed is True and can_function and bool(getattr(device, "online", True)))
 
 
 def _gate_blocks(device, name):
@@ -954,13 +954,17 @@ def _change_click(button, sbox):
     icon_name, _ = icon.get_icon_name()
     allowed = _icons_allowables.get(icon_name, True)
     new_allowed = _next_allowable[allowed]
-    sbox._control.set_sensitive(new_allowed is True)
+    sbox._control.set_sensitive(new_allowed is True and bool(sbox.setting._device.online))
     _change_icon(new_allowed, icon)
     if sbox.setting._device.persister:  # remember the new setting sensitivity
         sbox.setting._device.persister.set_sensitivity(sbox.setting.name, new_allowed)
     if allowed == settings.SENSITIVITY_IGNORE:  # update setting if it was being ignored
         setting = next((s for s in sbox.setting._device.settings if s.name == sbox.setting.name), None)
-        if setting:
+        # While the device is offline don't contact it. The new sensitivity is
+        # already persisted above and is applied when the device comes back
+        # online, because config_panel.update re-reads each setting with the
+        # persisted sensitivity.
+        if setting and sbox.setting._device.online:
             persisted = sbox.setting._device.persister.get(setting.name) if sbox.setting._device.persister else None
             if setting.persist and persisted is not None:
                 _write_async(setting, persisted, sbox)
@@ -1086,8 +1090,11 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
     sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
     name = sbox.setting.name
     can_function = not _gate_blocks(sbox.setting._device, name)
+    # An offline device greys the value widget only, never the row's lock
+    # button: the lock has to stay clickable while the device sleeps.
+    can_change = sensitive is True and can_function and bool(is_online)
     if value is None and not null_okay:
-        sbox._control.set_sensitive(sensitive is True and can_function)
+        sbox._control.set_sensitive(can_change)
         _change_icon(sensitive, sbox._change_icon)
         sbox._failed.set_visible(is_online)
         return
@@ -1097,7 +1104,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         sbox._control.set_value(value)
     except TypeError as e:
         logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
-    sbox._control.set_sensitive(sensitive is True and can_function)
+    sbox._control.set_sensitive(can_change)
     _change_icon(sensitive, sbox._change_icon)
     # rgb_control / rgb_zone_* gate per-key; headset_led_control and the
     # headset-onboard-effect gate the per-zone row — re-evaluate on a change.
