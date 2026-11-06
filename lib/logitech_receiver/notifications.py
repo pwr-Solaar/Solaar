@@ -409,9 +409,8 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
                 if device.setting_callback:
                     for profile in device.profiles.profiles.values() if device.profiles else []:
                         if profile.sector == profile_sector:
-                            device.setting_callback(
-                                device, settings_templates.AdjustableDpi, [profile.resolutions[resolution_index]]
-                            )
+                            setting_class, value = settings_templates.profile_dpi_value(device, profile, resolution_index)
+                            device.setting_callback(device, setting_class, [value])
                             break
 
     elif feature == SupportedFeature.BRIGHTNESS_CONTROL:

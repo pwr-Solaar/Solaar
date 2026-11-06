@@ -879,10 +879,21 @@ def apply_all_settings(device):
         time.sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, "persister", None)
     sensitives = persister.get("_sensitive", {}) if persister else {}
+    # Apply onboard profiles first: while an onboard profile is active the firmware
+    # rejects live writes to DPI and report rate, so only read those.
+    onboard = next((s for s in device.settings if s.name == "onboard_profiles"), None)
+    if onboard and sensitives.get(onboard.name, False) != SENSITIVITY_IGNORE:
+        onboard.apply()
+    onboard_active = bool(onboard and onboard._value)
     for s in device.settings:
+        if s is onboard:
+            continue
         ignore = sensitives.get(s.name, False)
         if ignore != SENSITIVITY_IGNORE:
-            s.apply()
+            if onboard_active and s.name in ("dpi", "dpi_extended", "report_rate", "report_rate_extended"):
+                s.read(False)
+            else:
+                s.apply()
 
 
 Setting.validator_class = settings_validator.BooleanValidator

@@ -26,6 +26,7 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
+from logitech_receiver import settings
 from logitech_receiver import settings_templates
 from logitech_receiver import settings_validator
 from logitech_receiver import special_keys
@@ -1053,3 +1054,82 @@ def test_HeadsetOnboardEffect_absent_animated_fields_seed_defaults():
 
     assert effect.intensity == 100
     assert effect.period == 5000
+
+
+def test_extended_adjustable_dpi_validate_read_default_fallback():
+    choices = common.NamedInts.list([600, 800, 1200, 1400, 1600])
+    keys = common.NamedInts(X=0, Y=1, LOD=2)
+    choices_map = {keys["X"]: choices, keys["Y"]: choices}
+    validator = settings_templates.ExtendedAdjustableDpi.validator_class(
+        choices_map=choices_map, byte_count=2, write_prefix_bytes=b"\x00"
+    )
+    validator.y = True
+    validator.lod = False
+    validator.keys = keys
+
+    reply_nonzero = b"\x00\x02\x58\x06\x40\x02\x58\x06\x40\x00"
+    val = validator.validate_read(reply_nonzero)
+    assert val == {keys["X"]: 600, keys["Y"]: 600}
+
+    # Zero DPI must fall back to default DPI (1600)
+    reply_zero = b"\x00\x00\x00\x06\x40\x00\x00\x06\x40\x00"
+    val_zero = validator.validate_read(reply_zero)
+    assert val_zero == {keys["X"]: 1600, keys["Y"]: 1600}
+
+
+def test_apply_all_settings_onboard_mode_skips_writes(mocker):
+    from logitech_receiver import settings
+    dev = mocker.MagicMock()
+    dev.features = {hidpp20_constants.SupportedFeature.ONBOARD_PROFILES: 1}
+    dev.persister = {}
+
+    s_onboard = mocker.MagicMock()
+    s_onboard.name = "onboard_profiles"
+    s_onboard._value = common.NamedInt(1, "Profile 1")
+
+    s_dpi = mocker.MagicMock()
+    s_dpi.name = "dpi_extended"
+
+    s_rr = mocker.MagicMock()
+    s_rr.name = "report_rate_extended"
+
+    dev.settings = [s_onboard, s_dpi, s_rr]
+
+    settings.apply_all_settings(dev)
+
+    s_onboard.apply.assert_called_once()
+    s_dpi.apply.assert_not_called()
+    s_dpi.read.assert_called_once_with(False)
+    s_rr.apply.assert_not_called()
+    s_rr.read.assert_called_once_with(False)
+
+
+def test_apply_all_settings_host_mode_applies_writes(mocker):
+    dev = mocker.MagicMock()
+    dev.features = {hidpp20_constants.SupportedFeature.ONBOARD_PROFILES: 1}
+    dev.persister = {}
+
+    s_onboard = mocker.MagicMock()
+    s_onboard.name = "onboard_profiles"
+    s_onboard._value = common.NamedInt(0, "Disabled")
+
+    s_dpi = mocker.MagicMock()
+    s_dpi.name = "dpi_extended"
+
+    s_rr = mocker.MagicMock()
+    s_rr.name = "report_rate_extended"
+
+    dev.settings = [s_onboard, s_dpi, s_rr]
+
+    settings.apply_all_settings(dev)
+
+    s_onboard.apply.assert_called_once()
+    s_dpi.apply.assert_called_once()
+    s_rr.apply.assert_called_once()
+
+
+def test_onboard_profiles_read_safe_on_none_response(mocker):
+    dev = mocker.MagicMock()
+    dev.feature_request.return_value = None
+    rw = settings_templates.OnboardProfiles.rw_class(hidpp20_constants.SupportedFeature.ONBOARD_PROFILES)
+    assert rw.read(dev) == b"\x00\x00"
