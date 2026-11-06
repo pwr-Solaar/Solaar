@@ -946,6 +946,25 @@ RAW_SECTOR_1_V7 = bytes.fromhex(
     "000300000000001f40320000036d41"
 )
 
+RAW_SECTOR_1_SUPERLIGHT2_V7 = bytes.fromhex(
+    "030300002003200302B004B004024006"
+    "4006026009600902800C800C02000000"
+    "00FF00FFFFFFFFFFFFFFFFFF3C002C01"
+    "80010001800100028001000480010008"
+    "80010010FFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "0300000000001F400000000300000000"
+    "001F400000000300000000001F403200"
+    "000300000000001F403200000384DB"
+)
+
 
 def test_onboard_profile_format_7_parse_and_roundtrip():
     crc = common.crc16(RAW_SECTOR_1_V7[:-2])
@@ -953,25 +972,35 @@ def test_onboard_profile_format_7_parse_and_roundtrip():
     assert crc == expected
 
     p = hidpp20.OnboardProfile.from_bytes(
-        sector=1, enabled=1, buttons=6, gbuttons=0, bytes=RAW_SECTOR_1_V7, profile_version=7
+        sector=1, enabled=1, buttons=6, gbuttons=6, bytes=RAW_SECTOR_1_V7, profile_version=7
     )
 
     assert p.sector == 1
     assert p.enabled == 1
     assert p.profile_version == 7
     assert p.report_rate == 3  # 1ms (1000 Hz)
-    assert p.resolution_default_index == 3
-    assert p.resolution_shift_index == 4
+    assert p.report_rate_wired == 3
+    assert p.resolution_default_index == 4
+    assert p.resolution_shift_index == 1
 
     assert p.resolutions_x == [600, 800, 1200, 1400, 1600]
     assert p.resolutions_y == [600, 800, 1200, 1400, 1600]
     assert p.resolutions_lod == [0, 0, 0, 0, 0]
     assert p.resolutions == [600, 800, 1200, 1400, 1600]
 
+    assert p.dpi_delta == b"\x00\x00\x00\x00"
+    assert p.power_mode == 0xFF
+    assert p.angle_snap == 0
+    assert p.write_count == 0xFFFF
+    assert p.reserved == b"\xff" * 7
     assert p.ps_timeout == 60
     assert p.po_timeout == 300
+    assert p.name == ""
+    assert len(p.lighting) == 4
+    assert p.lighting_flag == 0x03
 
     assert len(p.buttons) == 6
+    assert len(p.gbuttons) == 6
     assert p.buttons[0].behavior == hidpp20.ButtonBehavior.SEND
     assert p.buttons[0].value == 1  # Mouse Button Left
     assert p.buttons[5].behavior == hidpp20.ButtonBehavior.FUNCTION
@@ -985,12 +1014,65 @@ def test_onboard_profile_format_7_parse_and_roundtrip():
     assert loaded_p.to_bytes(255) == RAW_SECTOR_1_V7
 
 
+def test_onboard_profile_format_7_superlight2_se_roundtrip():
+    crc = common.crc16(RAW_SECTOR_1_SUPERLIGHT2_V7[:-2])
+    expected = int.from_bytes(RAW_SECTOR_1_SUPERLIGHT2_V7[-2:], "big")
+    assert crc == expected == 0x84DB
+
+    p = hidpp20.OnboardProfile.from_bytes(
+        sector=1, enabled=1, buttons=5, gbuttons=5, bytes=RAW_SECTOR_1_SUPERLIGHT2_V7, profile_version=7
+    )
+
+    assert p.report_rate == 3
+    assert p.report_rate_wired == 3
+    assert p.resolution_default_index == 0
+    assert p.resolution_shift_index == 0
+    assert p.resolutions_x == [800, 1200, 1600, 2400, 3200]
+    assert p.resolutions_y == [800, 1200, 1600, 2400, 3200]
+    assert p.resolutions_lod == [2, 2, 2, 2, 2]
+    assert p.power_mode == 0xFF
+    assert p.angle_snap == 0
+    assert p.write_count == 0xFFFF
+    assert p.ps_timeout == 60
+    assert p.po_timeout == 300
+    assert len(p.buttons) == 5
+    assert len(p.gbuttons) == 5
+    assert p.name == ""
+    assert len(p.lighting) == 4
+    assert p.lighting_flag == 0x03
+
+    assert p.to_bytes(255) == RAW_SECTOR_1_SUPERLIGHT2_V7
+
+
+def test_onboard_profile_format_7_rom_sector_ffff_crc():
+    rom_bytes = RAW_SECTOR_1_SUPERLIGHT2_V7[:-2] + b"\xff\xff"
+    p = hidpp20.OnboardProfile.from_bytes(
+        sector=0x0101, enabled=1, buttons=5, gbuttons=5, bytes=rom_bytes, profile_version=7
+    )
+    assert p.sector == 0x0101
+    assert p.resolutions_x == [800, 1200, 1600, 2400, 3200]
+    # Re-encoding seals with valid CRC 0x84DB
+    assert p.to_bytes(255) == RAW_SECTOR_1_SUPERLIGHT2_V7
+
+
+def test_onboard_profile_format_7_from_dev_corrupt_crc_fallback(mocker):
+    corrupt_bytes = RAW_SECTOR_1_V7[:-1] + b"\x00"
+    mocker.patch.object(hidpp20.OnboardProfiles, "read_sector", return_value=corrupt_bytes)
+    dev = mocker.MagicMock()
+    dev.online = True
+
+    p = hidpp20.OnboardProfile.from_dev(dev, 1, 1, 255, 1, 6, 6, profile_version=7)
+    assert p is not None
+    assert p.resolutions_x == [600, 800, 1200, 1400, 1600]
+    dev.ping.assert_called_once()
+
+
 def test_onboard_profiles_format_7_directory_sector():
-    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p2 = hidpp20.OnboardProfile.from_bytes(2, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p3 = hidpp20.OnboardProfile.from_bytes(3, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p4 = hidpp20.OnboardProfile.from_bytes(4, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p5 = hidpp20.OnboardProfile.from_bytes(5, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
+    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p2 = hidpp20.OnboardProfile.from_bytes(2, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p3 = hidpp20.OnboardProfile.from_bytes(3, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p4 = hidpp20.OnboardProfile.from_bytes(4, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p5 = hidpp20.OnboardProfile.from_bytes(5, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
 
     profiles = hidpp20.OnboardProfiles(
         version=hidpp20.OnboardProfilesVersion,
@@ -998,7 +1080,7 @@ def test_onboard_profiles_format_7_directory_sector():
         name="Device Format 7",
         count=5,
         buttons=6,
-        gbuttons=0,
+        gbuttons=6,
         sectors=16,
         size=255,
         profiles={1: p1, 2: p2, 3: p3, 4: p4, 5: p5},
@@ -1015,7 +1097,7 @@ def test_onboard_profiles_format_7_directory_sector():
 def test_onboard_profile_format_7_crc_failure():
     corrupt_bytes = RAW_SECTOR_1_V7[:-1] + b"\x00"
     with pytest.raises(AssertionError, match="CRC16 CCITT check failed"):
-        hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, corrupt_bytes, profile_version=7)
+        hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, corrupt_bytes, profile_version=7)
 
 
 def test_button_from_bytes_invalid_send_fallback():
@@ -1027,15 +1109,18 @@ def test_button_from_bytes_invalid_send_fallback():
 
 
 def test_onboard_profile_format_7_padding_and_truncation():
-    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p1._raw_tail = b"\xaa" * 10
+    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p1.reserved = b"\xaa" * 2
+    p1.name = "Gaming Profile"
     bs = p1.to_bytes(255)
     assert len(bs) == 255
     crc = common.crc16(bs[:-2])
     expected_crc = int.from_bytes(bs[-2:], "big")
     assert crc == expected_crc
+    decoded = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, bs, profile_version=7)
+    assert decoded.name == "Gaming Profile"
 
-    p1._raw_tail = b"\xbb" * 500
+    p1.reserved = b"\xbb" * 50
     bs_long = p1.to_bytes(255)
     assert len(bs_long) == 255
     crc_long = common.crc16(bs_long[:-2])
@@ -1044,11 +1129,11 @@ def test_onboard_profile_format_7_padding_and_truncation():
 
 
 def test_onboard_profiles_format_7_out_of_order_keys():
-    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p2 = hidpp20.OnboardProfile.from_bytes(2, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p3 = hidpp20.OnboardProfile.from_bytes(3, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p4 = hidpp20.OnboardProfile.from_bytes(4, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
-    p5 = hidpp20.OnboardProfile.from_bytes(5, 0, 6, 0, RAW_SECTOR_1_V7, profile_version=7)
+    p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p2 = hidpp20.OnboardProfile.from_bytes(2, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p3 = hidpp20.OnboardProfile.from_bytes(3, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p4 = hidpp20.OnboardProfile.from_bytes(4, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
+    p5 = hidpp20.OnboardProfile.from_bytes(5, 0, 6, 6, RAW_SECTOR_1_V7, profile_version=7)
 
     profiles = hidpp20.OnboardProfiles(
         version=hidpp20.OnboardProfilesVersion,
@@ -1056,7 +1141,7 @@ def test_onboard_profiles_format_7_out_of_order_keys():
         name="Device Format 7",
         count=5,
         buttons=6,
-        gbuttons=0,
+        gbuttons=6,
         sectors=16,
         size=255,
         profiles={5: p5, 3: p3, 1: p1, 4: p4, 2: p2},

@@ -29,16 +29,19 @@ from __future__ import annotations
 
 import logging
 import threading
+
 from typing import Hashable
 
 import gi
-gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk  # NOQA: E402
-import yaml  # NOQA: E402
+import yaml
 
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib  # NOQA: E402
+from gi.repository import Gtk  # NOQA: E402
 from logitech_receiver import common  # NOQA: E402
 from logitech_receiver import hidpp20  # NOQA: E402
 from logitech_receiver import settings_templates  # NOQA: E402
+
 from solaar.i18n import _  # NOQA: E402
 
 logger = logging.getLogger(__name__)
@@ -124,15 +127,36 @@ def _get_dpi_range(device) -> tuple[int, int, int]:
     return 100, 25600, 50
 
 
-def _get_report_rate_choices(profile_version: int | None) -> list[tuple[int, str]]:
-    """Return (value, label) pairs for report rate based on profile version."""
+def _get_report_rate_choices(
+    profile_version: int | None, device=None, current_rate: int | None = None
+) -> list[tuple[int, str]]:
+    """Return (value, label) pairs for report rate based on profile version and device capabilities."""
     if profile_version == 7:
-        return [
+        all_rates = [
+            (6, _("8000 Hz (0.125 ms)")),
+            (5, _("4000 Hz (0.25 ms)")),
+            (4, _("2000 Hz (0.5 ms)")),
             (3, _("1000 Hz (1 ms)")),
             (2, _("500 Hz (2 ms)")),
             (1, _("250 Hz (4 ms)")),
             (0, _("125 Hz (8 ms)")),
         ]
+        supported = {0, 1, 2, 3}
+        rr_setting = next(
+            (s for s in getattr(device, "settings", []) or [] if getattr(s, "name", None) == "report_rate_extended"),
+            None,
+        )
+        if rr_setting and getattr(rr_setting, "choices", None):
+            try:
+                supported = {int(c) for c in rr_setting.choices}
+            except (ValueError, TypeError):
+                pass
+        if current_rate is not None:
+            try:
+                supported.add(int(current_rate))
+            except (ValueError, TypeError):
+                pass
+        return [(val, lbl) for val, lbl in all_rates if val in supported]
     else:
         return [
             (1, _("1000 Hz (1 ms)")),
@@ -337,6 +361,19 @@ class OnboardProfileEditorDialog:
         self._activate_btn.connect("clicked", self._on_activate_clicked)
         sel_box.pack_end(self._activate_btn, False, False, 0)
         vbox.pack_start(sel_box, False, False, 0)
+
+        # Profile Name row
+        name_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        name_lbl = Gtk.Label(label=_("Profile Name:"))
+        name_box.pack_start(name_lbl, False, False, 0)
+
+        self._name_entry = Gtk.Entry()
+        self._name_entry.set_max_length(24)
+        self._name_entry.set_placeholder_text(_("Unnamed Profile"))
+        self._name_entry.set_tooltip_text(_("Optional profile name stored in mouse memory (up to 24 characters)"))
+        self._name_entry.connect("changed", self._on_name_changed)
+        name_box.pack_start(self._name_entry, True, True, 0)
+        vbox.pack_start(name_box, False, False, 0)
 
         # 4. Scrollable Content Area: DPI Stages & Settings
         scrolled = Gtk.ScrolledWindow()
@@ -651,8 +688,9 @@ class OnboardProfileEditorDialog:
             )
         else:
             act_num = int(active_val) if active_val is not None else 1
+            mode_txt = _("Device Mode: On-Board (Profile %d)") % act_num
             self._status_lbl.set_markup(
-                f"<small>{ver_text} • <b><span foreground='#1b8a2c'>{_('Device Mode: On-Board (Profile %d)') % act_num}</span></b></small>"
+                f"<small>{ver_text} • <b><span foreground='#1b8a2c'>{mode_txt}</span></b></small>"
             )
 
         # Populate profile selector dropdown
@@ -668,7 +706,9 @@ class OnboardProfileEditorDialog:
                 tag = f" ({_('Enabled')})"
             else:
                 tag = f" ({_('Disabled')})"
-            label = f"{_('Profile')} {idx}{tag}"
+            prof_name = (getattr(p, "name", "") or "").strip()
+            name_part = f" — {prof_name}" if prof_name else ""
+            label = f"{_('Profile')} {idx}{name_part}{tag}"
             self._profile_combo.append(str(idx), label)
 
         if self._selected_idx not in self._profiles.profiles:
@@ -678,9 +718,11 @@ class OnboardProfileEditorDialog:
         self._profile_combo.handler_unblock_by_func(self._on_profile_selection_changed)
 
         # Populate Report Rate dropdown choices
+        cur_p = self._profiles.profiles.get(self._selected_idx)
+        cur_rr = getattr(cur_p, "report_rate", None) if cur_p else None
         self._rr_combo.handler_block_by_func(self._on_report_rate_changed)
         self._rr_combo.remove_all()
-        for val, lbl in _get_report_rate_choices(prof_ver):
+        for val, lbl in _get_report_rate_choices(prof_ver, device=self.device, current_rate=cur_rr):
             self._rr_combo.append(str(val), lbl)
         self._rr_combo.handler_unblock_by_func(self._on_report_rate_changed)
 
@@ -696,13 +738,19 @@ class OnboardProfileEditorDialog:
         try:
             p = self._profiles.profiles[profile_idx]
 
+            # Profile Name entry
+            self._name_entry.handler_block_by_func(self._on_name_changed)
+            self._name_entry.set_text(getattr(p, "name", "") or "")
+            self._name_entry.handler_unblock_by_func(self._on_name_changed)
+
             # Enabled checkbutton
             self._enabled_chk.handler_block_by_func(self._on_enabled_toggled)
             self._enabled_chk.set_active(bool(getattr(p, "enabled", 0)))
             self._enabled_chk.handler_unblock_by_func(self._on_enabled_toggled)
 
             # Activate button status
-            onboard_setting = next((s for s in getattr(self.device, "settings", []) or [] if s.name == "onboard_profiles"), None)
+            dev_settings = getattr(self.device, "settings", []) or []
+            onboard_setting = next((s for s in dev_settings if s.name == "onboard_profiles"), None)
             active_val = getattr(onboard_setting, "_value", None)
             is_current_active = False
             if active_val is not None:
@@ -742,7 +790,18 @@ class OnboardProfileEditorDialog:
             shift_idx = getattr(p, "resolution_shift_index", 0)
             if not (0 <= shift_idx < 5):
                 shift_idx = 0
-            dpi_act_idx = getattr(p, "dpi_active_index", None)
+
+            live_dpi = None
+            if is_current_active:
+                dpi_setting = next(
+                    (s for s in dev_settings if getattr(s, "name", None) in ("dpi", "dpi_extended")),
+                    None,
+                )
+                raw_dpi = getattr(dpi_setting, "_value", None) if dpi_setting else None
+                if isinstance(raw_dpi, dict):
+                    live_dpi = raw_dpi.get(0)
+                elif isinstance(raw_dpi, (int, common.NamedInt)):
+                    live_dpi = int(raw_dpi)
 
             # Detect separate X/Y and update checkbox & widget visibility
             has_diff_xy = any(rx != ry for rx, ry in zip(res_x, res_y)) if len(res_x) == len(res_y) else False
@@ -770,7 +829,10 @@ class OnboardProfileEditorDialog:
                     w["spin_y"].hide()
 
                 # Active stage indicator
-                if is_current_active and dpi_act_idx == i:
+                is_active_stage = is_current_active and (
+                    (live_dpi is not None and val_x == live_dpi) or (live_dpi is None and i == def_idx)
+                )
+                if is_active_stage:
                     w["badge"].show()
                 else:
                     w["badge"].hide()
@@ -785,8 +847,12 @@ class OnboardProfileEditorDialog:
                 w["radio_shift"].handler_unblock_by_func(self._on_shift_radio_toggled)
 
             # Report Rate
+            prof_ver = getattr(self._profiles, "profile_version", getattr(p, "profile_version", None))
+            rr_val = getattr(p, "report_rate", 3 if prof_ver == 7 else 1)
             self._rr_combo.handler_block_by_func(self._on_report_rate_changed)
-            rr_val = getattr(p, "report_rate", 3)
+            self._rr_combo.remove_all()
+            for val, lbl in _get_report_rate_choices(prof_ver, device=self.device, current_rate=rr_val):
+                self._rr_combo.append(str(val), lbl)
             self._rr_combo.set_active_id(str(rr_val))
             self._rr_combo.handler_unblock_by_func(self._on_report_rate_changed)
 
@@ -806,6 +872,7 @@ class OnboardProfileEditorDialog:
             return
 
         p = self._profiles.profiles[profile_idx]
+        p.name = self._name_entry.get_text()[:24]
         p.enabled = 1 if self._enabled_chk.get_active() else 0
 
         res_x = []
@@ -830,16 +897,24 @@ class OnboardProfileEditorDialog:
             if w["radio_shift"].get_active():
                 p.resolution_shift_index = i
 
-        # Report rate
+        # Report rate (sync both byte 0 and byte 1 on Format 7)
         rr_id = self._rr_combo.get_active_id()
         if rr_id is not None:
             p.report_rate = int(rr_id)
+            if getattr(p, "profile_version", None) == 7:
+                p.report_rate_wired = int(rr_id)
 
         # Timeouts
         p.ps_timeout = int(self._ps_timeout_spin.get_value())
         p.po_timeout = int(self._po_timeout_spin.get_value())
 
     # ---- UI Event Handlers ----
+
+    def _on_name_changed(self, entry) -> None:
+        if self._loading:
+            return
+        if self._profiles and self._selected_idx in self._profiles.profiles:
+            self._profiles.profiles[self._selected_idx].name = entry.get_text()[:24]
 
     def _on_profile_selection_changed(self, combo) -> None:
         if self._loading:
@@ -912,7 +987,10 @@ class OnboardProfileEditorDialog:
             return
         rr_id = combo.get_active_id()
         if rr_id is not None and self._profiles and self._selected_idx in self._profiles.profiles:
-            self._profiles.profiles[self._selected_idx].report_rate = int(rr_id)
+            p = self._profiles.profiles[self._selected_idx]
+            p.report_rate = int(rr_id)
+            if getattr(p, "profile_version", None) == 7:
+                p.report_rate_wired = int(rr_id)
 
     def _on_timeout_changed(self, _spin) -> None:
         if self._loading:
@@ -998,6 +1076,8 @@ class OnboardProfileEditorDialog:
             dst_p.resolution_default_index = getattr(src_p, "resolution_default_index", 0)
             dst_p.resolution_shift_index = getattr(src_p, "resolution_shift_index", 0)
             dst_p.report_rate = getattr(src_p, "report_rate", 3)
+            if getattr(dst_p, "profile_version", None) == 7:
+                dst_p.report_rate_wired = getattr(src_p, "report_rate_wired", dst_p.report_rate)
             dst_p.ps_timeout = getattr(src_p, "ps_timeout", 60)
             dst_p.po_timeout = getattr(src_p, "po_timeout", 300)
 
@@ -1023,6 +1103,8 @@ class OnboardProfileEditorDialog:
         dst_p.resolution_default_index = 1  # 800 DPI
         dst_p.resolution_shift_index = 0    # 600 DPI
         dst_p.report_rate = 3 if getattr(self._profiles, "profile_version", None) == 7 else 1  # 1000 Hz
+        if getattr(dst_p, "profile_version", None) == 7:
+            dst_p.report_rate_wired = 3
         dst_p.ps_timeout = 60
         dst_p.po_timeout = 300
 

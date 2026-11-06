@@ -380,7 +380,7 @@ def test_profile_change_notifies_extended_dpi_and_report_rate(mocker):
     assert calls[0][0][1] == settings_templates.OnboardProfiles
     assert calls[0][0][2] == [1]
     assert issubclass(calls[1][0][1], settings_templates.ExtendedAdjustableDpi)
-    assert calls[1][0][2] == [{0: 1400, 1: 1400, 2: 0}]
+    assert calls[1][0][2] == [{0: 1600, 1: 1600, 2: 0}]
     assert issubclass(calls[2][0][1], settings_templates.ExtendedReportRate)
     assert calls[2][0][2] == [3]
 

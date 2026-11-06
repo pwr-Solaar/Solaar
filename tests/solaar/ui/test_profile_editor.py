@@ -6,19 +6,15 @@
 ## (at your option) any later version.
 
 from unittest import mock
+
 import gi
+
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
-import pytest
-import yaml
-
-from logitech_receiver import common
-from logitech_receiver import hidpp20
-from logitech_receiver import hidpp20_constants
-from logitech_receiver import settings_templates
-from solaar.ui import config_panel
-from solaar.ui import profile_editor
-
+from gi.repository import Gtk  # NOQA: E402
+from logitech_receiver import common  # NOQA: E402
+from logitech_receiver import hidpp20  # NOQA: E402
+from solaar.ui import config_panel  # NOQA: E402
+from solaar.ui import profile_editor  # NOQA: E402
 
 RAW_SECTOR_1 = bytes.fromhex(
     "0303040158025802002003200300b004b004007805780500400640060000000000ff00ffffffffff"
@@ -124,35 +120,49 @@ def test_dialog_load_and_edit_format7():
         # Check initial profile 1 values loaded into UI
         assert dlg._profile_combo.get_active_id() == "1"
         assert dlg._enabled_chk.get_active() is True
+        assert dlg._name_entry.get_text() == ""
         assert dlg._stage_widgets[0]["spin_x"].get_value() == 600
         assert dlg._stage_widgets[1]["spin_x"].get_value() == 800
         assert dlg._stage_widgets[2]["spin_x"].get_value() == 1200
         assert dlg._stage_widgets[3]["spin_x"].get_value() == 1400
         assert dlg._stage_widgets[4]["spin_x"].get_value() == 1600
-        assert dlg._stage_widgets[3]["radio_def"].get_active() is True
-        assert dlg._stage_widgets[4]["radio_shift"].get_active() is True
+        assert dlg._stage_widgets[4]["radio_def"].get_active() is True
+        assert dlg._stage_widgets[1]["radio_shift"].get_active() is True
         assert dlg._rr_combo.get_active_id() == "3"  # 1ms (1000Hz)
         assert dlg._ps_timeout_spin.get_value() == 60
         assert dlg._po_timeout_spin.get_value() == 300
 
-        # Edit DPI values
+        # Edit profile name, DPI values, and report rate
+        dlg._name_entry.set_text("Competitive")
         dlg._stage_widgets[0]["spin_x"].set_value(700)
         dlg._stage_widgets[1]["spin_x"].set_value(900)
         dlg._stage_widgets[0]["radio_def"].set_active(True)
-        dlg._stage_widgets[1]["radio_shift"].set_active(True)
+        dlg._stage_widgets[2]["radio_shift"].set_active(True)
         dlg._rr_combo.set_active_id("2")  # 500Hz
         dlg._ps_timeout_spin.set_value(90)
 
         # Sync to memory
         dlg._sync_ui_to_profile(1)
         p1 = profiles.profiles[1]
+        assert p1.name == "Competitive"
         assert p1.resolutions_x[0] == 700
         assert p1.resolutions_x[1] == 900
         assert p1.resolutions[0] == 700
         assert p1.resolution_default_index == 0
-        assert p1.resolution_shift_index == 1
+        assert p1.resolution_shift_index == 2
         assert p1.report_rate == 2
+        assert p1.report_rate_wired == 2
         assert p1.ps_timeout == 90
+
+        # Verify byte 0 and byte 1 in serialized sector both hold rate index 2,
+        # byte 2 holds default index 0, byte 3 holds shift index 2, and name is encoded at 160..208
+        s1_bytes = p1.to_bytes(255)
+        assert s1_bytes[0] == 2
+        assert s1_bytes[1] == 2
+        assert s1_bytes[2] == 0
+        assert s1_bytes[3] == 2
+        decoded_p1 = hidpp20.OnboardProfile.from_bytes(1, 1, 6, 6, s1_bytes, profile_version=7)
+        assert decoded_p1.name == "Competitive"
 
         # Switch to profile 2
         dlg._profile_combo.set_active_id("2")
@@ -175,6 +185,41 @@ def test_dialog_load_and_edit_format7():
         assert p2.resolutions_x[0] == 1000
         assert p2.resolutions_y[0] == 1200
 
+    finally:
+        dlg._destroy()
+
+
+def test_dialog_format7_high_report_rates():
+    dev, profiles, s_onboard = _make_format7_device()
+    s_rr = mock.MagicMock()
+    s_rr.name = "report_rate_extended"
+    s_rr.choices = common.NamedInts.list(
+        [
+            common.NamedInt(0, "8ms"),
+            common.NamedInt(1, "4ms"),
+            common.NamedInt(2, "2ms"),
+            common.NamedInt(3, "1ms"),
+            common.NamedInt(4, "500us"),
+            common.NamedInt(5, "250us"),
+            common.NamedInt(6, "125us"),
+        ]
+    )
+    dev.settings.append(s_rr)
+
+    dlg = profile_editor.OnboardProfileEditorDialog("test_key_fmt7_8k", dev)
+    dlg.present()
+
+    try:
+        dlg._rr_combo.set_active_id("4")  # 2000 Hz
+        assert dlg._rr_combo.get_active_id() == "4"
+        p1 = profiles.profiles[1]
+        assert p1.report_rate == 4
+        assert p1.report_rate_wired == 4
+
+        dlg._rr_combo.set_active_id("6")  # 8000 Hz
+        assert dlg._rr_combo.get_active_id() == "6"
+        assert p1.report_rate == 6
+        assert p1.report_rate_wired == 6
     finally:
         dlg._destroy()
 
@@ -416,7 +461,6 @@ def test_map_choice_control_sensitivity(mocker):
     from solaar.ui import config_panel
 
     sbox = mocker.MagicMock()
-    choices = common.NamedInts(X=0, Y=1)
     val_choices = common.NamedInts(DPI1=800, DPI2=1600)
     sbox.setting.choices = {0: val_choices, 1: val_choices}
     sbox.setting._value = {0: 800, 1: 800}

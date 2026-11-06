@@ -1558,31 +1558,42 @@ class OnboardProfile:
         return getattr(self, "resolution_shift_index", 0)
 
     @classmethod
-    def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes, profile_version=None):
+    def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes, profile_version=None, check_crc=True):
         if profile_version == 0x07:
             crc = common.crc16(bytes[:-2])
             expected_crc = int.from_bytes(bytes[-2:], "big")
-            assert crc == expected_crc, f"CRC16 CCITT check failed: {crc:04x} != {expected_crc:04x}"
+            if check_crc and sector < 0x0100 and expected_crc != 0xFFFF:
+                assert crc == expected_crc, f"CRC16 CCITT check failed: {crc:04x} != {expected_crc:04x}"
 
             report_rate = bytes[0]
-            resolution_default_index = bytes[1]
-            resolution_shift_index = bytes[2]
+            report_rate_wired = bytes[1]
+            resolution_default_index = bytes[2]
+            resolution_shift_index = bytes[3]
             resolutions_x = [struct.unpack("<H", bytes[4 + i * 5 : 6 + i * 5])[0] for i in range(5)]
             resolutions_y = [struct.unpack("<H", bytes[6 + i * 5 : 8 + i * 5])[0] for i in range(5)]
             resolutions_lod = [bytes[8 + i * 5] for i in range(5)]
 
-            parsed_buttons = [Button.from_bytes(bytes[48 + i * 4 : 52 + i * 4]) for i in range(buttons)]
-
+            dpi_delta = bytes[29:33]
+            power_mode = bytes[33]
+            angle_snap = bytes[34]
+            write_count = struct.unpack("<H", bytes[35:37])[0]
+            reserved = bytes[37:44]
             ps_timeout = struct.unpack("<H", bytes[44:46])[0]
             po_timeout = struct.unpack("<H", bytes[46:48])[0]
+
+            parsed_buttons = [Button.from_bytes(bytes[48 + i * 4 : 52 + i * 4]) for i in range(buttons)]
+            parsed_gbuttons = [Button.from_bytes(bytes[112 + i * 4 : 116 + i * 4]) for i in range(gbuttons)]
+            name = bytes[160:208].decode("utf-16le", errors="replace").rstrip("\x00").rstrip("\uffff")
+            lighting = [LEDEffectSetting.from_bytes(bytes[208 + i * 11 : 219 + i * 11]) for i in range(4)]
+            lighting_flag = bytes[252]
 
             return cls(
                 sector=sector,
                 enabled=enabled,
                 report_rate=report_rate,
+                report_rate_wired=report_rate_wired,
                 resolution_default_index=resolution_default_index,
                 resolution_shift_index=resolution_shift_index,
-                dpi_active_index=bytes[3],
                 resolutions=resolutions_x,
                 resolutions_x=resolutions_x,
                 resolutions_y=resolutions_y,
@@ -1590,18 +1601,19 @@ class OnboardProfile:
                 red=0,
                 green=0,
                 blue=0,
-                power_mode=0,
-                angle_snap=0,
-                write_count=0,
-                reserved=bytes[29:44],
+                dpi_delta=dpi_delta,
+                power_mode=power_mode,
+                angle_snap=angle_snap,
+                write_count=write_count,
+                reserved=reserved,
                 ps_timeout=ps_timeout,
                 po_timeout=po_timeout,
                 buttons=parsed_buttons,
-                gbuttons=[],
-                name="",
-                lighting=[],
+                gbuttons=parsed_gbuttons,
+                name=name,
+                lighting=lighting,
+                lighting_flag=lighting_flag,
                 profile_version=7,
-                _raw_tail=bytes[112:-2],
             )
 
         return cls(
@@ -1628,22 +1640,46 @@ class OnboardProfile:
 
     @classmethod
     def from_dev(cls, dev, i, sector, s, enabled, buttons, gbuttons, profile_version=None):
-        bytes = OnboardProfiles.read_sector(dev, sector, s)
-        return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes, profile_version=profile_version)
+        for attempt in range(2):
+            data = OnboardProfiles.read_sector(dev, sector, s)
+            try:
+                return cls.from_bytes(
+                    sector, enabled, buttons, gbuttons, data, profile_version=profile_version, check_crc=True
+                )
+            except AssertionError:
+                if attempt == 0:
+                    if getattr(dev, "online", False):
+                        dev.ping()
+                    continue
+                logger.warning("CRC16 check failed for profile sector 0x%04x on %s; decoding anyway", sector, dev)
+                return cls.from_bytes(
+                    sector, enabled, buttons, gbuttons, data, profile_version=profile_version, check_crc=False
+                )
 
     def to_bytes(self, length):
         if getattr(self, "profile_version", None) == 7:
+            rr_wired = getattr(self, "report_rate_wired", None)
             bytes = common.int2bytes(self.report_rate, 1)
+            bytes += common.int2bytes(rr_wired if rr_wired is not None else self.report_rate, 1)
             bytes += common.int2bytes(self.resolution_default_index, 1) + common.int2bytes(self.resolution_shift_index, 1)
-            bytes += common.int2bytes(self.dpi_active_index, 1)
             for i in range(0, 5):
                 bytes += self.resolutions_x[i].to_bytes(2, "little") + self.resolutions_y[i].to_bytes(2, "little")
                 bytes += common.int2bytes(self.resolutions_lod[i], 1)
-            bytes += self.reserved
+            bytes += getattr(self, "dpi_delta", b"\x00" * 4)[:4].ljust(4, b"\x00")
+            bytes += common.int2bytes(self.power_mode, 1) + common.int2bytes(self.angle_snap, 1)
+            bytes += self.write_count.to_bytes(2, "little") + self.reserved[:7].ljust(7, b"\xff")
             bytes += self.ps_timeout.to_bytes(2, "little") + self.po_timeout.to_bytes(2, "little")
             for i in range(0, 16):
                 bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b"\xff\xff\xff\xff"
-            bytes += self._raw_tail
+            for i in range(0, 12):
+                bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b"\xff\xff\xff\xff"
+            if self.name == "":
+                bytes += b"\xff" * 48
+            else:
+                bytes += self.name[0:24].ljust(24, "\x00").encode("utf-16le")
+            for i in range(0, 4):
+                bytes += self.lighting[i].to_bytes() if i < len(self.lighting) else b"\xff" * 11
+            bytes += common.int2bytes(getattr(self, "lighting_flag", 0x03), 1)
             while len(bytes) < length - 2:
                 bytes += b"\xff"
             bytes = bytes[: length - 2]
@@ -1742,7 +1778,7 @@ class OnboardProfiles:
         if memory != 0x01 or (profile > 0x05 and profile != 0x07):
             return
         count, oob, buttons, sectors, size, shift = struct.unpack("!BBBBHB", response[3:10])
-        gbuttons = buttons if (shift & 0x3 == 0x2 and profile != 0x07) else 0
+        gbuttons = buttons if (shift & 0x3 == 0x2) else 0
         headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
         for i, (sector, enabled) in enumerate(headers, start=1):
