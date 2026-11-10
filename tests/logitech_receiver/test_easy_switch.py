@@ -58,6 +58,27 @@ def test_follow_by_name(current, new, mocker):
     assert switches(spy_request) == [mouse_host["ABC"[new]]]
 
 
+def test_follow_by_normalized_name(mocker):
+    lead = keyboard({0: (True, "MacBook Air de felipe"), 1: (True, "avell")})
+    follower = mouse(1, names={0: (True, "MacBook-Air-de-felipe"), 1: (True, "avell")})
+    spy_request = mocker.spy(follower, "request")
+
+    easy_switch.follow(lead, lead.hosts, 0, [follower])
+
+    assert switches(spy_request) == [0]
+
+
+def test_sync_on_connect(mocker):
+    lead = keyboard({0: (True, "Mac"), 1: (True, "avell")})
+    follower = mouse(0, names={0: (True, "Mac"), 1: (True, "avell")})
+    spy_request = mocker.spy(follower, "request")
+    mocker.patch.object(easy_switch._hidpp20, "get_change_host_info", side_effect=[(2, 1), (2, 0)])
+
+    easy_switch.sync_on_connect(lead, [lead, follower])
+
+    assert switches(spy_request) == [1]
+
+
 @pytest.mark.parametrize(
     "keyboard_names, link_cookie, mouse_names",
     [

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import logging
 import time
+import unicodedata
 
 from dataclasses import dataclass
 from dataclasses import field
@@ -109,6 +110,41 @@ def follow(keyboard, hosts, new_host, devices):
                 logger.warning("%s: error following %s: %r", device, keyboard, e)
 
 
+def sync_on_connect(keyboard, devices):
+    """Bring linked devices to the keyboard's current host after reconnecting.
+
+    The normal Enhanced Easy-Switch path runs on the computer the keyboard is
+    leaving.  This fallback also repairs the pair when that computer does not
+    run Solaar or Logi Options+, by synchronizing as soon as the keyboard is
+    seen again here.
+    """
+    hosts = getattr(keyboard, "hosts", None)
+    if not hosts or not hosts.link_cookie:
+        return
+
+    try:
+        info = _hidpp20.get_change_host_info(keyboard)
+        if not info:
+            return
+        _, current_host = info
+        paired, name = hosts.names.get(current_host, (False, ""))
+        if not paired or not name:
+            return
+
+        start = time.monotonic()
+        for device in devices:
+            device_hosts = getattr(device, "hosts", None)
+            if device is not keyboard and device.online and device_hosts and hosts.link_cookie in device_hosts.cookies:
+                if time.monotonic() - start > DEADLINE:
+                    break
+                try:
+                    _switch(device, device_hosts, keyboard, hosts.link_cookie, name, current_host, start)
+                except Exception as e:
+                    logger.warning("%s: error synchronizing %s after reconnect: %r", device, keyboard, e)
+    except Exception as e:
+        logger.warning("%s: error synchronizing linked devices after reconnect: %r", keyboard, e)
+
+
 def _switch(device, device_hosts, keyboard, link_cookie, name, new_host, start):
     info = _hidpp20.get_change_host_info(device)
     cookies = _hidpp20.get_host_cookies(device, info[0]) if info else None
@@ -134,6 +170,19 @@ def _switch(device, device_hosts, keyboard, link_cookie, name, new_host, start):
 def choose_host(device, host_names, name, preferred):
     """Returns the paired host of the device with this name, the preferred host if several have the name, or None."""
     hosts = [host for host, (paired, host_name) in sorted(host_names.items()) if paired and host_name == name]
+    if not hosts:
+        wanted = _host_name_key(name)
+        hosts = [
+            host
+            for host, (paired, host_name) in sorted(host_names.items())
+            if paired and _host_name_key(host_name) == wanted
+        ]
     if len(hosts) > 1:
         logger.warning("%s: hosts %s all have name %r", device, [host + 1 for host in hosts], name)
     return preferred if preferred in hosts else next(iter(hosts), None)
+
+
+def _host_name_key(name):
+    """Compare host names independent of case, spacing, punctuation, and Unicode normalization."""
+    normalized = unicodedata.normalize("NFKD", name).casefold()
+    return "".join(character for character in normalized if character.isalnum())

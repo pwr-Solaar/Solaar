@@ -1350,6 +1350,9 @@ class EnhancedEasySwitch(settings.Setting):
             self.added = False
 
         def read(self, device):
+            if self.on and not self.added:
+                device.add_notification_handler(EnhancedEasySwitch.name, self.handler)
+                self.added = True
             return b"\x01" if self.on else b"\x00"
 
         def write(self, device, data_bytes):

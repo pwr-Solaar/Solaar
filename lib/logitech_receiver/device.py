@@ -619,6 +619,10 @@ class Device:
                     # already-active session (see apply_settings_if_needed).
                     settings.apply_all_settings(self)
                     self._record_config_cookie()
+                    if str(self.kind) == "keyboard":
+                        from . import easy_switch
+
+                        easy_switch.sync_on_connect(self, list(Device.instances))
                 if not was_active:
                     if self.protocol < 2.0:  # Make sure to set notification flags on the device
                         self.notification_flags = self.enable_connection_notifications()
