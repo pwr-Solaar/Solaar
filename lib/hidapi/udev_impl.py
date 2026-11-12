@@ -79,6 +79,19 @@ def exit():
     return True
 
 
+def _filter_hidpp_flags(hidpp_short, hidpp_long, centurion):
+    """Return the HID++ flags to pass to the product filter.
+
+    Centurion devices are always of interest. Otherwise the flags are passed
+    through unchanged so that None (report descriptor could not be parsed)
+    stays distinct from False (descriptor parsed, no HID++ reports) and the
+    filter can fall back to matching on product ID ranges.
+    """
+    if centurion:
+        return True, True
+    return hidpp_short, hidpp_long
+
+
 def _match(action: str, device, filter_func: typing.Callable[[int, int, int, bool, bool], dict[str, typing.Any]]):
     """
 
@@ -137,7 +150,8 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             e,
         )
 
-    filtered_result = filter_func(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short or centurion, hidpp_long or centurion)
+    filter_short, filter_long = _filter_hidpp_flags(hidpp_short, hidpp_long, centurion)
+    filtered_result = filter_func(int(bid, 16), int(vid, 16), int(pid, 16), filter_short, filter_long)
     if not filtered_result:
         return
     interface_number = filtered_result.get("usb_interface")

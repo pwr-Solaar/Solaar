@@ -71,6 +71,7 @@ def test_filter_receivers_unknown():
         (0xC07F, BusID.USB, None, None, {"usb_interface": 2}),
         (0xC07F, BusID.BLUETOOTH, None, None, None),
         (0xB013, BusID.BLUETOOTH, None, None, {"product_id": 0xB013}),
+        (0xB042, BusID.BLUETOOTH, None, None, {"product_id": 0xB042, "bus_id": 5}),  # MX Master 4, unparsable rdesc
     ],
 )
 def test_filter_products_of_interest(product_id, bus, hidpp_short, hidpp_long, expected):
