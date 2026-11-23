@@ -691,7 +691,9 @@ class Device:
         return None
 
     def request(self, request_id, *params, no_reply=False):
-        if self:
+        handle = self.handle or (self.receiver.handle if self.receiver else None)
+        # a handle closed after a failed read or write is falsy but not None, so `if self` alone is not enough
+        if self and handle:
             long = self.hidpp_long is True or (
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
@@ -699,7 +701,7 @@ class Device:
             # have devnumber=0xFF, so we must send 0xFF to match responses.
             devnumber = 0xFF if (self.centurion and self.receiver and not self.handle) else self.number
             return self.low_level.request(
-                self.handle or (self.receiver.handle if self.receiver else None),
+                handle,
                 devnumber,
                 request_id,
                 *params,
@@ -1022,9 +1024,9 @@ class Device:
         long = self.hidpp_long is True or (
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
-        handle = self.handle or self.receiver.handle
+        handle = self.handle or (self.receiver.handle if self.receiver else None)
         try:
-            protocol = self.low_level.ping(handle, self.number, long_message=long)
+            protocol = self.low_level.ping(handle, self.number, long_message=long) if handle else None
         except exceptions.NoReceiver:  # if ping fails, device is offline
             protocol = None
         self.online = protocol is not None and self.present
