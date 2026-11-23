@@ -398,10 +398,50 @@ class Device:
 
     @property
     def keys(self):
+        # A KeysArray with no keyversion was built while the device was still
+        # waking up (its REPROG_CONTROLS lookup got no reply); don't keep it.
+        if self._keys and getattr(self._keys, "keyversion", True) is None:
+            self._keys = None
         if not self._keys:
             if self.online and self.protocol >= 2.0:
                 self._keys = _hidpp20.get_keys(self) or ()
         return self._keys
+
+    def reprobe_settings(self):
+        """Rebuild saved settings that first detection failed to build.
+
+        Detection runs once, the first time the device is seen. If the device
+        is still waking up at that moment, feature lookups get no reply and
+        whole settings (e.g. divert-keys) are dropped for the life of the
+        process. Only settings that already have a saved value for this
+        device are retried, so this never invents settings the device lacks.
+        Returns True if any setting was added."""
+        if not self.online or not self._feature_settings_checked or not self.persister:
+            return False
+        # Settings whose build raises are broken, not missing: don't retry them
+        # (and re-log their traceback) on every wake.
+        failed = self.__dict__.setdefault("_reprobe_failed", set())
+        built = {s.name for s in self._settings}
+        added = []
+        for sclass in settings_templates.SETTINGS:
+            name = sclass.name
+            if not sclass.feature or name in built or name in failed or name not in self.persister:
+                continue
+            try:
+                setting = settings_templates.check_feature(self, sclass)
+            except Exception as e:
+                failed.add(name)
+                logger.warning("%s: re-probe of %s failed, not retrying: %s", self, name, e)
+                continue
+            new = setting if isinstance(setting, list) else [setting] if setting else []
+            with self._settings_lock:
+                for s in new:
+                    if all(k.name != s.name for k in self._settings):
+                        self._settings.append(s)
+                        added.append(s.name)
+        if added and logger.isEnabledFor(logging.INFO):
+            logger.info("%s: re-probe rebuilt settings missed at first detection: %s", self, added)
+        return bool(added)
 
     @property
     def remap_keys(self):
@@ -476,6 +516,12 @@ class Device:
         Returns True if apply ran, False if it was skipped."""
         if not self.online:
             return False
+        # Settings missed at first detection were never applied, whatever the
+        # cookie says, so a re-probe that finds any bypasses the cookie gate.
+        if self.reprobe_settings():
+            settings.apply_all_settings(self)
+            self._record_config_cookie()
+            return True
         if self.protocol >= 2.0 and self.features and SupportedFeature.CONFIG_CHANGE in self.features:
             live = _hidpp20.get_configuration_cookie(self)
             if live and len(live) >= 2:
@@ -608,6 +654,7 @@ class Device:
                     or push
                     and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
                 ):
+                    self.reprobe_settings()
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
                     # Activation apply must be unconditional — across power

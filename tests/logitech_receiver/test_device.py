@@ -440,3 +440,83 @@ def test_close_runs_cleanups_once():
     test_device.__del__()
 
     assert calls == [test_device]
+
+
+class _FakeSettingClass:
+    def __init__(self, name, feature=True):
+        self.name = name
+        self.feature = feature
+
+
+class _FakeSetting:
+    def __init__(self, name):
+        self.name = name
+
+
+def _awake_device_with_missed_settings(persisted):
+    """A device whose first settings detection ran while it was still waking
+    up, so the saved settings were never built."""
+    test_device = device.Device(LowLevelInterfaceFake(fake_hidpp.r_empty), None, None, None, handle=0x1, device_info=di_CCCC)
+    test_device.online = True
+    test_device._settings = []
+    test_device._feature_settings_checked = True
+    test_device._persister = persisted
+    return test_device
+
+
+def test_keys_discards_keysarray_built_without_feature(mocker):
+    """A KeysArray whose REPROG_CONTROLS lookup got no reply (keyversion None)
+    must not stay cached: the next access re-reads the keys."""
+    test_device = device.Device(LowLevelInterfaceFake(fake_hidpp.r_empty), None, None, None, handle=0x1, device_info=di_CCCC)
+    test_device.online = True
+    test_device._protocol = 4.5
+    test_device._keys = mock.Mock(keyversion=None, __len__=lambda _: 1)
+    fresh = mock.Mock(keyversion=hidpp20.SupportedFeature.REPROG_CONTROLS_V4)
+    mocker.patch.object(device._hidpp20, "get_keys", return_value=fresh)
+
+    assert test_device.keys is fresh
+
+
+def test_reprobe_settings_rebuilds_only_saved_missing_settings(mocker):
+    test_device = _awake_device_with_missed_settings({"divert-keys": {195: 2}, "broken": 1})
+    mocker.patch.object(
+        device.settings_templates,
+        "SETTINGS",
+        [_FakeSettingClass("divert-keys"), _FakeSettingClass("crown-smooth"), _FakeSettingClass("broken")],
+    )
+
+    def check_feature(_dev, sclass):
+        if sclass.name == "broken":
+            raise ValueError("already known")
+        return _FakeSetting(sclass.name)
+
+    spy = mocker.patch.object(device.settings_templates, "check_feature", side_effect=check_feature)
+
+    assert test_device.reprobe_settings() is True
+    assert [s.name for s in test_device._settings] == ["divert-keys"]  # crown-smooth was never saved
+    assert [c.args[1].name for c in spy.call_args_list] == ["divert-keys", "broken"]
+
+    spy.reset_mock()
+    assert test_device.reprobe_settings() is False  # built ones and failed ones are not retried
+    spy.assert_not_called()
+
+
+def test_reprobe_settings_waits_for_first_detection(mocker):
+    test_device = _awake_device_with_missed_settings({"divert-keys": {195: 2}})
+    test_device._feature_settings_checked = False
+    spy = mocker.patch.object(device.settings_templates, "check_feature")
+
+    assert test_device.reprobe_settings() is False
+    spy.assert_not_called()
+
+
+def test_apply_settings_if_needed_applies_rebuilt_settings_despite_matching_cookie(mocker):
+    test_device = _awake_device_with_missed_settings({"divert-keys": {195: 2}})
+    mocker.patch.object(test_device, "reprobe_settings", return_value=True)
+    cookie = mocker.patch.object(device._hidpp20, "get_configuration_cookie")
+    apply_all = mocker.patch.object(device.settings, "apply_all_settings")
+    mocker.patch.object(test_device, "_record_config_cookie")
+
+    assert test_device.apply_settings_if_needed() is True
+    apply_all.assert_called_once_with(test_device)
+    cookie.assert_not_called()
