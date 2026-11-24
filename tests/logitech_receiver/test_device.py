@@ -14,6 +14,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import threading
+
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
@@ -24,6 +26,7 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import device
 from logitech_receiver import hidpp20
+from logitech_receiver import listener
 from logitech_receiver.common import BatteryLevelApproximation
 from logitech_receiver.common import BatteryStatus
 
@@ -440,3 +443,35 @@ def test_close_runs_cleanups_once():
     test_device.__del__()
 
     assert calls == [test_device]
+
+
+def _device_with_closed_handle(mocker):
+    """base closes a handle after a failed read or write (e.g. a Bluetooth device went to sleep),
+    which leaves the device holding a _ThreadedHandle that is falsy but not None."""
+    mocker.patch("logitech_receiver.base.close")
+    handle = listener._ThreadedHandle(threading.current_thread(), "/dev/hidraw-test", 0x1)
+    test_device = device.Device(
+        LowLevelInterfaceFake(fake_hidpp.r_empty), None, None, None, handle=handle, device_info=di_CCCC
+    )
+    handle.close()
+    return test_device
+
+
+def test_request_with_closed_handle(mocker):
+    test_device = _device_with_closed_handle(mocker)
+    test_device._protocol = 4.5
+    spy_request = mocker.spy(test_device.low_level, "request")
+
+    assert test_device  # the device stays listed in the GUI; only its handle is dead
+    assert test_device.request(0x0000) is None
+    spy_request.assert_not_called()
+
+
+def test_ping_with_closed_handle(mocker):
+    test_device = _device_with_closed_handle(mocker)
+    test_device.online = True
+    spy_ping = mocker.spy(test_device.low_level, "ping")
+
+    assert test_device.ping() is False
+    assert test_device.online is False
+    spy_ping.assert_not_called()
